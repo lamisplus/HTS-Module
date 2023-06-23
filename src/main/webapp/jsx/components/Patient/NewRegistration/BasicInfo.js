@@ -895,7 +895,6 @@ const BasicInfo = (props) => {
                     ) : (
                       ""
                     )}
-                    <span>Client Code: <b>{createdCode}</b></span>
                   </FormGroup>
                   {clientCodeCheck !== "" ? (
                     <span className={classes.error}>{clientCodeCheck}</span>
