@@ -121,6 +121,7 @@ const BasicInfo = (props) => {
   const [clientCodeCheck, setClientCodeCheck] = useState("");
   const [createdCode, setCreatedCode] = useState("");
   const [facilityCode, setFacilityCode] = useState("");
+  const [serialNumber, setSerialNumber] = useState(null);
   const getPhoneNumber = (identifier) => {
     const identifiers = identifier;
     const phoneNumber = identifiers.contactPoint.find(
@@ -323,7 +324,7 @@ const BasicInfo = (props) => {
     if (country && country.stateId !== "") {
       getProvincesId(country.stateId);
     }
-  }, [objValues.age, props.patientObj, props.extra.age]);
+  }, [objValues.age, props.patientObj, props.extra.age, facilityCode]);
   //Get list of KP
   const KP = () => {
     axios
@@ -454,40 +455,48 @@ const BasicInfo = (props) => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          facilityShortCode = response.data;
-          console.log('Response Facility Short Code **** ', facilityShortCode);
-          setFacilityCode(facilityShortCode);
+          // console.log('Response Facility Short Code **** ', response.data);
+          setFacilityCode(response.data)
         })
         .catch((error) => {
           console.log(error);
         });
 
     let visitDate = new Date(props.patientObj.dateVisit);
-    console.log('Modality **** ', visitDate);
+
     let modality = props.patientObj.modality;
     let modalityCode = '';
-    if(modality === 'TEST_SETTING_CT_STI') {
+    if(modality.includes('STI')) {
       modalityCode = 'STI';
-    }else if (modality === 'TEST_SETTING_CT_EMERGENCY') {
+    }else if (modality.includes('EMERGENCY')) {
       modalityCode = 'EME';
-    }else if (modality === 'TEST_SETTING_CT_INDEX') {
+    }else if (modality.includes('INDEX')) {
       modalityCode = 'IND';
-    }else if (modality === 'TEST_SETTING_CT_INPATIENT') {
+    }else if (modality.includes('INPATIENT')) {
       modalityCode = 'INP';
-    }else if (modality === 'TEST_SETTING_CT_PMTCT') {
+    }else if (modality.includes('PMTCT')) {
       modalityCode = 'PMTCT';
-    }else if (modality === 'TEST_SETTING_CT_TB') {
+    }else if (modality.includes('TB')) {
       modalityCode = 'TB';
-    }else if (modality === 'TEST_SETTING_CT_VCT') {
+    }else if (modality.includes('VCT')) {
       modalityCode = 'VCT';
     }
-    console.log('Modality **** ', modality);
+    else if (modality.includes('MOBILE')) {
+      modalityCode = 'MOB';
+    }
+    else if (modality.includes('SNS')) {
+      modalityCode = 'SNS';
+    }
+    else if (modality.includes('OTHER')) {
+      modalityCode = 'OTH';
+    }
+
     let month = visitDate.getMonth();
     let year = visitDate.getFullYear();
-    console.log('Facility Short Code **** ', facilityCode);
-    let createdCode = 'C' + facilityCode + '/' +modalityCode + '/' +month + '/' + year + '/';
-    setCreatedCode(createdCode);
-    console.log('Created Code **** ', createdCode);
+    let codeCreated = 'C' + facilityCode + '/' +modalityCode + '/' +month + '/' + year + '/';
+    setCreatedCode(codeCreated);
+    setObjValues({...objValues, clientCode: createdCode})
+    // console.log('Created Code **** ', createdCode);
   }
 
   //Get States from selected country
@@ -591,14 +600,15 @@ const BasicInfo = (props) => {
   };
   //checkClientCode
   const checkClientCode = (e) => {
-    if(e.target.name === "clientCode"){
-      let code = createdCode + e.target.value;
-      code = code.replaceAll('/', '_');
+    let code = '';
+    if(e.target.name === "serialNumber"){
+      code = createdCode + e.target.value;
       setCreatedCode(code);
+      console.log("Code created is &&&& ", createdCode);
+      setObjValues({...objValues, clientCode: code})
     }
     async function getIndexClientCode() {
       const indexClientCode = objValues.clientCode;
-      console.log(indexClientCode);
       const response = await axios.get(
         `${baseUrl}hts/client/${indexClientCode}`,
         {
@@ -607,7 +617,7 @@ const BasicInfo = (props) => {
             "Content-Type": "text/plain",
           },
         }
-      );
+      )
       // if(response.data!=='Record Not Found'){
       //     setClientCodeCheck("Client code already exist")
       // }else{
@@ -844,15 +854,35 @@ const BasicInfo = (props) => {
                 <div className="form-group mb-3 col-md-4">
                   <FormGroup>
                     <Label for="">
+                      Serial Number <span style={{ color: "red" }}> *</span>
+                    </Label>
+                    <Input
+                        type="text"
+                        name="serialNumber"
+                        id="serialNumber"
+                        value={serialNumber}
+                        //value={Math.floor(Math.random() * 1093328)}
+                        onBlur={checkClientCode}
+                        onChange={handleInputChange}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.25rem",
+                        }}
+                    />
+                  </FormGroup>
+                </div>
+                <div className="form-group mb-3 col-md-4">
+                  <FormGroup>
+                    <Label for="">
                       Client Code <span style={{ color: "red" }}> *</span>
                     </Label>
                     <Input
-                      min={1}
-                      type="number"
+                      type="text"
                       name="clientCode"
                       id="clientCode"
-                      //value={Math.floor(Math.random() * 1093328)}
                       value={objValues.clientCode}
+                      disabled={true}
+                      //value={Math.floor(Math.random() * 1093328)}
                       onBlur={checkClientCode}
                       onChange={handleInputChange}
                       style={{
@@ -873,24 +903,6 @@ const BasicInfo = (props) => {
                     ""
                   )}
                 </div>
-                {/* <div className="form-group mb-3 col-md-4">
-                                <FormGroup>
-                                <Label for=""> Date Of Registration </Label>
-                                <Input
-                                    type="date"
-                                    name="dateOfRegistration"
-                                    id="dateOfRegistration"
-                                    value={objValues.dateOfRegistration}
-                                    onChange={handleInputChange}
-                                    max= {moment(new Date()).format("YYYY-MM-DD") }
-                                    style={{border: "1px solid #014D88", borderRadius:"0.25rem"}}
-                                    
-                                />
-                                {errors.dateOfRegistration !=="" ? (
-                                    <span className={classes.error}>{errors.dateOfRegistration}</span>
-                                ) : "" }
-                                </FormGroup>
-                            </div> */}
               </div>
               <div className="form-group  col-md-4">
                 <FormGroup>

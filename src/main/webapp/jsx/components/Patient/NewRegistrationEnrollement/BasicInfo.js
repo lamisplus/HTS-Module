@@ -410,7 +410,7 @@ const BasicInfo = (props) => {
                     Client Code <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="number"
+                    type="text"
                     name="clientCode"
                     id="clientCode"
                     value={objValues.clientCode}
