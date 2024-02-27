@@ -1,0 +1,19 @@
+basePackage: org.lamisplus.modules.hts
+name: HtsModule
+dependencies: {PatientModule: 2.0.2}
+menus:
+  - icon: fa-solid fa-microscope
+    disabled: false
+    name: HTS
+    state: hts
+    url: /across/resources/static/hts/index.html
+umdLocation: /across/resources/static/hts/index.html
+webModules:
+  - breadcrumb: HTS
+    name: HtsModule
+    path: hts
+    position: 99
+permissions:
+  - name: hts_view
+    description: View hts
+    moduleName: HtsModule
