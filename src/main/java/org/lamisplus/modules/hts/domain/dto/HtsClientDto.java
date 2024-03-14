@@ -17,6 +17,7 @@ import java.util.List;
 public class HtsClientDto {
     @NotNull(message = "id is mandatory")
     private  Long id;
+
     private  String targetGroup;
     //private  ApplicationCodeSet targetGroupCodeSet;
     @NotNull(message = "clientCode is mandatory")

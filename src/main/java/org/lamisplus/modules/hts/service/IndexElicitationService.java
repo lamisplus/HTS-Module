@@ -7,6 +7,7 @@ import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.hts.domain.dto.IndexElicitationDto;
 import org.lamisplus.modules.hts.domain.dto.IndexElicitationResponseDto;
+import org.lamisplus.modules.hts.domain.dto.RiskStratificationResponseDto;
 import org.lamisplus.modules.hts.domain.entity.HtsClient;
 import org.lamisplus.modules.hts.domain.entity.IndexElicitation;
 import org.lamisplus.modules.hts.domain.enums.Source;
@@ -44,6 +45,13 @@ public class IndexElicitationService {
     }
 
     public IndexElicitationResponseDto save(IndexElicitationDto indexElicitationDto){
+
+        if(indexElicitationDto.getSource().equalsIgnoreCase(Source.Mobile.toString())
+                && indexElicitationRepository.existsByUuid(
+                indexElicitationDto.getUuid())){
+            LOG.info("Index elicitation OBJECT. {}", indexElicitationDto.toString());
+            return new IndexElicitationResponseDto();
+        }
 
         if(indexElicitationDto.getSource().equalsIgnoreCase(Source.Mobile.toString())) {
             Optional<IndexElicitation> indexElicitationExists = indexElicitationRepository.findByUuid(indexElicitationDto.getUuid());

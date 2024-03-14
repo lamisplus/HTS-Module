@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class RiskStratificationDto {

@@ -50,6 +50,13 @@ public class HtsClientService {
     private final ModuleService moduleService;
     public HtsClientDto save(HtsClientRequestDto htsClientRequestDto){
         if(htsClientRequestDto.getRiskStratificationCode() != null){
+            if(htsClientRequestDto.getSource().equalsIgnoreCase(Source.Mobile.toString())
+                    && htsClientRepository.existsByRiskStratificationCode(
+                            htsClientRequestDto.getRiskStratificationCode())){
+                LOG.info("Hts client OBJECT. {}", htsClientRequestDto.toString());
+                return new HtsClientDto();
+            }
+
             if(htsClientRepository.existsByRiskStratificationCode(htsClientRequestDto.getRiskStratificationCode())){
                 throw new IllegalTypeException(HtsClientRequestDto.class, "RiskStratificationCode is ", "already exist for an hts client");
             }

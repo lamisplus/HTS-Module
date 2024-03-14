@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RiskStratificationRepository extends PagingAndSortingRepository<RiskStratification, Long> {
     List<RiskStratification> findAllByPersonUuid(String uuid);
+    boolean existsByCode(String code);
 
     Optional<RiskStratification> findByCode(String code);
 

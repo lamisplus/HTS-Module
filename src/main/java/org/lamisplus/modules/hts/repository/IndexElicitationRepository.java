@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface IndexElicitationRepository extends JpaRepository<IndexElicitation, Long>, JpaSpecificationExecutor<IndexElicitation> {
     List<IndexElicitation> findAllByHtsClient(HtsClient htsClient);
+    boolean existsByUuid(String uuid);
 
     Optional<IndexElicitation> findByIdAndArchived(Long id, int archived);
 

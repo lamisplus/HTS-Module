@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.audit4j.core.util.Log;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
+import org.lamisplus.modules.hts.domain.dto.HtsClientDto;
 import org.lamisplus.modules.hts.domain.dto.RiskStratificationDto;
 import org.lamisplus.modules.hts.domain.dto.RiskStratificationResponseDto;
 import org.lamisplus.modules.hts.domain.entity.HtsClient;
@@ -35,6 +36,13 @@ public class RiskStratificationService {
     private final JdbcTemplate jdbcTemplate;
 
     public RiskStratificationResponseDto save(RiskStratificationDto riskStratificationDTO) {
+
+        if(riskStratificationDTO.getSource().equalsIgnoreCase(Source.Mobile.toString())
+                && stratificationRepository.existsByCode(
+                riskStratificationDTO.getCode())){
+            LOG.info("Risk stratification OBJECT. {}", riskStratificationDTO.toString());
+            return new RiskStratificationResponseDto();
+        }
 
         if(riskStratificationDTO.getSource().equalsIgnoreCase(Source.Mobile.toString())) {
 
