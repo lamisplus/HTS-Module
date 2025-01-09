@@ -128,7 +128,7 @@
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider --max-old-space-size=14096 start",
     "jsreport": "jsreport-start",
-    "build": "react-scripts --openssl-legacy-provider --max-old-space-size=14096 build && xcopy /s /y build src\\main\\resources\\views\\static\\hts",
+    "build": "react-scripts --max-old-space-size=14096 build && xcopy /s /y build src\\main\\resources\\views\\static\\hts",
     "serve": "serve -s build",
     "run-build": "react-scripts build && serve",
     "test": "react-scripts test --env=jsdom",
