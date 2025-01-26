@@ -18,7 +18,7 @@ permissions:
   - name: hts_view
     description: View hts
     moduleName: HtsModule
-  - name: request_and_result_Form
+  - name: request_and_result_form
     description: Request and Result Form
     moduleName: HtsModule
   - name: client_intake_form

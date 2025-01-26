@@ -35,7 +35,7 @@ import FamilyIndexHistory from "./NewRegistration/PartnerNotificationServices/Fa
 import FamilyIndexTestingForm from "./NewRegistration/FamilyIndexTestingForm";
 import axios from "axios";
 import { token, url as baseUrl } from "../../../api";
-import { getPreviousForm } from "../../../utility";
+import { getPreviousForm, getCurentForm } from "../../../utility";
 import { calculate_age } from "../utils";
 
 
@@ -101,56 +101,7 @@ const UserRegistration = (props) => {
       actionType: actionType,
     });
   };
-  const getCurentForm=(activeItem)=>{
 
-    switch(activeItem){
-      case  "risk": 
-      return "Risk_Stratification";
-      break;
-      case  "basic": 
-      return "Client_intake_form"; 
-
-      case  "pre-test-counsel": 
-      return "Pre_Test_Counseling";
-
-      case  "hiv-test": 
-      return "Request_and_Result_Form";
-
-      case  "post-test": 
-      return "Post_Test_Counseling";
-
-      case  "recency-testing": 
-      return "HIV_Recency_Testing";
-
-      case  "fit": 
-      return "Family_Index_Testing_Form";
-
-      case  "fit-history": 
-      return "Family_Index_Testing_Form";
-
-      case  "view-fit": 
-      return "Family_Index_Testing_Form";
-
-      case  "pns": 
-      return "Nigeria_PNS_Form";
-
-      case  "pns-history": 
-      return "Nigeria_PNS_Form";
-
-
-      case  "client-referral": 
-      return "";
-
-      case  "refferal-history": 
-      return "Referral_Form";
-
-      case  "view-referral": 
-      return "Referral_Form";
-
-      default:
-        return "";    }
-
-  }
   const getPrevForm=(e)=>{
           if( activeItem === "risk"){
             history.push("/");

@@ -2959,4 +2959,32 @@
         </sql>
     </changeSet>
 
+
+
+    <changeSet  failOnError="false" id="drop-modality-fk-constraint002" author="Ganiyat" >
+        <preConditions  onFail="MARK_RAN">
+            <tableExists tableName="hts_risk_stratification"/>
+            <columnExists tableName="hts_risk_stratification" columnName="modality"/>
+            <foreignKeyConstraintExists foreignKeyName="modality_fk"/>
+        </preConditions>
+        <dropForeignKeyConstraint
+                baseTableName="hts_risk_stratification"
+                constraintName="modality_fk"/>
+    </changeSet>
+
+    <changeSet failOnError="false" id="26-0671-0032" author="Ganiyat" >
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_index_elicitation" columnName="longitude" />
+                <columnExists tableName="hts_index_elicitation" columnName="latitude" />
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_index_elicitation ADD COLUMN latitude varchar(255);
+            ALTER TABLE hts_index_elicitation ADD COLUMN longitude varchar(255);
+        </sql>
+    </changeSet>
+
+
+
 </databaseChangeLog>

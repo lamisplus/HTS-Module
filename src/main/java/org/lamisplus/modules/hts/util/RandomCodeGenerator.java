@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.util.UUID;
 
 public class RandomCodeGenerator {
+    private RandomCodeGenerator() {}
 
     public static String randomAlphabeticString (int length) {
         return RandomStringUtils.randomAlphanumeric(length);

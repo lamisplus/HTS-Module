@@ -870,7 +870,6 @@ const handleInputChangeTie2 = (e) => {
         .then((response) => {
           setSaving(false);
           props.setPatientObj(response.data);
-      
           handleItemClick(latestForm[0], latestForm[1]);
         })
         .catch((error) => {
@@ -1981,9 +1980,8 @@ const handleInputChangeTie2 = (e) => {
                 <h5 style={{ color: "#fff" }}>Others</h5>
               </LabelRibbon>
               <br /> <br />
-              {props.patientObj.riskStratificationResponseDto !== null &&
-                props.patientObj.riskStratificationResponseDto
-                  .communityEntryPoint !== "" && (
+              {props?.patientObj?.riskStratificationResponseDto !== null &&
+                props?.patientObj?.riskStratificationResponseDto?.communityEntryPoint !== "" && (
                   <>
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>

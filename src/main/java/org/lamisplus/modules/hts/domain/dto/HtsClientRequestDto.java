@@ -8,7 +8,6 @@ import org.lamisplus.modules.patient.domain.dto.PersonDto;
 import javax.persistence.Basic;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
@@ -37,7 +36,6 @@ public class HtsClientRequestDto {
     private final Boolean previouslyTested;
     private final Object extra;
     private Long personId;
-    //private final String personUuid;
     private PersonDto personDto;
     private final Long pregnant;
     private final Boolean breastFeeding;

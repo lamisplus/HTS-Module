@@ -38,7 +38,6 @@ public class RiskStratificationService {
 
             Optional<RiskStratification> riskStratificationExists = stratificationRepository.findByCode(riskStratificationDTO.getCode());
             if (riskStratificationExists.isPresent()) {
-//                LOG.info("Risk stratification with code {} has already been synced.", riskStratificationDTO.getCode());
                 return toRiskStratificationResponseDTO(riskStratificationExists.get());
             }
         }
@@ -103,9 +102,7 @@ public class RiskStratificationService {
         riskStratificationDto.setHealthFacility( riskStratification.getHealthFacility());
 
 
-        /*riskStratificationDto.setPersonId(personRepository
-                        .findByUuid(riskStratification.getPersonUuid())
-                        .orElse(null).getId());*/
+
 
         return riskStratificationDto;
     }
@@ -117,7 +114,6 @@ public class RiskStratificationService {
         RiskStratificationResponseDto responseDto = new RiskStratificationResponseDto();
         responseDto.setId(riskStratification.getId());
         responseDto.setEntryPoint( riskStratification.getEntryPoint());
-        //LOG.info("riskStratification is {}", riskStratification);
 
         responseDto.setAge( riskStratification.getAge() != null ? riskStratification.getAge():0);
 

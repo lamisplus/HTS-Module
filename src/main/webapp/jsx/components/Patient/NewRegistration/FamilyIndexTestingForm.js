@@ -808,13 +808,13 @@ const getSettings=()=>{
       });
     }
     // setSaving(true);
-    if (permissions.includes("Nigeria_PNS_Form")) {
-      handleItemClick("pns", "fit");
-      toggle();
-    } else if (permissions.includes("Referral_Form")) {
-      handleItemClick("pns", "client-referral");
-      toggle();
-    }
+    // if (permissions.includes("Nigeria_PNS_Form")) {
+    //   handleItemClick("pns", "fit");
+    //   toggle();
+    // } else if (permissions.includes("Referral_Form")) {
+    //   handleItemClick("pns", "client-referral");
+    //   toggle();
+    // }
   };
 
   //fetch province

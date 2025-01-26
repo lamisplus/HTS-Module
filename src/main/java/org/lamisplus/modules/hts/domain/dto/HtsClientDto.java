@@ -19,20 +19,16 @@ public class HtsClientDto {
     @NotNull(message = "id is mandatory")
     private  Long id;
     private  String targetGroup;
-    //private  ApplicationCodeSet targetGroupCodeSet;
     @NotNull(message = "clientCode is mandatory")
     private  String clientCode;
     @NotNull(message = "dateVisit is mandatory")
     private  LocalDate dateVisit;
     private  Long referredFrom;
-    //private  ApplicationCodeSet referredFromCodeSet;
     private  String testingSetting;
-    //private  ApplicationCodeSet testingSettingCodeSet;
     private  Boolean firstTimeVisit;
     private  Integer numChildren;
     private  Integer numWives;
     private  Long typeCounseling;
-    //private  ApplicationCodeSet typeCounselingCodeSet;
     private  Boolean indexClient;
     private  Boolean previouslyTested;
     @NotNull(message = "personId is mandatory")
@@ -46,9 +42,6 @@ public class HtsClientDto {
 
     private Object recency;
 
-    /*private ApplicationCodeSet pregnantCodeSet;
-    private ApplicationCodeSet breastFeedingCodeSet;
-    private ApplicationCodeSet relationWithIndexClientCodeSet;*/
 
     //PRE TEST COUNSELING
     private  Object knowledgeAssessment;

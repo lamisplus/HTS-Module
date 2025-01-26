@@ -45,7 +45,6 @@ public class PNSService {
         // generate new partner id by concatenating the hts client id and the serial number of the pns
         res.setHtsClientUuid(htsClient.getUuid());
         res.setFacilityId(facilityId);
-//        res.setPartnerId(generatePartnerId(req.getHtsClientId(), htsClient.getClientCode()));
         PersonalNotificationService personalNotificationService = personalNotificationServiceRepository.save(res);
         return convertPnsToResponseDto(htsClient, personalNotificationService);
     }

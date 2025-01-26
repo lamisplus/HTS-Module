@@ -283,7 +283,7 @@
         <sql>ALTER TABLE hts_pns_index_client_partner ADD partner_id VARCHAR(255);</sql>
     </changeSet>
 
-    <changeSet failOnError="true" author="Taiwo Gboyegun" id="20240902-002-2">
+    <changeSet failOnError="true" author="Taiwo Gboyegun" id="20240945344302-002-2">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_family_index_testing_tracker"/>
             <not>
@@ -333,6 +333,18 @@
         </sql>
     </changeSet>
 
+    <changeSet failOnError="false" author="Ganiyat" id="02-01-2025-001">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_family_index" columnName="is_htsclient" />
+                <columnExists tableName="hts_family_index" columnName="other_child_number"  />
 
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_family_index ADD COLUMN is_htsclient varchar(255);
+            ALTER TABLE hts_family_index ADD COLUMN other_child_number varchar(255);
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

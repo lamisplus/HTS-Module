@@ -1902,9 +1902,8 @@ const HivTestResult = (props) => {
                                 <h5 style={{color: "#fff"}}>Others</h5>
                             </LabelRibbon>
                             <br/> <br/>
-                            {props.patientObj.riskStratificationResponseDto !== null &&
-                                props.patientObj.riskStratificationResponseDto
-                                    .communityEntryPoint !== "" && (
+                            {props?.patientObj?.riskStratificationResponseDto !== null &&
+                                props?.patientObj?.riskStratificationResponseDto?.communityEntryPoint !== "" && (
                                     <>
                                         <div className="form-group mb-3 col-md-4">
                                             <FormGroup>

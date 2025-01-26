@@ -553,3 +553,59 @@ export const getPreviousForm = (formName, age, pmtctModality, hivStatus) => {
     return ["", ""];
   }
 };
+
+
+
+export const getCurentForm=(activeItem)=>{
+    
+
+    switch(activeItem){
+      case  "risk": 
+      return "Risk_Stratification";
+    
+      case  "basic": 
+      return "Client_intake_form"; 
+
+      case  "pre-test-counsel": 
+      return "Pre_Test_Counseling";
+
+      case  "hiv-test": 
+      return "Request_and_Result_Form";
+
+      case  "post-test": 
+      return "Post_Test_Counseling";
+
+      case  "recency-testing": 
+      return "HIV_Recency_Testing";
+
+      case  "fit": 
+      return "Family_Index_Testing_Form";
+
+      case  "fit-history": 
+      return "Family_Index_Testing_Form";
+
+      case  "view-fit": 
+      return "Family_Index_Testing_Form";
+
+      case  "pns": 
+      return "Nigeria_PNS_Form";
+
+      case  "pns-history": 
+      return "Nigeria_PNS_Form";
+
+
+      case  "client-referral": 
+      return "";
+
+      case  "refferal-history": 
+      return "Referral_Form";
+
+      case  "view-referral": 
+      return "Referral_Form";
+
+      default:
+        return "";    }
+
+  }
+
+

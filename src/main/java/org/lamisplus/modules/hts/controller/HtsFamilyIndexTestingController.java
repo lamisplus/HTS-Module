@@ -35,10 +35,7 @@ public class HtsFamilyIndexTestingController {
         return ResponseEntity.ok(this.familyIndexTestingService.getFamilyIndexTestingById(id));
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<String> updateFamilyIndexTesting(@PathVariable Long id, @Valid @RequestBody FamilyIndexTestingResponseDTO familyIndexTestingDTO) {
-//        return ResponseEntity.ok(this.familyIndexTestingService.updateFamilyIndexTesting(id, familyIndexTestingDTO));
-//    }
+
 
     @GetMapping("/{id}/hts-client")
     public ResponseEntity<FamilyIndexTestingResponseDTO> getFamilyIndexTestingByHtsClientId(@PathVariable Long id) {
@@ -57,7 +54,7 @@ public class HtsFamilyIndexTestingController {
     }
 
 
-    //
+
 
     @GetMapping("/getCurrentTreatment")
     public ResponseEntity<String> getCurrentTreatment(@RequestParam String personUuid) {
@@ -65,11 +62,7 @@ public class HtsFamilyIndexTestingController {
       String Result =  familyIndexTestingService.getCurrentTreatmentAndDate(personUuid);
 
         return ResponseEntity.ok(Result);
-
-
     }
-
-
 
     @GetMapping("/getViralLoad")
     public ResponseEntity<String> getViralLoad(@RequestParam String personUuid) {
@@ -80,10 +73,7 @@ public class HtsFamilyIndexTestingController {
 
 
     }
-//    @PutMapping("/family-index/{id}")
-//    public ResponseEntity<FamilyIndexResponseDTO> updateFamilyIndex(@PathVariable Long id, @Valid @RequestBody FamilyIndexRequestDto familyIndexRequestDto) {
-//        return ResponseEntity.ok(this.familyIndexTestingService.updateFamilyIndex(id, familyIndexRequestDto));
-//    }
+
 
     //  get familyIndex by id
     @GetMapping("/family-index/{id}")

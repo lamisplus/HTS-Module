@@ -19,7 +19,6 @@ public class FamilyIndexRequestDto {
 
     @NotBlank(message = "Contact status is required")
     private String statusOfContact;
-//    private String familyIndexHivStatus;
 
     @NotNull(message = "Child number is required")
     private int childNumber;

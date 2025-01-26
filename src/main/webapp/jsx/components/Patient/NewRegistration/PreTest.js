@@ -179,8 +179,6 @@ const BasicInfo = (props) => {
     bloodTransfusion: "",
     consistentWeightFeverNightCough: "",
     soldPaidVaginalSex: "",
-    consistentWeightFeverNightCough: "",
-    soldPaidVaginalSex: "",
     haveCondomBurst: "",
     mlStatus: "",
     mlScore: "",

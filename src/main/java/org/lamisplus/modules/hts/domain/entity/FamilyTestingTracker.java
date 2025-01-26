@@ -84,9 +84,6 @@ public class FamilyTestingTracker extends Audit implements Serializable {
     @Column(name ="date_tested")
     private LocalDate dateTested ;
 
-//    @Basic
-//    @Column(name ="attempt")
-//    private String attempt;
 
     @Basic
     @Column(name="date_enrolledonart")
