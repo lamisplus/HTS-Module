@@ -309,7 +309,7 @@
             ALTER TABLE hts_family_index ADD COLUMN is_htsclient varchar(255);
         </sql>
     </changeSet>
-    <changeSet failOnError="false" author="Taiwo Gboyegun" id="isHtsClient-001">
+    <changeSet failOnError="false" author="Taiwo Gboyegun" id="isHtsClient-00574e65651">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="hts_pns_index_client_partner" columnName="is_htsclient" />
