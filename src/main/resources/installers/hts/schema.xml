@@ -2983,8 +2983,12 @@
             ALTER TABLE hts_index_elicitation ADD COLUMN latitude varchar(255);
             ALTER TABLE hts_index_elicitation ADD COLUMN longitude varchar(255);
         </sql>
-    </changeSet>
 
+
+
+
+    </changeSet>
+  
 
 
 </databaseChangeLog>

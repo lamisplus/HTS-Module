@@ -108,4 +108,31 @@
         </sql>
     </changeSet>
 
+
+
+    <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-001">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempts" />
+
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_family_index_testing_tracker
+                RENAME COLUMN attempts TO attempt;
+
+
+        </sql>
+    </changeSet>
+
+
+    <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-002">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing_tracker"/>
+        </preConditions>
+        <sql>
+
+            ALTER TABLE hts_family_index_testing_tracker
+            ALTER COLUMN attempt TYPE character varying;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

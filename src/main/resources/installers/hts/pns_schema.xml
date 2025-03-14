@@ -309,7 +309,7 @@
             ALTER TABLE hts_family_index ADD COLUMN is_htsclient varchar(255);
         </sql>
     </changeSet>
-    <changeSet failOnError="false" author="Taiwo Gboyegun" id="isHtsClient-00574e65651">
+    <changeSet failOnError="false" author="Taiwo Gboyegun" id="isHtsClient-001">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="hts_pns_index_client_partner" columnName="is_htsclient" />
@@ -344,6 +344,17 @@
         <sql>
             ALTER TABLE hts_family_index ADD COLUMN is_htsclient varchar(255);
             ALTER TABLE hts_family_index ADD COLUMN other_child_number varchar(255);
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Ganiyat" id="27-01-2025-00246">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_pns_index_client_partner" columnName="is_htsclient" />
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_pns_index_client_partner ADD COLUMN is_htsclient varchar(255);
         </sql>
     </changeSet>
 
