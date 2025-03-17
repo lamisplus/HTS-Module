@@ -103,8 +103,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ViewEditHivst = (props) => {
-    // console.log(props.patientObject)
-    // console.log("active page row", props.activePage.activeObject)
+
     const patient = props.patientObject;
     const hivstObj = props.activePage.activeObject
     const [saving, setSaving] = useState(false)
@@ -207,7 +206,6 @@ const ViewEditHivst = (props) => {
     // );
 
 
-    // // console.log("Selected Options", selectedUsers);
     const options = [
         {value: 'myself', label: 'For myself'},
         {value: 'spouse', label: 'Spouse'},
@@ -238,7 +236,6 @@ const ViewEditHivst = (props) => {
                         }
                     });
                     setServiceNeeded(serviceNeeded);
-                    // // console.log("serviceNeeded", serviceNeeded)
                 }
             })
             .catch((e) => {
@@ -246,8 +243,7 @@ const ViewEditHivst = (props) => {
             });
     };
 
-    // // console.log("selectedUsers", selectedUsers);
-    // console.log("showUserInfo", showUserInfo);
+
     useEffect(() => {
         SERVICE_NEEDED();
     }, []);
@@ -271,7 +267,7 @@ const ViewEditHivst = (props) => {
         if(selectedUsers.length === 0) {
             temp.selectedUsers =   objValues.testKitUsers ? "" : "Please select at least one user"
         }
-        // console.log("temp", temp);
+      
         setErrors({ ...temp });
         return Object.values(temp).every((x) => x == "");
     }
@@ -345,7 +341,6 @@ const ViewEditHivst = (props) => {
         setObjValues(newObjectValues);
     }
 
-    // console.log("action type", props.activePage.actionType)
 
     const handleUserInformationInputChange = (e, section) => {
         const {name, value} = e.target;
@@ -558,7 +553,6 @@ const ViewEditHivst = (props) => {
         setObjValues({...objValues, testKitUserDetails: []});
     };
 
-    // // console.log("Obj", objValues)
 
     const handleKitSelectUserChange = selectedUsers => {
         setSelectedUsers(selectedUsers);
@@ -593,13 +587,11 @@ const ViewEditHivst = (props) => {
         if (e.target.name === "serialNumber") {
             code = createdCode + e.target.value;
             setCreatedCode(code);
-            // // console.log("Code created is &&&& ", createdCode);
             setObjValues({...objValues, clientCode: code});
         }
 
         async function getIndexClientCode() {
             const indexClientCode = objValues.clientCode;
-            // // console.log(indexClientCode);
             const response = await axios.get(
                 `${baseUrl}hts/client/${indexClientCode}`,
                 {
@@ -621,7 +613,6 @@ const ViewEditHivst = (props) => {
                 headers: {Authorization: `Bearer ${token}`},
             })
             .then((response) => {
-                //// console.log(response.data);
                 setSexs(response.data);
             })
             .catch((error) => {
@@ -635,7 +626,6 @@ const ViewEditHivst = (props) => {
                 headers: {Authorization: `Bearer ${token}`},
             })
             .then((response) => {
-                //// console.log(response.data);
                 setMaritalStatus(response.data);
             })
             .catch((error) => {
@@ -755,10 +745,6 @@ const ViewEditHivst = (props) => {
         setUserInformation({ ...testKitUserDetails, age: e.target.value });
     };
 
-    // console.log("selectedUsers", selectedUsers)
-    // console.log("objValues", objValues)
-    // console.log("testKitUserDetails", testKitUserDetails)
-    // console.log("userInformationList", userInformationList)
 
 
     return (
@@ -776,7 +762,8 @@ const ViewEditHivst = (props) => {
                                         Visit Date <span style={{color: "red"}}> *</span>
                                     </Label>
                                     <Input
-                                        type="date"
+                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                         name="dateOfVisit"
                                         id="dateOfVisit"
                                         // value={objValues.dateOfVisit}
@@ -1112,7 +1099,8 @@ const ViewEditHivst = (props) => {
                                         {/*<span style={{color: "red"}}> *</span>*/}
                                     </Label>
                                     <Input
-                                        type="date"
+                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                         name="expiryDate"
                                         id="expirtyDate"
                                         value={objValues.expiryDate}
@@ -1261,7 +1249,8 @@ const ViewEditHivst = (props) => {
                                                       {/*<span style={{color: "red"}}> *</span>*/}
                                                   </Label>
                                                   <Input
-                                                      type="date"
+                                                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                       name="dateOfRegistration"
                                                       id="dateOfRegistration"
                                                       min="1929-12-31"
@@ -1495,7 +1484,8 @@ const ViewEditHivst = (props) => {
                                                   </Label>
                                                   <input
                                                       className="form-control"
-                                                      type="date"
+                                                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                       name="dob"
                                                       id="dob"
                                                       min="1929-12-31"
@@ -1958,7 +1948,8 @@ const ViewEditHivst = (props) => {
                                                                         {/*<span style={{color: "red"}}> *</span>*/}
                                                                     </Label>
                                                                     <Input
-                                                                        type="date"
+                                                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                                         name="dateReferredForConfirmatoryHts"
                                                                         id="dateReferredForConfirmatoryHts"
                                                                         value={testKitUserDetails.postTestAssessment.referralInformation.dateReferredForConfirmatoryHts}
@@ -2009,7 +2000,8 @@ const ViewEditHivst = (props) => {
                                                                         {/*<span style={{color: "red"}}> *</span>*/}
                                                                     </Label>
                                                                     <Input
-                                                                        type="date"
+                                                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                                         name="dateReferredForPreventionServices"
                                                                         id="dateReferredForPreventionServices"
                                                                         value={testKitUserDetails.postTestAssessment.referralInformation.dateReferredForPreventionServices}

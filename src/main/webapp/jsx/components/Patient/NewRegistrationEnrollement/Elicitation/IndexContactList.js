@@ -113,7 +113,6 @@ const PatientnHistory = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log(response.data);
         setIndexClientList(response.data);
       })
       .catch((error) => {});
@@ -122,8 +121,7 @@ const PatientnHistory = (props) => {
     props.handleIClickPage(page);
   };
   const handleIEditIndex = (page, activePage) => {
-    console.log(page);
-    console.log(activePage);
+
     //props.setActivePage({...props.activePage, activePage:"activePage", activeObject:row, actionType:actionType})
     //props.handleIClickPage(page)
   };

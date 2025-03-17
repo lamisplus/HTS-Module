@@ -19,10 +19,10 @@ public class FamilyIndexRequestDto {
 
     @NotBlank(message = "Contact status is required")
     private String statusOfContact;
-//    private String familyIndexHivStatus;
 
     @NotNull(message = "Child number is required")
     private int childNumber;
+    private int otherChildNumber;
 
     private String motherDead;
 
@@ -40,6 +40,7 @@ public class FamilyIndexRequestDto {
     private LocalDate yearChildDead;
     private String liveWithParent;
     private Boolean isDateOfBirthEstimated;
+    private String isHtsClient;
     private FamilyTestingTrackerRequestDTO familyTestingTrackerRequestDTO;
 
 }

@@ -89,9 +89,11 @@ const Patients = (props) => {
             title: "Patient Name",
             field: "name",
             hidden: showPPI,
+
           },
           // { title: "Hospital Number", field: "hospital_number", filtering: false },
-          { title: "Client Code", field: "clientCode", filtering: false },
+          { title: "Patient ID", field: "clientCode", filtering: false },
+          { title: "", field: "", filtering: false },
 
           { title: "Sex", field: "gender", filtering: false },
           { title: "Age", field: "age", filtering: false },
@@ -118,19 +120,18 @@ const Patients = (props) => {
                       name: row.firstName + " " + row.surname,
                       // hospital_number: row.hospitalNumber,
 
-                      clientCode: row.clientCode,
+                      clientCode: row.hospitalNumber,
                       gender: row.gender,
                       age: row.age,
                       count: (
                         <Label color="blue" size="mini">
-                          {row.htsCount}
+                          {0}
                         </Label>
                       ),
                       actions: (
                         <div>
                           {row.htsCount >= 0 && (
                             <>
-                              {console.log(row)}
                               <Link
                                 to={{
                                   pathname: "/patient-history",

@@ -211,7 +211,6 @@ const AddIndexContact = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setSexs(response.data);
       })
       .catch((error) => {
@@ -250,7 +249,6 @@ const AddIndexContact = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setNotificationContact(response.data);
       })
       .catch((error) => {
@@ -629,7 +627,8 @@ const AddIndexContact = (props) => {
                       <Label>Date</Label>
                       <input
                         className="form-control"
-                        type="date"
+                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="dob"
                         id="dob"
                         max={moment(new Date()).format("YYYY-MM-DD")}
@@ -1008,7 +1007,8 @@ const AddIndexContact = (props) => {
                         If contract by which date will partner come for testing?
                       </Label>
                       <Input
-                        type="date"
+                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="datePartnerCameForTesting"
                         id="datePartnerCameForTesting"
                         value={objValues.datePartnerCameForTesting}
@@ -1062,7 +1062,8 @@ const AddIndexContact = (props) => {
                             <span style={{ color: "red" }}> *</span>
                           </Label>
                           <Input
-                            type="date"
+                            type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                             name="dateTested"
                             id="dateTested"
                             value={objValues.dateTested}

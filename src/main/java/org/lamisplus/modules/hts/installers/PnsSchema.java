@@ -6,7 +6,7 @@ import org.springframework.core.annotation.Order;
 
 @Order(3)
 @Installer(name = "pns-schema-installer", description = "create pns schema",
-        version = 1)
+        version = 9)
 public class PnsSchema extends AcrossLiquibaseInstaller {
     public PnsSchema() {
         super("classpath:installers/hts/pns_schema.xml");

@@ -574,7 +574,8 @@ const ServicesProvided = (props) => {
                   Date <span style={{color: "red"}}> *</span>{" "}
                 </Label>
                 <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="referralDate"
                     id="referralDate"
                     value={payload.referralDate}

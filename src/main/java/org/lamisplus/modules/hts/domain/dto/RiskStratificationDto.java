@@ -20,8 +20,12 @@ public class RiskStratificationDto {
     private String entryPoint;
     @NotBlank(message = "testingSetting is mandatory")
     private String testingSetting;
-    @NotBlank(message = "modality is mandatory")
+//    @NotBlank(message = "modality is mandatory")
     private String modality;
+
+    private String  spokeFacility;
+    private String healthFacility;
+
     @NotBlank(message = "targetGroup is mandatory")
     private String targetGroup;
     @NotNull(message = "visitDate is mandatory")

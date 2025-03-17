@@ -6,7 +6,7 @@ import org.springframework.core.annotation.Order;
 
 @Order(2)
 @Installer(name = "schema-installer-update", description = "Updates the required database tables data",
-        version = 4)
+        version = 10)
 public class Updates extends AcrossLiquibaseInstaller {
     public Updates() {
         super("classpath:installers/hts/updates.xml");

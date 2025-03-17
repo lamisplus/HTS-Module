@@ -47,7 +47,7 @@ import java.util.Arrays;
         @TypeDef(name = "jsonb-node", typeClass = JsonNodeBinaryType.class),
         @TypeDef(name = "json-node", typeClass = JsonNodeStringType.class),
 })
-public class Hivst extends Audit implements Serializable {
+public class Hivst extends Audit<Hivst>  implements Serializable {
     @Id
     @Column(name = "id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

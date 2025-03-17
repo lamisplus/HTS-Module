@@ -79,6 +79,10 @@ public class FamilyIndex extends Audit implements Serializable  {
     private int childNumber;
 
     @Basic
+    @Column(name = "other_child_number")
+    private int otherChildNumber;
+
+    @Basic
     @Column(name = "child_dead")
     private String childDead;
 
@@ -121,6 +125,10 @@ public class FamilyIndex extends Audit implements Serializable  {
     @Basic
     @Column(name ="is_date_of_birth_estimated")
     private Boolean isDateOfBirthEstimated;
+
+    @Basic
+    @Column(name="is_htsclient")
+    private String isHtsClient;
 
 
     @OneToMany(mappedBy = "familyIndex", cascade = CascadeType.ALL, orphanRemoval = true)

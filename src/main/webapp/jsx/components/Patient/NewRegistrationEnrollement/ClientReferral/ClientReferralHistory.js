@@ -3,9 +3,13 @@ import {Col, Row} from "react-bootstrap";
 import PNSList from "../../NewRegistration/PartnerNotificationServices/PNSlist";
 import AddIndexContact from "../../ContinuesHTSEnrollment/Elicitation/AddIndexContact";
 import {Button} from "semantic-ui-react";
+import { useHistory } from "react-router-dom";
+
 import ClientRerralList from "./ClientRerralList";
 
 const ClientReferralHistory = (props) => {
+    let history = useHistory();
+
     const [activePage, setActivePage] = useState("list");
     const handleIClickPage = (activeItem) => {
         setActivePage(activeItem);
@@ -18,12 +22,18 @@ const ClientReferralHistory = (props) => {
         }
     };
     const handleDone = (row, actionType) => {
-        props.setActivePage({
+        if(props === "existing"){
+         props.setActivePage({
             ...props.activePage,
             activePage: "home",
             activeObject: row,
             actionType: actionType,
         });
+        }else{
+            
+        history.push("/");
+        }
+   
     };
 
     return (

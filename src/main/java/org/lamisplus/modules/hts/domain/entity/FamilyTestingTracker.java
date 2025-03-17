@@ -84,9 +84,6 @@ public class FamilyTestingTracker extends Audit implements Serializable {
     @Column(name ="date_tested")
     private LocalDate dateTested ;
 
-//    @Basic
-//    @Column(name ="attempt")
-//    private String attempt;
 
     @Basic
     @Column(name="date_enrolledonart")
@@ -113,10 +110,12 @@ public class FamilyTestingTracker extends Audit implements Serializable {
     @JoinColumn(name = "family_index_id")
     private FamilyIndex familyIndex;
 
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb", name = "attempts")
-    private JsonNode attempts;
 
+    @Column(name = "attempt")
+    private String  attempt;
+
+    @Column(name = "family_index_testing_id")
+    private Long familyIndexTestingId;
     @PrePersist
     public void setFields(){
         if(StringUtils.isEmpty(uuid)){

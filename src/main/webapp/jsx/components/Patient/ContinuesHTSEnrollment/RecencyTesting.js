@@ -15,7 +15,7 @@ import { Label as LabelRibbon, Button } from "semantic-ui-react";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import { token, url as baseUrl } from "../../../../api";
-
+import { getNextForm } from "../../../../utility";
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -83,7 +83,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Recency = (props) => {
-  //console.log("data1", props.patientObj)
   const classes = useStyles();
   const patientID =
     props.patientObj && props.patientObj.personResponseDto
@@ -102,7 +101,9 @@ const Recency = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-
+  const [permissions, setPermission] = useState(
+    localStorage.getItem("permissions")?.split(",")
+  );
   const [objValues, setObjValues] = useState({
     htsClientId: clientId,
     recency: {},
@@ -189,14 +190,13 @@ const Recency = (props) => {
 
   useEffect(() => {
     if (props.patientObj && props.patientObj.recency !== null) {
-      console.log(props.patientObj.recency);
       setRecency(props.patientObj.recency);
       if (recency.optOutRTRI === "true") {
         setRecency({
           optOutRTRI:
-              props.patientObj && props.patientObj.recency !== null
-                  ? props.patientObj.recency.optOutRTRI
-                  : "",
+            props.patientObj && props.patientObj.recency !== null
+              ? props.patientObj.recency.optOutRTRI
+              : "",
           optOutRTRITestName: "",
           optOutRTRITestDate: "",
           rencencyId: "",
@@ -218,20 +218,20 @@ const Recency = (props) => {
         });
       }
     }
-      if(props.patientObj){
-        if (
-            props.patientObj.confirmatoryTest2 &&
-            props.patientObj.confirmatoryTest2.date2 !== ""
-        ) {
-          setHivTestDate(props.patientObj.confirmatoryTest2.date2);
-        } else if (
-            props.patientObj.confirmatoryTest &&
-            props.patientObj.confirmatoryTest.date !== ""
-        ) {
-          setHivTestDate(props.patientObj.confirmatoryTest.date);
-        } else {
-          setHivTestDate("");
-        }
+    if (props.patientObj) {
+      if (
+        props.patientObj.confirmatoryTest2 &&
+        props.patientObj.confirmatoryTest2.date2 !== ""
+      ) {
+        setHivTestDate(props.patientObj.confirmatoryTest2.date2);
+      } else if (
+        props.patientObj.confirmatoryTest &&
+        props.patientObj.confirmatoryTest.date !== ""
+      ) {
+        setHivTestDate(props.patientObj.confirmatoryTest.date);
+      } else {
+        setHivTestDate("");
+      }
     }
     if (
       recency.longTermLine === "true" &&
@@ -278,10 +278,10 @@ const Recency = (props) => {
     recency.controlLine,
     props.patientObj,
   ]);
-  //console.log(props.patientObj)
   const handleInputChangeRecency = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "viralLoadConfirmationResult") {
+      
       if (e.target.value >= 1000) {
         recency.viralLoadResultClassification = ">=1000";
         recency.finalRecencyResult = "RITA Recent";
@@ -292,6 +292,57 @@ const Recency = (props) => {
         setRecency({ ...recency, [e.target.name]: e.target.value });
       }
     }
+   if(e.target.name === "optOutRTRI"){
+      setRecency({
+        // optOutRTRI: "false",
+        optOutRTRITestName: "",
+        optOutRTRITestDate: "",
+        rencencyId: "",
+        controlLine: "",
+        verififcationLine: "",
+        longTermLine: "",
+        rencencyInterpretation: "",
+        hasViralLoad: "",
+        sampleCollectedDate: "",
+        sampleReferanceNumber: "",
+        dateSampleSentToPCRLab: "",
+        sampleTestDate: "",
+        sampleType: "",
+        receivingPcrLab: "",
+        viralLoadResultClassification: "",
+        recencyResult: "",
+        finalRecencyResult: "",
+        viralLoadConfirmationResult: "",
+         [e.target.name]: e.target.value });
+
+         setErrors({ ...temp,
+          optOutRTRITestName: "",
+          optOutRTRITestDate: "",
+          rencencyId: "",
+          controlLine: "",
+          verififcationLine: "",
+          longTermLine: "",
+          rencencyInterpretation: "",
+          hasViralLoad: "",
+          sampleCollectedDate: "",
+          sampleReferanceNumber: "",
+          dateSampleSentToPCRLab: "",
+          sampleTestDate: "",
+          sampleType: "",
+          receivingPcrLab: "",
+          viralLoadResultClassification: "",
+          recencyResult: "",
+          finalRecencyResult: "",
+          viralLoadConfirmationResult: "", [e.target.name]: "" });
+
+    } 
+if(e.target.name === "controlLine" || e.target.name === "verififcationLine" ||   e.target.name === "longTermLine"){
+setErrors({...errors, hasViralLoad: ""})
+  // hasViralLoad
+
+}
+
+
     if (e.target.name === "viralLoadResultClassification") {
       if (e.target.value === ">=1000") {
         recency.finalRecencyResult = "RITA Recent";
@@ -324,26 +375,79 @@ const Recency = (props) => {
   /*****  Validation  */
   const validate = () => {
     //HTS FORM VALIDATION
-    {
+
+      recency.optOutRTRI === "false" &&
+        (temp.optOutRTRITestName = recency.optOutRTRITestName
+          ? ""
+          : "This field is required.");
+    
+    
+         recency.optOutRTRI === "false" &&
+          (temp.optOutRTRITestDate = recency.optOutRTRITestDate
+            ? ""
+            : "This field is required.");
+
+      
+          recency.optOutRTRI === "false" &&
+            (temp.rencencyId = recency.rencencyId
+              ? ""
+              : "This field is required.");
+
+             recency.optOutRTRI === "false" &&
+              (temp.controlLine = recency.controlLine
+                ? ""
+                : "This field is required.")
+
+                
+      
+              recency.optOutRTRI === "false" &&
+              (temp.verififcationLine = recency.verififcationLine
+                ? ""
+                : "This field is required.");
+
+
+                recency.optOutRTRI === "false" &&
+                (temp.longTermLine = recency.longTermLine
+                  ? ""
+                  : "This field is required.")
+
+
+
+                  recency.optOutRTRI === "false" &&
+                  (temp.rencencyInterpretation = recency.rencencyInterpretation
+                    ? ""
+                    : "This field is required.")
       recency.hasViralLoad == "true" &&
         (temp.sampleReferanceNumber = recency.sampleReferanceNumber
           ? ""
           : "This field is required.");
-    }
+    
     // {  recency.sampleCollectedDate!=='' && (temp.dateSampleSentToPCRLab = recency.dateSampleSentToPCRLab ? "" : "This field is required.")}
-    {
+    
       recency.hasViralLoad == "true" &&
         (temp.sampleType = recency.sampleType ? "" : "This field is required.");
-    }
+    
+
+
+    recency.rencencyInterpretation === "RTRI Recent" &&
+      (temp.hasViralLoad = recency.hasViralLoad
+        ? ""
+        : "This field is required."); 
+        
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
   const handleSubmit = (e) => {
     e.preventDefault();
+    let latestForm = getNextForm(
+      "HIV_Recency_Testing",
+      props.patientAge,
+      "",
+      props?.patientObj?.hivTestResult
+    );
     objValues.htsClientId = clientId;
     objValues.recency = recency;
     objValues.personId = patientID;
-    //console.log(recency)
     if (validate()) {
       setSaving(true);
       axios
@@ -354,10 +458,12 @@ const Recency = (props) => {
           setSaving(false);
           props.setPatientObj(response.data);
           //toast.success("Risk Assesment successful");
-          //comment this out for release 
+          //comment this out for release
           // handleItemClick("fit", "recency-testing");
-                   handleItemClick("pns", "recency-testing");
-         
+          handleItemClick(latestForm[0], latestForm[1]);
+
+          // else if (permissions.includes("Nigeria_PNS_Form")) {
+          // }
         })
         .catch((error) => {
           setSaving(false);
@@ -438,6 +544,11 @@ const Recency = (props) => {
                         <option value="Asante">Asante</option>
                         <option value="Others">Others</option>
                       </select>
+                      {errors.optOutRTRITestName !== "" ? (
+                      <span className={classes.error}>{errors.optOutRTRITestName}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -446,7 +557,9 @@ const Recency = (props) => {
                         Test Date <span style={{ color: "red" }}> *</span>
                       </Label>
                       <Input
-                        type="date"
+                        type="date"                  
+                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="optOutRTRITestDate"
                         id="optOutRTRITestDate"
                         value={recency.optOutRTRITestDate}
@@ -462,6 +575,11 @@ const Recency = (props) => {
                           borderRadius: "0.25rem",
                         }}
                       />
+                      {errors.optOutRTRITestDate !== "" ? (
+                      <span className={classes.error}>{errors.optOutRTRITestDate}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -481,6 +599,11 @@ const Recency = (props) => {
                           borderRadius: "0.2rem",
                         }}
                       />
+                      {errors.rencencyId !== "" ? (
+                      <span className={classes.error}>{errors.rencencyId}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -503,6 +626,12 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+
+                      {errors.controlLine !== "" ? (
+                      <span className={classes.error}>{errors.controlLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -526,6 +655,11 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+                      {errors.verififcationLine !== "" ? (
+                      <span className={classes.error}>{errors.verififcationLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -548,6 +682,11 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+                      {errors.longTermLine !== "" ? (
+                      <span className={classes.error}>{errors.longTermLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
 
@@ -569,12 +708,20 @@ const Recency = (props) => {
                           borderRadius: "0.2rem",
                         }}
                       />
+                      {errors.rencencyInterpretation !== "" ? (
+                      <span className={classes.error}>{errors.rencencyInterpretation}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   {recency.rencencyInterpretation === "RTRI Recent" && (
                     <div className="form-group  col-md-4">
                       <FormGroup>
-                        <Label>Has Viral Load been ordered? </Label>
+                        <Label>
+                          Has Viral Load been ordered?{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
                         <select
                           className="form-control"
                           name="hasViralLoad"
@@ -590,6 +737,11 @@ const Recency = (props) => {
                           <option value="true">Yes</option>
                           <option value="false">No</option>
                         </select>
+                        {errors.hasViralLoad !== "" ? (
+                      <span className={classes.error}>{errors.hasViralLoad}</span>
+                    ) : (
+                      ""
+                    )}
                       </FormGroup>
                     </div>
                   )}
@@ -605,7 +757,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="sampleCollectedDate"
                               id="sampleCollectedDate"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               value={recency.sampleCollectedDate}
                               min={recency.optOutRTRITestDate}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -681,7 +834,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="dateSampleSentToPCRLab"
                               id="dateSampleSentToPCRLab"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               min={recency.sampleCollectedDate}
                               value={recency.dateSampleSentToPCRLab}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -707,7 +861,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="sampleTestDate"
                               id="sampleTestDate"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               // min={recency.optOutRTRITestDate}
                               min={recency.dateSampleSentToPCRLab}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -827,13 +982,13 @@ const Recency = (props) => {
               <br />
               <div className="row">
                 <div className="form-group mb-3 col-md-12">
-                  <Button
+                  {/* <Button
                     content="Back"
                     icon="left arrow"
                     labelPosition="left"
                     style={{ backgroundColor: "#992E62", color: "#fff" }}
                     onClick={() => handleItemClick("post-test", "post-test")}
-                  />
+                  /> */}
                   <Button
                     content="Save & Continue"
                     icon="right arrow"

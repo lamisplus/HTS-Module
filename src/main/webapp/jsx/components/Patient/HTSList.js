@@ -108,7 +108,7 @@ const HTSList = (props) => {
               )
               .then((response) => response)
               .then((result) => {
-                //setLoading(false)
+
                 resolve({
                   data:
                     result?.data?.records &&

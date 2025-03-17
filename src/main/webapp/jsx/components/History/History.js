@@ -112,13 +112,11 @@ const PatientnHistory = (props) => {
   };
 
   const handleHTSDelete = (row) => {
-    console.log(props.patientList);
     axios
       .delete(`${baseUrl}hts/${row.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log(response);
         toast.success(
           `HTS patient with client code ${row.clientCode}, deleted successfully`
         );
@@ -133,10 +131,11 @@ const PatientnHistory = (props) => {
     <div>
       <MaterialTable
         icons={tableIcons}
-        title="HTS HISTORY "
+        title="HTS HISTORY"
         columns={[
           // { title: "HTS ID", field: "id" },
           { title: "Date", field: "date" },
+          { title: "Client Code", field: "clientCode" },
           { title: "Pre Test Counseling", field: "pre" },
           { title: "Recency Test", field: "rencency" },
           { title: "Post Test", field: "post" },
@@ -152,6 +151,8 @@ const PatientnHistory = (props) => {
         data={props.patientList.map((row) => ({
           // id: row.id,
           date: row.dateVisit,
+          clientCode: row.clientCode,
+
           pre: row.knowledgeAssessment ? "Filled" : "Not Filled ",
           requestResult: row.confirmatoryTest ? "Filled" : "Not Filled ",
           rencency: row.recency ? "Filled" : "Not Filled ",

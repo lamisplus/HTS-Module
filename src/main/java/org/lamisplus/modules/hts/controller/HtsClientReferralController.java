@@ -41,10 +41,7 @@ public class HtsClientReferralController {
         return ResponseEntity.ok(clientReferralService.deleteHtsClientReferral(id));
     }
 
-//    @GetMapping("/hts-client/{id}")
-//    public ResponseEntity<HtsClientReferralDTO> getHtsClientReferralByHtsClientId(@PathVariable Long id) {
-//        return ResponseEntity.ok(clientReferralService.getHtsClientReferralByHtsClientId(id));
-//    }
+
 //    update htsClientReferral
     @PutMapping("/update-hts-client-referral/{id}")
     public ResponseEntity<HtsClientReferralDTO> updateHtsClientReferral(@PathVariable Long id, @Valid @RequestBody HtsClientReferralRequestDTO reqDTO) {

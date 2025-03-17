@@ -36,8 +36,7 @@ public class HtsClientUpdateRequestDto {
     private final Object extra;
     @NotNull(message = "personId is mandatory")
     private Long personId;
-    //private final String personUuid;
-    //private PersonDto personDto;
+
     private final Long pregnant;
     private final Boolean breastFeeding;
     private final Long relationWithIndexClient;

@@ -1,5 +1,6 @@
 import React, {useCallback, useEffect, useState} from "react";
 import axios from "axios";
+import { checkPregnantPatient } from "../../../../utility";
 import {FormGroup, Label , CardBody, Spinner,Input,Form} from "reactstrap";
 import {makeStyles} from "@material-ui/core/styles";
 import {Card, CardContent} from "@material-ui/core";
@@ -16,6 +17,8 @@ import {Label as LabelRibbon, Button, Message} from 'semantic-ui-react'
 // import 'semantic-ui-css/semantic.min.css';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import { getNextForm } from "../../../../utility";
+import { getCheckModality } from "../../../../utility";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -90,8 +93,9 @@ const BasicInfo = (props) => {
     const clientId = props.patientObj && props.patientObj ? props.patientObj.id : "";
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState({});
+
+
     let temp = { ...errors }
-    //console.log("data1", props.patientObj)
     const [riskAssessmentPartner, setRiskAssessmentPartner]= useState(
         {
             sexPartnerHivPositive:"",
@@ -163,24 +167,79 @@ const BasicInfo = (props) => {
             nightSweats :"",
         }
     )
+
+
+
+  
     useEffect(() => { 
 
         if(props.patientObj){
-            setKnowledgeAssessment(props.patientObj.knowledgeAssessment  && props.patientObj.knowledgeAssessment!==null ? props.patientObj.knowledgeAssessment : {})
-            setRiskAssessment(props.patientObj.riskAssessment  && props.patientObj.riskAssessment!==null ? props.patientObj.riskAssessment : {})
-            setRiskAssessmentPartner(props.patientObj.sexPartnerRiskAssessment && props.patientObj.sexPartnerRiskAssessment!==null ? props.patientObj.sexPartnerRiskAssessment : {})
-            setStiScreening(props.patientObj.stiScreening  && props.patientObj.stiScreening!==null? props.patientObj.stiScreening : {})
-            setTbScreening(props.patientObj.tbScreening  && props.patientObj.tbScreening!==null? props.patientObj.tbScreening : {})
-            //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
-            //console.log(props.patientObj.riskStratificationResponseDto.riskAssessment)
-            if(props.patientObj.riskStratificationResponseDto && Object.keys(props.patientObj.riskStratificationResponseDto.riskAssessment).length !== 0 && props.patientObj.riskAssessment===null){
-                //setRiskAssessment({...riskAssessment, ...props.patientObj.riskStratificationResponseDto.riskAssessment})
-                props.patientObj.riskStratificationResponseDto.riskAssessment.whatWasTheResult!=="" && props.patientObj.riskStratificationResponseDto.riskAssessment.whatWasTheResult==='Positive' ? knowledgeAssessment.previousTestedHIVNegative='false' :
-                knowledgeAssessment.previousTestedHIVNegative='true'
-            }else{
-                setRiskAssessment({...riskAssessment, ...props.patientObj.riskAssessment})   
-            } 
-            knowledgeAssessment.clientPregnant=props.patientObj.pregnant===73 ? "true" :"" ;
+            let knowledgeAsses = props?.patientObj?.knowledgeAssessment
+
+          setKnowledgeAssessment(
+            props.patientObj.knowledgeAssessment &&
+              props.patientObj.knowledgeAssessment !== null
+              ? props.patientObj.knowledgeAssessment
+              : {}
+          );
+
+          if (props?.patientObj?.pregnant) {
+            checkPregnantPatient(props.patientObj.pregnant).then((res) => {
+              setKnowledgeAssessment({
+                ...knowledgeAsses,
+                clientPregnant: res ? "true" : "false",
+              });
+            });  
+         }
+
+          setRiskAssessment(
+            props.patientObj.riskAssessment &&
+              props.patientObj.riskAssessment !== null
+              ? props.patientObj.riskAssessment
+              : {}
+          );
+          setRiskAssessmentPartner(
+            props.patientObj.sexPartnerRiskAssessment &&
+              props.patientObj.sexPartnerRiskAssessment !== null
+              ? props.patientObj.sexPartnerRiskAssessment
+              : {}
+          );
+          setStiScreening(
+            props.patientObj.stiScreening &&
+              props.patientObj.stiScreening !== null
+              ? props.patientObj.stiScreening
+              : {}
+          );
+          setTbScreening(
+            props.patientObj.tbScreening &&
+              props.patientObj.tbScreening !== null
+              ? props.patientObj.tbScreening
+              : {}
+          );
+          //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
+          
+
+          if (
+            props.patientObj.riskStratificationResponseDto &&
+            Object.keys(
+              props.patientObj.riskStratificationResponseDto.riskAssessment
+            ).length !== 0 &&
+            props.patientObj.riskAssessment === null
+          ) {
+            //setRiskAssessment({...riskAssessment, ...props.patientObj.riskStratificationResponseDto.riskAssessment})
+            props.patientObj.riskStratificationResponseDto.riskAssessment
+              .whatWasTheResult !== "" &&
+            props.patientObj.riskStratificationResponseDto.riskAssessment
+              .whatWasTheResult === "Positive"
+              ? (knowledgeAssessment.previousTestedHIVNegative = "false")
+              : (knowledgeAssessment.previousTestedHIVNegative = "true");
+          } else {
+            setRiskAssessment({
+              ...riskAssessment,
+              ...props.patientObj.riskAssessment,
+            });
+          }
+       
         }
     }, [props.patientObj]);
     const handleItemClick =(page, completedMenu)=>{        
@@ -235,7 +294,6 @@ const BasicInfo = (props) => {
         if(e.target.value==='false') {
             const newcount = tbCount -1
             //settbCount(newcount)
-            //console.log(newcount)
             if(newcount <=0 ){
                 
                 settbCount(0)
@@ -302,6 +360,15 @@ const BasicInfo = (props) => {
     }
     const handleSubmit =(e)=>{
         e.preventDefault();
+        let modality = getCheckModality(
+          props.patientObj?.riskStratificationResponseDto?.testingSetting
+        );
+              let latestForm = getNextForm(
+                "Pre_Test_Counseling",
+                props.patientAge,
+                modality,
+                "unknown"
+              );
         if(validate()){
             setSaving(true);
             objValues.htsClientId= clientId
@@ -317,9 +384,16 @@ const BasicInfo = (props) => {
             )
             .then(response => {
                 setSaving(false);
-                props.setPatientObj(response.data)
-                //toast.success("Risk Assesment successful");
-                handleItemClick('hiv-test', 'pre-test-counsel' )
+                props.setPatientObj({...props.patientObj, 
+                    knowledgeAssessment: response.data.knowledgeAssessment,
+                    riskAssessment: response.data.riskAssessment,
+                    stiScreening: response.data.stiScreening,
+                    tbScreening: response.data.tbScreening,
+                    sexPartnerRiskAssessment: response.data.sexPartnerRiskAssessment,
+                  }
+                  );             
+                     //toast.success("Risk Assesment successful");
+                handleItemClick(latestForm[0], latestForm[1]);
 
             })
             .catch(error => {
@@ -337,7 +411,6 @@ const BasicInfo = (props) => {
                 
         }
     }
-    //console.log(riskAssessmentPartner)
 
     return (
         <>
@@ -410,6 +483,7 @@ const BasicInfo = (props) => {
                                         value={knowledgeAssessment.clientPregnant}
                                         onChange={handleInputChangeKnowledgeAssessment}
                                         style={{border: "1px solid #014D88", borderRadius:"0.2rem"}}
+                                        disabled={true}
                                     >
                                         <option value={""}></option>
                                         <option value="true">Yes</option>
@@ -1268,7 +1342,7 @@ const BasicInfo = (props) => {
                             <br />
                             <div className="row">
                             <div className="form-group mb-3 col-md-12">
-                            <Button content='Back' icon='left arrow' labelPosition='left' style={{backgroundColor:"#992E62", color:'#fff'}} onClick={()=>handleItemClick('basic','basic')}/>
+                            {/* <Button content='Back' icon='left arrow' labelPosition='left' style={{backgroundColor:"#992E62", color:'#fff'}} onClick={()=>handleItemClick('basic','basic')}/> */}
                             <Button content='Save & Continue' icon='right arrow' labelPosition='right' style={{backgroundColor:"#014d88", color:'#fff'}} onClick={handleSubmit} disabled={saving}/>
                             </div>
                             </div>

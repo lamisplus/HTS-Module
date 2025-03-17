@@ -16,7 +16,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import { token, url as baseUrl } from "../../../../api";
 import { useHistory } from "react-router-dom/cjs/react-router-dom";
-
+import { getNextForm } from "../../../../utility";
+import { calculate_age } from "../../utils";
 import { Modal } from "react-bootstrap";
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -85,7 +86,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Recency = (props) => {
-  console.log("recency new", props.patientObj);
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
   const toggle = () => setOpen(!open);
@@ -100,6 +100,9 @@ const Recency = (props) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [hivTestDate, setHivTestDate] = useState("");
+  const [nextForm, setNextForm] = useState([]);
+  const [showSaveButton, setShowSaveButton] = useState(true);
+
   let temp = { ...errors };
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
@@ -108,7 +111,9 @@ const Recency = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-
+  const [permissions, setPermission] = useState(
+    localStorage.getItem("permissions")?.split(",")
+  );
   const [objValues, setObjValues] = useState({
     htsClientId: clientId,
     recency: {},
@@ -197,23 +202,23 @@ const Recency = (props) => {
     toggle();
     //commenting this out for release
     // handleItemClick("pns", "recency-testing");
-    handleItemClick("client-referral", "recency-testing");
+    handleItemClick(nextForm[0], nextForm[1]);
   };
   const loadOtherForm = (row) => {
-    // setSaving(true);
-    //props.setActiveContent({...props.activeContent, route:'mental-health-view', id:row.id})
     toggle();
   };
 
   const loadNextForm = (row) => {
     // setSaving(true);
-    //commenting this out for release
-    // handleItemClick("fit", "recency-testing");
-    handleItemClick("pns", "recency-testing");
+    handleItemClick(nextForm[0], nextForm[1]);
+
+    // else if (permissions.includes("Nigeria_PNS_Form")) {
+    // }
 
     toggle();
   };
   useEffect(() => {
+
     if (props.patientObj && props.patientObj.recency !== null) {
       console.log(props.patientObj.recency);
       setRecency(props.patientObj.recency);
@@ -318,6 +323,13 @@ const Recency = (props) => {
         setRecency({ ...recency, [e.target.name]: e.target.value });
       }
     }
+
+    if(e.target.name === "controlLine" || e.target.name === "verififcationLine" ||   e.target.name === "longTermLine"){
+      setErrors({...errors, hasViralLoad: ""})
+        // hasViralLoad
+      
+      }
+      
     if (e.target.name === "viralLoadResultClassification") {
       if (e.target.value === ">=1000") {
         recency.finalRecencyResult = "RITA Recent";
@@ -334,7 +346,52 @@ const Recency = (props) => {
       } else {
         setRecency({ ...recency, [e.target.name]: e.target.value });
       }
-    } else if (e.target.name === "rencencyId" && e.target.value !== "") {
+    }else if(e.target.name === "optOutRTRI"){
+      setRecency({
+        // optOutRTRI: "false",
+        optOutRTRITestName: "",
+        optOutRTRITestDate: "",
+        rencencyId: "",
+        controlLine: "",
+        verififcationLine: "",
+        longTermLine: "",
+        rencencyInterpretation: "",
+        hasViralLoad: "",
+        sampleCollectedDate: "",
+        sampleReferanceNumber: "",
+        dateSampleSentToPCRLab: "",
+        sampleTestDate: "",
+        sampleType: "",
+        receivingPcrLab: "",
+        viralLoadResultClassification: "",
+        recencyResult: "",
+        finalRecencyResult: "",
+        viralLoadConfirmationResult: "",
+         [e.target.name]: e.target.value });
+
+         
+         setErrors({ ...temp,
+          optOutRTRITestName: "",
+          optOutRTRITestDate: "",
+          rencencyId: "",
+          controlLine: "",
+          verififcationLine: "",
+          longTermLine: "",
+          rencencyInterpretation: "",
+          hasViralLoad: "",
+          sampleCollectedDate: "",
+          sampleReferanceNumber: "",
+          dateSampleSentToPCRLab: "",
+          sampleTestDate: "",
+          sampleType: "",
+          receivingPcrLab: "",
+          viralLoadResultClassification: "",
+          recencyResult: "",
+          finalRecencyResult: "",
+          viralLoadConfirmationResult: "", [e.target.name]: "" });
+
+
+    }  else if (e.target.name === "rencencyId" && e.target.value !== "") {
       const recencyIdNumberValue = checkRecencyLimit(e.target.value);
       setRecency({ ...recency, [e.target.name]: recencyIdNumberValue });
     } else {
@@ -350,22 +407,80 @@ const Recency = (props) => {
   /*****  Validation  */
   const validate = () => {
     //HTS FORM VALIDATION
-    {
+    
+
+    recency.optOutRTRI === "false" &&
+    (temp.optOutRTRITestName = recency.optOutRTRITestName
+      ? ""
+      : "This field is required.");
+
+
+     recency.optOutRTRI === "false" &&
+      (temp.optOutRTRITestDate = recency.optOutRTRITestDate
+        ? ""
+        : "This field is required.");
+
+  
+      recency.optOutRTRI === "false" &&
+        (temp.rencencyId = recency.rencencyId
+          ? ""
+          : "This field is required.");
+
+         recency.optOutRTRI === "false" &&
+          (temp.controlLine = recency.controlLine
+            ? ""
+            : "This field is required.")
+
+            
+  
+          recency.optOutRTRI === "false" &&
+          (temp.verififcationLine = recency.verififcationLine
+            ? ""
+            : "This field is required.");
+
+
+            recency.optOutRTRI === "false" &&
+            (temp.longTermLine = recency.longTermLine
+              ? ""
+              : "This field is required.")
+
+
+
+              recency.optOutRTRI === "false" &&
+              (temp.rencencyInterpretation = recency.rencencyInterpretation
+                ? ""
+                : "This field is required.")
+
+
       recency.hasViralLoad == "true" &&
         (temp.sampleReferanceNumber = recency.sampleReferanceNumber
           ? ""
           : "This field is required.");
-    }
+  
     // {  recency.sampleCollectedDate!=='' && (temp.dateSampleSentToPCRLab = recency.dateSampleSentToPCRLab ? "" : "This field is required.")}
-    {
-      recency.hasViralLoad == "true" &&
+ 
+            recency.hasViralLoad == "true" &&
         (temp.sampleType = recency.sampleType ? "" : "This field is required.");
-    }
+
+          recency.rencencyInterpretation === "RTRI Recent" &&
+            (temp.hasViralLoad = recency.hasViralLoad
+              ? ""
+              : "This field is required.");
+   
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    let  age = calculate_age(props?.patientObj?.personResponseDto?.dateOfBirth)
+           let latestForm = getNextForm(
+             "HIV_Recency_Testing",
+             age,
+             "",
+             props?.patientObj?.hivTestResult
+           );
+           setNextForm(latestForm);
     objValues.htsClientId = clientId;
     objValues.recency = recency;
     objValues.personId = patientID;
@@ -379,7 +494,18 @@ const Recency = (props) => {
         .then((response) => {
           setSaving(false);
           props.setPatientObj(response.data);
-          loadOtherForm();
+          if (
+            latestForm[0] === "recency-testing" &&
+            latestForm[1] === "recency-testing"
+          ) {
+            // loadNextForm();
+
+            // if there are no other form then we should hide the save button
+
+            setShowSaveButton(false)
+          } else {
+            loadOtherForm();
+          }
           //toast.success("Risk Assesment successful");
           // history.push('/')
         })
@@ -462,6 +588,11 @@ const Recency = (props) => {
                         <option value="Asante">Asante</option>
                         <option value="Others">Others</option>
                       </select>
+                      {errors.optOutRTRITestName !== "" ? (
+                      <span className={classes.error}>{errors.optOutRTRITestName}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -470,7 +601,9 @@ const Recency = (props) => {
                         Test Date <span style={{ color: "red" }}> *</span>
                       </Label>
                       <Input
-                        type="date"
+                        type="date"                 
+                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="optOutRTRITestDate"
                         id="optOutRTRITestDate"
                         value={recency.optOutRTRITestDate}
@@ -486,6 +619,11 @@ const Recency = (props) => {
                           borderRadius: "0.25rem",
                         }}
                       />
+                       {errors.optOutRTRITestDate !== "" ? (
+                      <span className={classes.error}>{errors.optOutRTRITestDate}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -505,6 +643,11 @@ const Recency = (props) => {
                           borderRadius: "0.2rem",
                         }}
                       />
+                           {errors.rencencyId !== "" ? (
+                      <span className={classes.error}>{errors.rencencyId}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -527,6 +670,11 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+                      {errors.controlLine !== "" ? (
+                      <span className={classes.error}>{errors.controlLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -550,6 +698,11 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+                      {errors.verififcationLine !== "" ? (
+                      <span className={classes.error}>{errors.verififcationLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   <div className="form-group  col-md-4">
@@ -572,6 +725,11 @@ const Recency = (props) => {
                         <option value="true">Yes</option>
                         <option value="false">No</option>
                       </select>
+                      {errors.longTermLine !== "" ? (
+                      <span className={classes.error}>{errors.longTermLine}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
 
@@ -593,12 +751,19 @@ const Recency = (props) => {
                           borderRadius: "0.2rem",
                         }}
                       />
+                       {errors.rencencyInterpretation !== "" ? (
+                      <span className={classes.error}>{errors.rencencyInterpretation}</span>
+                    ) : (
+                      ""
+                    )}
                     </FormGroup>
                   </div>
                   {recency.rencencyInterpretation === "RTRI Recent" && (
                     <div className="form-group  col-md-4">
                       <FormGroup>
-                        <Label>Has Viral Load been ordered? </Label>
+                        <Label>Has Viral Load been ordered?                    <span style={{ color: "red" }}> *</span>
+                        <span style={{ color: "red" }}> *</span>
+                        </Label>
                         <select
                           className="form-control"
                           name="hasViralLoad"
@@ -614,6 +779,11 @@ const Recency = (props) => {
                           <option value="true">Yes</option>
                           <option value="false">No</option>
                         </select>
+                        {errors.hasViralLoad !== "" ? (
+                      <span className={classes.error}>{errors.hasViralLoad}</span>
+                    ) : (
+                      ""
+                    )}
                       </FormGroup>
                     </div>
                   )}
@@ -629,7 +799,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="sampleCollectedDate"
                               id="sampleCollectedDate"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               value={recency.sampleCollectedDate}
                               min={recency.optOutRTRITestDate}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -705,7 +876,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="dateSampleSentToPCRLab"
                               id="dateSampleSentToPCRLab"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               min={recency.sampleCollectedDate}
                               value={recency.dateSampleSentToPCRLab}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -731,7 +903,8 @@ const Recency = (props) => {
                               className="form-control"
                               name="sampleTestDate"
                               id="sampleTestDate"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               // min={recency.optOutRTRITestDate}
                               min={recency.dateSampleSentToPCRLab}
                               max={moment(new Date()).format("YYYY-MM-DD")}
@@ -789,12 +962,12 @@ const Recency = (props) => {
                               className="form-control"
                               name="receivedResultDate"
                               id="receivedResultDate"
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               // min={recency.optOutRTRITestDate}
                               min={recency.sampleTestDate}
                               value={recency?.receivedResultDate}
                               max={moment(new Date()).format("YYYY-MM-DD")}
-                              value={recency.receivedResultDate}
                               onChange={handleInputChangeRecency}
                               style={{
                                 border: "1px solid #014D88",
@@ -869,48 +1042,68 @@ const Recency = (props) => {
                   }}
                 >
                   <div className="">
-                    <Button
-                      content="Back"
-                      icon="left arrow"
-                      labelPosition="left"
-                      style={{ backgroundColor: "#992E62", color: "#fff" }}
-                      onClick={() => handleItemClick("post-test", "post-test")}
-                    />
-                    <Button
-                      content="Done"
-                      icon="right arrowrr"
-                      labelPosition="right"
-                      style={{ backgroundColor: "#014d88", color: "#fff" }}
-                      onClick={() => {
-                        history.push("/");
-                      }}
-                      disabled={
-                        props.patientObj?.postTestCounselingKnowledgeAssessment
-                          ?.hivTestResult === "true" &&
-                        recency.optOutRTRI === ""
-                          ? true
-                          : false
-                      }
-                    />
+                    {/* // <Button
+                    //   content="Back"
+                    //   icon="left arrow"
+                    //   labelPosition="left"
+                    //   style={{ backgroundColor: "#992E62", color: "#fff" }}
+                    //   onClick={() => handleItemClick("post-test", "post-test")}
+                    // /> */}
+                    {showSaveButton && (
+                      <Button
+                        content="Done"
+                        icon="right arrowrr"
+                        labelPosition="right"
+                        style={{ backgroundColor: "#014d88", color: "#fff" }}
+                        onClick={() => {
+                          history.push("/");
+                        }}
+                        disabled={
+                          props.patientObj
+                            ?.postTestCounselingKnowledgeAssessment
+                            ?.hivTestResult === "true" &&
+                          recency.optOutRTRI === ""
+                            ? true
+                            : false
+                        }
+                      />
+                    )}
                   </div>
 
-                  <div>
-                    {" "}
-                    <Button
-                      content="Save & Continue"
-                      icon="right arrow"
-                      labelPosition="right"
-                      style={{ backgroundColor: "#014d88", color: "#fff" }}
-                      onClick={handleSubmit}
-                      disabled={
-                        props.patientObj?.postTestCounselingKnowledgeAssessment
-                          ?.hivTestResult === "true" &&
-                        recency.optOutRTRI === ""
-                          ? true
-                          : false
-                      }
-                    />
-                  </div>
+                  {showSaveButton ? (
+                    <div>
+                      {" "}
+                      <Button
+                        content="Save & Continue"
+                        icon="right arrow"
+                        labelPosition="right"
+                        style={{ backgroundColor: "#014d88", color: "#fff" }}
+                        onClick={handleSubmit}
+                        disabled={
+                          props.patientObj
+                            ?.postTestCounselingKnowledgeAssessment
+                            ?.hivTestResult === "true" &&
+                          recency.optOutRTRI === ""
+                            ? true
+                            : false
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      {" "}
+                      <Button
+                        content="Done"
+                        icon="right arrow"
+                        labelPosition="right"
+                        style={{ backgroundColor: "#014d88", color: "#fff" }}
+                        onClick={() => {
+                          history.push("/");
+                        }}
+                       
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -934,7 +1127,7 @@ const Recency = (props) => {
         </Modal.Header>
         <Modal.Body>
           <h4>
-            Would you like to fill the next form ?
+            Would you like to fill the Family Index form ?
             {/* <b>{row && record.activityName}</b> */}
           </h4>
         </Modal.Body>

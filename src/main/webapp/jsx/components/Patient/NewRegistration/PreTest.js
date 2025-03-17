@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
+import { checkPregnantPatient } from "../../../../utility";
 import {
   FormGroup,
   Label,
@@ -16,17 +17,16 @@ import Stack from "@mui/material/Stack";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
+import FeedbackModal from "./FeedbackModal";
 import { token, url as baseUrl } from "../../../../api";
 import "react-phone-input-2/lib/style.css";
 import { Label as LabelRibbon, Button, Message } from "semantic-ui-react";
-// import 'semantic-ui-css/semantic.min.css';
+
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import PanToolIcon from "@mui/icons-material/PanTool";
-//import * as moment from 'moment';
 import { getCheckModality } from "../../../../utility";
+import { getNextForm } from "../../../../utility";
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -95,21 +95,26 @@ const useStyles = makeStyles((theme) => ({
 
 const BasicInfo = (props) => {
   const [predictionValue, setPredictionValue] = useState(0);
+  const [openModal, setOpenModal] = React.useState(false);
+  const toggleModal = (event) => {
+    event.preventDefault();
+    setOpenModal(!openModal);
+  };
 
   const predictionRanges = (prediction) => {
-    if (parseFloat(prediction) <= 0.2) {
+    if (parseFloat(prediction) < 0.005575358) {
       return <Badge color="success">Low Risk</Badge>;
     } else if (
-      parseFloat(prediction) >= 0.21 &&
-      parseFloat(prediction) <= 0.4
+      parseFloat(prediction) > 0.005575358 &&
+      parseFloat(prediction) < 0.02719647
     ) {
       return <Badge color="info">Medium Risk</Badge>;
     } else if (
-      parseFloat(prediction) >= 0.41 &&
-      parseFloat(prediction) <= 0.8
+      parseFloat(prediction) > 0.02719647 &&
+      parseFloat(prediction) < 0.08083864
     ) {
       return <Badge color="warning">High Risk</Badge>;
-    } else if (parseFloat(prediction) >= 0.81) {
+    } else if (parseFloat(prediction) > 0.08083864) {
       return <Badge color="danger">Highest Risk</Badge>;
     } else {
       return <Badge color="dark">No Prediction Result</Badge>;
@@ -125,27 +130,19 @@ const BasicInfo = (props) => {
   const clientId =
     props.patientObj && props.patientObj ? props.patientObj.id : "";
   const [saving, setSaving] = useState(false);
+  const [mlresult, setMlresult] = useState(false);
   const [savingPrediction, setSavingPrediction] = useState(false);
   const [savingResult, setSavingRsult] = useState(false);
+  const [savingFeedback, setSavingFeedback] = useState(false);
   const [errors, setErrors] = useState({});
   let temp = { ...errors };
   const [modalityCheck, setModalityCheck] = useState("");
-  //console.log("data_pre_test", props.patientObj);
-  // const calculate_age = dob => {
-  //     var today = new Date();
-  //     var dateParts = dob.split("-");
-  //     var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
-  //     var birthDate = new Date(dateObject); // create a date object directlyfrom`dob1`argument
-  //     var age_now = today.getFullYear() - birthDate.getFullYear();
-  //     var m = today.getMonth() - birthDate.getMonth();
-  //         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-  //                 age_now--;
-  //             }
-  //         if (age_now === 0) {
-  //                 return m + " month(s)";
-  //             }
-  //             return age_now ;
-  // };
+
+  let dataObj = props.patientObj;
+  //console.log("data", dataObj);
+  const [permissions, setPermission] = useState(
+    localStorage.getItem("stringifiedPermmision")?.split(",")
+  );
   const [knowledgeAssessment, setKnowledgeAssessment] = useState({
     previousTestedHIVNegative: "",
     timeLastHIVNegativeTestResult: "",
@@ -156,14 +153,87 @@ const BasicInfo = (props) => {
     clientInformPossibleTestResult: "",
     informConsentHivTest: "",
   });
+  const [objValues, setObjValues] = useState({
+    htsClientId: clientId,
+    knowledgeAssessment: {},
+    personId: patientID,
+    riskAssessment: {},
+    stiScreening: {},
+    tbScreening: {},
+    sexPartnerRiskAssessment: {},
+  });
+
+  const [riskAssessment, setRiskAssessment] = useState({
+    everHadSexualIntercourse: "",
+    bloodtransInlastThreeMonths: "",
+    uprotectedSexWithCasualLastThreeMonths: "",
+    uprotectedSexWithRegularPartnerLastThreeMonths: "",
+    unprotectedVaginalSex: "",
+    uprotectedAnalSex: "",
+    stiLastThreeMonths: "",
+    sexUnderInfluence: "",
+    moreThanOneSexPartnerLastThreeMonths: "",
+    experiencePain: "",
+    haveSexWithoutCondom: "",
+    abuseDrug: "",
+    bloodTransfusion: "",
+    consistentWeightFeverNightCough: "",
+    soldPaidVaginalSex: "",
+    haveCondomBurst: "",
+    mlStatus: "",
+    mlScore: "",
+  });
+
+  const [riskAssessmentPartner, setRiskAssessmentPartner] = useState({
+    sexPartnerHivPositive: "",
+    newDiagnosedHivlastThreeMonths: "",
+    currentlyArvForPmtct: "",
+    knowHivPositiveOnArv: "",
+    knowHivPositiveAfterLostToFollowUp: "",
+    uprotectedAnalSex: "",
+  });
+
+  const [tbScreening, setTbScreening] = useState({
+    currentCough: "",
+    weightLoss: "",
+    lymphadenopathy: "",
+    fever: "",
+    nightSweats: "",
+  });
+
+  const [stiScreening, setStiScreening] = useState({
+    vaginalDischarge: "",
+    lowerAbdominalPains: "",
+    urethralDischarge: "",
+    complaintsOfScrotal: "",
+    complaintsGenitalSore: "",
+  });
+
+  const [mlResultObj, setMlResultObj] = useState({
+    htsClientId: clientId,
+    status: "",
+    score: "",
+  });
+
   useEffect(() => {
     if (props.patientObj) {
+      let knowledgeAsses = props?.patientObj?.knowledgeAssessment;
       setKnowledgeAssessment(
         props.patientObj.knowledgeAssessment &&
           props.patientObj.knowledgeAssessment !== null
           ? props.patientObj.knowledgeAssessment
           : {}
       );
+
+      if (props?.patientObj?.pregnant) {
+        checkPregnantPatient(props.patientObj.pregnant).then((res) => {
+          console.log("my result", res);
+          setKnowledgeAssessment({
+            ...knowledgeAsses,
+            clientPregnant: res ? "true" : "false",
+          });
+        });
+      }
       setRiskAssessment(
         props.patientObj.riskAssessment &&
           props.patientObj.riskAssessment !== null
@@ -186,8 +256,7 @@ const BasicInfo = (props) => {
           ? props.patientObj.tbScreening
           : {}
       );
-      //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
-      //console.log(props.patientObj.riskStratificationResponseDto.riskAssessment)
+
       if (
         props.patientObj.riskStratificationResponseDto &&
         Object.keys(
@@ -195,7 +264,6 @@ const BasicInfo = (props) => {
         ).length !== 0 &&
         props.patientObj.riskAssessment === null
       ) {
-        //setRiskAssessment({...riskAssessment, ...props.patientObj.riskStratificationResponseDto.riskAssessment})
         props.patientObj.riskStratificationResponseDto.riskAssessment
           .whatWasTheResult !== "" &&
         props.patientObj.riskStratificationResponseDto.riskAssessment
@@ -213,7 +281,7 @@ const BasicInfo = (props) => {
 
       setModalityCheck(
         getCheckModality(
-          props.patientObj?.riskStratificationResponseDto?.modality
+          props.patientObj?.riskStratificationResponseDto?.testingSetting
         )
       );
     }
@@ -226,142 +294,365 @@ const BasicInfo = (props) => {
     }
     props.handleItemClick(page);
   };
-  const [objValues, setObjValues] = useState({
-    htsClientId: clientId,
-    knowledgeAssessment: {},
-    personId: patientID,
-    riskAssessment: {},
-    stiScreening: {},
-    tbScreening: {},
-    sexPartnerRiskAssessment: {},
-  });
 
   const handleInputChangeKnowledgeAssessment = (e) => {
-    //setErrors({...temp, [e.target.name]:""})
-
     setKnowledgeAssessment({
       ...knowledgeAssessment,
       [e.target.name]: e.target.value,
     });
   };
-  const [riskAssessment, setRiskAssessment] = useState({
-    everHadSexualIntercourse: "",
-    bloodtransInlastThreeMonths: "",
-    uprotectedSexWithCasualLastThreeMonths: "",
-    uprotectedSexWithRegularPartnerLastThreeMonths: "",
-    unprotectedVaginalSex: "",
-    uprotectedAnalSex: "",
-    stiLastThreeMonths: "",
-    sexUnderInfluence: "",
-    moreThanOneSexPartnerLastThreeMonths: "",
-    experiencePain: "",
-    haveSexWithoutCondom: "",
-    abuseDrug: "",
-    bloodTransfusion: "",
-    consistentWeightFeverNightCough: "",
-    soldPaidVaginalSex: "",
-    consistentWeightFeverNightCough: "",
-    soldPaidVaginalSex: "",
-    haveCondomBurst: "",
-  });
 
-  // const postPredictions = (name, value) => {
-  //   if (name === "soldPaidVaginalSex" && value !== "null") {
-  //     setSavingRsult(true);
-  //     let mlData = {
-  //       modelConfigs: {
-  //         debug: "true",
-  //         encounterDate: props.patientObj?.dateVisit,
-  //         facilityId: "LBgwDTw2C8u",
-  //         modelId: "hts_v1",
-  //       },
-  //       variableValues: {
-  //         age: props.patientObj?.riskStratificationResponseDto.age,
-  //         client_pregnant_X0: props.patientObj?.pregnant === null ? 0 : 1,
-  //         first_time_visit_Y:
-  //           props.patientObj?.firstTimeVisit === false ? 0 : 1,
-  //         hts_setting_Other: 0,
-  //         hts_setting_Others: 0,
-  //         hts_setting_Outreach: 1,
-  //         marital_status_Divorced: 0,
-  //         marital_status_Married:
-  //           props.patientObj?.personResponseDto?.maritalStatus === null ? 0 : 1,
-  //         marital_status_Widowed: 0,
-  //         previously_tested_hiv_negative_Missing: 0,
-  //         previously_tested_hiv_negative_TRUE: 0,
-  //         referred_from_Other: 0,
-  //         referred_from_Self: 1,
-  //         session_type_Individual: 0,
-  //         sex_F: props.patientObj?.personResponseDto?.sex === "Female" ? 1 : 0,
-  //         sex_M: props.patientObj?.personResponseDto?.sex === "Male" ? 1 : 0,
-  //         tested_for_hiv_before_within_this_year_NotPreviouslyTested: 1,
-  //         tested_for_hiv_before_within_this_year_PreviouslyTestedNegative: 0,
-  //         tested_for_hiv_before_within_this_year_PreviouslyTestedPositiveInHIVCare: 0,
-  //         tested_for_hiv_before_within_this_year_PreviouslyTestedPositiveNotInHIVCare: 0,
-  //       },
-  //     };
-  //     //ML Post
-  //     axios
-  //       .post(`${baseUrl}machine-learning/evaluate`, mlData, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       })
-  //       .then((resp) => {
-  //         console.log("ML", resp);
-  //         let predictions = Object.values(resp.data.result.predictions);
-  //         setPredictionValue(predictions);
-  //         setSavingPrediction(true);
-  //         setSavingRsult(false);
-  //       })
-  //       .catch((err) => {
-  //         console.error("ML_err", err);
-  //       });
-  //   }
-  // };
+  const postPredictions = (e) => {
+    e.preventDefault();
+    setSavingRsult(true);
+
+    if (dataObj?.riskStratificationResponseDto?.age < 15) {
+      toast.info(`No risk score for client less than 15 years`, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+      setMlresult(true);
+      setSavingRsult(false);
+    } else {
+      let mlData = {
+        modelConfigs: {
+          debug: "true",
+          encounterDate: dataObj?.dateVisit,
+          facilityId: "LBgwDTw2C8u", // TODO: get facility id from database
+          modelId: "hts_v5",
+        },
+        variableValues: {
+          age:
+            dataObj?.riskStratificationResponseDto?.age !== null
+              ? dataObj?.riskStratificationResponseDto?.age
+              : -1000.0,
+          bloodTransfusionInLast3Months:
+            dataObj?.riskStratificationResponseDto?.riskAssessment
+              ?.lastHivTestBloodTransfusion === "true" ||
+            riskAssessment.bloodTransfusion === "true" ||
+            riskAssessment.bloodtransInlastThreeMonths === "true"
+              ? 1
+              : 0,
+          clientPregnant:
+            dataObj?.pregnant === 73 &&
+            dataObj?.personResponseDto?.sex === "Female"
+              ? 1
+              : dataObj?.pregnant === 72 &&
+                dataObj?.personResponseDto?.sex === "Male"
+              ? 0
+              : dataObj?.pregnant === 72 &&
+                dataObj?.personResponseDto?.sex === "Female"
+              ? 0
+              : dataObj?.pregnant === "" &&
+                dataObj?.personResponseDto?.sex === "Female"
+              ? 0
+              : 0,
+          everHadSexualIntercourse:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+                        "TARGET_GROUP_SEXUAL_PARTNER" ||
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+                                    "TARGET_GROUP_MSM" ||
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+                        "TARGET_GROUP_FSW" ||
+            riskAssessment?.everHadSexualIntercourse === "true" ||
+            riskAssessment?.soldPaidVaginalSex === "true" ||
+            riskAssessmentPartner?.uprotectedAnalSex === "true" ||
+            riskAssessment?.haveCondomBurst === "true" ||
+            riskAssessment?.haveSexWithoutCondom === "true"
+              ? 1
+              : riskAssessment?.soldPaidVaginalSex === "false" &&
+                riskAssessmentPartner?.uprotectedAnalSex === "false" &&
+                riskAssessment?.haveCondomBurst === "false" &&
+                riskAssessment?.haveSexWithoutCondom === "false"
+              ? 0
+              : riskAssessment?.soldPaidVaginalSex === "" &&
+                riskAssessmentPartner?.uprotectedAnalSex === "" &&
+                riskAssessment?.haveCondomBurst === "" &&
+                riskAssessment?.haveSexWithoutCondom === ""
+              ? 0
+              : 0,
+          first_time_visit: dataObj?.firstTimeVisit === true ? 1 : 0,
+          gender_female: dataObj?.personResponseDto?.sex === "Female" ? 1 : 0,
+          gender_male: dataObj?.personResponseDto?.sex === "Male" ? 1 : 0,
+          index_client: dataObj?.indexClient === true ? 1 : 0,
+          marital_status_divorced:
+            dataObj?.personResponseDto?.maritalStatus?.display === "Divorced"
+              ? 1
+              : 0,
+          marital_status_married:
+            dataObj?.personResponseDto?.maritalStatus?.display === "Married"
+              ? 1
+              : 0,
+          marital_status_other:
+            dataObj?.personResponseDto?.maritalStatus?.display === "Divorced" ||
+            dataObj?.personResponseDto?.maritalStatus?.display ===
+              "Separated" ||
+            dataObj?.personResponseDto?.maritalStatus?.display === "Widowed"
+              ? 1
+              : 0,
+          marital_status_single:
+            dataObj?.personResponseDto?.maritalStatus?.display === "Single"
+              ? 1
+              : 0,
+          moreThan1SexPartnerDuringLast3Months:
+            riskAssessment?.soldPaidVaginalSex === "true" ||
+            riskAssessment?.moreThanOneSexPartnerLastThreeMonths === "true"
+              ? 1
+              : 0,
+          previously_tested: dataObj?.previouslyTested === true ? 1 : 0,
+          referred_from_Community_Mobilization:
+            dataObj?.referredFrom === 1015 ? 1 : 0,
+          referred_from_OPD: dataObj?.referredFrom === 47 ? 1 : 0,
+          referred_from_Others:
+            dataObj?.referredFrom === 50 ||
+            dataObj?.referredFrom === 45 ||
+            dataObj?.referredFrom === 44 ||
+            dataObj?.referredFrom === 48 ||
+            dataObj?.referredFrom === 45 ||
+            dataObj?.referredFrom === 447 ||
+            dataObj?.referredFrom === 449 ||
+            dataObj?.referredFrom === 46 ||
+            dataObj?.referredFrom === 49 ||
+            dataObj?.referredFrom === 870
+              ? 1
+              : 0,
+          referred_from_Private_Commercial_Health_facility:
+            dataObj?.referredFrom === 448 ? 1 : 0,
+          referred_from_Self: dataObj?.referredFrom === 43 ? 1 : 0,
+          stiInLast3Months:
+            riskAssessment?.stiLastThreeMonths === "true" ||
+            riskAssessment?.experiencePain === "true" ||
+            riskAssessmentPartner?.sexPartnerHivPositive === "true" ||
+            riskAssessmentPartner?.newDiagnosedHivlastThreeMonths === "true" ||
+            riskAssessmentPartner?.currentlyArvForPmtct === "true" ||
+            riskAssessmentPartner?.knowHivPositiveOnArv === "true" ||
+            riskAssessmentPartner?.knowHivPositiveAfterLostToFollowUp === "true"
+              ? 1
+              : 0,
+          sti_symptoms:
+            (stiScreening?.lowerAbdominalPains === "true" &&
+              stiScreening?.vaginalDischarge === "true") ||
+            (stiScreening?.complaintsGenitalSore === "true" &&
+              stiScreening?.complaintsOfScrotal === "true" &&
+              stiScreening?.urethralDischarge === "true")
+              ? 1
+              : stiScreening?.lowerAbdominalPains === "" ||
+                stiScreening?.vaginalDischarge === ""
+              ? -1000
+              : 0,
+          target_group_FSW:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+            "TARGET_GROUP_FSW"
+              ? 1
+              : 0,
+          target_group_GEN_POP:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+            "TARGET_GROUP_GEN_POP"
+              ? 1
+              : 0,
+          target_group_MSM:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+            "TARGET_GROUP_MSM"
+              ? 1
+              : 0,
+          target_group_PWID:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+            "TARGET_GROUP_PWID"
+              ? 1
+              : 0,
+          target_group_SEXUAL_PARTNER:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+            "TARGET_GROUP_SEXUAL_PARTNER"
+              ? 1
+              : 0,
+          target_group_other:
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+              "TARGET_GROUP_PRISON" ||
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+              "TARGET_GROUP_TRANSGENDER" ||
+            dataObj?.riskStratificationResponseDto?.targetGroup ===
+              "TARGET_GROUP_CHILDREN_OF_KP"
+              ? 1
+              : 0,
+          tb_symptoms:
+            tbScreening?.currentCough === "true" ||
+            tbScreening?.weightLoss === "true" ||
+            tbScreening?.lymphadenopathy === "true" ||
+            tbScreening?.fever === "true" ||
+            tbScreening?.nightSweats === "true"
+              ? 1
+              : tbScreening?.currentCough === "" &&
+                tbScreening?.weightLoss === "" &&
+                tbScreening?.lymphadenopathy === "" &&
+                tbScreening?.fever === "" &&
+                tbScreening?.nightSweats === ""
+              ? -1000
+              : 0,
+          testing_settingANC:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+            "FACILITY_HTS_TEST_SETTING_ANC"
+              ? 1
+              : 0,
+          testing_settingCPMTCT:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY"
+              ? 1
+              : 0,
+          testing_settingCT:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_CT" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_CT"
+              ? 1
+              : 0,
+          testing_settingIndex:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_INDEX" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_SNS" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_SNS" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_INDEX"
+              ? 1
+              : 0,
+          testing_settingOthers:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_OTHERS" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_BLOOD_BANK" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_EMERGENCY" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_FP" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_L&D" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_MALNUTRITION" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_PEDIATRIC" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_STI" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "FACILITY_HTS_TEST_SETTING_PREP_TESTING" ||
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+              "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS"
+              ? 1
+              : 0,
+          testing_settingOutreach:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+            "COMMUNITY_HTS_TEST_SETTING_OUTREACH"
+              ? 1
+              : 0,
+          testing_settingOVC:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+            "COMMUNITY_HTS_TEST_SETTING_OVC"
+              ? 1
+              : 0,
+          testing_settingTB:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+            "FACILITY_HTS_TEST_SETTING_TB"
+              ? 1
+              : 0,
+          testing_settingWard_Inpatient:
+            dataObj?.riskStratificationResponseDto?.testingSetting ===
+            "FACILITY_HTS_TEST_SETTING_WARD_INPATIENT"
+              ? 1
+              : 0,
+          unprotectedSexWithCasualPartnerInLast3Months:
+            riskAssessment?.uprotectedSexWithCasualLastThreeMonths === "true" ||
+            riskAssessment?.soldPaidVaginalSex === "true" ||
+            riskAssessmentPartner?.uprotectedAnalSex === "true"
+              ? 1
+              : 0,
+          unprotectedSexWithRegularPartnerInLast3Months:
+            riskAssessment?.uprotectedSexWithRegularPartnerLastThreeMonths ===
+              "true" ||
+            riskAssessment?.haveCondomBurst === "true" ||
+            riskAssessment?.haveSexWithoutCondom === "true"
+              ? 1
+              : 0,
+        },
+      };
+
+      setMlresult(true);
+
+      axios
+        .post(`${baseUrl}machine-learning/evaluate`, mlData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((resp) => {
+          console.log("ML", resp);
+          let predictions = Object.values(resp.data.result.predictions);
+          setPredictionValue(predictions);
+          let statusVal = "";
+
+          if (parseFloat(predictions[1]) < 0.005575358) {
+            statusVal = "Low Risk";
+          } else if (
+            parseFloat(predictions[1]) > 0.005575358 &&
+            parseFloat(predictions[1]) < 0.02719647
+          ) {
+            statusVal = "Medium Risk";
+          } else if (
+            parseFloat(predictions[1]) > 0.02719647 &&
+            parseFloat(predictions[1]) < 0.08083864
+          ) {
+            statusVal = "High Risk";
+          } else if (parseFloat(predictions[1]) > 0.08083864) {
+            statusVal = "Highest Risk";
+          } else {
+            statusVal = "No Prediction Result";
+          }
+
+          setMlResultObj({
+            htsClientId: clientId,
+            status: statusVal,
+            score: predictions[1],
+          });
+
+          setSavingPrediction(true);
+          setSavingRsult(false);
+        })
+        .catch((err) => {
+          console.error("ML_err", err);
+        });
+    }
+  };
 
   const handleInputChangeRiskAssessment = (e) => {
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
-    //postPredictions(e.target.name, e.target.value);
   };
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
   const riskCount = actualRiskCountTrue.filter((x) => x === "true");
-  const [riskAssessmentPartner, setRiskAssessmentPartner] = useState({
-    sexPartnerHivPositive: "",
-    newDiagnosedHivlastThreeMonths: "",
-    currentlyArvForPmtct: "",
-    knowHivPositiveOnArv: "",
-    knowHivPositiveAfterLostToFollowUp: "",
-    uprotectedAnalSex: "",
-  });
+
   const handleInputChangeRiskAssessmentPartner = (e) => {
     //setErrors({...temp, [e.target.name]:""})
     setRiskAssessmentPartner({
       ...riskAssessmentPartner,
       [e.target.name]: e.target.value,
     });
-    // if(riskAssessmentPartner.sexPartnerHivPositive==='false' || (e.target.name==='sexPartnerHivPositive' &&  e.target.value==='false')){
-    //     setRiskAssessmentPartner ({
-    //         sexPartnerHivPositive:'false',
-    //         newDiagnosedHivlastThreeMonths:"",
-    //         currentlyArvForPmtct :"",
-    //         knowHivPositiveOnArv :"",
-    //         knowHivPositiveAfterLostToFollowUp:"",
-    //         uprotectedAnalSex  :"",
-    //     })
-    // }
   };
   // Getting the number count of sexPartRiskCount True
   const actualSexPartRiskCountTrue = Object.values(riskAssessmentPartner);
   const sexPartRiskCount = actualSexPartRiskCountTrue.filter(
     (x) => x === "true"
   );
-  const [stiScreening, setStiScreening] = useState({
-    vaginalDischarge: "",
-    lowerAbdominalPains: "",
-    urethralDischarge: "",
-    complaintsOfScrotal: "",
-    complaintsGenitalSore: "",
-  });
+
   const handleInputChangeStiScreening = (e) => {
     //setErrors({...temp, [e.target.name]:""})
     setStiScreening({ ...stiScreening, [e.target.name]: e.target.value });
@@ -369,13 +660,7 @@ const BasicInfo = (props) => {
   // Getting the number count of STI True
   const actualStiTrue = Object.values(stiScreening);
   const stiCount = actualStiTrue.filter((x) => x === "true");
-  const [tbScreening, setTbScreening] = useState({
-    currentCough: "",
-    weightLoss: "",
-    lymphadenopathy: "",
-    fever: "",
-    nightSweats: "",
-  });
+
   const handleInputChangeTbScreening = (e) => {
     //setErrors({...temp, [e.target.name]:""})
     setTbScreening({ ...tbScreening, [e.target.name]: e.target.value });
@@ -385,28 +670,6 @@ const BasicInfo = (props) => {
   const newTbTrue = actualTBTrue.filter((x) => x === "true");
   /*****  Validation  */
   const validate = () => {
-    //HTS FORM VALIDATION
-    //temp.previousTestedHIVNegative = knowledgeAssessment.previousTestedHIVNegative ? "" : "This field is required."
-    //    {knowledgeAssessment.previousTestedHIVNegative==='true' && ( temp.timeLastHIVNegativeTestResult = knowledgeAssessment.timeLastHIVNegativeTestResult ? "" : "This field is required.")}
-    //    temp.clientPregnant = knowledgeAssessment.clientPregnant ? "" : "This field is required."
-    //    temp.clientInformHivTransRoutes = knowledgeAssessment.clientInformHivTransRoutes ? "" : "This field is required."
-    //    temp.clientInformRiskkHivTrans = knowledgeAssessment.clientInformRiskkHivTrans ? "" : "This field is required."
-    //    temp.clientInformPreventingsHivTrans = knowledgeAssessment.clientInformPreventingsHivTrans ? "" : "This field is required."
-    //    temp.clientInformPossibleTestResult = knowledgeAssessment.clientInformPossibleTestResult ? "" : "This field is required."
-    //    temp.informConsentHivTest = knowledgeAssessment.informConsentHivTest ? "" : "This field is required."
-
-    //     temp.currentCough = tbScreening.currentCough ? "" : "This field is required."
-    //     temp.weightLoss = tbScreening.weightLoss ? "" : "This field is required."
-    //     temp.lymphadenopathy = tbScreening.lymphadenopathy ? "" : "This field is required."
-    //     temp.fever = tbScreening.fever ? "" : "This field is required."
-    //     temp.nightSweats = tbScreening.nightSweats ? "" : "This field is required."
-
-    // props.patientObj && props.patientObj.personResponseDto.sex==='Female' && (temp.vaginalDischarge = stiScreening.vaginalDischarge ? "" : "This field is required." )
-    // props.patientObj && props.patientObj.personResponseDto.sex==='Female' && (temp.lowerAbdominalPains = stiScreening.lowerAbdominalPains ? "" : "This field is required.")
-    // props.patientObj.personResponseDto && props.patientObj.personResponseDto.sex==='Male' && (temp.urethralDischarge = stiScreening.urethralDischarge ? "" : "This field is required.")
-    // props.patientObj.personResponseDto && props.patientObj.personResponseDto.sex==='Male' && (temp.complaintsOfScrotal = stiScreening.complaintsOfScrotal ? "" : "This field is required.")
-    // props.patientObj.personResponseDto && props.patientObj.personResponseDto.sex==='Male' && (temp.complaintsGenitalSore = stiScreening.complaintsGenitalSore ? "" : "This field is required.")
-
     props.patientObj.targetGroup === "TARGET_GROUP_GEN_POP" &&
       (temp.everHadSexualIntercourse = riskAssessment.everHadSexualIntercourse
         ? ""
@@ -416,14 +679,6 @@ const BasicInfo = (props) => {
         riskAssessment.bloodtransInlastThreeMonths
           ? ""
           : "This field is required.");
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.uprotectedSexWithCasualLastThreeMonths = riskAssessment.uprotectedSexWithCasualLastThreeMonths ? "" : "This field is required.")
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.uprotectedSexWithRegularPartnerLastThreeMonths = riskAssessment.uprotectedSexWithRegularPartnerLastThreeMonths ? "" : "This field is required.")
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.unprotectedVaginalSex = riskAssessment.unprotectedVaginalSex ? "" : "This field is required.")
-
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.uprotectedAnalSex = riskAssessment.uprotectedAnalSex ? "" : "This field is required.")
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.sexUnderInfluence = riskAssessment.sexUnderInfluence ? "" : "This field is required.")
-    //props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.uprotectedSexWithCasualLastThreeMonths = riskAssessment.uprotectedSexWithCasualLastThreeMonths ? "" : "This field is required.")
-    // props.patientObj.targetGroup==="TARGET_GROUP_GEN_POP" && (temp.moreThanOneSexPartnerLastThreeMonths = riskAssessment.moreThanOneSexPartnerLastThreeMonths ? "" : "This field is required.")
 
     props.patientObj.targetGroup !== "TARGET_GROUP_GEN_POP" &&
       (temp.experiencePain = riskAssessment.experiencePain
@@ -452,20 +707,23 @@ const BasicInfo = (props) => {
         ? ""
         : "This field is required.");
 
-    // temp.sexPartnerHivPositive = tbScreening.sexPartnerHivPositive ? "" : "This field is required."
-    // {riskAssessmentPartner.sexPartnerHivPositive==='true' && (temp.newDiagnosedHivlastThreeMonths = tbScreening.newDiagnosedHivlastThreeMonths ? "" : "This field is required.")}
-    // {riskAssessmentPartner.sexPartnerHivPositive==='true' && (temp.currentlyArvForPmtct = tbScreening.currentlyArvForPmtct ? "" : "This field is required.")}
-    // {riskAssessmentPartner.sexPartnerHivPositive==='true' && ( temp.knowHivPositiveOnArv = tbScreening.knowHivPositiveOnArv ? "" : "This field is required.")}
-    // {riskAssessmentPartner.sexPartnerHivPositive==='true' && (temp.knowHivPositiveAfterLostToFollowUp = tbScreening.knowHivPositiveAfterLostToFollowUp ? "" : "This field is required.")}
-    // {riskAssessmentPartner.sexPartnerHivPositive==='true' && (temp.uprotectedAnalSex = tbScreening.uprotectedAnalSex ? "" : "This field is required.")}
-
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x === "");
   };
   const handleSubmit = (e) => {
     e.preventDefault();
+    let latestForm = getNextForm(
+      "Pre_Test_Counseling",
+      objValues.age,
+      modalityCheck,
+      "unknown"
+    );
     if (validate()) {
       setSaving(true);
+
+      riskAssessment.mlStatus = mlResultObj.status;
+      riskAssessment.mlScore = mlResultObj.score;
+
       objValues.htsClientId = clientId;
       objValues.knowledgeAssessment = knowledgeAssessment;
       objValues.personId = patientID;
@@ -480,12 +738,15 @@ const BasicInfo = (props) => {
         })
         .then((response) => {
           setSaving(false);
-          props.setPatientObj(response.data);
-          //toast.success("Risk Assesment successful");
-
-          if (modalityCheck == "fill") {
-            handleItemClick("hiv-test", "pre-test-counsel");
-          }
+          props.setPatientObj({
+            ...props.patientObj,
+            knowledgeAssessment: response.data.knowledgeAssessment,
+            riskAssessment: response.data.riskAssessment,
+            stiScreening: response.data.stiScreening,
+            tbScreening: response.data.tbScreening,
+            sexPartnerRiskAssessment: response.data.sexPartnerRiskAssessment,
+          });
+          handleItemClick(latestForm[0], latestForm[1]);
         })
         .catch((error) => {
           setSaving(false);
@@ -618,6 +879,7 @@ const BasicInfo = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.2rem",
                         }}
+                        disabled={true}
                       >
                         <option value={""}></option>
                         <option value="true">Yes</option>
@@ -775,23 +1037,7 @@ const BasicInfo = (props) => {
               </div>
               <hr />
               <br />
-              {savingResult ? (
-                <div
-                  style={{
-                    display: "block",
-                    width: 1000,
-                    padding: 10,
-                  }}
-                >
-                  <Spinner style={{ width: "2rem", height: "2rem" }} />
-                  <b style={{ color: "#992E62", fontSize: "14px" }}>
-                    {" "}
-                    <PanToolIcon /> requesting HTS ML predictions...
-                  </b>
-                </div>
-              ) : (
-                " "
-              )}
+
               {props.patientObj.targetGroup === "TARGET_GROUP_GEN_POP" && (
                 <>
                   <div
@@ -1710,6 +1956,45 @@ const BasicInfo = (props) => {
 
               <hr />
               <br />
+              {savingResult ? (
+                <div
+                  style={{
+                    display: "block",
+                    width: 1000,
+                    padding: 10,
+                  }}
+                >
+                  <Spinner style={{ width: "2rem", height: "2rem" }} />
+                  <b style={{ color: "#992E62", fontSize: "14px" }}>
+                    {" "}
+                    <PanToolIcon /> requesting HTS ML predictions...
+                  </b>
+                </div>
+              ) : (
+                " "
+              )}
+              {savingPrediction ? (
+                <Stack sx={{ width: "70%" }} spacing={2}>
+                  <Alert
+                    severity="info"
+                    style={{ fontSize: "16px", color: "000" }}
+                  >
+                    <b>ML Prediction Result for HTS Patient :</b>{" "}
+                    {predictionRanges(predictionValue[1])}
+                  </Alert>
+
+                  <Button
+                    content="Provide Feedback"
+                    style={{ backgroundColor: "#014d88", color: "#fff" }}
+                    onClick={toggleModal}
+                    disabled={savingFeedback ? true : false}
+                  />
+                  <br />
+                </Stack>
+              ) : (
+                ""
+              )}
+
               <div
                 className="form-group  col-md-12 text-center pt-2 mb-4"
                 style={{
@@ -1893,11 +2178,12 @@ const BasicInfo = (props) => {
               <div className="row">
                 <div className="form-group mb-3 col-md-12">
                   <Button
-                    content="Back"
-                    icon="left arrow"
+                    content="Check ML Prediction"
+                    icon="refresh"
                     labelPosition="left"
+                    disabled={mlresult ? true : false}
                     style={{ backgroundColor: "#992E62", color: "#fff" }}
-                    onClick={() => handleItemClick("basic", "basic")}
+                    onClick={postPredictions}
                   />
                   <Button
                     content="Save & Continue"
@@ -1913,6 +2199,14 @@ const BasicInfo = (props) => {
           </form>
         </CardBody>
       </Card>
+      <FeedbackModal
+        toggleModal={toggleModal}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        predictionValue={predictionValue[1]}
+        clientId={clientId}
+        setSavingFeedback={setSavingFeedback}
+      />
     </>
   );
 };
