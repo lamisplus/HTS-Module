@@ -15,6 +15,8 @@ import { Label as LabelRibbon, Button, Message } from "semantic-ui-react";
 // import 'semantic-ui-css/semantic.min.css';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import { getNextForm } from "../../../../utility";
+
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -93,7 +95,6 @@ const PostTest = (props) => {
     props.patientObj && props.patientObj ? props.patientObj.id : "";
   const [saving, setSaving] = useState(false);
 
-  console.log("data3", props.patientObj);
   ///const [errors, setErrors] = useState({});
   const [objValues, setObjValues] = useState({
     htsClientId: clientId,
@@ -129,60 +130,51 @@ const PostTest = (props) => {
     condomProvidedToClientCount: "",
     lubricantProvidedToClientCount: "",
   });
-  useEffect(() => {
-    setPostTest({
-      ...postTest,
-      ...props.patientObj.postTestCounselingKnowledgeAssessment,
-    });
 
+
+
+  useEffect(() => {
     if (
-      props.patientObj?.hivTestResult2?.length > 0 &&
-      props.patientObj.hivTestResult2 === "Positive"
+      props.patientObj &&
+      props.patientObj.postTestCounselingKnowledgeAssessment
     ) {
-      postTest.hivTestResult = "true";
-      setPostTest({ ...postTest, hivTestResult: "true" });
-    } else if (
-      props.patientObj?.hivTestResult2?.length > 0 &&
-      props.patientObj.hivTestResult2 === "Negative"
-    ) {
-      postTest.hivTestResult = "false";
-      setPostTest({ ...postTest, hivTestResult: "false" });
-    } else if (
-      props.patientObj?.hivTestResult?.length > 0 &&
-      props.patientObj.hivTestResult === "Positive"
-    ) {
-      postTest.hivTestResult = "true";
-      setPostTest({ ...postTest, hivTestResult: "true" });
-    } else if (
-      props.patientObj?.hivTestResult?.length > 0 &&
-      props.patientObj.hivTestResult === "Negative"
-    ) {
-      postTest.hivTestResult = "false";
-      setPostTest({ ...postTest, hivTestResult: "false" });
+      setPostTest(props.patientObj.postTestCounselingKnowledgeAssessment);
+    } else {
+      ///setPostTest(props.patientObj && props.patientObj.postTestCounselingKnowledgeAssessment!==null ? props.patientObj.postTestCounselingKnowledgeAssessment : {})
+      if (
+        postTest.hivTestResult === "" &&
+        props.patientObj.hivTestResult2 !== "" &&
+        props.patientObj.hivTestResult2 !== null &&
+        props.patientObj.hivTestResult2 === "Positive"
+      ) {
+        postTest.hivTestResult = "true";
+        setPostTest({ ...postTest, hivTestResult: "true" });
+      } else if (
+        postTest.hivTestResult === "" &&
+        props.patientObj.hivTestResult2 !== "" &&
+        props.patientObj.hivTestResult2 !== null &&
+        props.patientObj.hivTestResult2 === "Negative"
+      ) {
+        postTest.hivTestResult = "false";
+        setPostTest({ ...postTest, hivTestResult: "false" });
+      } else if (
+        postTest.hivTestResult === "" &&
+        props.patientObj.hivTestResult !== "" &&
+        props.patientObj.hivTestResult !== null &&
+        props.patientObj.hivTestResult === "Positive"
+      ) {
+        postTest.hivTestResult = "true";
+        setPostTest({ ...postTest, hivTestResult: "true" });
+      } else if (
+        postTest.hivTestResult === "" &&
+        props.patientObj.hivTestResult !== "" &&
+        props.patientObj.hivTestResult !== null &&
+        props.patientObj.hivTestResult === "Negative"
+      ) {
+        postTest.hivTestResult = "false";
+        setPostTest({ ...postTest, hivTestResult: "false" });
+      }
     }
-    // if(props.patientObj && props.patientObj.postTestCounselingKnowledgeAssessment){
-    //     setPostTest(props.patientObj.postTestCounselingKnowledgeAssessment)
-    // }else{
-    //     if (postTest.hivTestResult==="" && props.patientObj.hivTestResult2!==""
-    //     && props.patientObj.hivTestResult2!==null && props.patientObj.hivTestResult2==='Positive') {
-    //         postTest.hivTestResult='true'
-    //         setPostTest({...postTest, hivTestResult:'true' })
-    //     }else if (postTest.hivTestResult==="" && props.patientObj.hivTestResult2!==""
-    //     && props.patientObj.hivTestResult2!==null && props.patientObj.hivTestResult2==='Negative') {
-    //         postTest.hivTestResult='false'
-    //         setPostTest({...postTest, hivTestResult:'false' })
-    //     }
-    //     else if (postTest.hivTestResult==="" && props.patientObj.hivTestResult!==""
-    //     && props.patientObj.hivTestResult!==null && props.patientObj.hivTestResult==='Positive') {
-    //         postTest.hivTestResult='true'
-    //         setPostTest({...postTest, hivTestResult:'true' })
-    //     }
-    //     else if (postTest.hivTestResult==="" && props.patientObj.hivTestResult!==""
-    //     && props.patientObj.hivTestResult!==null && props.patientObj.hivTestResult==='Negative') {
-    //         postTest.hivTestResult='false'
-    //         setPostTest({...postTest, hivTestResult:'false' })
-    //     }
-    // }
   }, [props.patientObj, postTest.hivTestResult]);
   const handleInputChangePostTest = (e) => {
     //setErrors({...temp, [e.target.name]:""})
@@ -212,7 +204,13 @@ const PostTest = (props) => {
     e.preventDefault();
     //handleItemClick('recency-testing', 'post-test')
     // if(!(Object.values(postTest).every(x => x === ""))){
-
+    
+   let latestForm = getNextForm(
+     "Post_Test_Counseling",
+     props?.patientObj?.riskStratificationResponseDto?.age,
+     "",
+     props?.patientObj?.hivTestResult
+   );
     setSaving(true);
     objValues.htsClientId = props.patientObj.id;
     objValues.postTestCounselingKnowledgeAssessment = postTest;
@@ -227,17 +225,8 @@ const PostTest = (props) => {
         setSaving(false);
         props.setPatientObj(response.data);
         toast.success("Post test successful");
-        if (
-          postTest.hivTestResult === "true" &&
-          props.patientObj.riskStratificationResponseDto.age >= 15
-        ) {
-          handleItemClick("recency-testing", "post-test");
-        } else if (postTest.hivTestResult === "false") {
-          // history.push("/");
-          handleItemClick("client-referral", "post-test");
-        } else {
-          handleItemClick("client-referral", "post-test");
-        }
+         handleItemClick(latestForm[0], latestForm[1]);
+
         // handleItemClick("recency-testing", "post-test");
       })
       .catch((error) => {
@@ -259,7 +248,6 @@ const PostTest = (props) => {
     // }
   };
 
-  //console.log(postTest.hivTestResult)
 
   return (
     <>
@@ -729,13 +717,13 @@ const PostTest = (props) => {
               <br />
               <div className="row">
                 <div className="form-group mb-3 col-md-12">
-                  <Button
+                  {/* <Button
                     content="Back"
                     icon="left arrow"
                     labelPosition="left"
                     style={{ backgroundColor: "#992E62", color: "#fff" }}
                     onClick={() => handleItemClick("hiv-test", "hiv-test")}
-                  />
+                  /> */}
                   {/*{postTest.hivTestResult === "true" && (*/}
                   {/*  <Button*/}
                   {/*    content="Save & Continue"*/}

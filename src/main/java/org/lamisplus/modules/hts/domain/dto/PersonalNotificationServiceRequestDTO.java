@@ -39,5 +39,6 @@ public class PersonalNotificationServiceRequestDTO {
     private Object htsClientInformation;
     private LocalDate dateEnrollmentOnART;
     private String partnerId;
+    private String isHtsClient;
 
 }

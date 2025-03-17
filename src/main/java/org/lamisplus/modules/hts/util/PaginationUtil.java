@@ -17,9 +17,9 @@ public final class PaginationUtil {
 
     public static <T> HttpHeaders generatePaginationHttpHeaders(UriComponentsBuilder uriBuilder, Page<T> page) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("X-Total-Count", Long.toString(page.getTotalElements()));
+        headers.add(HEADER_X_TOTAL_COUNT, Long.toString(page.getTotalElements()));
         List<String> allowedHeaders = new ArrayList<>();
-        allowedHeaders.add("X-Total-Count");
+        allowedHeaders.add(HEADER_X_TOTAL_COUNT);
         headers.setAccessControlExposeHeaders(allowedHeaders);
         int pageNumber = page.getNumber();
         int pageSize = page.getSize();
@@ -38,7 +38,7 @@ public final class PaginationUtil {
     }
 
     private static String prepareLink(UriComponentsBuilder uriBuilder, int pageNumber, int pageSize, String relType) {
-        return MessageFormat.format("<{0}>; rel=\"{1}\"", preparePageUri(uriBuilder, pageNumber, pageSize), relType);
+        return MessageFormat.format(HEADER_LINK_FORMAT, preparePageUri(uriBuilder, pageNumber, pageSize), relType);
     }
 
     private static String preparePageUri(UriComponentsBuilder uriBuilder, int pageNumber, int pageSize) {

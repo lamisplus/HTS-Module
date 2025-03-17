@@ -12,6 +12,7 @@ import org.lamisplus.modules.hts.domain.entity.IndexElicitation;
 import org.lamisplus.modules.hts.domain.enums.Source;
 import org.lamisplus.modules.hts.repository.HtsClientRepository;
 import org.lamisplus.modules.hts.repository.IndexElicitationRepository;
+import org.lamisplus.modules.hts.util.Constants;
 import org.lamisplus.modules.patient.service.PersonService;
 import org.springframework.stereotype.Service;
 
@@ -131,6 +132,10 @@ public class IndexElicitationService {
             indexElicitation.setSexuallyUncomfortable(indexElicitationDto.getSexuallyUncomfortable());
             indexElicitation.setCurrentlyLiveWithPartner(indexElicitationDto.getCurrentlyLiveWithPartner());
             indexElicitation.setDatePartnerCameForTesting(indexElicitationDto.getDatePartnerCameForTesting());
+            indexElicitation.setLatitude(indexElicitationDto.getLatitude());
+            indexElicitation.setLongitude(indexElicitationDto.getLongitude());
+            String sourceSupport = indexElicitationDto.getSource() == null || indexElicitationDto.getSource().isEmpty() ? Constants.WEB_SOURCE : Constants.MOBILE_SOURCE;
+            indexElicitation.setSource(sourceSupport);
 
             indexElicitation.setOfferedIns(indexElicitationDto.getOfferedIns());
             indexElicitation.setAcceptedIns(indexElicitationDto.getAcceptedIns());
@@ -207,6 +212,8 @@ public class IndexElicitationService {
         indexElicitationResponseDto.setSexuallyUncomfortable( indexElicitation.getSexuallyUncomfortable() );
         indexElicitationResponseDto.setCurrentlyLiveWithPartner( indexElicitation.getCurrentlyLiveWithPartner() );
         indexElicitationResponseDto.setDatePartnerCameForTesting( indexElicitation.getDatePartnerCameForTesting() );
+        indexElicitationResponseDto.setLatitude(indexElicitation.getLatitude());
+        indexElicitationResponseDto.setLongitude(indexElicitation.getLongitude());
 
         indexElicitationResponseDto.setOfferedIns(indexElicitation.getOfferedIns() );
         indexElicitationResponseDto.setAcceptedIns( indexElicitation.getAcceptedIns() );

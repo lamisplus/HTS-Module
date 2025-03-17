@@ -108,7 +108,6 @@ const PartnerNotificationService = (props) => {
   const [selectedRecencyTest, setSelectedRecencyTest] = useState([]);
 
   let temp = { ...errors }
-  console.log("data1", props.patientObj)
   const [riskAssessmentPartner, setRiskAssessmentPartner] = useState(
     {
       sexPartnerHivPositive: "",
@@ -227,7 +226,6 @@ const PartnerNotificationService = (props) => {
       setStiScreening(props.patientObj.stiScreening && props.patientObj.stiScreening !== null ? props.patientObj.stiScreening : {})
       setTbScreening(props.patientObj.tbScreening && props.patientObj.tbScreening !== null ? props.patientObj.tbScreening : {})
       //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
-      //console.log(props.patientObj.riskStratificationResponseDto.riskAssessment)
       if (props.patientObj.riskStratificationResponseDto && Object.keys(props.patientObj.riskStratificationResponseDto.riskAssessment).length !== 0 && props.patientObj.riskAssessment === null) {
         //setRiskAssessment({...riskAssessment, ...props.patientObj.riskStratificationResponseDto.riskAssessment})
         props.patientObj.riskStratificationResponseDto.riskAssessment.whatWasTheResult !== "" && props.patientObj.riskStratificationResponseDto.riskAssessment.whatWasTheResult === 'Positive' ? knowledgeAssessment.previousTestedHIVNegative = 'false' :
@@ -295,7 +293,6 @@ const PartnerNotificationService = (props) => {
     if (e.target.value === 'false') {
       const newcount = tbCount - 1
       //settbCount(newcount)
-      //console.log(newcount)
       if (newcount <= 0) {
 
         settbCount(0)
@@ -362,7 +359,6 @@ const PartnerNotificationService = (props) => {
 
     }
   }
-  //console.log(riskAssessmentPartner)
 
   return (
     <>
@@ -451,7 +447,8 @@ const PartnerNotificationService = (props) => {
                     Date <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     // name="dateVisit"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -668,7 +665,8 @@ const PartnerNotificationService = (props) => {
                     date of index client HIV-positive test results
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="indexClientConfirmedHivPositiveDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -771,7 +769,8 @@ const PartnerNotificationService = (props) => {
                     date of treatemnt initiation
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="treatmentInitiationDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -901,7 +900,8 @@ const PartnerNotificationService = (props) => {
                     schedule visit date
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="scheduleVisitDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -927,7 +927,8 @@ const PartnerNotificationService = (props) => {
                     date visited
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="dateVisited"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -981,7 +982,8 @@ const PartnerNotificationService = (props) => {
                     date tested
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="dateTested"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1035,7 +1037,8 @@ const PartnerNotificationService = (props) => {
                     Date enrolled in OVC
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="ovcEnrolledDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1062,7 +1065,8 @@ const PartnerNotificationService = (props) => {
                     Date enrolled\ on ART
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="artEnrolledDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}

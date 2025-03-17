@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface PersonalNotificationServiceRepository extends JpaRepository<PersonalNotificationService, Long> {
 
     Optional<PersonalNotificationService> findByIdAndArchivedAndFacilityId(Long id, int archived, Long facilityId);
+    Optional<PersonalNotificationService> findByUuidAndArchived(String Uuid, Integer archived);
 
     List<PersonalNotificationService> findAllByHtsClient(HtsClient htsClient);
 

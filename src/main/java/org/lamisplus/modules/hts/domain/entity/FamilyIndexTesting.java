@@ -62,9 +62,6 @@ public class FamilyIndexTesting extends Audit implements Serializable {
     @JoinColumn(name = "hts_client_uuid", referencedColumnName = "uuid", insertable = false, updatable = false)
     private HtsClient htsClient;
 
-//    @ToString.Exclude
-//    @OneToMany(mappedBy = "familyIndexTesting", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<FamilyTestingTracker> familyTestingTrackers = new ArrayList<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "familyIndexTesting", cascade = CascadeType.ALL, orphanRemoval = true)

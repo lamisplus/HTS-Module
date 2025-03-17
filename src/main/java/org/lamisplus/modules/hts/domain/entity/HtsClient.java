@@ -37,7 +37,7 @@ import java.util.UUID;
         @TypeDef(name = "jsonb-node", typeClass = JsonNodeBinaryType.class),
         @TypeDef(name = "json-node", typeClass = JsonNodeStringType.class),
 })
-public class HtsClient extends Audit implements Serializable {
+public class HtsClient extends Audit<HtsClient> implements Serializable {
     @Id
     @Column(name = "id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,9 +47,6 @@ public class HtsClient extends Audit implements Serializable {
     @Column(name = "target_group")
     private String targetGroup;
 
-    /*@ManyToOne
-    @JoinColumn(name = "target_group", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet targetGroupCodeSet;*/
 
     @Basic
     @Column(name = "client_code")
@@ -68,19 +65,13 @@ public class HtsClient extends Audit implements Serializable {
     @Column(name = "referred_from")
     private Long referredFrom;
 
-    /*@ManyToOne
-    @JoinColumn(name = "referred_from", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet referredFromCodeSet;*/
+
 
     private String capturedBy;
 
     @Basic
     @Column(name = "testing_setting")
     private String testingSetting;
-
-    /*@ManyToOne
-    @JoinColumn(name = "testing_setting", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet testingSettingCodeSet;*/
 
     @Basic
     @Column(name = "first_time_visit")
@@ -95,9 +86,6 @@ public class HtsClient extends Audit implements Serializable {
     @Column(name = "type_counseling")
     private Long typeCounseling;
 
-    /*@ManyToOne
-    @JoinColumn(name = "type_counseling", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet typeCounselingCodeSet;*/
 
     @Basic
     @Column(name = "index_client")
@@ -111,9 +99,6 @@ public class HtsClient extends Audit implements Serializable {
     @Column(name = "facility_id")
     private Long facilityId;
 
-    /*@ManyToOne
-    @JoinColumn(name = "facility_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private OrganisationUnit facilityIdOrganisationUnit;*/
 
     @Type(type = "jsonb")
     @Basic(fetch = FetchType.LAZY)
@@ -132,25 +117,16 @@ public class HtsClient extends Audit implements Serializable {
     @JoinColumn(name = "person_uuid", referencedColumnName = "uuid", insertable = false, updatable = false)
     private Person person;
 
-    /*@ManyToOne
-    @JoinColumn(name = "pregnant", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet pregnantCodeSet;*/
 
     @Basic
     @Column(name = "pregnant")
     private Long pregnant;
 
-   /* @ManyToOne
-    @JoinColumn(name = "breast_feeding", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet breastFeedingCodeSet;*/
+
 
     @Basic
     @Column(name = "breast_feeding")
     private Boolean breastFeeding;
-
-    /*@ManyToOne
-    @JoinColumn(name = "relation_with_index_client", referencedColumnName = "id", insertable = false, updatable = false)
-    private ApplicationCodeSet relationWithIndexClientCodeSet;*/
 
     @Basic
     @Column(name = "relation_with_index_client")
@@ -307,6 +283,21 @@ public class HtsClient extends Audit implements Serializable {
     private String source;
     @Column(name = "comment")
     private String comment;
-    
+
+    @Basic
+    @Column(name = "longitude")
+    private String longitude;
+
+    @Basic
+    @Column(name = "latitude")
+    private  String latitude;
+
+    @Basic
+    @Column(name = "family_index")
+    private  String familyIndex;
+
+    @Basic
+    @Column(name ="partner_notification_service")
+    private String partnerNotificationService;
 
 }

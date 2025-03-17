@@ -3,6 +3,7 @@ package org.lamisplus.modules.hts.domain.dto;
 import lombok.*;
 import org.lamisplus.modules.patient.domain.dto.PersonResponseDto;
 
+import javax.persistence.Basic;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -38,4 +39,8 @@ public class IndexElicitationResponseDto {
     private String offeredIns;
     private String acceptedIns;
     private String source;
+    @Basic
+    private String longitude;
+    @Basic
+    private  String latitude;
 }

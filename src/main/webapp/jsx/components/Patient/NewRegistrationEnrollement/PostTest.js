@@ -17,6 +17,7 @@ import { Label as LabelRibbon, Button, Message } from "semantic-ui-react";
 // import 'semantic-ui-css/semantic.min.css';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import { getNextForm } from "../../../../utility";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -206,9 +207,16 @@ const PostTest = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+      let latestForm = getNextForm(
+        "Post_Test_Counseling",
+        props?.patientAge,
+        "",
+        props?.patientObj?.hivTestResult
+      );
+
     if (props.activePage.actionType === "view") {
       //e.preventDefault();
-      handleItemClick("recency-testing", "post-test");
+         handleItemClick(latestForm[0], latestForm[1]);
     }
     if (props.activePage.actionType === "update") {
       setSaving(true);
@@ -226,16 +234,8 @@ const PostTest = (props) => {
 
           props.setPatientObj(response.data);
           toast.success("Post Test Assesment successful");
-          if (
-            postTest.hivTestResult === "true" &&
-            props.patientObj.riskStratificationResponseDto.age >= 15
-          ) {
-            handleItemClick("recency-testing", "post-test");
-          } else if (postTest.hivTestResult === "false") {
-            handleItemClick("client-referral", "post-test");
-          } else {
-            handleItemClick("client-referral", "post-test");
-          }
+          handleItemClick(latestForm[0], latestForm[1]);
+
         })
         .catch((error) => {
           setSaving(false);
@@ -741,13 +741,13 @@ const PostTest = (props) => {
               <br />
               <div className="row">
                 <div className="form-group mb-3 col-md-12">
-                  <Button
+                  {/* <Button
                     content="Back"
                     icon="left arrow"
                     labelPosition="left"
                     style={{ backgroundColor: "#992E62", color: "#fff" }}
                     onClick={() => handleItemClick("hiv-test", "hiv-test")}
-                  />
+                  /> */}
 
                   {props.activePage.actionType === "update" && (
                     <Button

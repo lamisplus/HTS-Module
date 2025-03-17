@@ -25,7 +25,6 @@ import HIVSTPatientRegistration from "./HIVSTPatientRegistration";
 // import ReferralUnit from "../ContinuesHTSEnrollment/ClientReferral/ReferralUnit";
 
 const ExistenceClientHIVSTRegistration = (props) => {
-    // console.log("ExistenceClientHIVSTRegistration", props.patientObj)
     const location = useLocation();
     const locationState = location.state;
     const [activeItem, setactiveItem] = useState("reg");
@@ -39,7 +38,6 @@ const ExistenceClientHIVSTRegistration = (props) => {
         //setCompleted({...completed, ...completedMenu})
     };
 
-    // console.log("ExistenceClientHIVSTRegistration", locationState.patientObject)
     return (<>
         <ToastContainer autoClose={3000} hideProgressBar />
 

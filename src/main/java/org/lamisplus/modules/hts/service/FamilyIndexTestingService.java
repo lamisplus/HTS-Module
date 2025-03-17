@@ -16,6 +16,7 @@ import org.lamisplus.modules.hts.repository.FamilyIndexTestingRepository;
 import org.lamisplus.modules.hts.repository.FamilyTestingTrackerRepository;
 import org.lamisplus.modules.hts.repository.HtsClientRepository;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class FamilyIndexTestingService {
     private final FamilyIndexTestingRepository familyIndexTestingRepository;
     private final FamilyIndexRepository familyIndexRepository;
     private final FamilyTestingTrackerRepository familyTestingTrackerRepository;
+    private final  String successMessage = " deleted successfully"; 
 
     private HtsClient getHtsClient(Long htsClientId, String htsClientUuid) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
@@ -150,7 +152,9 @@ public class FamilyIndexTestingService {
                         BeanUtils.copyProperties(familyTestingTracker, familyTestingTrackerResponseDTO);
                         familyTestingTrackerResponseDTO.setFamilyIndexUuid(familyIndex.getUuid());
                         familyTestingTrackerResponseDTO.setFamilyIndex(familyIndex.getId());
+                        familyTestingTrackerResponseDTO.setFamilyIndex(familyIndex.getId());
                         familyTestingTrackerResponseDTOList.add(familyTestingTrackerResponseDTO);
+
                     }
                     newFam.setFamilyTestingTrackerResponseDTO(familyTestingTrackerResponseDTOList);
                 }
@@ -161,62 +165,6 @@ public class FamilyIndexTestingService {
         return responseDTO;
     }
 
-//    @Transactional
-//    public String updateFamilyIndexTesting(Long familyIndexId, FamilyIndexTestingResponseDTO reqDTO) {
-//        // Check if the family index testing exists
-//        if( this.getFamilyIndexTestingById(familyIndexId) == null ) {
-//            throw new EntityNotFoundException(FamilyIndexTesting.class, "id", familyIndexId + "");
-//        }
-//        FamilyIndexTesting existingFamilyIndexTesting = familyIndexTestingRepository.findByHtsClientIdAndArchived(reqDTO.getHtsClientId(), UN_ARCHIVED)
-//                .orElseThrow(() -> new EntityNotFoundException(FamilyIndexTesting.class, "HtsClientId", reqDTO.getHtsClientId() + ""));
-//        if (!Objects.equals(reqDTO.getHtsClientId(), existingFamilyIndexTesting.getHtsClientId())) {
-//            throw new IllegalArgumentException("Mix match of hts client id");
-//        }
-//        updateEntityFields(reqDTO, existingFamilyIndexTesting);
-//        familyIndexTestingRepository.save(existingFamilyIndexTesting);
-//
-//        updateFamilyIndices(reqDTO.getFamilyIndexList(), existingFamilyIndexTesting);
-////        updateFamilyTestingTrackers(reqDTO.getFamilyTestingTrackerResponseDTO(), existingFamilyIndexTesting);
-//        return "Family Index Testing updated successfully";
-//    }
-
-//    private void updateFamilyIndices(List<FamilyIndexResponseDTO> familyIndexList, FamilyIndexTesting existingFamilyIndexTesting) {
-//        if (familyIndexList != null && !familyIndexList.isEmpty()) {
-//            List<FamilyIndex> existingFamilyIndices = familyIndexRepository.findByFamilyIndexTestingUuid(existingFamilyIndexTesting.getUuid(), UN_ARCHIVED);
-//            Map<Long, FamilyIndexResponseDTO> familyIndexMap = familyIndexList.stream().collect(Collectors.toMap(FamilyIndexResponseDTO::getId, Function.identity()));
-//            // Iterate over existing family indices and update or delete them
-//            for (FamilyIndex familyIndex : existingFamilyIndices) {
-//                FamilyIndexResponseDTO familyIndexResponseDTO = familyIndexMap.get(familyIndex.getId());
-//                if (familyIndexResponseDTO == null) {
-//                    // Delete family index from the database if not found in the request
-//                    familyIndex.setArchived(1);
-//                    familyIndexRepository.save(familyIndex);
-//                } else {
-//                    // Update family index if found in the request
-//                    updateFamilyIndex(familyIndex, familyIndexResponseDTO);
-//                    familyIndexRepository.save(familyIndex);
-//
-//                    // Fetch and update associated FamilyTestingTracker entities
-//                    List<FamilyTestingTrackerResponseDTO> trackers = this.getFamilyTestingTrackerByFamilyIndexUuid(familyIndex.getUuid());
-//                    this.updateFamilyTestingTrackers(trackers, familyIndex);
-////                    for (FamilyTestingTracker tracker : trackers) {
-////                        // Update tracker properties here
-////                        FamilyTestingTrackerResponseDTO trackerResponseDTO = familyIndexResponseDTO.getFamilyTestingTrackerResponseDTO().stream()
-////                                .filter(t -> t.getId().equals(tracker.getId()))
-////                                .findFirst()
-////                                .orElse(null);
-////                        familyTestingTrackerRepository.save(tracker);
-////                    }
-//                }
-//            }
-//            // Add new family indices
-//            for (FamilyIndexResponseDTO familyIndexResponseDTO : familyIndexList) {
-//                if (StringUtils.isEmpty(familyIndexResponseDTO.getFamilyIndexTestingUuid())) {
-//                    addFamilyIndex(familyIndexResponseDTO, existingFamilyIndexTesting);
-//                }
-//            }
-//        }
-//    }
 
     private void updateFamilyIndex(FamilyIndex familyIndex, FamilyIndexResponseDTO familyIndexResponseDTO) {
         BeanUtils.copyProperties(familyIndexResponseDTO, familyIndex);
@@ -344,6 +292,7 @@ public class FamilyIndexTestingService {
         familyIndex.setFamilyIndexTesting(familyIndexTesting);
         familyIndex.setFamilyIndexTestingUuid(familyIndexTesting.getUuid());
         familyIndex.setIsDateOfBirthEstimated(familyIndexRequestDto.getIsDateOfBirthEstimated());
+        familyIndex.setIsHtsClient("No");
         familyIndex = familyIndexRepository.save(familyIndex);
 
         return familyIndex;
@@ -362,8 +311,9 @@ public class FamilyIndexTestingService {
     public void addFamilyIndexTracker(FamilyTestingTrackerRequestDTO req, FamilyIndex familyIndex) {
         if (req != null && familyIndex != null) {
             FamilyTestingTracker familyTestingTracker = new FamilyTestingTracker();
-            BeanUtils.copyProperties(req, familyTestingTracker); // moved this line up
+            BeanUtils.copyProperties(req, familyTestingTracker);
             familyTestingTracker.setFamilyIndex(familyIndex);
+            familyTestingTracker.setFamilyIndexTestingId(familyIndex.getFamilyIndexTesting().getId());
             familyTestingTracker.setFamilyIndexUuid(familyIndex.getUuid());
             familyTestingTrackerRepository.save(familyTestingTracker);
         } else {
@@ -375,7 +325,7 @@ public class FamilyIndexTestingService {
                 .orElseThrow(() -> new EntityNotFoundException(FamilyIndexTesting.class, "id", id + ""));
         familyIndexTesting.setArchived(1);
         familyIndexTestingRepository.save(familyIndexTesting);
-        return "Family Index Testing with the id " + id + " deleted successfully";
+        return "Family Index Testing with the id " + id + successMessage;
     }
 
     public FamilyIndex findFamilyIndexById(Long id) {
@@ -430,7 +380,7 @@ public class FamilyIndexTestingService {
         FamilyIndex familyIndex = findFamilyIndexById(id);
         familyIndex.setArchived(1);
         familyIndexRepository.save(familyIndex);
-        return "Family Index with the id " + id + " deleted successfully";
+        return "Family Index with the id " + id + successMessage;
     }
 
     public FamilyTestingTracker findFamilyTrackerById(Long id) {
@@ -453,6 +403,7 @@ public class FamilyIndexTestingService {
         BeanUtils.copyProperties(familyTestingTrackerRequestDTO, familyTestingTracker);
         familyTestingTracker.setFamilyIndexUuid(familyTestingTracker.getFamilyIndex().getUuid());
         familyTestingTracker.setFamilyIndex(familyTestingTracker.getFamilyIndex());
+        familyTestingTracker.setFamilyIndexTestingId(familyTestingTracker.getFamilyIndexTestingId());
         familyTestingTrackerRepository.save(familyTestingTracker);
         return convertFamilyTestingTrackerToResponseDTO(familyTestingTracker);
     }
@@ -461,7 +412,7 @@ public class FamilyIndexTestingService {
         FamilyTestingTracker familyTestingTracker = findFamilyTrackerById(id);
         familyTestingTracker.setArchived(1);
         familyTestingTrackerRepository.save(familyTestingTracker);
-        return "Family Testing Tracker with the id " + id + " deleted successfully";
+        return "Family Testing Tracker with the id " + id + successMessage;
     }
 
 
@@ -485,30 +436,6 @@ public class FamilyIndexTestingService {
         return familyTestingTrackerResponseDTO;
     }
 
-
-//    @Transactional
-//    public FamilyIndexResponseDTO updateFamilyIndex(Long familyIndexId, FamilyIndexResponseDTO reqDTO) {
-//        FamilyIndex existingFamilyIndex = familyIndexRepository.findById(familyIndexId)
-//                .orElseThrow(() -> new EntityNotFoundException(FamilyIndex.class, "id", familyIndexId + ""));
-//        // get the tracker that is associate with and update it
-//        List<FamilyTestingTracker> trackers = familyTestingTrackerRepository.findByFamilyIndexUuid(existingFamilyIndex.getUuid(), UN_ARCHIVED);
-//        // if trackers is not null or empty,
-//        if(trackers != null && !trackers.isEmpty()) {
-//            for (FamilyTestingTracker tracker : trackers) {
-//                FamilyTestingTrackerResponseDTO trackerResponseDTO = reqDTO.getFamilyTestingTrackerResponseDTO().stream()
-//                        .filter(t -> t.getId().equals(tracker.getId()))
-//                        .findFirst()
-//                        .orElse(null);
-//                if (trackerResponseDTO != null) {
-//                    updateFamilyTestingTracker(tracker, trackerResponseDTO);
-//                    familyTestingTrackerRepository.save(tracker);
-//                }
-//            }
-//        }
-//        updateFamilyIndex(existingFamilyIndex, reqDTO);
-//        familyIndexRepository.save(existingFamilyIndex);
-//        return convertFamilyIndexToResponseDTO(existingFamilyIndex);
-//    }
 
     @Transactional
     public FamilyIndexResponseDTO updateFamilyIndex(Long familyIndexId, FamilyIndexResponseDTO reqDTO) {
@@ -539,4 +466,137 @@ public class FamilyIndexTestingService {
         return convertFamilyIndexToResponseDTO(existingFamilyIndex);
     }
 
+    public FamilyTestingTrackerResponseDTO addFamilyTracker(FamilyTestingTrackerRequestDTO familyTestingTracker){
+        FamilyIndex existingFamilyIndex = familyIndexRepository.findById(familyTestingTracker.getFamilyIndexId())
+                .orElseThrow(() -> new EntityNotFoundException(FamilyIndex.class, "id", familyTestingTracker.getFamilyIndexId() + ""));
+        FamilyTestingTracker tracker = new FamilyTestingTracker();
+        BeanUtils.copyProperties(familyTestingTracker, tracker);
+        tracker.setFamilyIndex(existingFamilyIndex);
+        tracker.setFamilyIndexUuid(existingFamilyIndex.getUuid());
+        familyTestingTrackerRepository.save(tracker);
+
+        return convertFamilyTestingTrackerToResponseDTO(tracker);
+    }
+
+    public FamilyIndexResponseDTO updateSingleFamilyIndex(Long id, FamilyIndexResponseDTO req){
+        FamilyIndex existingFamilyIndex = familyIndexRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(FamilyIndex.class, "id", id + ""));
+        if (!req.getId().equals(id) && existingFamilyIndex == null ) {
+            throw new IllegalArgumentException("The provided id does not match any saved family index");
+        }
+        BeanUtils.copyProperties(req, existingFamilyIndex);
+        existingFamilyIndex.setId(existingFamilyIndex.getId());
+        existingFamilyIndex.setUuid(existingFamilyIndex.getUuid());
+        existingFamilyIndex.setFamilyIndexTestingUuid(existingFamilyIndex.getFamilyIndexTestingUuid());
+        familyIndexRepository.save(existingFamilyIndex);
+
+        return convertFamilyIndexToResponseDTO(existingFamilyIndex);
+    }
+
+    @Transactional
+    public String updateFamilyIndexTestingAndIndex(Long id, FamilyIndexTestingResponseDTO req) {
+        Optional<FamilyIndexTesting> found = familyIndexTestingRepository.findByIdAndArchived(id, UN_ARCHIVED);
+        if(!found.isPresent()){
+            throw new EntityNotFoundException(HtsClient.class, "htsClientId", "" + id);
+        }
+        if(!found.get().getId().equals(req.getId())){
+            throw new IllegalArgumentException("The provided id does not match any saved family index testing");
+        }
+
+        FamilyIndexTesting familyIndexTesting = found.get();
+        familyIndexTesting.setUuid(req.getUuid());
+        familyIndexTesting.setHtsClientUuid(req.getHtsClientUuid());
+        familyIndexTesting.setHtsClientId(req.getHtsClientId());
+        familyIndexTesting.setExtra(req.getExtra());
+        familyIndexTesting.setState(req.getState());
+        familyIndexTesting.setLga(req.getLga());
+        familyIndexTesting.setFacilityName(req.getFacilityName());
+        familyIndexTesting.setVisitDate(req.getVisitDate());
+        familyIndexTesting.setSetting(req.getSetting());
+        familyIndexTesting.setFamilyIndexClient(req.getFamilyIndexClient());
+        familyIndexTesting.setSex(req.getSex());
+        familyIndexTesting.setIndexClientId(req.getIndexClientId());
+        familyIndexTesting.setName(req.getName());
+        familyIndexTesting.setDateOfBirth(req.getDateOfBirth());
+        familyIndexTesting.setAge(req.getAge());
+        familyIndexTesting.setMaritalStatus(req.getMaritalStatus());
+        familyIndexTesting.setPhoneNumber(req.getPhoneNumber());
+        familyIndexTesting.setAlternatePhoneNumber(req.getAlternatePhoneNumber());
+        familyIndexTesting.setDateIndexClientConfirmedHivPositiveTestResult(req.getDateIndexClientConfirmedHivPositiveTestResult());
+        familyIndexTesting.setVirallyUnSuppressed(req.getVirallyUnSuppressed());
+        familyIndexTesting.setDateClientEnrolledOnTreatment(req.getDateClientEnrolledOnTreatment());
+        familyIndexTesting.setRecencyTesting(req.getRecencyTesting());
+        familyIndexTesting.setWillingToHaveChildrenTestedElseWhere(req.getWillingToHaveChildrenTestedElseWhere());
+
+        // Update familyIndexList
+        if (req.getFamilyIndexList() != null && !req.getFamilyIndexList().isEmpty()) {
+            req.getFamilyIndexList().forEach(familyIndex -> {
+                FamilyIndex existingFamilyIndex = familyIndexTesting.getFamilyIndices().stream()
+                        .filter(fi -> fi.getId().equals(familyIndex.getId()))
+                        .findFirst()
+                        .orElseGet(() -> new FamilyIndex());
+                existingFamilyIndex.setId(familyIndex.getId());
+                existingFamilyIndex.setUuid(familyIndex.getUuid());
+                existingFamilyIndex.setFamilyRelationship(familyIndex.getFamilyRelationship());
+                existingFamilyIndex.setStatusOfContact(familyIndex.getStatusOfContact());
+                existingFamilyIndex.setChildNumber(familyIndex.getChildNumber());
+                existingFamilyIndex.setOtherChildNumber(familyIndex.getOtherChildNumber());
+                existingFamilyIndex.setMotherDead(familyIndex.getMotherDead());
+                existingFamilyIndex.setUAN(familyIndex.getUAN());
+                existingFamilyIndex.setYearMotherDead(familyIndex.getYearMotherDead());
+                existingFamilyIndex.setFamilyIndexTestingUuid(familyIndex.getFamilyIndexTestingUuid());
+                existingFamilyIndex.setDateOfHts(familyIndex.getDateOfHts());
+                existingFamilyIndex.setDateOfBirth(familyIndex.getDateOfBirth());
+                existingFamilyIndex.setAge(familyIndex.getAge());
+                existingFamilyIndex.setFirstName(familyIndex.getFirstName());
+                existingFamilyIndex.setLastName(familyIndex.getLastName());
+                existingFamilyIndex.setMiddleName(familyIndex.getMiddleName());
+                existingFamilyIndex.setChildDead(familyIndex.getChildDead());
+                existingFamilyIndex.setYearChildDead(familyIndex.getYearChildDead());
+                existingFamilyIndex.setLiveWithParent(familyIndex.getLiveWithParent());
+                existingFamilyIndex.setIsDateOfBirthEstimated(familyIndex.getIsDateOfBirthEstimated());
+                familyIndexRepository.save(existingFamilyIndex);
+            });
+        }
+        familyIndexTestingRepository.save(familyIndexTesting);
+        return "Family Index Testing updated successfully";
+    }
+
+    public void updateIndexClientStatus(String uuid) {
+        if (!uuid.isEmpty()) {
+            Optional<FamilyIndex> existingFamilyIndex = familyIndexRepository.findByUuidAndArchived(uuid, 0);
+            if (existingFamilyIndex.isPresent()) {
+                FamilyIndex familyIndex = existingFamilyIndex.get();
+                familyIndex.setIsHtsClient("Yes");
+                familyIndexRepository.save(familyIndex);
+            }
+        }
+    }
+
+    public String getCurrentTreatmentAndDate(String personUuid) {
+
+        String Result = familyIndexRepository.getCurrentHIVByPersonUuid(personUuid);
+        System.out.println(Result);
+        if(Result != null) {
+            return Result;
+        }else{
+
+            return"";
+        }
+
+
+
+    }
+
+    public String getVirallySuppressedByPersonUuid(String personUuid) {
+        String Result =   familyIndexRepository.getVirallySuppressedByPersonUuid(personUuid);
+        if(Result != null) {
+            return Result;
+        }else{
+
+            return"";
+        }
+
+
+    }
 }

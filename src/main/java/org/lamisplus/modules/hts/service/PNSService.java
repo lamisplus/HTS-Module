@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.hts.domain.dto.PersonalNotificationServiceRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.PersonalNotificationServiceResponseDTO;
+import org.lamisplus.modules.hts.domain.entity.FamilyIndex;
 import org.lamisplus.modules.hts.domain.entity.HtsClient;
 import org.lamisplus.modules.hts.domain.entity.PersonalNotificationService;
 import org.lamisplus.modules.hts.repository.HtsClientRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.lamisplus.modules.base.util.Constants.ArchiveStatus.UN_ARCHIVED;
@@ -27,7 +29,7 @@ public class PNSService {
     private final PersonalNotificationServiceRepository personalNotificationServiceRepository;
     private final CurrentUserOrganizationService currentUserOrganizationService;
     private final PersonService personService;
-
+    private final  String clientID = "htsClientId"; 
     public PersonalNotificationServiceResponseDTO save(PersonalNotificationServiceRequestDTO req) {
         if(req == null) {
             throw new IllegalArgumentException("PersonalNotification request cannot be null");
@@ -35,7 +37,7 @@ public class PNSService {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
         HtsClient htsClient = htsClientRepository
                 .findByIdAndArchivedAndFacilityId(req.getHtsClientId(), UN_ARCHIVED, facilityId)
-                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, "htsClientId", "" + req.getHtsClientId()));
+                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, clientID, "" + req.getHtsClientId()));
         htsClient.setOfferedPns(req.getOfferedPns());
         htsClient.setAcceptedPns(req.getAcceptedPns());
         htsClientRepository.save(htsClient);
@@ -43,7 +45,6 @@ public class PNSService {
         // generate new partner id by concatenating the hts client id and the serial number of the pns
         res.setHtsClientUuid(htsClient.getUuid());
         res.setFacilityId(facilityId);
-//        res.setPartnerId(generatePartnerId(req.getHtsClientId(), htsClient.getClientCode()));
         PersonalNotificationService personalNotificationService = personalNotificationServiceRepository.save(res);
         return convertPnsToResponseDto(htsClient, personalNotificationService);
     }
@@ -57,7 +58,7 @@ public class PNSService {
 
         HtsClient htsClient = htsClientRepository
                 .findByIdAndArchivedAndFacilityId(htsClientId, UN_ARCHIVED, currentUserOrganizationService.getCurrentUserOrganization())
-                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, "htsClientId", "" + htsClientId));
+                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, clientID, "" + htsClientId));
         // Check if the retrieved HTS client matches the provided ID and client code
         if (!htsClient.getId().equals(htsClientId) || !htsClient.getClientCode().equals(clientCode)) {
             throw new IllegalArgumentException("HTS client ID or client code does not match the provided values");
@@ -95,7 +96,7 @@ public class PNSService {
     }
 
     public List<PersonalNotificationServiceResponseDTO> getAllPnsIndexClientByHtsClient(Long htsClientId) {
-        HtsClient htsClient = htsClientRepository.findById(htsClientId).orElseThrow(() -> new EntityNotFoundException(HtsClient.class, "htsClientId", "" + htsClientId));
+        HtsClient htsClient = htsClientRepository.findById(htsClientId).orElseThrow(() -> new EntityNotFoundException(HtsClient.class, clientID, "" + htsClientId));
         List<PersonalNotificationService> indesClientList = personalNotificationServiceRepository.findAllByHtsClient(htsClient);
         if(indesClientList.isEmpty()) {
                return new ArrayList<>();
@@ -142,7 +143,7 @@ public class PNSService {
         pnsDTO.setPartnerId(pns.getPartnerId());
         pnsDTO.setReasonForDecline(pns.getReasonForDecline());
         pnsDTO.setOtherReasonForDecline(pns.getOtherReasonForDecline());
-
+        pnsDTO.setIsHtsClient(pns.getIsHtsClient());
         return pnsDTO;
     }
 
@@ -171,6 +172,7 @@ public class PNSService {
         pns.setHtsClientInformation(req.getHtsClientInformation());
         pns.setPartnerId(req.getPartnerId());
         pns.setReasonForDecline(req.getReasonForDecline());
+        pns.setIsHtsClient("No");
         pns.setOtherReasonForDecline(req.getOtherReasonForDecline());
 
         return pns;
@@ -228,5 +230,22 @@ public class PNSService {
 
     public PersonalNotificationServiceResponseDTO getPnsIndexClientPartnerById(Long id) {
         return convertPnsToResponseDto(null, getPnsById(id));
+    }
+
+
+    public void updateIndexClientStatus(String uuid) {
+        System.out.println("inside updateIndexClientStatus");
+
+        System.out.println("uuid " + uuid);
+
+        if (!uuid.isEmpty()) {
+            Optional<PersonalNotificationService> pns = personalNotificationServiceRepository.findByUuidAndArchived(uuid, 0);
+            System.out.println(pns);
+            if (pns.isPresent()) {
+                PersonalNotificationService existingPns = pns.get();
+                existingPns.setIsHtsClient("Yes");
+                personalNotificationServiceRepository.save(existingPns);
+            }
+        }
     }
 }

@@ -15,10 +15,10 @@ public class FamilyIndexResponseDTO {
     private Long id;
     private String uuid;
     private String familyRelationship;
-//    private String familyIndexHivStatus;
     private String statusOfContact;
 
     private int childNumber;
+    private int otherChildNumber;
     private String motherDead;
     private String UAN;
     private LocalDate yearMotherDead;
@@ -35,4 +35,5 @@ public class FamilyIndexResponseDTO {
     private String liveWithParent;
     private List<FamilyTestingTrackerResponseDTO> familyTestingTrackerResponseDTO;
     private Boolean isDateOfBirthEstimated;
+    private String isHtsClient;
 }

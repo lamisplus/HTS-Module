@@ -573,7 +573,8 @@ const BasicInfo = (props) => {
                                 <FormGroup>
                                 <Label for="">Visit Date  </Label>
                                 <Input
-                                    type="date"
+                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                     name="visitDate"
                                     id="visitDate"
                                     value={objValues.visitDate}
@@ -649,7 +650,8 @@ const BasicInfo = (props) => {
                                     <Label>Date</Label>
                                     <input
                                         className="form-control"
-                                        type="date"
+                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                         name="dob"
                                         id="dob"
                                         min={objValues.dateVisit}

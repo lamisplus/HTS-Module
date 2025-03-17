@@ -14,5 +14,7 @@ public interface HtsPerson {
     String getGender();
     LocalDate getDateOfBirth();
     String getClientCode();
+    String getPersonUuid();
+
     Integer getHtsCount();
 }

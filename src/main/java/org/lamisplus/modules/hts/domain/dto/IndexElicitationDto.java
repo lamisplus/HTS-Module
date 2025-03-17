@@ -4,7 +4,6 @@ import lombok.*;
 import org.lamisplus.modules.hts.domain.enums.Source;
 
 import javax.persistence.Basic;
-import javax.persistence.Column;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -38,4 +37,8 @@ public class IndexElicitationDto {
     private String acceptedIns;
     private String source = Source.Web.toString();
     private  String uuid;
+    @Basic
+    private String longitude;
+    @Basic
+    private  String latitude;
 }

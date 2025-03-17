@@ -157,6 +157,10 @@ public class PersonalNotificationService extends Audit implements Serializable {
     @Column(name = "hts_client_information", columnDefinition = "jsonb")
     private Object htsClientInformation;
 
+    @Basic
+    @Column(name="is_htsclient")
+    private String isHtsClient;
+
     @PrePersist
     public void setFields(){
         if(StringUtils.isEmpty(uuid)){

@@ -50,14 +50,10 @@ const styles = (theme) => ({
 });
 
 function PatientCard(props) {
-  let history = useHistory();
-  const [activePage, setActivePage] = useState({
-    activePage: "home",
-    activeObject: {},
-    actionType: "",
-  });
   const { classes } = props;
-  useEffect(() => {}, [activePage]);
+  let history = useHistory();
+
+
   const patientObject =
     history.location && history.location.state
       ? history.location.state.patientObject
@@ -66,16 +62,25 @@ function PatientCard(props) {
     history.location && history.location.state
       ? history.location.state.patientObj
       : {};
+
+   
   const clientCode =
     history.location && history.location.state
       ? history.location.state.clientCode
       : "";
 
+
+      const [personInfo, setPersonInfo]=useState({})
+  const [activePage, setActivePage] = useState({
+    activePage: "home",
+    activeObject: {},
+    actionType: "",
+  });
+  useEffect(() => {}, [activePage]);
   const patientAge = calculate_age(
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
 
- 
   return (
     <div className={classes.root}>
       <div
@@ -97,15 +102,26 @@ function PatientCard(props) {
             patientObj={patientObj}
             clientCode={clientCode}
             patientObject={patientObject}
+            setPersonInfo={setPersonInfo}
           />
           {activePage.activePage === "home" && (
             <PatientHistory
               patientObj={patientObj}
-              activePage={activePage}
+              activePage={
+                history?.location?.state?.activepage
+                  ? history?.location?.state?.activepage
+                  : "home"
+              }
+              checkedInPatient={
+                history?.location?.state?.checkedInPatient
+                  ? history?.location?.state?.checkedInPatient
+                  : ""
+              }
               setActivePage={setActivePage}
               clientCode={clientCode}
-              patientAge={patientAge}
+              patientAge={patientObj.age}
               patientObject={patientObject}
+              personInfo={personInfo}
             />
           )}
           {activePage.activePage === "view" && (
@@ -114,10 +130,11 @@ function PatientCard(props) {
               activePage={activePage}
               setActivePage={setActivePage}
               clientCode={clientCode}
-              patientAge={patientAge}
+              patientAge={patientObj.age}
               patientObject={patientObject}
             />
           )}
+
           {activePage.activePage === "hivst_view" && (
             <ViewEditHivst
               patientObj={patientObj}

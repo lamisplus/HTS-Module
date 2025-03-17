@@ -46,10 +46,7 @@ public class HivstController {
         return hivstService.getAllHivstByPatientId(patientId);
     }
 
-//    @PutMapping("/{id}")
-//    public HivstDto updateHivst(@RequestBody HivstDto hivstDto, Long id) {
-//        return hivstService.updateHivst(hivstDto, id);
-//    }
+
 
     @PutMapping("/{id}")
     public List<HivstDto> updateHivst(@RequestBody HivstDto hivstDto, @PathVariable Long id) {

@@ -117,6 +117,7 @@ const FamilyIndexHistory = (props) => {
       .then((response) => {
         if (response.data) {
           setFamilyIndexList([response.data]);
+          getListOfFamliyIndices(response.data.uuid);
           props.handleItemClick("fit-history");
         } else {
           setFamilyIndexList([]);
@@ -127,14 +128,79 @@ const FamilyIndexHistory = (props) => {
       });
   };
 
+  const convertRelationship = (relationship) => {
+    if (relationship === "FAMILY_RELATIONSHIP_FATHER") {
+      return "Father";
+    } else if (relationship === "FAMILY_RELATIONSHIP_MOTHER") {
+      return "Mother";
+    } else if (relationship === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD") {
+      return "Child";
+    } else {
+      return relationship;
+    }
+  };
+
+  const getListOfFamliyIndices = (uuid) => {
+    axios
+      .get(
+        `${baseUrl}hts-family-index-testing/family-index?familyIndexTestingUuid=${uuid}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then((response) => {
+        if (response.data) {
+          setFamilyIndexList(response.data);
+          props.handleItemClick("fit-history");
+        } else {
+          setFamilyIndexList([]);
+        }
+      })
+      .catch((e) => {
+        // console.log("Fetch Facilities error" + e);
+      });
+  };
+  const enrollEllicitedPatient = (row, actionType) => {
+    console.log(row);
+    let obj = {
+      uuid: row.uuid,
+      type: "family",
+      clientCode: props?.patientObj?.clientCode,
+    };
+    localStorage.setItem("index", JSON.stringify(obj));
+
+
+
+    if(history.location.pathname === "/register-patient"){
+
+      props.clearInfo()
+ 
+      props.handleItemClick("risk")
+ 
+    }else{
+      history.push("/register-patient");
+    }
+
+
+
+  };
   useEffect(() => {
     getListoFFamilyIndexInfo();
   }, [props.patientObj]);
 
   const LoadViewPage = (row, actionType) => {
+    console.log(row);
+    console.log(props);
+
     props.handleItemClick("view-fit");
+    props.setSelectedRow(row);
     props.setAction(actionType);
   };
+
+
+
 
   const LoadModal = (row) => {
     toggle();
@@ -144,9 +210,12 @@ const FamilyIndexHistory = (props) => {
     // setSaving(true);
     //props.setActiveContent({...props.activeContent, route:'mental-health-view', id:row.id})
     axios
-      .delete(`${baseUrl}hts-family-index-testing/${recordSelected.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .delete(
+        `${baseUrl}hts-family-index-testing/family-index/${recordSelected.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
         toast.success("Record Deleted Successfully");
         getListoFFamilyIndexInfo();
@@ -172,7 +241,7 @@ const FamilyIndexHistory = (props) => {
       <div>
         <div className="form-group mb-3 col-md-12">
           {console.log(familyIndexList)}
-          {familyIndexList.length < 1 && (
+          {
             <Button
               content="Add New form"
               icon="left add"
@@ -180,7 +249,7 @@ const FamilyIndexHistory = (props) => {
               style={{ backgroundColor: "#992E62", color: "#fff" }}
               onClick={() => props.handleItemClick("fit")}
             />
-          )}
+          }
           {/* <Button
             content="Done"
             icon="list"
@@ -193,20 +262,18 @@ const FamilyIndexHistory = (props) => {
           icons={tableIcons}
           // title=''
           columns={[
-            // { title: "HTS ID", field: "id" },
-            { title: "Family Index Client", field: "date" },
-            { title: "Date of Birth", field: "pre" },
-            { title: "Recency Test", field: "rencency" },
+            { title: "ID", field: "id" },
+            { title: "Date Of Birth", field: "date" },
+            { title: "family Relationship", field: "familyRelationship" },
             // { title: "Index Notification", field: "indexNotifiation", filtering: false },
 
             { title: "Actions", field: "actions", filtering: false },
           ]}
           isLoading={props.loading}
           data={familyIndexList.map((row) => ({
-            // id: row.id,
-            date: row.indexClientId,
-            pre: row.dateOfBirth,
-            rencency: row.recencyTesting,
+            id: row.id,
+            date: row.dateOfBirth,
+            familyRelationship: convertRelationship(row.familyRelationship),
 
             //indexNotifiation:row.indexNotificationServicesElicitation ? "Filled":"Not Filled ",
 
@@ -214,35 +281,49 @@ const FamilyIndexHistory = (props) => {
               <div>
                 <Menu.Menu position="right">
                   <Menu.Item>
-                    {/* <Button
-                    style={{ backgroundColor: "rgb(153,46,98)" }}
-                    primary
-                    onClick={(e) => {
-                      e.preventDefault();
-                    }}
-                  > */}
-                    <Dropdown item text="Action">
-                      <Dropdown.Menu style={{ marginTop: "10px" }}>
-                        <Dropdown.Item
-                          onClick={() => LoadViewPage(row, "view")}
-                        >
-                          {" "}
-                          <Icon name="eye" />
-                          View
-                        </Dropdown.Item>
-                        <Dropdown.Item
-                          onClick={() => LoadViewPage(row, "update")}
-                        >
-                          <Icon name="edit" />
-                          Edit
-                        </Dropdown.Item>
-                        <Dropdown.Item onClick={() => LoadModal(row)}>
-                          <Icon name="delete" />
-                          Delete
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                    {/* </Button> */}
+                    <div
+                      style={{
+                        backgroundColor: "rgb(153,46,98)",
+                        color: "white",
+                        borderRadius: "5px",
+                        width: "100px",
+                      }}
+                      primary
+                      className="px-3 py-2"
+                    >
+                      <Dropdown item text="Action">
+                        <Dropdown.Menu style={{ marginTop: "10px" }}>
+                        {row?.isHtsClient === "No"&&  
+                        <>
+                        <Dropdown.Item onClick={() =>
+                              enrollEllicitedPatient(row, "enroll")
+                            }>       
+                               <Icon name="save" />
+  
+                              Enroll
+                          </Dropdown.Item>
+                          
+                          </>}
+                          <Dropdown.Item
+                            onClick={() => LoadViewPage(row, "view")}
+                          >
+                            {" "}
+                            <Icon name="eye" />
+                            View
+                          </Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() => LoadViewPage(row, "update")}
+                          >
+                            <Icon name="edit" />
+                            Edit
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => LoadModal(row)}>
+                            <Icon name="delete" />
+                            Delete
+                          </Dropdown.Item>
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </div>
                   </Menu.Item>
                 </Menu.Menu>
               </div>

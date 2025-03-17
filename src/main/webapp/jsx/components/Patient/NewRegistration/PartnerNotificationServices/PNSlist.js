@@ -4,6 +4,8 @@ import axios from "axios";
 import { url as baseUrl, token } from "./../../../../../api";
 //import { token as token } from "./../../../api";
 import { forwardRef } from "react";
+import { useHistory } from "react-router-dom";
+
 import "semantic-ui-css/semantic.min.css";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
@@ -99,6 +101,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PNSList = (props) => {
+  let history = useHistory();
   const [indexClientList, setIndexClientList] = useState([]);
   const [recordSelected, setRecordSelected] = useState({});
 
@@ -139,6 +142,17 @@ const PNSList = (props) => {
   const LoadModal = (row) => {
     toggle();
     setRecordSelected(row);
+  };
+
+  const enrollEllicitedPatient = (row, actionType) => {
+    console.log(row);
+    let obj = {
+      uuid: row.uuid,
+      type: "partner",
+      clientCode: props?.patientObj?.clientCode,
+    };
+    localStorage.setItem("index", JSON.stringify(obj));
+    history.push("/register-patient");
   };
   const LoadDeletePage = (row) => {
     // setSaving(true);
@@ -223,6 +237,18 @@ const PNSList = (props) => {
                           }}
                         >
                           <Dropdown.Menu style={{ marginTop: "10px" }}>
+                            {row?.isHtsClient === "No"  && 
+                         <Dropdown.Item
+                            onClick={() =>
+                              enrollEllicitedPatient(row, "enroll")
+                            }
+                          >
+                            {" "}
+                            <Icon name="save" />
+                            Enroll
+                          </Dropdown.Item>}
+                           
+                           
                             <Dropdown.Item
                               onClick={(e) => LoadViewPage(row, "view")}
                             >

@@ -689,7 +689,8 @@ const RefferralUnit = (props) => {
                       Date <span style={{color: "red"}}> *</span>{" "}
                     </Label>
                     <Input
-                        type="date"
+                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="dateVisit"
                         id="dateVisit"
                         value={payload.dateVisit}
@@ -1061,7 +1062,8 @@ const RefferralUnit = (props) => {
                     </Label>
                     <input
                         className="form-control"
-                        type="date"
+                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                         name="dob"
                         id="dob"
                         min="1929-12-31"

@@ -2,10 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "semantic-ui-react";
 import { Card, CardBody } from "reactstrap";
 import { makeStyles } from "@material-ui/core/styles";
+import { useLocation } from "react-router-dom";
+
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { getCheckModality } from "../../../utility";
 //import {TiArrowBack} from 'react-icons/ti'
 //import {token, url as baseUrl } from "../../../api";
@@ -33,6 +35,9 @@ import FamilyIndexHistory from "./NewRegistration/PartnerNotificationServices/Fa
 import FamilyIndexTestingForm from "./NewRegistration/FamilyIndexTestingForm";
 import axios from "axios";
 import { token, url as baseUrl } from "../../../api";
+import { getPreviousForm, getCurentForm } from "../../../utility";
+import { calculate_age } from "../utils";
+
 
 const useStyles = makeStyles((theme) => ({
   error: {
@@ -47,6 +52,10 @@ const useStyles = makeStyles((theme) => ({
 
 const UserRegistration = (props) => {
   const classes = useStyles();
+  const history = useHistory();
+  const location = useLocation();
+
+  const locationState = location.state;
   const [activeItem, setactiveItem] = useState("basic");
   const [completed, setCompleted] = useState([]);
   const [hideOtherMenu, setHideOtherMenu] = useState(true);
@@ -61,7 +70,13 @@ const UserRegistration = (props) => {
     familyIndexTesting: "",
     pns: "",
   });
-    const [modalityCheck, setModalityCheck] = useState("");
+  const [showBackButton, setShowBackButton] = useState(true);
+
+  const [modalityCheck, setModalityCheck] = useState("");
+  const [permissions, setPermission] = useState(
+    JSON.parse(localStorage.getItem("stringifiedPermmision"))
+  );
+  const [selectedRow, setSelectedRow] = useState({});
 
   const [basicInfo, setBasicInfo] = useState({});
   const [organizationInfo, setOrganizationInfo] = useState({});
@@ -87,17 +102,50 @@ const UserRegistration = (props) => {
     });
   };
 
+  const getPrevForm=(e)=>{
+          if( activeItem === "risk"){
+            history.push("/");
 
-  useEffect(( ) => {
+          }else{
+            e.preventDefault()
+          let currentForm =   getCurentForm(activeItem)
+
+            let age = calculate_age(
+              basicInfo?.personResponseDto?.dateOfBirth
+                ? basicInfo?.personResponseDto?.dateOfBirth
+                : patientObj?.personResponseDto?.dateOfBirth
+            );
+            let checkModality = patientObj?.riskStratificationResponseDto?.testingSetting? patientObj.riskStratificationResponseDto.testingSetting: "";
+            let isPMTCTModality =getCheckModality(checkModality)
+          
 
 
+
+            let hivStatus = patientObj?.hivTestResult;
+          let answer =  getPreviousForm(currentForm, age, isPMTCTModality, hivStatus); 
+          if (answer[0]  && answer[1]) {
+            if(answer[0] === "fit"){
+              handleItemClick("fit-history");
+
+            }else if(answer[0] === "pns"){
+
+              handleItemClick("pns-history");
+
+            }else{
+              handleItemClick(answer[0]);
+
+            }
+          }else{
+          history.push("/");
+
+          }
+}
+  } 
+  useEffect(() => {
     setModalityCheck(
-      getCheckModality(patientObj?.riskStratificationResponseDto?.modality)
+      getCheckModality(patientObj?.riskStratificationResponseDto?.testingSetting)
     );
-
-
   }, [patientObj]);
-  console.log(familyIndexList);
   return (
     <>
       <ToastContainer autoClose={3000} hideProgressBar />
@@ -109,16 +157,21 @@ const UserRegistration = (props) => {
               <h3>
                 HIV COUNSELLING AND TESTING -{" "}
                 {patientObj && patientObj.dateVisit ? patientObj.dateVisit : ""}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  className=" float-end"
-                  //startIcon={<FaUserPlus size="10"/>}
-                  style={{ backgroundColor: "#014d88" }}
-                  onClick={LoadViewPage}
-                >
-                  <span style={{ textTransform: "capitalize" }}>Back</span>
-                </Button>
+                {showBackButton &&  <div>
+                    {/* <Link to={"/"}> */}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      className=" float-end"
+                      //startIcon={<FaUserPlus size="10"/>}
+                      onClick={getPrevForm}
+                      style={{ backgroundColor: "#014d88" }}
+                    >
+                      <span style={{ textTransform: "capitalize" }}>Back</span>
+                    </Button>
+                    {/* </Link> */}
+                  </div>}
+            
               </h3>
               <br />
               <br />
@@ -182,24 +235,26 @@ const UserRegistration = (props) => {
                       </span>
                     </Menu.Item>
                   )}
-
-                  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "hiv-test"}
-                    onClick={() => handleItemClick("hiv-test")}
-                    style={{
-                      backgroundColor: activeItem === "hiv-test" ? "#000" : "",
-                    }}
-                    //disabled={activeItem !== 'hiv-test' ? true : false}
-                  >
-                    <span style={{ color: "#fff" }}>
-                      Request {"&"} Result Form
-                      {completed.includes("hiv-test") && (
-                        <Icon name="check" color="green" />
-                      )}
-                    </span>
-                    {/* <Label color='teal'>3</Label> */}
-                  </Menu.Item>
+                  {permissions.includes("Request_and_Result_Form") && (
+                    <Menu.Item
+                      name="inbox"
+                      active={activeItem === "hiv-test"}
+                      onClick={() => handleItemClick("hiv-test")}
+                      style={{
+                        backgroundColor:
+                          activeItem === "hiv-test" ? "#000" : "",
+                      }}
+                      //disabled={activeItem !== 'hiv-test' ? true : false}
+                    >
+                      <span style={{ color: "#fff" }}>
+                        Request {"&"} Result Form
+                        {completed.includes("hiv-test") && (
+                          <Icon name="check" color="green" />
+                        )}
+                      </span>
+                      {/* <Label color='teal'>3</Label> */}
+                    </Menu.Item>
+                  )}
                   <Menu.Item
                     name="spam"
                     active={activeItem === "post-test"}
@@ -295,6 +350,28 @@ const UserRegistration = (props) => {
                     </span>
                   </Menu.Item>}  */}
 
+                  {permissions.includes("Nigeria_PNS_Form") &&
+                    patientObj.hivTestResult &&
+                    patientObj.hivTestResult.toLowerCase() === "positive" && (
+                      <Menu.Item
+                        name="inbox"
+                        active={activeItem === "fit-history"}
+                        onClick={() => handleItemClick("fit-history")}
+                        style={{
+                          backgroundColor:
+                            activeItem === "fit-history" ? "#000" : "",
+                        }}
+                      >
+                        <span style={{ color: "#fff" }}>
+                          {" "}
+                          Family Index Testing form
+                          {completed.includes("fit") && (
+                            <Icon name="check" color="green" />
+                          )}
+                        </span>
+                      </Menu.Item>
+                    )}
+
                   {patientObj.hivTestResult &&
                     patientObj.hivTestResult.toLowerCase() === "positive" && (
                       <Menu.Item
@@ -315,23 +392,25 @@ const UserRegistration = (props) => {
                         </span>
                       </Menu.Item>
                     )}
-                  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "refferal-history"}
-                    onClick={() => handleItemClick("refferal-history")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "refferal-history" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>
-                      {" "}
-                      Client Referral Service
-                      {completed.includes("refferal") && (
-                        <Icon name="check" color="green" />
-                      )}
-                    </span>
-                  </Menu.Item>
+                  {permissions.includes("Referral_Form") && (
+                    <Menu.Item
+                      name="inbox"
+                      active={activeItem === "refferal-history"}
+                      onClick={() => handleItemClick("refferal-history")}
+                      style={{
+                        backgroundColor:
+                          activeItem === "refferal-history" ? "#000" : "",
+                      }}
+                    >
+                      <span style={{ color: "#fff" }}>
+                        {" "}
+                        Client Referral Service
+                        {completed.includes("refferal") && (
+                          <Icon name="check" color="green" />
+                        )}
+                      </span>
+                    </Menu.Item>
+                  )}
                 </Menu>
               </div>
 
@@ -354,6 +433,8 @@ const UserRegistration = (props) => {
                     setExtra={setExtra}
                     extra={extra}
                     activePage={props.activePage}
+                    patientObject={locationState.patientObject}
+
                     setActivePage={props.setActivePage}
                     patientAge={props.patientAge}
                     setOrganizationInfo={setOrganizationInfo}
@@ -506,6 +587,8 @@ const UserRegistration = (props) => {
                     organizationInfo={organizationInfo}
                     addNewForm={false}
                     row={row}
+                    setRow={setRow}
+                    selectedRow={selectedRow}
                   />
                 )}
 
@@ -521,7 +604,9 @@ const UserRegistration = (props) => {
                     basicInfo={basicInfo}
                     organizationInfo={organizationInfo}
                     addNewForm={false}
-                    row={row}
+                    selectedRow={selectedRow}
+                    setSelectedRow={setSelectedRow}
+                    // row={row}
                     setAction={setAction}
                   />
                 )}
@@ -569,6 +654,8 @@ const UserRegistration = (props) => {
                     activePage={props.activePage}
                     setActivePage={props.setActivePage}
                     setRow={setRow}
+                    status={"existing"}
+
                   />
                 )}
                 {activeItem === "client-referral" && (

@@ -103,7 +103,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const HIVSTPatientRegistration = (props) => {
-    // // console.log(props.patientObject)
     const patient = props.patientObject;
     const [saving, setSaving] = useState(false)
     const classes = useStyles();
@@ -199,7 +198,6 @@ const HIVSTPatientRegistration = (props) => {
     );
 
 
-     console.log("Selected Options", selectedUsers);
     const options = [
         {value: 'myself', label: 'For myself'},
         {value: 'spouse', label: 'Spouse'},
@@ -230,7 +228,6 @@ const HIVSTPatientRegistration = (props) => {
                         }
                     });
                     setServiceNeeded(serviceNeeded);
-                    // // console.log("serviceNeeded", serviceNeeded)
                 }
             })
             .catch((e) => {
@@ -238,8 +235,6 @@ const HIVSTPatientRegistration = (props) => {
             });
     };
 
-    // // console.log("selectedUsers", selectedUsers);
-    // // console.log("showUserInfo", showUserInfo);
     useEffect(() => {
         SERVICE_NEEDED();
     }, []);
@@ -263,7 +258,7 @@ const HIVSTPatientRegistration = (props) => {
         if(selectedUsers.length === 0) {
             temp.selectedUsers =   objValues.testKitUsers ? "" : "Please select at least one user"
         }
-        console.log("temp", temp);
+    
         setErrors({ ...temp });
         return Object.values(temp).every((x) => x == "");
     }
@@ -548,7 +543,6 @@ const HIVSTPatientRegistration = (props) => {
         setObjValues({...objValues, testKitUserDetails: []});
     };
 
-    // // console.log("Obj", objValues)
 
     const handleKitSelectUserChange = selectedUsers => {
         // if (objValues.userType === "Secondary User") {
@@ -589,13 +583,12 @@ const HIVSTPatientRegistration = (props) => {
         if (e.target.name === "serialNumber") {
             code = createdCode + e.target.value;
             setCreatedCode(code);
-            // // console.log("Code created is &&&& ", createdCode);
+         
             setObjValues({...objValues, clientCode: code});
         }
 
         async function getIndexClientCode() {
             const indexClientCode = objValues.clientCode;
-            // // console.log(indexClientCode);
             const response = await axios.get(
                 `${baseUrl}hts/client/${indexClientCode}`,
                 {
@@ -669,8 +662,7 @@ const HIVSTPatientRegistration = (props) => {
         setUserInformation(newUserInformation);
     }
 
-    console.log("userInformationList :",  userInformationList )
-    console.log("saviing :",  saving )
+
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -759,10 +751,7 @@ const HIVSTPatientRegistration = (props) => {
         }
     };
 
-    // console.log("selectedUsers", selectedUsers)
-   console.log("objValues", objValues)
-   console.log("testKitUserDetails", testKitUserDetails)
-   console.log("userInformationList", userInformationList)
+
 
 
     return (
@@ -779,7 +768,8 @@ const HIVSTPatientRegistration = (props) => {
                                         Visit Date <span style={{color: "red"}}> *</span>
                                     </Label>
                                     <Input
-                                        type="date"
+                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                         name="dateOfVisit"
                                         id="dateOfVisit"
                                         value={objValues.dateOfVisit}
@@ -1100,7 +1090,8 @@ const HIVSTPatientRegistration = (props) => {
                                         Expiry Date <span style={{color: "red"}}> *</span>
                                     </Label>
                                     <Input
-                                        type="date"
+                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                         name="expiryDate"
                                         id="expirtyDate"
                                         value={objValues.expiryDate}
@@ -1242,7 +1233,8 @@ const HIVSTPatientRegistration = (props) => {
                                                     {/*<span style={{color: "red"}}> *</span>*/}
                                                 </Label>
                                                 <Input
-                                                    type="date"
+                                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                     name="dateOfRegistration"
                                                     id="dateOfRegistration"
                                                     min="1929-12-31"
@@ -1469,7 +1461,8 @@ const HIVSTPatientRegistration = (props) => {
                                                 </Label>
                                                 <input
                                                     className="form-control"
-                                                    type="date"
+                                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                     name="dob"
                                                     id="dob"
                                                     min="1929-12-31"
@@ -1904,7 +1897,8 @@ const HIVSTPatientRegistration = (props) => {
                                                                         {/*<span style={{color: "red"}}> *</span>*/}
                                                                     </Label>
                                                                     <Input
-                                                                        type="date"
+                                                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                                         name="dateReferredForConfirmatoryHts"
                                                                         id="dateReferredForConfirmatoryHts"
                                                                         value={testKitUserDetails.postTestAssessment.referralInformation.dateReferredForConfirmatoryHts}
@@ -1953,7 +1947,8 @@ const HIVSTPatientRegistration = (props) => {
                                                                         {/*<span style={{color: "red"}}> *</span>*/}
                                                                     </Label>
                                                                     <Input
-                                                                        type="date"
+                                                                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                                                                         name="dateReferredForPreventionServices"
                                                                         id="dateReferredForPreventionServices"
                                                                         value={testKitUserDetails.postTestAssessment.referralInformation.dateReferredForPreventionServices}

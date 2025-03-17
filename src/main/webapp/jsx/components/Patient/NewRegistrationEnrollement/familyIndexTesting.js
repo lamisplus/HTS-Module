@@ -122,7 +122,6 @@ const FamilyIndexTesting = (props) => {
   const [selectedRecencyTest, setSelectedRecencyTest] = useState([]);
 
   let temp = { ...errors };
-  console.log("data1", props.patientObj);
   const [riskAssessmentPartner, setRiskAssessmentPartner] = useState({
     sexPartnerHivPositive: "",
     newDiagnosedHivlastThreeMonths: "",
@@ -239,7 +238,6 @@ const FamilyIndexTesting = (props) => {
           : {}
       );
       //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
-      //console.log(props.patientObj.riskStratificationResponseDto.riskAssessment)
       if (
         props.patientObj.riskStratificationResponseDto &&
         Object.keys(
@@ -328,7 +326,6 @@ const FamilyIndexTesting = (props) => {
     if (e.target.value === "false") {
       const newcount = tbCount - 1;
       //settbCount(newcount)
-      //console.log(newcount)
       if (newcount <= 0) {
         settbCount(0);
       } else {
@@ -420,7 +417,6 @@ const FamilyIndexTesting = (props) => {
       });
     }
   };
-  //console.log(riskAssessmentPartner)
 
   return (
     <>
@@ -525,7 +521,8 @@ const FamilyIndexTesting = (props) => {
                     Date <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     // name="dateVisit"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -720,7 +717,8 @@ const FamilyIndexTesting = (props) => {
                     date of index client HIV-positive test results
                   </Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="indexClientConfirmedHivPositiveDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -828,7 +826,8 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date of treatemnt initiation</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="treatmentInitiationDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -925,7 +924,8 @@ const FamilyIndexTesting = (props) => {
                       <FormGroup>
                         <Label for="dateOfHTS">Date of HTS</Label>
                         <Input
-                          type="date"
+                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                           name="dateOfHTS"
                           // value={dateOfHTS}
                           // onChange={(e) => setDateOfHTS(e.target.value)}
@@ -1029,7 +1029,8 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">schedule visit date</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="scheduleVisitDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1053,7 +1054,8 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date visited</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="dateVisited"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1105,7 +1107,8 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date tested</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="dateTested"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1153,13 +1156,13 @@ const FamilyIndexTesting = (props) => {
                   )} */}
                 </FormGroup>
               </div>
-              {console.log("patient agee reaching ", payload.age)}
 
               <div className="form-group col-md-4">
                 <FormGroup>
                   <Label for="">Date enrolled in OVC</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="ovcEnrolledDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}
@@ -1184,7 +1187,8 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">Date enrolled\ on ART</Label>
                   <Input
-                    type="date"
+                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                     name="artEnrolledDate"
                     // id="dateVisit"
                     // value={objValues.dateVisit}

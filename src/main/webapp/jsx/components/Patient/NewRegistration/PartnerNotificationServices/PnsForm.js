@@ -21,7 +21,7 @@ import "react-phone-input-2/lib/style.css";
 import Badge from "@mui/material/Badge";
 import { useHistory } from "react-router-dom";
 import { Modal } from "react-bootstrap";
-
+import { getNextForm } from "../../../../../utility";
 import { calculate_age } from "../../../utils";
 import PersonIcon from "@mui/icons-material/Person";
 const useStyles = makeStyles((theme) => ({
@@ -99,6 +99,8 @@ const PnsForm = (props) => {
   const [indexTesting, setIndexTesting] = useState([]);
   const [consent, setConsent] = useState([]);
   const [hivTestDate, setHivTestDate] = useState("");
+  const [showSaveButton, setShowSaveButton] = useState(true);
+
   const [errors, setErrors] = useState({});
   const [states, setStates] = useState([]);
   const [provinces, setProvinces] = useState([]);
@@ -113,6 +115,10 @@ const PnsForm = (props) => {
 
   let history = useHistory();
   const [open, setOpen] = React.useState(false);
+  const [permissions, setPermission] = useState(
+    localStorage.getItem("stringifiedPermmision")?.split(",")
+  );
+  const [nextForm, setNextForm] = useState([]);
 
   const [stateInfo, setStateInfo] = useState(
     props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId
@@ -204,15 +210,14 @@ const PnsForm = (props) => {
       // numberOfPartnerIdentifiedFromClientIndex: "",
     },
   });
-  console.log("thusssssss", props.patientObj);
 
   const loadNextForm = (row) => {
-    // setSaving(true);
-    handleItemClick("client-referral", "pns");
+    handleItemClick(nextForm[0], nextForm[1]);
+
     toggle();
   };
   const [htsClientInformation, sethtsClientInformation] = useState({
-    testingSetting: props.patientObj.testingSetting,
+    testingSetting: props?.patientObj?.testingSetting,
     providerNameCompletingForm: "",
     providerRoleCompletingForm: "",
     maritalStatus: props?.basicInfo?.personResponseDto?.maritalStatus?.id,
@@ -244,8 +249,6 @@ const PnsForm = (props) => {
   });
 
   const loadOtherForm = (row) => {
-    // setSaving(true);
-    //props.setActiveContent({...props.activeContent, route:'mental-health-view', id:row.id})
     toggle();
   };
   const getPNSInfo = (id) => {
@@ -284,7 +287,7 @@ const PnsForm = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log(response.data);
+   
         setFacilityInfo(response.data.currentOrganisationUnitName);
       })
       .catch((error) => {
@@ -382,8 +385,21 @@ const PnsForm = (props) => {
   };
 
   const loadFamilyIndexSetting = () => {
+      let  testingSetting =  props?.patientObj?.testingSetting
+      let testingType =""
+// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
+    if(testingSetting.includes("COMMUNITY")){
+      testingType= "COMMUNITY_HTS_TEST_SETTING"
+      
+    }
+
+    if(testingSetting.includes("FACILITY")){
+      testingType= "FACILITY_HTS_TEST_SETTING"
+
+      
+    }
     axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
+      .get(`${baseUrl}application-codesets/v2/${testingType}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -500,7 +516,6 @@ const PnsForm = (props) => {
     toggle();
     history.push("/");
   };
-  console.log(props); //Get all recorcd by htsClientId
   const getAllRecordByHTSClientId = () => {
     axios
       .get(`${baseUrl}hts-personal-notification-service/{id}/hts-client`, {
@@ -612,7 +627,6 @@ const PnsForm = (props) => {
     // }
   };
 
-  console.log(objValues);
   //Date of Birth and Age handle
   const handleDobChange = (e) => {
     if (e.target.value) {
@@ -722,6 +736,17 @@ const PnsForm = (props) => {
   // };
   const handleSubmit = (e) => {
     e.preventDefault();
+    let age = calculate_age(
+      props?.basicInfo?.personResponseDto?.dateOfBirth
+        ? props?.basicInfo?.personResponseDto?.dateOfBirth
+        : props?.patientObj?.personResponseDto?.dateOfBirth
+    );
+
+    let hivStatus = props?.patientObj?.hivTestResult;
+    let latestForm = getNextForm("Nigeria_PNS_Form", age, "", hivStatus);
+
+    setNextForm(latestForm);
+
     objValues.htsClientInformation = htsClientInformation;
     objValues.contactTracing = contactTracing;
     objValues.partnerId = partnerId;
@@ -743,7 +768,13 @@ const PnsForm = (props) => {
           if (props?.addNewForm === false) {
             handleItemClick("pns-history", "pns");
           } else {
-            loadOtherForm();
+            if (latestForm[0] === latestForm[1]) {
+              // loadNextForm();
+
+              setShowSaveButton(false);
+            } else {
+              loadOtherForm();
+            }
           }
           if (
             objValues.offeredPns !== "No" &&
@@ -1054,7 +1085,8 @@ const PnsForm = (props) => {
                         <Label>Date</Label>
                         <input
                           className="form-control"
-                          type="date"
+                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                           name="dob"
                           id="dob"
                           max={moment(new Date()).format("YYYY-MM-DD")}
@@ -1317,7 +1349,8 @@ const PnsForm = (props) => {
                         <Label>Date Of Birth</Label>
                         <input
                           className="form-control"
-                          type="date"
+                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                           name="dob"
                           id="dob"
                           max={moment(new Date()).format("YYYY-MM-DD")}
@@ -1519,7 +1552,8 @@ const PnsForm = (props) => {
                           results <span style={{ color: "red" }}> *</span>{" "}
                         </Label>
                         <Input
-                          type="date"
+                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                           name="dateIndexClientConfirmedHiv"
                           id="dateIndexClientConfirmedHiv"
                           value={
@@ -1576,7 +1610,8 @@ const PnsForm = (props) => {
                               <span style={{ color: "red" }}> *</span>{" "}
                             </Label>
                             <Input
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               name="DateOfTreatmentInitiation"
                               id="DateOfTreatmentInitiation"
                               value={
@@ -2122,7 +2157,8 @@ const PnsForm = (props) => {
                               <span style={{ color: "red" }}> *</span>
                             </Label>
                             <Input
-                              type="date"
+                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                               name="datePartnerTested"
                               id="datePartnerTested"
                               value={objValues.datePartnerTested}
@@ -2140,7 +2176,8 @@ const PnsForm = (props) => {
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
                         <Input
-                          type="date"
+                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                           name="dateEnrollmentOnART"
                           id="dateEnrollmentOnART"
                           value={objValues.dateEnrollmentOnART}
@@ -2179,14 +2216,28 @@ const PnsForm = (props) => {
                     }}
                     disabled={saving}
                   />
-                  <Button
-                    content="Save"
-                    icon="save"
-                    labelPosition="right"
-                    style={{ backgroundColor: "#014d88", color: "#fff" }}
-                    onClick={handleSubmit}
-                    disabled={saving}
-                  />
+
+                  {showSaveButton ? (
+                    <Button
+                      content="Save"
+                      icon="save"
+                      labelPosition="right"
+                      style={{ backgroundColor: "#014d88", color: "#fff" }}
+                      onClick={handleSubmit}
+                      disabled={saving}
+                    />
+                  ) : (
+                    <Button
+                      content="Done"
+                      icon="save"
+                      labelPosition="right"
+                      style={{ backgroundColor: "#014d88", color: "#fff" }}
+                      onClick={() => {
+                        history.push("/");
+                      }}
+                      disabled={saving}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -2207,7 +2258,7 @@ const PnsForm = (props) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <h4>Would you like to fill the Refferal form ?</h4>
+          <h4>Would you like to fill the Referral form ?</h4>
         </Modal.Body>
         <Modal.Footer>
           <Button

@@ -124,7 +124,7 @@ const ReferralUnit = (props) => {
 
   const [facilityName, setFacilityName] = useState(Cookies.get("facilityName"));
   const [allFacilities, setAllFacilities] = useState([]);
-  // console.log(Cookies.get("facilityName"));
+
   const [statesOfTheReceivingFacility, setStateOfTheReceivingFacility] =
     useState([]);
   const [lgasOfTheReceivingFacility, setLgasOfTheReceivingFacility] = useState(
@@ -183,7 +183,7 @@ const ReferralUnit = (props) => {
     htsClientId: props && props.patientObj ? props.patientObj?.id : "",
     htsClientUuid: props && props.patientObj ? props.patientObj?.uuid : "",
   });
-  console.log("payload in referalUnit", payload);
+
 
   const getProvincesWithId = (id) => {
     getAllProvinces(id)
@@ -192,7 +192,7 @@ const ReferralUnit = (props) => {
       })
       .catch((e) => {});
   };
-  // console.log("PAYLOAD", payload);
+ 
   const loadGenders = useCallback(async () => {
     getAllGenders()
       .then((response) => {
@@ -211,10 +211,7 @@ const ReferralUnit = (props) => {
       );
     }
   }, []);
- console.log(
-   "heeelooeeeo",
-   props?.patientObj?.personResponseDto?.address?.address[0]?.stateId
- );
+ 
   //Get list of State
   const getStateByCountryId = () => {
     getAllStateByCountryId()
@@ -243,7 +240,7 @@ const ReferralUnit = (props) => {
 
   // handle Facility Name to slect drop down
   const handleInputChangeObject = (e) => {
-    // console.log(e);
+   
     setPayload({
       ...payload,
       nameOfReceivingFacility: e.name,
@@ -548,13 +545,12 @@ const ReferralUnit = (props) => {
       : "This field is required.";
     temp.serviceNeeded = payload.serviceNeeded ? "" : "This field is required.";
 
-    // console.log("temp", temp)
     // temp.referredTo = payload.referredTo ? "" : "This field is required.";
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
 
-  // console.log("payload before submit", payload)
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
@@ -570,7 +566,6 @@ const ReferralUnit = (props) => {
         // props.handleItemClick("refferal-history");
         history.push("/");
       } catch (error) {
-        console.log("error", error);
         setSaving(false);
         const errorMessage =
           error.response?.data?.apierror?.message ||
@@ -614,7 +609,8 @@ const ReferralUnit = (props) => {
                       Date <span style={{ color: "red" }}> *</span>{" "}
                     </Label>
                     <Input
-                      type="date"
+                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                       name="dateVisit"
                       id="dateVisit"
                       value={payload.dateVisit}
@@ -984,7 +980,8 @@ const ReferralUnit = (props) => {
                     </Label>
                     <input
                       className="form-control"
-                      type="date"
+                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+
                       name="dob"
                       id="dob"
                       min="1929-12-31"
@@ -1600,7 +1597,7 @@ const ReferralUnit = (props) => {
               <div className="row">
                 <div className="form-group mb-3 col-md-12">
                   <Button
-                    content="Add Form"
+                    content="Submit"
                     type="submit"
                     // icon="right arrow"
                     // labelPosition="right"

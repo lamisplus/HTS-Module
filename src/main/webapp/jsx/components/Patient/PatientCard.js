@@ -62,7 +62,6 @@ const styles = (theme) => ({
 
 function PatientCard(props) {
   const { classes } = props;
-  console.log(props.patientObj);
   //const patientCurrentStatus=props.patientObj && props.patientObj.currentStatus==="Died (Confirmed)" ? true : false ;
   const patientObjs = props.patientObj ? props.patientObj : {};
   //const permissions= props.permissions ? props.permissions : [];
@@ -79,13 +78,18 @@ function PatientCard(props) {
   ///GET LIST OF Patients
   async function PatientCurrentObject() {
     axios
-      .get(`${baseUrl}hts/persons/${patientObjs.personId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(
+        `${baseUrl}hts/persons/${
+          patientObjs.personId ? patientObjs.personId : patientObjs.id
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
-        //console.log("data", response.data);
         setPatientObj(response.data);
 
+        props.setPersonInfo(response.data)
         setHtscount(response.data.htsCount);
         setHtsResult(
           response.data.htsClientDtoList[
@@ -234,8 +238,8 @@ function PatientCard(props) {
                           {" "}
                           Client Code :{" "}
                           <b style={{ color: "#0B72AA" }}>
-                            {patientObj && patientObj.clientCode
-                              ? patientObj.clientCode
+                            {patientObj && patientObj?.clientCode
+                              ? patientObj?.clientCode
                               : ""}{" "}
                           </b>
                         </span>
