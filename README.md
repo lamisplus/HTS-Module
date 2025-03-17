@@ -68,6 +68,15 @@
 
 ## Authors & Acknowledgments
 ### Main contributors
-- Ganiyat Yakub   https://github.com/Ganiyatyakub
 - Victor Ajor   https://github.com/AJ-DataFI
-- Mathew Adegbite https://github.com/mathewade 
+- Mathew Adegbite https://github.com/mathewade
+- Emeka https://github.com/drjavanew
+- Ganiyat Yakub   https://github.com/Ganiyatyakub
+- Abisayo Peter Abiodun https://github.com/Asquarep
+- Tyav Barnabas https://github.com/tyavbarnabas
+## Special mentions.
+- mechack2022 https://github.com/mechack2022
+- Aderoju Israel https://github.com/yinkyAde
+- Hafiz Mohammad Danmanu https://github.com/Danmanu44
+- Aniwange Tertese Amos https://github.com/aniwange33
+- Dikum https://github.com/dikumheartland
