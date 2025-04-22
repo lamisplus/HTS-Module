@@ -23,6 +23,7 @@ public class FamilyIndexTestingResponseDTO {
     private String state;
     private String lga;
     private String facilityName;
+    private String contactId;
     private LocalDate visitDate;
     private String setting;
     private String familyIndexClient;
@@ -43,4 +44,7 @@ public class FamilyIndexTestingResponseDTO {
     private List<FamilyIndexResponseDTO> familyIndexList = new ArrayList<>();
 //    private List<FamilyTestingTrackerResponseDTO> familyTestingTrackerResponseDTO = new ArrayList<>();
     private String willingToHaveChildrenTestedElseWhere;
+
+
+
 }

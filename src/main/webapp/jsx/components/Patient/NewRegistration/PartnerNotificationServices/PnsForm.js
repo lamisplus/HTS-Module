@@ -91,6 +91,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PnsForm = (props) => {
+  console.log("PNS", props.patientObj.confirmatoryTest2.date2);
   const classes = useStyles();
   const [saving, setSaving] = useState(false);
   const [sexs, setSexs] = useState([]);
@@ -156,6 +157,7 @@ const PnsForm = (props) => {
       numberOfAttempt: "",
     },
     dateEnrollmentOnART: "",
+    dateOfElicitation:"",
     datePartnerTested: "",
     dob: props?.basicInfo?.personResponseDto?.dateOfBirth,
     facilityId: props?.organizationInfo?.currentOrganisationUnitId,
@@ -1259,12 +1261,13 @@ const PnsForm = (props) => {
                           type="text"
                           name="indexClientId"
                           id="indexClientId"
-                          value={objValues.indexClientId}
+                          value={props?.patientObj?.clientCode || ""}
                           onChange={handleInputChange}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
+                          disabled
                         />
                       </FormGroup>
                     </div>
@@ -1349,8 +1352,10 @@ const PnsForm = (props) => {
                         <Label>Date Of Birth</Label>
                         <input
                           className="form-control"
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dob"
                           id="dob"
                           max={moment(new Date()).format("YYYY-MM-DD")}
@@ -1552,29 +1557,23 @@ const PnsForm = (props) => {
                           results <span style={{ color: "red" }}> *</span>{" "}
                         </Label>
                         <Input
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dateIndexClientConfirmedHiv"
                           id="dateIndexClientConfirmedHiv"
                           value={
-                            htsClientInformation.dateIndexClientConfirmedHiv
+                            props?.patientObj?.confirmatoryTest2?.date2 || ""
                           }
                           onChange={handleHTSClientInputChange}
-                          min="1929-12-31"
-                          max={moment(new Date()).format("YYYY-MM-DD")}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
+                            backgroundColor: "#e9ecef",
                           }}
-                          // disabled
+                          disabled
                         />
-                        {errors.dateIndexClientConfrimedHiv !== "" ? (
-                          <span className={classes.error}>
-                            {errors.referralDate}
-                          </span>
-                        ) : (
-                          ""
-                        )}
                       </FormGroup>
                     </div>
                     {/* {indexClientConfirmedHivPositive && ( */}
@@ -1610,15 +1609,17 @@ const PnsForm = (props) => {
                               <span style={{ color: "red" }}> *</span>{" "}
                             </Label>
                             <Input
-                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                              type="date"
+                              onKeyPress={(e) => {
+                                e.preventDefault();
+                              }}
                               name="DateOfTreatmentInitiation"
                               id="DateOfTreatmentInitiation"
                               value={
                                 htsClientInformation.DateOfTreatmentInitiation
                               }
                               onChange={handleHTSClientInputChange}
-                              min="1929-12-31"
+                              min={props?.patientObj?.confirmatoryTest2?.date2}
                               max={moment(new Date()).format("YYYY-MM-DD")}
                               style={{
                                 border: "1px solid #014D88",
@@ -1767,6 +1768,34 @@ const PnsForm = (props) => {
                       </i>
                     </p>
 
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label for="">Date of Elicitation</Label>
+                        <Input
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
+                          name="dateOfElicitation"
+                          id="dateOfElicitation"
+                          value={objValues.dateOfElicitation}
+                          onChange={handleInputChange}
+                          min={props?.patientObj?.confirmatoryTest2?.date2}
+                          max={moment(new Date()).format("YYYY-MM-DD")}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                        {errors?.dateOfElicitation !== "" ? (
+                          <span className={classes.error}>
+                            {errors?.dateOfElicitation}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
                         <Label for="">Partner ID </Label>
@@ -2157,8 +2186,10 @@ const PnsForm = (props) => {
                               <span style={{ color: "red" }}> *</span>
                             </Label>
                             <Input
-                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                              type="date"
+                              onKeyPress={(e) => {
+                                e.preventDefault();
+                              }}
                               name="datePartnerTested"
                               id="datePartnerTested"
                               value={objValues.datePartnerTested}
@@ -2176,8 +2207,10 @@ const PnsForm = (props) => {
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
                         <Input
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dateEnrollmentOnART"
                           id="dateEnrollmentOnART"
                           value={objValues.dateEnrollmentOnART}

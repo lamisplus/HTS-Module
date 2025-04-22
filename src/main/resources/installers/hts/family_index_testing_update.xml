@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet failOnError="true" author="Basil" id="20250401-001">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_family_index_testing ADD COLUMN IF NOT EXISTS contact_id varchar(255);
+
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="true" author="Basil" id="20250401-002">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_family_index ADD COLUMN IF NOT EXISTS contact_id varchar(255);
+        </sql>
+    </changeSet>
+
+
+    <changeSet failOnError="true" author="Basil" id="20250404-003">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_pns_index_client_partner"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_pns_index_client_partner ADD COLUMN IF NOT EXISTS date_of_elicitation date;
+        </sql>
+    </changeSet>
+
+
+</databaseChangeLog>

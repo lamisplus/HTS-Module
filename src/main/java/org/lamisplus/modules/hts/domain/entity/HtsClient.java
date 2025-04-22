@@ -300,4 +300,6 @@ public class HtsClient extends Audit<HtsClient> implements Serializable {
     @Column(name ="partner_notification_service")
     private String partnerNotificationService;
 
+
+
 }

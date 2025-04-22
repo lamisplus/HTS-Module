@@ -25,9 +25,6 @@ import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
 
-
-
-
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -100,6 +97,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RiskStratification = (props) => {
+
   const classes = useStyles();
   const history = useHistory();
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -122,9 +120,13 @@ const RiskStratification = (props) => {
 
   const [objValues, setObjValues] = useState({
     age: props.patientAge,
-    dob: props.patientObj.dateOfBirth?  props.patientObj.dateOfBirth :props?.personInfo?.personResponseDto?.dateOfBirth,
+    dob: props.patientObj.dateOfBirth
+      ? props.patientObj.dateOfBirth
+      : props?.personInfo?.personResponseDto?.dateOfBirth,
     visitDate: "",
-    dateOfBirth:props.patientObj.dateOfBirth?  props.patientObj.dateOfBirth :props?.personInfo?.personResponseDto?.dateOfBirth,
+    dateOfBirth: props.patientObj.dateOfBirth
+      ? props.patientObj.dateOfBirth
+      : props?.personInfo?.personResponseDto?.dateOfBirth,
     dateOfRegistration: "", //props.patientObj.dateOfRegistration,
     isDateOfBirthEstimated: "", //props.patientObj.personResponseDto.isDateOfBirthEstimated
     targetGroup: "",
@@ -138,7 +140,7 @@ const RiskStratification = (props) => {
     careProvider: "",
     communityEntryPoint: "",
     spokeFacility: "",
-    healthFacility: ""
+    healthFacility: "",
   });
   const [riskAssessment, setRiskAssessment] = useState({
     // soldPaidVaginalSex:"",
@@ -157,15 +159,16 @@ const RiskStratification = (props) => {
   const [isPMTCTModality, setIsPMTCTModality] = useState(false);
   const [showRiskAssessment, setShowRiskAssessment] = useState(false);
 
-
-
-  const retestingInfo= ()=>{
-      if(props.newHTSType ===  "RETESTING"){ 
-
-        setObjValues({...objValues,entryPoint: "HTS_ENTRY_POINT_FACILITY", testingSetting: "FACILITY_HTS_TEST_SETTING_RETESTING"})
-        setDisableInput(true)
-      }
-  }
+  const retestingInfo = () => {
+    if (props.newHTSType === "RETESTING") {
+      setObjValues({
+        ...objValues,
+        entryPoint: "HTS_ENTRY_POINT_FACILITY",
+        testingSetting: "FACILITY_HTS_TEST_SETTING_RETESTING",
+      });
+      setDisableInput(true);
+    }
+  };
   useEffect(() => {
     KP();
     EnrollmentSetting();
@@ -173,17 +176,22 @@ const RiskStratification = (props) => {
     HTS_ENTRY_POINT_FACILITY();
 
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
-      if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-        HTS_ENTRY_POINT_COMMUNITY()
-      }else if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint=== "HTS_ENTRY_POINT_FACILITY"){
-
-        HTS_ENTRY_POINT_FACILITY()
+      if (
+        props?.activePage?.activeObject?.riskStratificationResponseDto
+          ?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"
+      ) {
+        HTS_ENTRY_POINT_COMMUNITY();
+      } else if (
+        props?.activePage?.activeObject?.riskStratificationResponseDto
+          ?.entryPoint === "HTS_ENTRY_POINT_FACILITY"
+      ) {
+        HTS_ENTRY_POINT_FACILITY();
       }
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
       SettingModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       );
-   
+
       setRiskAssessment(
         props.patientObj.riskStratificationResponseDto &&
           props.patientObj.riskStratificationResponseDto.riskAssessment
@@ -191,11 +199,9 @@ const RiskStratification = (props) => {
     }
   }, [props.patientObj]);
 
-
-  useEffect(()=>{
-    retestingInfo()
-
-  }, [entryPointSetting, entryPoint, props.newHTSType])
+  useEffect(() => {
+    retestingInfo();
+  }, [entryPointSetting, entryPoint, props.newHTSType]);
   //Get list of HIV STATUS ENROLLMENT
   const EnrollmentSetting = () => {
     axios
@@ -205,8 +211,7 @@ const RiskStratification = (props) => {
       .then((response) => {
         setEnrollSetting(response.data);
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
   const EntryPoint = () => {
     axios
@@ -216,27 +221,22 @@ const RiskStratification = (props) => {
       .then((response) => {
         setEntryPoint(response.data);
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
 
-
   const getSpokeFaclityByHubSite = () => {
-    let facility =Cookies.get("facilityName")
+    let facility = Cookies.get("facilityName");
     axios
       .get(`${baseUrl}hts/spoke-site?hubSite=${facility}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        setSpokeFacList(response.data)
+        setSpokeFacList(response.data);
       })
       .catch((error) => {
         //console.log(error);
       });
   };
-
-
-
 
   const HTS_ENTRY_POINT_FACILITY = () => {
     axios
@@ -253,21 +253,21 @@ const RiskStratification = (props) => {
 
         // })
         setEntryPointSetting(response.data);
-
       })
       .catch((error) => {
         //console.log(error);
       });
   };
 
-
-
   const HTS_ENTRY_POINT_COMMUNITY = () => {
     axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(
+        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+ `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
         //console.log(response.data);
         setEntryPointSetting(response.data);
@@ -277,7 +277,6 @@ const RiskStratification = (props) => {
       });
   };
 
-
   //Get list of KP
   const KP = () => {
     axios
@@ -285,40 +284,29 @@ const RiskStratification = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
+        if (props.patientObject.gender) {
+          let kpList = [];
+          let gender = props.patientObject.gender.toLowerCase();
+          if (gender === "female") {
+            response.data.map((each, index) => {
+              if (each.code !== "TARGET_GROUP_MSM") {
+                kpList.push(each);
+              }
+            });
+          } else if (gender === "male") {
+            response.data.map((each, index) => {
+              if (each.code !== "TARGET_GROUP_FSW") {
+                kpList.push(each);
+              }
+            });
+          }
 
-if(props.patientObject.gender){
-  let kpList =[]
-let gender = props.patientObject.gender.toLowerCase()
-if(gender === "female"){
-
-  response.data.map((each, index )=>{
-
-        if(each.code !==  "TARGET_GROUP_MSM"){
-          kpList.push(each )
+          setKP(kpList);
+        } else {
+          setKP(response.data);
         }
-
-  })
-
-}else if(gender === "male"){
-  response.data.map((each, index )=>{
-    if(each.code !==  "TARGET_GROUP_FSW"){
-      kpList.push(each )
-    }
-
-})
-}
-
-setKP(kpList)
-
-}else{
-  setKP(response.data);
-
-}
-
-
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
 
 
@@ -328,29 +316,27 @@ setKP(kpList)
   };
 
   const checkPMTCTModality = (modality) => {
-
     if (
       modality === "FACILITY_HTS_TEST_SETTING_ANC" ||
       modality === "FACILITY_HTS_TEST_SETTING_L&D" ||
-      modality === "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING" 
- 
-      ) {
+      modality === "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+    ) {
       setIsPMTCTModality(true);
 
-     setErrors({...errors,
-       lastHivTestDone: "",
-       whatWasTheResult: "",
-       lastHivTestVaginalOral: "",
-       lastHivTestBloodTransfusion: "",
-       lastHivTestPainfulUrination: "",
-       diagnosedWithTb: "",
-       lastHivTestInjectedDrugs: "",
-       lastHivTestHadAnal: "",
-       lastHivTestForceToHaveSex: "",
-      })
+      setErrors({
+        ...errors,
+        lastHivTestDone: "",
+        whatWasTheResult: "",
+        lastHivTestVaginalOral: "",
+        lastHivTestBloodTransfusion: "",
+        lastHivTestPainfulUrination: "",
+        diagnosedWithTb: "",
+        lastHivTestInjectedDrugs: "",
+        lastHivTestHadAnal: "",
+        lastHivTestForceToHaveSex: "",
+      });
       return true;
     } else {
-
       setIsPMTCTModality(false);
       return false;
     }
@@ -358,7 +344,7 @@ setKP(kpList)
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "testingSetting" && e.target.value !== "") {
-      setErrors({ ...temp, spokeFacility: "",  healthFacility: ""});
+      setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
       SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
@@ -368,61 +354,66 @@ setKP(kpList)
         objValues.age,
         ans
       );
-     if(e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
-            setShowHealthFacility(true)
-      }else{
-            setShowHealthFacility(false)
+      if (
+        e.target.value ===
+          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+      ) {
+        setShowHealthFacility(true);
+      } else {
+        setShowHealthFacility(false);
+      }
 
-       }
-    
-
-      
       //get spoke sites
-      if(e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
-
+      if (
+        e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
+        e.target.value ===
+          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+      ) {
         getSpokeFaclityByHubSite();
       }
 
       //set risk count
-              if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS"   || e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS") {
-                setRiskCount(1);
-              }   else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT"  || e.target.value === "FACILITY_HTS_TEST_SETTING_CT") {
-                setRiskCount(1);
-              } else if (e.target.value ==="FACILITY_HTS_TEST_SETTING_TB") {
-                setRiskCount(1);
-              } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
-                setRiskCount(1);
-              } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
-                setRiskCount(1);
-              } else {
-                setRiskCount(0);
-              }
-        
- 
+      if (
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
+        e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
+      ) {
+        setRiskCount(1);
+      } else if (
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
+        e.target.value === "FACILITY_HTS_TEST_SETTING_CT"
+      ) {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_TB") {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
+        setRiskCount(1);
+      } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
+        setRiskCount(1);
+      } else {
+        setRiskCount(0);
+      }
     }
-   
 
-
-
-   if(e.target.name === "entryPoint"){
-
-          if(e.target.value === "HTS_ENTRY_POINT_COMMUNITY"){
-            HTS_ENTRY_POINT_COMMUNITY()
-          }else if(e.target.value === "HTS_ENTRY_POINT_FACILITY"){
-
-            HTS_ENTRY_POINT_FACILITY()
-          }else{
-            setEntryPointSetting([]);
-
-          }
-
+    if (e.target.name === "entryPoint") {
+      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+        HTS_ENTRY_POINT_COMMUNITY();
+      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
+        HTS_ENTRY_POINT_FACILITY();
+      } else {
+        setEntryPointSetting([]);
+      }
     }
-    
+
     setObjValues({ ...objValues, [e.target.name]: e.target.value });
   };
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {
-
     let SecAge = age !== "" ? age : 0;
     let ans;
 
@@ -433,32 +424,30 @@ setKP(kpList)
         setShowRiskAssessment(false);
         ans = false;
 
-       // 
-           // 
-           if( age !== ""){
-            setRiskAssessment({...riskAssessment,
-              lastHivTestForceToHaveSex: "",
-              lastHivTestHadAnal: "",
-              lastHivTestInjectedDrugs: "",
-              whatWasTheResult: "",
-              lastHivTestDone: "",
-              diagnosedWithTb: "",
-              lastHivTestPainfulUrination: "",
-              lastHivTestBloodTransfusion: "",
-              lastHivTestVaginalOral: "",
-            })
-          }
+        //
+        //
+        if (age !== "") {
+          setRiskAssessment({
+            ...riskAssessment,
+            lastHivTestForceToHaveSex: "",
+            lastHivTestHadAnal: "",
+            lastHivTestInjectedDrugs: "",
+            whatWasTheResult: "",
+            lastHivTestDone: "",
+            diagnosedWithTb: "",
+            lastHivTestPainfulUrination: "",
+            lastHivTestBloodTransfusion: "",
+            lastHivTestVaginalOral: "",
+          });
+        }
 
-        // 
-      } else if (SecAge > 15 ) {
+        //
+      } else if (SecAge > 15) {
         setShowRiskAssessment(true);
         ans = true;
-
-       
-      }else if(lastVisit === "false"){
+      } else if (lastVisit === "false") {
         setShowRiskAssessment(true);
         ans = true;
-
       } else {
         setShowRiskAssessment(false);
         ans = false;
@@ -467,11 +456,7 @@ setKP(kpList)
       setShowRiskAssessment(false);
       ans = false;
     }
-
-
   };
-
-
 
   //Date of Birth and Age handle
   //Get list of DSD Model Type
@@ -498,85 +483,82 @@ setKP(kpList)
       ? ""
       : "This field is required.";
     // temp.modality = objValues.modality ? "" : "This field is required.";
-   
-   
-    temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
-    ? ""
-    : "This field is required.";
 
-   
-   
+    temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
+      ? ""
+      : "This field is required.";
+
     props.patientAge > 15 &&
       (temp.targetGroup = objValues.targetGroup
         ? ""
         : "This field is required.");
-   
+
     // objValues.entryPoint !== "" &&
     //     objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" &&
     //     (temp.communityEntryPoint = objValues.communityEntryPoint
     //       ? ""
     //       : "This field is required.");
-   
- // 
-      objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
+
+    //
+    objValues.testingSetting ===
+      "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
       (temp.spokeFacility = objValues.spokeFacility
         ? ""
         : "This field is required.");
-        
-        showHealthFacility &&
-        (temp.healthFacility = objValues.healthFacility
-          ? ""
-          : "This field is required.");
-        //
-        
+
+    showHealthFacility &&
+      (temp.healthFacility = objValues.healthFacility
+        ? ""
+        : "This field is required.");
+    //
+
     //objValues.age>15 && riskAssessment.lastHivTestBasedOnRequest==='false' && riskAssessment.lastHivTestDone!=="" && riskAssessment.lastHivTestDone!=='Never' && (temp.whatWasTheResult = riskAssessment.whatWasTheResult ? "" : "This field is required." )
 
+    //Risk Assement section
+    if (
+      objValues.age > 15 &&
+      riskAssessment.lastHivTestBasedOnRequest === "false" &&
+      showRiskAssessment
+    ) {
+      temp.lastHivTestDone = riskAssessment.lastHivTestDone
+        ? ""
+        : "This field is required.";
+      riskAssessment.lastHivTestDone !== "" &&
+        riskAssessment.lastHivTestDone !== "Never" &&
+        (temp.whatWasTheResult = riskAssessment.whatWasTheResult
+          ? ""
+          : "This field is required.");
 
-      //Risk Assement section
-      if (
-        objValues.age > 15 &&
-        riskAssessment.lastHivTestBasedOnRequest === "false" &&
-        showRiskAssessment
-      ) {
-        temp.lastHivTestDone = riskAssessment.lastHivTestDone
+      temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
+        ? ""
+        : "This field is required.";
+
+      temp.lastHivTestBloodTransfusion =
+        riskAssessment.lastHivTestBloodTransfusion
           ? ""
           : "This field is required.";
-        riskAssessment.lastHivTestDone !== "" &&
-          riskAssessment.lastHivTestDone !== "Never" &&
-          (temp.whatWasTheResult = riskAssessment.whatWasTheResult
-            ? ""
-            : "This field is required.");
-  
-        temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
+
+      temp.lastHivTestPainfulUrination =
+        riskAssessment.lastHivTestPainfulUrination
           ? ""
           : "This field is required.";
-  
-        temp.lastHivTestBloodTransfusion =
-          riskAssessment.lastHivTestBloodTransfusion
-            ? ""
-            : "This field is required.";
-  
-        temp.lastHivTestPainfulUrination =
-          riskAssessment.lastHivTestPainfulUrination
-            ? ""
-            : "This field is required.";
-  
-        temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
-          ? ""
-          : "This field is required.";
-  
-        temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
-          ? ""
-          : "This field is required.";
-  
-        temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
-          ? ""
-          : "This field is required.";
-  
-        temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
-          ? ""
-          : "This field is required.";
-      }
+
+      temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
+        ? ""
+        : "This field is required.";
+
+      temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
+        ? ""
+        : "This field is required.";
+
+      temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
+        ? ""
+        : "This field is required.";
+
+      temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
+        ? ""
+        : "This field is required.";
+    }
     //targetGroup
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
@@ -593,30 +575,26 @@ setKP(kpList)
   const actualRiskCountTrue = Object.values(riskAssessment);
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
 
-
   const handleInputChangeRiskAssessment = (e) => {
- 
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
-    if(e.target.name === "lastHivTestBasedOnRequest"){
+    if (e.target.name === "lastHivTestBasedOnRequest") {
       displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
       setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
-
-      }
-  
+    }
   };
   const handleSubmit = (e) => {
     e.preventDefault();
     getMenuLogic();
-      let newModality = isPMTCTModality ? "skip" : "fill";
+    let newModality = isPMTCTModality ? "skip" : "fill";
 
-        let latestForm = getNextForm(
-          "Risk_Stratification",
-          objValues.age,
-          newModality,
-          "unknown"
-        );
+    let latestForm = getNextForm(
+      "Risk_Stratification",
+      objValues.age,
+      newModality,
+      "unknown"
+    );
 
     props.patientObj.targetGroup = objValues.targetGroup;
     props.patientObj.testingSetting = objValues.testingSetting;
@@ -666,7 +644,6 @@ setKP(kpList)
         });
     } else {
       if (validate()) {
-
         setSaving(true);
         axios
           .post(`${baseUrl}risk-stratification`, objValues, {
@@ -676,7 +653,7 @@ setKP(kpList)
             setSaving(false);
             objValues.code = response.data.code;
             props.setExtra(objValues);
-           handleItemClick(latestForm[0], latestForm[1]);
+            handleItemClick(latestForm[0], latestForm[1]);
             props.setHideOtherMenu(false);
             toast.success("Risk stratification save succesfully!");
           })
@@ -703,7 +680,6 @@ setKP(kpList)
         });
       }
     }
-
   };
 
   return (
@@ -744,7 +720,6 @@ setKP(kpList)
                         borderRadius: "0.2rem",
                       }}
                       disabled={disableInput}
-
                     >
                       <option value={""}>Select</option>
                       {entryPoint.map((value) => (
@@ -801,13 +776,17 @@ setKP(kpList)
                       Visit Date <span style={{ color: "red" }}> *</span>{" "}
                     </Label>
                     <Input
-                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                      type="date"
+                      onKeyPress={(e) => {
+                        e.preventDefault();
+                      }}
                       name="visitDate"
                       id="visitDate"
                       value={objValues.visitDate}
                       onChange={handleInputChange}
-                      min="1929-12-31"
+                      min={
+                        props?.personInfo?.personResponseDto?.dateOfRegistration
+                      }
                       max={moment(new Date()).format("YYYY-MM-DD")}
                       style={{
                         border: "1px solid #014D88",
@@ -839,14 +818,12 @@ setKP(kpList)
                       disabled={disableInput}
                     >
                       <option value={""}>Select</option>
-                      {entryPointSetting && entryPointSetting.map((value) =>
-                          
+                      {entryPointSetting &&
+                        entryPointSetting.map((value) => (
                           <option key={value.id} value={value.code}>
                             {value.display}
                           </option>
-                        
-                      )
-                    }
+                        ))}
                       {/* <option value="TEST_SETTING_CT">CT</option>
                                         <option value="TEST_SETTING_TB">TB</option>
                                         <option value="TEST_SETTING_STI">STI</option>
@@ -898,101 +875,116 @@ setKP(kpList)
                   </FormGroup>
                 </div> */}
 
-{ objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                    Spoke Health Facility <span style={{ color: "red" }}> *</span>
-                    </Label>
+                {objValues.testingSetting ===
+                  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
+                  <div className="form-group  col-md-6">
+                    <FormGroup>
+                      <Label>
+                        Spoke Health Facility{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
 
+                      {spokeFacList.length > 0 ? (
+                        <>
+                          {" "}
+                          <select
+                            className="form-control"
+                            name="spokeFacility"
+                            id="spokeFacility"
+                            value={objValues.spokeFacility}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                              textTransform: "capitalize  !important",
+                            }}
+                          >
+                            <option value={""}>Select</option>
+                            {spokeFacList.map((value) => (
+                              <option key={value.id} value={value.spokeSite}>
+                                {value.spokeSite}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <Input
+                          type="text"
+                          name="spokeFacility"
+                          id="spokeFacility"
+                          value={objValues.spokeFacility}
+                          //value={Math.floor(Math.random() * 1093328)}
+                          // onBlur={checkClientCode}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      )}
+                      {errors.spokeFacility !== "" ? (
+                        <span className={classes.error}>
+                          {errors.spokeFacility}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
 
-                   { spokeFacList.length > 0 ?   <> <select
-                      className="form-control"
-                      name="spokeFacility"
-                      id="spokeFacility"
-                      value={objValues.spokeFacility}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {spokeFacList.map((value) => (
-                        <option key={value.id} value={value.spokeSite}       
-                     >
-                          {value.spokeSite}
-                        </option>
-                      ))}
-                    </select></>: <Input
-                    type="text"
-                    name="spokeFacility"
-                    id="spokeFacility"
-                    value={objValues.spokeFacility}
-                    //value={Math.floor(Math.random() * 1093328)}
-                    // onBlur={checkClientCode}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
-                    {errors.spokeFacility !== "" ? (
-                      <span className={classes.error}>{errors.spokeFacility}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div>} 
-
-
-
-      
-                {showHealthFacility && <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                     Health Facility <span style={{ color: "red" }}> *</span>
-                    </Label>
-                    { spokeFacList.length > 0 ?    <select
-                      className="form-control"
-                      name="healthFacility"
-                      id="healthFacility"
-                      value={objValues.healthFacility}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {spokeFacList.map((value) => (
-                        <option key={value.id} value={value.spokeSite}       
-                     >
-                          {value.spokeSite}
-                        </option>
-                      ))}
-                    </select>:  <Input
-                    type="text"
-                    name="healthFacility"
-                    id="healthFacility"
-                    value={objValues.healthFacility}
-                    //value={Math.floor(Math.random() * 1093328)}
-                    // onBlur={checkClientCode}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
-                    {errors.healthFacility !== "" ? (
-                      <span className={classes.error}>{errors.healthFacility}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div>}
-                <div className="form-group  col-md-6">
+                {showHealthFacility && (
+                  <div className="form-group  col-md-6">
+                    <FormGroup>
+                      <Label>
+                        Health Facility <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      {spokeFacList.length > 0 ? (
+                        <select
+                          className="form-control"
+                          name="healthFacility"
+                          id="healthFacility"
+                          value={objValues.healthFacility}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                            textTransform: "capitalize  !important",
+                          }}
+                        >
+                          <option value={""}>Select</option>
+                          {spokeFacList.map((value) => (
+                            <option key={value.id} value={value.spokeSite}>
+                              {value.spokeSite}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Input
+                          type="text"
+                          name="healthFacility"
+                          id="healthFacility"
+                          value={objValues.healthFacility}
+                          //value={Math.floor(Math.random() * 1093328)}
+                          // onBlur={checkClientCode}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      )}
+                      {errors.healthFacility !== "" ? (
+                        <span className={classes.error}>
+                          {errors.healthFacility}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
+                <div className="form-group col-md-6">
                   <FormGroup>
                     <Label>
                       Target Group <span style={{ color: "red" }}> *</span>
@@ -1009,11 +1001,23 @@ setKP(kpList)
                       }}
                     >
                       <option value={""}>Select</option>
-                      {kP.map((value) => {
-                      return  <option key={value.id} value={value.code}>
-                          {value.display}
-                        </option>
-                      })}
+                      {kP
+                        .filter((value) => {
+                          if (
+                            props.patientAge > 14 &&
+                            (value.id === 961 || value.id === 475)
+                          ) {
+                            return false;
+                          }
+                          return true;
+                        })
+                        .map((value) => {
+                          return (
+                            <option key={value.id} value={value.code}>
+                              {value.display}
+                            </option>
+                          );
+                        })}
                     </select>
                     {errors.targetGroup !== "" ? (
                       <span className={classes.error}>
@@ -1060,320 +1064,319 @@ setKP(kpList)
                 </div>
               </div>
               <br />
-              {showRiskAssessment  && (
-                  <>
-                    <div
-                      className="form-group  col-md-12 text-center pt-2 mb-4"
-                      style={{
-                        backgroundColor: "#992E62",
-                        width: "125%",
-                        height: "35px",
-                        color: "#fff",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      HIV Risk Assessment (Last 3 months)
-                    </div>
+              {showRiskAssessment && (
+                <>
+                  <div
+                    className="form-group  col-md-12 text-center pt-2 mb-4"
+                    style={{
+                      backgroundColor: "#992E62",
+                      width: "125%",
+                      height: "35px",
+                      color: "#fff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    HIV Risk Assessment (Last 3 months)
+                  </div>
 
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          When was your last HIV test done?{" "}
-                          <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestDone"
-                          id="lastHivTestDone"
-                          value={riskAssessment.lastHivTestDone}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="<1"> {"< 1"} month</option>
-                          <option value="1-3 Months">1-3 Months</option>
-                          <option value="4-6 Months">4-6 Months</option>
-                          <option value=">6 Months"> {">6"} Months</option>
-                          <option value="Never"> Never</option>
-                        </select>
-                        {errors.lastHivTestDone !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestDone}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    {riskAssessment.lastHivTestDone !== "" &&
-                      riskAssessment.lastHivTestDone !== "Never" && (
-                        <div className="form-group  col-md-4">
-                          <FormGroup>
-                            <Label>
-                              What was the result?{" "}
-                              <span style={{ color: "red" }}> *</span>
-                            </Label>
-                            <select
-                              className="form-control"
-                              name="whatWasTheResult"
-                              id="whatWasTheResult"
-                              value={riskAssessment.whatWasTheResult}
-                              onChange={handleInputChangeRiskAssessment}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.2rem",
-                              }}
-                            >
-                              <option value={""}></option>
-                              <option value="Positive">Positive</option>
-                              <option value="Negative">Negative</option>
-                            </select>
-                            {errors.whatWasTheResult !== "" ? (
-                              <span className={classes.error}>
-                                {errors.whatWasTheResult}
-                              </span>
-                            ) : (
-                              ""
-                            )}
-                          </FormGroup>
-                        </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        When was your last HIV test done?{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestDone"
+                        id="lastHivTestDone"
+                        value={riskAssessment.lastHivTestDone}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="<1"> {"< 1"} month</option>
+                        <option value="1-3 Months">1-3 Months</option>
+                        <option value="4-6 Months">4-6 Months</option>
+                        <option value=">6 Months"> {">6"} Months</option>
+                        <option value="Never"> Never</option>
+                      </select>
+                      {errors.lastHivTestDone !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestDone}
+                        </span>
+                      ) : (
+                        ""
                       )}
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you had anal or vaginal
-                          or oral sex without a condom with someone who was HIV
-                          positive or unaware of their HIV status?{" "}
-                          <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestVaginalOral"
-                          id="lastHivTestVaginalOral"
-                          value={riskAssessment.lastHivTestVaginalOral}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestVaginalOral !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestVaginalOral}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you had a blood or
-                          blood product transfusion?{" "}
-                          <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestBloodTransfusion"
-                          id="lastHivTestBloodTransfusion"
-                          value={riskAssessment.lastHivTestBloodTransfusion}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestBloodTransfusion !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestBloodTransfusion}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you experienced painful
-                          urination, lower abdominal pain, vaginal or penile
-                          discharge, pain during sexual intercourse, thick,
-                          cloudy, or foul smelling discharge and/or small bumps
-                          or blisters near the mouth, penis, vagina, or anal
-                          areas? <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestPainfulUrination"
-                          id="lastHivTestPainfulUrination"
-                          value={riskAssessment.lastHivTestPainfulUrination}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestPainfulUrination !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestPainfulUrination}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Have you been diagnosed with TB or currently have any
-                          of the following symptoms : cough, fever, weight loss,
-                          night sweats? <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="diagnosedWithTb"
-                          id="diagnosedWithTb"
-                          value={riskAssessment.diagnosedWithTb}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.diagnosedWithTb !== "" ? (
-                          <span className={classes.error}>
-                            {errors.diagnosedWithTb}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you ever injected
-                          drugs, shared needles or other sharp objects with
-                          someone known to be HIV positive or who you didn’t
-                          know their HIV status?{" "}
-                          <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestInjectedDrugs"
-                          id="sexUnderInfluence"
-                          value={riskAssessment.lastHivTestInjectedDrugs}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestInjectedDrugs !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestInjectedDrugs}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you had anal, oral or
-                          vaginal sex in exchange for money or other benefits?
-                          <span style={{ color: "red" }}> *</span>{" "}
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestHadAnal"
-                          id="lastHivTestHadAnal"
-                          value={riskAssessment.lastHivTestHadAnal}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestHadAnal !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestHadAnal}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>
-                          Since your last HIV test, have you been forced to have
-                          sex? <span style={{ color: "red" }}> *</span>
-                        </Label>
-                        <select
-                          className="form-control"
-                          name="lastHivTestForceToHaveSex"
-                          id="moreThanOneSexPartnerLastThreeMonths"
-                          value={riskAssessment.lastHivTestForceToHaveSex}
-                          onChange={handleInputChangeRiskAssessment}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                        >
-                          <option value={""}></option>
-                          <option value="true">Yes</option>
-                          <option value="false">No</option>
-                        </select>
-                        {errors.lastHivTestForceToHaveSex !== "" ? (
-                          <span className={classes.error}>
-                            {errors.lastHivTestForceToHaveSex}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    <br />
-                  </>
-                )}
+                    </FormGroup>
+                  </div>
+                  {riskAssessment.lastHivTestDone !== "" &&
+                    riskAssessment.lastHivTestDone !== "Never" && (
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>
+                            What was the result?{" "}
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
+                          <select
+                            className="form-control"
+                            name="whatWasTheResult"
+                            id="whatWasTheResult"
+                            value={riskAssessment.whatWasTheResult}
+                            onChange={handleInputChangeRiskAssessment}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                            }}
+                          >
+                            <option value={""}></option>
+                            <option value="Positive">Positive</option>
+                            <option value="Negative">Negative</option>
+                          </select>
+                          {errors.whatWasTheResult !== "" ? (
+                            <span className={classes.error}>
+                              {errors.whatWasTheResult}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </FormGroup>
+                      </div>
+                    )}
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you had anal or vaginal
+                        or oral sex without a condom with someone who was HIV
+                        positive or unaware of their HIV status?{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestVaginalOral"
+                        id="lastHivTestVaginalOral"
+                        value={riskAssessment.lastHivTestVaginalOral}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestVaginalOral !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestVaginalOral}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you had a blood or blood
+                        product transfusion?{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestBloodTransfusion"
+                        id="lastHivTestBloodTransfusion"
+                        value={riskAssessment.lastHivTestBloodTransfusion}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestBloodTransfusion !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestBloodTransfusion}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you experienced painful
+                        urination, lower abdominal pain, vaginal or penile
+                        discharge, pain during sexual intercourse, thick,
+                        cloudy, or foul smelling discharge and/or small bumps or
+                        blisters near the mouth, penis, vagina, or anal areas?{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestPainfulUrination"
+                        id="lastHivTestPainfulUrination"
+                        value={riskAssessment.lastHivTestPainfulUrination}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestPainfulUrination !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestPainfulUrination}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Have you been diagnosed with TB or currently have any of
+                        the following symptoms : cough, fever, weight loss,
+                        night sweats? <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="diagnosedWithTb"
+                        id="diagnosedWithTb"
+                        value={riskAssessment.diagnosedWithTb}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.diagnosedWithTb !== "" ? (
+                        <span className={classes.error}>
+                          {errors.diagnosedWithTb}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you ever injected drugs,
+                        shared needles or other sharp objects with someone known
+                        to be HIV positive or who you didn’t know their HIV
+                        status? <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestInjectedDrugs"
+                        id="sexUnderInfluence"
+                        value={riskAssessment.lastHivTestInjectedDrugs}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestInjectedDrugs !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestInjectedDrugs}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you had anal, oral or
+                        vaginal sex in exchange for money or other benefits?
+                        <span style={{ color: "red" }}> *</span>{" "}
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestHadAnal"
+                        id="lastHivTestHadAnal"
+                        value={riskAssessment.lastHivTestHadAnal}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestHadAnal !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestHadAnal}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>
+                        Since your last HIV test, have you been forced to have
+                        sex? <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <select
+                        className="form-control"
+                        name="lastHivTestForceToHaveSex"
+                        id="moreThanOneSexPartnerLastThreeMonths"
+                        value={riskAssessment.lastHivTestForceToHaveSex}
+                        onChange={handleInputChangeRiskAssessment}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                      >
+                        <option value={""}></option>
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                      </select>
+                      {errors.lastHivTestForceToHaveSex !== "" ? (
+                        <span className={classes.error}>
+                          {errors.lastHivTestForceToHaveSex}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  <br />
+                </>
+              )}
 
               <br />
               <Message warning>
-                <h4> Risk assessment score </h4>
+                <h4> Risk assessment score 1</h4>
                 <b>
                   Score :
                   {riskCount +
-                    (props.patientAge > 15 ? riskCountQuestion.length : 0)}
+                    (props.patientAge > 14 ? riskCountQuestion.length : 0)}
                 </b>
               </Message>
               <hr />

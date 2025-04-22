@@ -99,6 +99,7 @@ public class FamilyIndexTestingService {
         familyIndexTesting.setSex(requestDTO.getSex());
         familyIndexTesting.setIndexClientId(requestDTO.getIndexClientId());
         familyIndexTesting.setName(requestDTO.getName());
+        familyIndexTesting.setContactId(requestDTO.getContactId());
         familyIndexTesting.setDateOfBirth(requestDTO.getDateOfBirth());
         familyIndexTesting.setAge(requestDTO.getAge());
         familyIndexTesting.setMaritalStatus(requestDTO.getMaritalStatus());
@@ -119,6 +120,58 @@ public class FamilyIndexTestingService {
         FamilyIndexTesting familyIndexTesting = familyIndexTestingRepository.findByIdAndArchived(id, UN_ARCHIVED)
                 .orElse(null);
         return familyIndexTesting != null ? convertFamilyIndexTestingToResponseDTO(familyIndexTesting) : null;
+    }
+
+
+
+
+    public String generateContactId(Long htsClientId, String clientCode) {
+        // Validation checks for htsClientId and clientCode
+        if (htsClientId == null || clientCode == null || clientCode.isEmpty()) {
+            throw new IllegalArgumentException("Invalid HTS client ID or client code");
+        }
+
+        HtsClient htsClient = htsClientRepository
+                .findByIdAndArchivedAndFacilityId(htsClientId, UN_ARCHIVED, currentUserOrganizationService.getCurrentUserOrganization())
+                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, clientCode, "" + htsClientId));
+
+        // Check if the retrieved HTS client matches the provided ID and client code
+        if (!htsClient.getId().equals(htsClientId) || !htsClient.getClientCode().equals(clientCode)) {
+            throw new IllegalArgumentException("HTS client ID or client code does not match the provided values");
+        }
+
+        // Get the list of PNS for the HTS client
+        List<FamilyIndexTestingResponseDTO> familyIndexList = getFamilyIndexTestingListByHtsClient(htsClientId);
+
+        // If the list is empty, the partner ID should be the first for the HTS client
+        if (familyIndexList.isEmpty()) {
+            return clientCode + "/001";
+        } else {
+            // Get the last partner ID from the list
+            String lastContactId = familyIndexList.get(familyIndexList.size() - 1).getContactId();
+
+            // If lastContactId is null or empty, return the first contact ID
+            if (lastContactId == null || lastContactId.isEmpty()) {
+                return clientCode + "/001";
+            }
+
+            // Extract the serial number from the last partner ID and increment it
+            int serialNumber = Integer.parseInt(lastContactId.substring(lastContactId.lastIndexOf("/") + 1)) + 1;
+            // Create a new partner ID for the new PNS partner
+            return clientCode + "/" + String.format("%03d", serialNumber);
+        }
+    }
+
+    public List<FamilyIndexTestingResponseDTO> getFamilyIndexTestingListByHtsClient(Long id) {
+        List<FamilyIndexTestingResponseDTO> result = new ArrayList<>();
+
+        Optional<FamilyIndexTesting> familyIndexTestingOptional = familyIndexTestingRepository.findByHtsClientIdAndArchived(id, UN_ARCHIVED);
+
+        if (familyIndexTestingOptional.isPresent()) {
+            result.add(convertFamilyIndexTestingToResponseDTO(familyIndexTestingOptional.get()));
+        }
+
+        return result;
     }
 
     public FamilyIndexTestingResponseDTO getFamilyIndexTestingByHtsClient(Long id) {
@@ -511,6 +564,7 @@ public class FamilyIndexTestingService {
         familyIndexTesting.setState(req.getState());
         familyIndexTesting.setLga(req.getLga());
         familyIndexTesting.setFacilityName(req.getFacilityName());
+        familyIndexTesting.setContactId(req.getContactId());
         familyIndexTesting.setVisitDate(req.getVisitDate());
         familyIndexTesting.setSetting(req.getSetting());
         familyIndexTesting.setFamilyIndexClient(req.getFamilyIndexClient());
@@ -540,6 +594,7 @@ public class FamilyIndexTestingService {
                 existingFamilyIndex.setFamilyRelationship(familyIndex.getFamilyRelationship());
                 existingFamilyIndex.setStatusOfContact(familyIndex.getStatusOfContact());
                 existingFamilyIndex.setChildNumber(familyIndex.getChildNumber());
+                existingFamilyIndex.setContactId(familyIndex.getContactId());
                 existingFamilyIndex.setOtherChildNumber(familyIndex.getOtherChildNumber());
                 existingFamilyIndex.setMotherDead(familyIndex.getMotherDead());
                 existingFamilyIndex.setUAN(familyIndex.getUAN());
@@ -587,6 +642,11 @@ public class FamilyIndexTestingService {
 
 
     }
+
+    public UuidProjection getHTSClientUUID(String personUuid) {
+        return familyIndexRepository.getHTSClientUUID(personUuid);
+    }
+
 
     public String getVirallySuppressedByPersonUuid(String personUuid) {
         String Result =   familyIndexRepository.getVirallySuppressedByPersonUuid(personUuid);

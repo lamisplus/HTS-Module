@@ -530,7 +530,7 @@ const UserRegistration = (props) => {
           <form>
             <div className="row">
               <h3>
-                HIV COUNSELLING AND TESTING
+                HIV COUNSELLING AND TESTING 
                 {showBackButton &&  <div>
                     {/* <Link to={"/"}> */}
                     <Button

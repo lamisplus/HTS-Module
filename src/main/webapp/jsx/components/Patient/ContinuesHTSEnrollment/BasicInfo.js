@@ -685,6 +685,7 @@ const BasicInfo = (props) => {
       familyIndex: objValues.familyIndex,
 
     };
+
     props.setPatientObj({ ...props.patientObj, ...objValues });
     Cookies.set("serial-number", serialNumber)
 
@@ -745,7 +746,12 @@ const BasicInfo = (props) => {
 
           setSaving(false);
           props.setPatientObj(response.data);
-          localStorage.setItem("htsClientUUid", JSON.stringify(response.data.htsClientUUid));
+          if (response.data && response.data.htsClientUUid) {
+            localStorage.setItem(
+              "htsClientUUid",
+              JSON.stringify(response.data.htsClientUUid)
+            );
+          }
           handleItemClick(latestForm[0], latestForm[1]);
 
         })
@@ -803,49 +809,36 @@ const BasicInfo = (props) => {
                     Target Group <span style={{ color: "red" }}> *</span>
                   </Label>
 
-                  
                   <select
                     className="form-control"
                     name="targetGroup"
                     id="targetGroup"
                     onChange={handleInputChange}
                     value={objValues.targetGroup}
-                    disabled
                     style={{
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
                   >
-                    {kP.map((value) => (
-                      <option key={value.id} value={value.code}>
-                        {value.display}
-                      </option>
-                    ))}
-                    {/* {props?.sex && props?.sex.toLowerCase() === "female" && (
-                      <>
-                        {" "}
-                        {kP
-                          .filter((x) => x.display !== "MSM")
-                          .map((value) => (
-                            <option key={value.id} value={value.code}>
-                              {value.display}
-                            </option>
-                          ))}
-                      </>
-                    )} */}
-                    {/* 
-                    {props?.sex && props?.sex.toLowerCase() === "male" && (
-                      <>
-                        {" "}
-                        {kP
-                          .filter((x) => x.display !== "FSW")
-                          .map((value) => (
-                            <option key={value.id} value={value.code}>
-                              {value.display}
-                            </option>
-                          ))}{" "}
-                      </>
-                    )} */}
+                    <option value={""}>Select</option>
+                    {kP
+                      .filter((value) => {
+                     
+                        if (
+                          props.patientAge > 14 &&
+                          (value.id === 961 || value.id === 475)
+                        ) {
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map((value) => {
+                        return (
+                          <option key={value.id} value={value.code}>
+                            {value.display}
+                          </option>
+                        );
+                      })}
                   </select>
                   {errors.targetGroup !== "" ? (
                     <span className={classes.error}>{errors.targetGroup}</span>
@@ -887,7 +880,6 @@ const BasicInfo = (props) => {
                     // value={createdCode + (serialNumber ? serialNumber : "")}
                     value={objValues.clientCode}
                     onChange={handleInputChange}
-
                     style={{
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
@@ -900,10 +892,7 @@ const BasicInfo = (props) => {
                     ""
                   )} */}
                   {clientCodeCheck !== "" ? (
-                    <span className={classes.error}>
-                      {" "}
-                      {clientCodeCheck}
-                    </span>
+                    <span className={classes.error}> {clientCodeCheck}</span>
                   ) : (
                     ""
                   )}
@@ -977,9 +966,10 @@ const BasicInfo = (props) => {
                     Visit Date <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="date"               
-                    onKeyPress={(e)=>{e.preventDefault()}}
-
+                    type="date"
+                    onKeyPress={(e) => {
+                      e.preventDefault();
+                    }}
                     name="dateVisit"
                     id="dateVisit"
                     value={objValues.dateVisit}
@@ -1177,16 +1167,16 @@ const BasicInfo = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                        disabled={disableModality}
+                          disabled={disableModality}
                         >
                           <option value={""}></option>
-                          {pregnancyStatus.map((value) =>{
-                       
-                           return    <option key={value.id} value={value.id}>
+                          {pregnancyStatus.map((value) => {
+                            return (
+                              <option key={value.id} value={value.id}>
                                 {value.display}
-                              </option>}
-                            )
-                          }
+                              </option>
+                            );
+                          })}
                         </select>
                         {errors.pregnant !== "" ? (
                           <span className={classes.error}>

@@ -24,8 +24,6 @@ import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import Cookies from "js-cookie";
 
-
-
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -98,6 +96,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
+  console.log("props age basicinfo",props.patientAge)
+
   const classes = useStyles();
   //const history = useHistory();
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -126,8 +126,6 @@ const BasicInfo = (props) => {
   const [nextForm, setNextForm] = useState([]);
   const [targetGroupValue, setTargetGroupValue] = useState(null);
 
-
-  
   const [objValues, setObjValues] = useState({
     age: "",
     dob: "",
@@ -146,11 +144,9 @@ const BasicInfo = (props) => {
     entryPoint: "",
     communityEntryPoint: "",
     spokeFacility: "",
-    healthFacility: ""
-
+    healthFacility: "",
   });
   const [riskAssessment, setRiskAssessment] = useState({
-
     lastHivTestForceToHaveSex: "",
     lastHivTestHadAnal: "",
     lastHivTestInjectedDrugs: "",
@@ -163,17 +159,20 @@ const BasicInfo = (props) => {
     lastHivTestBasedOnRequest: "",
   });
   useEffect(() => {
-
-
-if (objValues.age !== "") {
+    if (objValues.age !== "") {
       props.setPatientObjAge(objValues.age);
     }
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
-      if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-        HTS_ENTRY_POINT_COMMUNITY()
-      }else if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint=== "HTS_ENTRY_POINT_FACILITY"){
-
-        HTS_ENTRY_POINT_FACILITY()
+      if (
+        props?.activePage?.activeObject?.riskStratificationResponseDto
+          ?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"
+      ) {
+        HTS_ENTRY_POINT_COMMUNITY();
+      } else if (
+        props?.activePage?.activeObject?.riskStratificationResponseDto
+          ?.entryPoint === "HTS_ENTRY_POINT_FACILITY"
+      ) {
+        HTS_ENTRY_POINT_FACILITY();
       }
       setObjValues(props.patientObj.riskStratificationResponseDto);
 
@@ -183,13 +182,12 @@ if (objValues.age !== "") {
     }
   }, [objValues.age]);
 
-
-  useEffect(()=>{
+  useEffect(() => {
     KP();
     TargetGroupSetup();
     PregnancyStatus();
     EntryPoint();
-  }, [])
+  }, []);
   //Get list of HIV STATUS ENROLLMENT
   const EnrollmentSetting = () => {
     axios
@@ -197,12 +195,9 @@ if (objValues.age !== "") {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-
         setEnrollSetting(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
 
   const PregnancyStatus = () => {
@@ -211,16 +206,15 @@ if (objValues.age !== "") {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        let pregnancyUsed  =""
-        if(response.data.length > 0){
-          response.data.map((each, index)=>{
-     
-            if(each.code === "PREGANACY_STATUS_PREGNANT"){
-             pregnancyUsed =each.id 
+        let pregnancyUsed = "";
+        if (response.data.length > 0) {
+          response.data.map((each, index) => {
+            if (each.code === "PREGANACY_STATUS_PREGNANT") {
+              pregnancyUsed = each.id;
             }
-          })
+          });
         }
-        localStorage.setItem("pregnancyCode", pregnancyUsed)
+        localStorage.setItem("pregnancyCode", pregnancyUsed);
       })
       .catch((error) => {
         //console.log(error);
@@ -232,42 +226,35 @@ if (objValues.age !== "") {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-
         setEntryPoint(response.data);
-        if(props?.patientObj?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-          HTS_ENTRY_POINT_COMMUNITY()
-        }else if(props?.patientObj?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
-
-          HTS_ENTRY_POINT_FACILITY()
-        }else{
+        if (
+          props?.patientObj?.riskStratificationResponseDto?.entryPoint ===
+          "HTS_ENTRY_POINT_COMMUNITY"
+        ) {
+          HTS_ENTRY_POINT_COMMUNITY();
+        } else if (
+          props?.patientObj?.riskStratificationResponseDto?.entryPoint ===
+          "HTS_ENTRY_POINT_FACILITY"
+        ) {
+          HTS_ENTRY_POINT_FACILITY();
+        } else {
           setEntryPointSetting([]);
-
         }
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
 
-
-
-
   const getSpokeFaclityByHubSite = () => {
-    let facility =Cookies.get("facilityName")
+    let facility = Cookies.get("facilityName");
     axios
       .get(`${baseUrl}hts/spoke-site?hubSite=${facility}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        setSpokeFacList(response.data)
-
-
+        setSpokeFacList(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
-
 
   const HTS_ENTRY_POINT_FACILITY = () => {
     axios
@@ -275,33 +262,27 @@ if (objValues.age !== "") {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-
-          let facilityList = []
+        let facilityList = [];
 
         setEntryPointSetting(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
-
 
   const HTS_ENTRY_POINT_COMMUNITY = () => {
     axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(
+        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+ `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
-
         setEntryPointSetting(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
-
-
 
   const TargetGroupSetup = () => {
     axios
@@ -313,9 +294,7 @@ if (objValues.age !== "") {
 
         props.setOrganizationInfo(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
   //Get list of KP
   const KP = () => {
@@ -324,17 +303,12 @@ if (objValues.age !== "") {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-
         setKP(response.data);
       })
-      .catch((error) => {
-
-      });
+      .catch((error) => {});
   };
 
-
-
-
+  console.log("kpList", kP);
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -346,9 +320,9 @@ if (objValues.age !== "") {
       setting === "FACILITY_HTS_TEST_SETTING_ANC" ||
       setting === "FACILITY_HTS_TEST_SETTING_L&D" ||
       setting === "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
-
     ) {
-      setErrors({...errors,
+      setErrors({
+        ...errors,
         lastHivTestDone: "",
         whatWasTheResult: "",
         lastHivTestVaginalOral: "",
@@ -358,11 +332,10 @@ if (objValues.age !== "") {
         lastHivTestInjectedDrugs: "",
         lastHivTestHadAnal: "",
         lastHivTestForceToHaveSex: "",
-       })
+      });
       setIsPMTCTModality(true);
       return true;
     } else {
-
       setIsPMTCTModality(false);
       return false;
     }
@@ -371,75 +344,85 @@ if (objValues.age !== "") {
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "testingSetting" && e.target.value !== "") {
-      setErrors({ ...temp, spokeFacility: "",  healthFacility: ""});
+      setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
       SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
       let ans = checkPMTCTModality(e.target.value);
 
-     if(e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
-            setShowHealthFacility(true)
-      }else{
-            setShowHealthFacility(false)
-
-       }
+      if (
+        e.target.value ===
+          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+      ) {
+        setShowHealthFacility(true);
+      } else {
+        setShowHealthFacility(false);
+      }
 
       displayRiskAssessment(
         riskAssessment.lastHivTestBasedOnRequest,
         objValues.age,
-        ans 
-
+        ans
       );
 
-
       //get spoke sites
-      if(e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
-
+      if (
+        e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
+        e.target.value ===
+          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+      ) {
         getSpokeFaclityByHubSite();
       }
 
       //set risk count
-              if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS"   || e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS") {
-                setRiskCount(1);
-              }   else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT"  || e.target.value === "FACILITY_HTS_TEST_SETTING_CT") {
-                setRiskCount(1);
-              } else if (e.target.value ==="FACILITY_HTS_TEST_SETTING_TB") {
-                setRiskCount(1);
-              } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
-                setRiskCount(1);
-              } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
-                setRiskCount(1);
-              } else {
-                setRiskCount(0);
-              }
-
-
+      if (
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
+        e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
+      ) {
+        setRiskCount(1);
+      } else if (
+        e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
+        e.target.value === "FACILITY_HTS_TEST_SETTING_CT"
+      ) {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_TB") {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
+        setRiskCount(1);
+      } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
+        setRiskCount(1);
+      } else {
+        setRiskCount(0);
+      }
     }
 
-
-    if(e.target.name === "entryPoint"){
-
-          if(e.target.value === "HTS_ENTRY_POINT_COMMUNITY"){
-            HTS_ENTRY_POINT_COMMUNITY()
-          }else if(e.target.value === "HTS_ENTRY_POINT_FACILITY"){
-
-            HTS_ENTRY_POINT_FACILITY()
-          }else{
-            setEntryPointSetting([]);
-
-          }
-
+    if (e.target.name === "entryPoint") {
+      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+        HTS_ENTRY_POINT_COMMUNITY();
+      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
+        HTS_ENTRY_POINT_FACILITY();
+      } else {
+        setEntryPointSetting([]);
+      }
     }
 
     setObjValues({ ...objValues, [e.target.name]: e.target.value });
   };
+
+
+
 
   // display risk assement function
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {
     let SecAge = age !== "" ? age : 0;
     let ans;
-
 
     // for the section to show
 
@@ -448,31 +431,27 @@ if (objValues.age !== "") {
         setShowRiskAssessment(false);
         ans = false;
 
-       // 
-            if( age !== ""){
-              setRiskAssessment({...riskAssessment,
-                lastHivTestForceToHaveSex: "",
-                lastHivTestHadAnal: "",
-                lastHivTestInjectedDrugs: "",
-                whatWasTheResult: "",
-                lastHivTestDone: "",
-                diagnosedWithTb: "",
-                lastHivTestPainfulUrination: "",
-                lastHivTestBloodTransfusion: "",
-                lastHivTestVaginalOral: "",
-              })
-            }
-
-        
-      } else if (SecAge > 15 ) {
+        //
+        if (age !== "") {
+          setRiskAssessment({
+            ...riskAssessment,
+            lastHivTestForceToHaveSex: "",
+            lastHivTestHadAnal: "",
+            lastHivTestInjectedDrugs: "",
+            whatWasTheResult: "",
+            lastHivTestDone: "",
+            diagnosedWithTb: "",
+            lastHivTestPainfulUrination: "",
+            lastHivTestBloodTransfusion: "",
+            lastHivTestVaginalOral: "",
+          });
+        }
+      } else if (SecAge > 15) {
         setShowRiskAssessment(true);
         ans = true;
-
-       
-      }else if(lastVisit === "false"){
+      } else if (lastVisit === "false") {
         setShowRiskAssessment(true);
         ans = true;
-
       } else {
         setShowRiskAssessment(false);
         ans = false;
@@ -481,63 +460,253 @@ if (objValues.age !== "") {
       setShowRiskAssessment(false);
       ans = false;
     }
-
   };
   //Date of Birth and Age handle
-  const handleDobChange = (e) => {
-    if (e.target.value) {
-      const today = new Date();
-      const birthDate = new Date(e.target.value);
-      let age_now = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (age_now <= 0 && m < 0 && today.getDate() < birthDate.getDate()) {
-        age_now--;
-      }
 
-      objValues.age = age_now;
-      displayRiskAssessment(
-        riskAssessment.lastHivTestBasedOnRequest,
-        age_now,
-        isPMTCTModality
-      );
-;
-    } else {
-      setObjValues({ ...objValues, age: "" });
+
+ const validateAgeRestriction = (formData) => {
+   // Check if we have a restricted target group with age > 14
+   if (
+     formData &&
+     (formData.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+       formData.targetGroup === "TARGET_GROUP_PD") &&
+     formData.age > 14
+   ) {
+     return false;
+   }
+   return true;
+ };
+
+const handleDobChange = (e) => {
+  const dobValue = e.target.value;
+
+  if (dobValue) {
+    // Calculate age from the provided DOB
+    const today = new Date();
+    const birthDate = new Date(dobValue);
+    let age_now = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age_now--;
     }
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
-  };
-  const handleDateOfBirthChange = (e) => {
-    if (e.target.value == "Actual") {
-      objValues.isDateOfBirthEstimated = false;
-      setAgeDisabled(true);
-    } else if (e.target.value == "Estimated") {
-      objValues.isDateOfBirthEstimated = true;
-      setAgeDisabled(false);
+
+    // Check if the calculated age is valid for the current target group
+    if (
+      (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+        objValues.targetGroup === "TARGET_GROUP_PD") &&
+      age_now > 14
+    ) {
+      // Set error in state instead of showing toast
+      setErrors({
+        ...errors,
+        age: "For this target group, age cannot be greater than 14 years",
+      });
+      return; // Don't update the state
     }
-  };
-  const handleAgeChange = (e) => {
+
+    // Clear any existing age errors
+    setErrors({
+      ...errors,
+      age: "",
+    });
+
+    // Use setState with function to ensure we capture the latest state
+    setObjValues((prevState) => ({
+      ...prevState,
+      dob: dobValue,
+      age: age_now,
+    }));
+
+    // Run risk assessment with the new age
     displayRiskAssessment(
       riskAssessment.lastHivTestBasedOnRequest,
-      e.target.value,
+      age_now,
       isPMTCTModality
     );
+  } else {
+    // If DOB is cleared, update the state accordingly
+    setObjValues((prevState) => ({
+      ...prevState,
+      dob: "",
+      age: "",
+    }));
+  }
+};
 
-    if (!ageDisabled && e.target.value) {
-      if (e.target.value !== "" && e.target.value >= 85) {
-        toggle();
+const handleDateOfBirthChange = (e) => {
+  const dateType = e.target.value;
+  const isEstimated = dateType === "Estimated";
+
+  // Toggle age input disabled state - this is critical
+  setAgeDisabled(!isEstimated);
+
+  // Use setState with function to ensure we capture the latest state
+  setObjValues((prevState) => {
+    let updatedState = {
+      ...prevState,
+      isDateOfBirthEstimated: isEstimated,
+    };
+
+    // Check if current age exceeds limit for restricted groups
+    if (
+      (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+        prevState.targetGroup === "TARGET_GROUP_PD") &&
+      prevState.age > 14
+    ) {
+      // Clear age and DOB instead of adjusting
+      updatedState.age = "";
+      updatedState.dob = "";
+
+      // Set error in state instead of showing toast
+      setErrors({
+        ...errors,
+        age: "The current age exceeds the limit of 14 for this target group",
+      });
+    } else {
+      // Clear any existing age errors
+      setErrors({
+        ...errors,
+        age: "",
+      });
+    }
+
+    return updatedState;
+  });
+};
+
+const handleAgeChange = (e) => {
+  let newAge = e.target.value === "" ? "" : parseInt(e.target.value);
+
+  // Only proceed with updates if we have a valid number or empty string
+  if (newAge === "" || !isNaN(newAge)) {
+    // Use setState with function to ensure we capture the latest state
+    setObjValues((prevState) => {
+      let updatedState = { ...prevState };
+
+      // If we have a valid number, process it
+      if (newAge !== "" && !isNaN(newAge)) {
+        // Enforce age restriction for specific target groups
+        if (
+          (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+            prevState.targetGroup === "TARGET_GROUP_PD") &&
+          newAge > 14
+        ) {
+          // Set error in state instead of showing toast
+          setErrors({
+            ...errors,
+            age: "For this target group, age cannot be greater than 14 years",
+          });
+
+          // Clear age and DOB
+          return {
+            ...prevState,
+            age: "",
+            dob: "",
+          };
+        }
+
+        // Clear any existing age errors
+        setErrors({
+          ...errors,
+          age: "",
+        });
+
+        // Update the age in our state
+        updatedState.age = newAge;
+
+        // If we're not using actual DOB (i.e., age is editable), update the DOB too
+        if (!ageDisabled) {
+          if (newAge >= 85) {
+            // Schedule the toggle modal to appear after state update
+            setTimeout(() => toggle(), 0);
+          }
+
+          // Calculate new DOB based on age
+          const currentDate = new Date();
+          currentDate.setDate(15);
+          currentDate.setMonth(5);
+          const estDob = moment(currentDate.toISOString());
+          const dobNew = estDob.add(newAge * -1, "years");
+          updatedState.dob = moment(dobNew).format("YYYY-MM-DD");
+        }
+
+        // Schedule risk assessment after state update
+        setTimeout(() => {
+          displayRiskAssessment(
+            riskAssessment.lastHivTestBasedOnRequest,
+            newAge,
+            isPMTCTModality
+          );
+        }, 0);
+      } else {
+        // For empty input, just update the age field
+        updatedState.age = "";
       }
 
+      return updatedState;
+    });
+  }
+};
 
-      const currentDate = new Date();
-      currentDate.setDate(15);
-      currentDate.setMonth(5);
-      const estDob = moment(currentDate.toISOString());
-      const dobNew = estDob.add(e.target.value * -1, "years");
-      setObjValues({ ...objValues, dob: moment(dobNew).format("YYYY-MM-DD") });
-      objValues.dob = moment(dobNew).format("YYYY-MM-DD");
+const handleTargetGroupChange = (e) => {
+  // Clear any errors
+  setErrors({ ...temp, [e.target.name]: "" });
+
+  // Get the new target group value
+  const newTargetGroup = e.target.value;
+
+  // First, let's get the current age
+  const currentAge = objValues.age;
+
+  // Update the target group immediately
+  // Important: Use a callback form of setState to ensure we're working with the latest state
+  setObjValues((prevState) => {
+    let updatedState = { ...prevState, targetGroup: newTargetGroup };
+
+    // If selecting a restricted group and age is over 14, clear the age and DOB
+    if (
+      (newTargetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+        newTargetGroup === "TARGET_GROUP_PD") &&
+      currentAge > 14
+    ) {
+      // Clear age and DOB instead of adjusting
+      updatedState.age = "";
+      updatedState.dob = "";
+
+      // Set error in state instead of showing toast
+      setErrors({
+        ...errors,
+        age: "The current age exceeds the limit of 14 for this target group",
+      });
+    } else if (newTargetGroup === "") {
+      // If target group is cleared, also clear age and DOB
+      updatedState.age = "";
+      updatedState.dob = "";
+    } else {
+      // For other target groups or valid age, keep existing values
+
+      // If age is not set but DOB is estimated, calculate a default DOB
+      // (maintaining your original logic for this case)
+      if (!updatedState.age && prevState.isDateOfBirthEstimated) {
+        const currentDate = new Date();
+        currentDate.setDate(15);
+        currentDate.setMonth(5);
+        const estDob = moment(currentDate.toISOString());
+        // Don't set a specific age since we want the user to enter it
+        updatedState.dob = moment(estDob).format("YYYY-MM-DD");
+      }
+
+      // Clear any existing age errors if group changes to non-restricted
+      setErrors({
+        ...errors,
+        age: "",
+      });
     }
-    setObjValues({ ...objValues, age: e.target.value });
-  };
+
+    return updatedState;
+  });
+};
+   const isAgeValid = validateAgeRestriction(objValues);
   //Get list of DSD Model Type
   function SettingModality(settingId) {
     const setting = settingId;
@@ -554,89 +723,100 @@ if (objValues.age !== "") {
   }
   //End of Date of Birth and Age handling
   /*****  Validation  */
-  const validate = () => {
-    //HTS FORM VALIDATION
+ const validate = () => {
+   //HTS FORM VALIDATION
+   let temp = { ...errors };
 
-    temp.visitDate = objValues.visitDate ? "" : "This field is required.";
-    temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
-    temp.testingSetting = objValues.testingSetting
-      ? ""
-      : "This field is required.";
-    temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
+   temp.visitDate = objValues.visitDate ? "" : "This field is required.";
+   temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
+   temp.testingSetting = objValues.testingSetting
+     ? ""
+     : "This field is required.";
 
-    temp.dob = objValues.dob ? "" : "This field is required.";
-    temp.age = objValues.age ? "" : "This field is required.";
-    //
-    temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
-      ? ""
-      : "This field is required.";
+   temp.dob = objValues.dob ? "" : "This field is required.";
+   temp.age = objValues.age ? "" : "This field is required.";
 
-    objValues.age > 15 &&
-      (temp.targetGroup = objValues.targetGroup
-        ? ""
-        : "This field is required.");
+   // Check age restriction only if target group and age are provided
+   if (
+     objValues.targetGroup &&
+     objValues.age &&
+     (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+       objValues.targetGroup === "TARGET_GROUP_PD") &&
+     objValues.age > 14
+   ) {
+     temp.age = "For this target group, age cannot be greater than 14 years";
+   }
 
-//
-      objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
-      (temp.spokeFacility = objValues.spokeFacility
-        ? ""
-        : "This field is required.");
+   temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
+     ? ""
+     : "This field is required.";
 
-        showHealthFacility &&
-        (temp.healthFacility = objValues.healthFacility
-          ? ""
-          : "This field is required.");
+   objValues.age > 15 &&
+     (temp.targetGroup = objValues.targetGroup
+       ? ""
+       : "This field is required.");
 
+   // Remaining validation logic...
+   objValues.testingSetting ===
+     "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
+     (temp.spokeFacility = objValues.spokeFacility
+       ? ""
+       : "This field is required.");
 
-    //Risk Assement section
-    if (
-      objValues.age > 15 &&
-      riskAssessment.lastHivTestBasedOnRequest === "false" &&
-      showRiskAssessment
-    ) {
-      temp.lastHivTestDone = riskAssessment.lastHivTestDone
-        ? ""
-        : "This field is required.";
-      riskAssessment.lastHivTestDone !== "" &&
-        riskAssessment.lastHivTestDone !== "Never" &&
-        (temp.whatWasTheResult = riskAssessment.whatWasTheResult
-          ? ""
-          : "This field is required.");
+   showHealthFacility &&
+     (temp.healthFacility = objValues.healthFacility
+       ? ""
+       : "This field is required.");
 
-      temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
-        ? ""
-        : "This field is required.";
+   //Risk Assement section
+   if (
+     objValues.age > 15 &&
+     riskAssessment.lastHivTestBasedOnRequest === "false" &&
+     showRiskAssessment
+   ) {
+     temp.lastHivTestDone = riskAssessment.lastHivTestDone
+       ? ""
+       : "This field is required.";
+     riskAssessment.lastHivTestDone !== "" &&
+       riskAssessment.lastHivTestDone !== "Never" &&
+       (temp.whatWasTheResult = riskAssessment.whatWasTheResult
+         ? ""
+         : "This field is required.");
 
-      temp.lastHivTestBloodTransfusion =
-        riskAssessment.lastHivTestBloodTransfusion
-          ? ""
-          : "This field is required.";
+     temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
+       ? ""
+       : "This field is required.";
 
-      temp.lastHivTestPainfulUrination =
-        riskAssessment.lastHivTestPainfulUrination
-          ? ""
-          : "This field is required.";
+     temp.lastHivTestBloodTransfusion =
+       riskAssessment.lastHivTestBloodTransfusion
+         ? ""
+         : "This field is required.";
 
-      temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
-        ? ""
-        : "This field is required.";
+     temp.lastHivTestPainfulUrination =
+       riskAssessment.lastHivTestPainfulUrination
+         ? ""
+         : "This field is required.";
 
-      temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
-        ? ""
-        : "This field is required.";
+     temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
+       ? ""
+       : "This field is required.";
 
-      temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
-        ? ""
-        : "This field is required.";
+     temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
+       ? ""
+       : "This field is required.";
 
-      temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
-        ? ""
-        : "This field is required.";
-    }
+     temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
+       ? ""
+       : "This field is required.";
 
-    setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
-  };
+     temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
+       ? ""
+       : "This field is required.";
+   }
+
+   setErrors({ ...temp });
+   return Object.values(temp).every((x) => x == "");
+ };
 
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
@@ -650,19 +830,14 @@ if (objValues.age !== "") {
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
 
   const handleInputChangeRiskAssessment = (e) => {
-  
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
-    
-    if(e.target.name === "lastHivTestBasedOnRequest"){
+    if (e.target.name === "lastHivTestBasedOnRequest") {
       displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
       setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
-
     }
-
   };
-
 
   const handleInputChangeRiskAssessment2 = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -671,10 +846,37 @@ if (objValues.age !== "") {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validate()) {
+      // Check specifically if it's an age restriction error
+      if (
+        (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+          objValues.targetGroup === "TARGET_GROUP_PD") &&
+        objValues.age > 14
+      ) {
+        toast.dismiss();
+        toast.error(
+          "Cannot save: For the selected target group, age must not exceed 14 years."
+        );
+      } else {
+        toast.error("Please correct the errors in the form", {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
+      return;
+    }
+
     // get next form
     let newModality = isPMTCTModality ? "skip" : "fill";
 
-  let latestForm =  getNextForm("Risk_Stratification", objValues.age, newModality, "unknown")
+    let latestForm = getNextForm(
+      "Risk_Stratification",
+      objValues.age,
+      newModality,
+      "unknown"
+    );
+
+
 
     getMenuLogic(objValues);
     props.patientObj.riskStratificationResponseDto = objValues;
@@ -918,14 +1120,16 @@ if (objValues.age !== "") {
                     </Label>
                     <Input
                       type="date"
-
-                      onKeyPress={(e)=>{e.preventDefault()}}
-
+                      onKeyPress={(e) => {
+                        e.preventDefault();
+                      }}
                       name="visitDate"
                       id="visitDate"
                       value={objValues.visitDate}
                       onChange={handleInputChange}
-                      min="1929-12-31"
+                      min={
+                        props?.personInfo?.personResponseDto?.dateOfRegistration
+                      }
                       max={moment(new Date()).format("YYYY-MM-DD")}
                       style={{
                         border: "1px solid #014D88",
@@ -959,15 +1163,12 @@ if (objValues.age !== "") {
                         {" "}
                         Select
                       </option>
-                      {entryPointSetting && entryPointSetting.map((value) =>
-
-                              <option key={value.id} value={value.code}>
-                                {value.display}
-                              </option>
-
-                          )
-                        }
-
+                      {entryPointSetting &&
+                        entryPointSetting.map((value) => (
+                          <option key={value.id} value={value.code}>
+                            {value.display}
+                          </option>
+                        ))}
                     </select>
                     {errors.testingSetting !== "" ? (
                       <span className={classes.error}>
@@ -980,99 +1181,113 @@ if (objValues.age !== "") {
                 </div>
                 {/*  */}
 
-{ objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                    Spoke Health Facility <span style={{ color: "red" }}> *</span>
-                    </Label>
+                {objValues.testingSetting ===
+                  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
+                  <div className="form-group  col-md-6">
+                    <FormGroup>
+                      <Label>
+                        Spoke Health Facility{" "}
+                        <span style={{ color: "red" }}> *</span>
+                      </Label>
 
+                      {spokeFacList.length > 0 ? (
+                        <>
+                          {" "}
+                          <select
+                            className="form-control"
+                            name="spokeFacility"
+                            id="spokeFacility"
+                            value={objValues.spokeFacility}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                              textTransform: "capitalize  !important",
+                            }}
+                          >
+                            <option value={""}>Select</option>
+                            {spokeFacList.map((value) => (
+                              <option key={value.id} value={value.spokeSite}>
+                                {value.spokeSite}
+                              </option>
+                            ))}
+                          </select>
+                        </>
+                      ) : (
+                        <Input
+                          type="text"
+                          name="spokeFacility"
+                          id="spokeFacility"
+                          value={objValues.spokeFacility}
+                          //value={Math.floor(Math.random() * 1093328)}
+                          // onBlur={checkClientCode}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      )}
+                      {errors.spokeFacility !== "" ? (
+                        <span className={classes.error}>
+                          {errors.spokeFacility}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
 
-                   { spokeFacList.length > 0 ?   <> <select
-                      className="form-control"
-                      name="spokeFacility"
-                      id="spokeFacility"
-                      value={objValues.spokeFacility}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {spokeFacList.map((value) => (
-                        <option key={value.id} value={value.spokeSite}
-                     >
-                          {value.spokeSite}
-                        </option>
-                      ))}
-                    </select></>: <Input
-                    type="text"
-                    name="spokeFacility"
-                    id="spokeFacility"
-                    value={objValues.spokeFacility}
-                    //value={Math.floor(Math.random() * 1093328)}
-                    // onBlur={checkClientCode}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
-                    {errors.spokeFacility !== "" ? (
-                      <span className={classes.error}>{errors.spokeFacility}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div>}
-
-
-
-                {showHealthFacility && <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                     Health Facility <span style={{ color: "red" }}> *</span>
-                    </Label>
-                    { spokeFacList.length > 0 ?    <select
-                      className="form-control"
-                      name="healthFacility"
-                      id="healthFacility"
-                      value={objValues.healthFacility}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {spokeFacList.map((value) => (
-                        <option key={value.id} value={value.spokeSite}
-                     >
-                          {value.spokeSite}
-                        </option>
-                      ))}
-                    </select>:  <Input
-                    type="text"
-                    name="healthFacility"
-                    id="healthFacility"
-                    value={objValues.healthFacility}
-
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
-                    {errors.healthFacility !== "" ? (
-                      <span className={classes.error}>{errors.healthFacility}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div>}
-
+                {showHealthFacility && (
+                  <div className="form-group  col-md-6">
+                    <FormGroup>
+                      <Label>
+                        Health Facility <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      {spokeFacList.length > 0 ? (
+                        <select
+                          className="form-control"
+                          name="healthFacility"
+                          id="healthFacility"
+                          value={objValues.healthFacility}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.2rem",
+                            textTransform: "capitalize  !important",
+                          }}
+                        >
+                          <option value={""}>Select</option>
+                          {spokeFacList.map((value) => (
+                            <option key={value.id} value={value.spokeSite}>
+                              {value.spokeSite}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Input
+                          type="text"
+                          name="healthFacility"
+                          id="healthFacility"
+                          value={objValues.healthFacility}
+                          onChange={handleInputChange}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      )}
+                      {errors.healthFacility !== "" ? (
+                        <span className={classes.error}>
+                          {errors.healthFacility}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
               </div>
               <br />
 
@@ -1092,12 +1307,24 @@ if (objValues.age !== "") {
                       borderRadius: "0.2rem",
                     }}
                   >
-                    <option value={""}></option>
-                    {kP.map((value) => (
-                      <option key={value.id} value={value.code}>
-                        {value.display}
-                      </option>
-                    ))}
+                    <option value={""}>Select</option>
+                    {kP
+                      .filter((value) => {
+                        if (
+                          props.patientAge > 14 &&
+                          (value.id === 961 || value.id === 475)
+                        ) {
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map((value) => {
+                        return (
+                          <option key={value.id} value={value.code}>
+                            {value.display}
+                          </option>
+                        );
+                      })}
                   </select>
                   {errors.targetGroup !== "" ? (
                     <span className={classes.error}>{errors.targetGroup}</span>
@@ -1152,9 +1379,9 @@ if (objValues.age !== "") {
                   <input
                     className="form-control"
                     type="date"
-
-                    onKeyPress={(e)=>{e.preventDefault()}}
-
+                    onKeyPress={(e) => {
+                      e.preventDefault();
+                    }}
                     name="dob"
                     id="dob"
                     min="1929-12-31"
@@ -1186,6 +1413,13 @@ if (objValues.age !== "") {
                     value={objValues.age}
                     disabled={ageDisabled}
                     onChange={handleAgeChange}
+                    // Add max attribute based on target group
+                    max={
+                      objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+                      objValues.targetGroup === "TARGET_GROUP_PD"
+                        ? 14
+                        : undefined
+                    }
                     style={{
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
@@ -1451,7 +1685,6 @@ if (objValues.age !== "") {
                       <select
                         className="form-control"
                         name="lastHivTestInjectedDrugs"
-
                         value={riskAssessment.lastHivTestInjectedDrugs}
                         onChange={handleInputChangeRiskAssessment2}
                         style={{
@@ -1555,7 +1788,14 @@ if (objValues.age !== "") {
                     labelPosition="right"
                     style={{ backgroundColor: "#014d88", color: "#fff" }}
                     onClick={handleSubmit}
-                    disabled={saving}
+                    disabled={
+                      saving ||
+                      !isAgeValid ||
+                      ((objValues.targetGroup ===
+                        "TARGET_GROUP_CHILDREN_OF_KP" ||
+                        objValues.targetGroup === "TARGET_GROUP_PD") &&
+                        objValues.age > 14)
+                    }
                   />
                 </div>
               </div>

@@ -30,6 +30,8 @@ public class FamilyIndexRequestDto {
 
     private String UAN;
 
+    private String contactId;
+
     private LocalDate dateOfHts;
     private LocalDate dateOfBirth;
     private int age;

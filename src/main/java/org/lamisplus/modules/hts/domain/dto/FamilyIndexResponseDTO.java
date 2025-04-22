@@ -16,6 +16,7 @@ public class FamilyIndexResponseDTO {
     private String uuid;
     private String familyRelationship;
     private String statusOfContact;
+    private String contactId;
 
     private int childNumber;
     private int otherChildNumber;

@@ -144,6 +144,7 @@ const ViewPNSForm = (props) => {
       numberOfAttempt: "",
     },
     dateEnrollmentOnART: "",
+    dateOfElicitation: "",
     datePartnerTested: "",
     dob: props?.basicInfo?.personResponseDto?.dateOfBirth,
     facilityId: props?.organizationInfo.currentOrganisationUnitId,
@@ -379,20 +380,16 @@ const ViewPNSForm = (props) => {
     }
   };
 
-
   const loadFamilyIndexSetting = () => {
-      let  testingSetting =  props?.patientObj?.testingSetting
-      let testingType =""
-// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
-    if(testingSetting.includes("COMMUNITY")){
-      testingType= "COMMUNITY_HTS_TEST_SETTING"
-      
+    let testingSetting = props?.patientObj?.testingSetting;
+    let testingType = "";
+    // COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
+    if (testingSetting.includes("COMMUNITY")) {
+      testingType = "COMMUNITY_HTS_TEST_SETTING";
     }
 
-    if(testingSetting.includes("FACILITY")){
-      testingType= "FACILITY_HTS_TEST_SETTING"
-
-      
+    if (testingSetting.includes("FACILITY")) {
+      testingType = "FACILITY_HTS_TEST_SETTING";
     }
     axios
       .get(`${baseUrl}application-codesets/v2/${testingType}`, {
@@ -403,8 +400,6 @@ const ViewPNSForm = (props) => {
       })
       .catch((error) => {});
   };
-
-
 
   const getMaritalStatus = () => {
     axios
@@ -678,18 +673,18 @@ const ViewPNSForm = (props) => {
     // temp.stateId = objValues.stateId ? "" : "This field is required.";
     // temp.lga = objValues.lga ? "" : "This field is required.";
     // temp.facilityId = objValues.facilityId ? "" : "This field is required.";
-   if (objValues.offeredPns !== "No") {
-     temp.testingSetting = htsClientInformation.testingSetting
-       ? ""
-       : "This field is required.";
-     temp.providerRoleCompletingForm =
-       htsClientInformation.providerRoleCompletingForm
-         ? ""
-         : "This field is required.";
-     temp.relativeToIndexClient = htsClientInformation.relativeToIndexClient
-       ? ""
-       : "This field is required.";
-   }
+    if (objValues.offeredPns !== "No") {
+      temp.testingSetting = htsClientInformation.testingSetting
+        ? ""
+        : "This field is required.";
+      temp.providerRoleCompletingForm =
+        htsClientInformation.providerRoleCompletingForm
+          ? ""
+          : "This field is required.";
+      temp.relativeToIndexClient = htsClientInformation.relativeToIndexClient
+        ? ""
+        : "This field is required.";
+    }
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
         ? ""
@@ -1257,13 +1252,14 @@ const ViewPNSForm = (props) => {
                           type="text"
                           name="indexClientId"
                           id="indexClientId"
-                          value={objValues.indexClientId}
+                          value={props?.patientObj?.clientCode || ""}
                           onChange={handleInputChange}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          disabled={props.row.action === "view" ? true : false}
+                          // disabled={props.row.action === "view" ? true : false}
+                          disabled
                         />
                       </FormGroup>
                     </div>
@@ -1348,8 +1344,10 @@ const ViewPNSForm = (props) => {
                         <Label>Date Of Birth</Label>
                         <input
                           className="form-control"
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dob"
                           id="dob"
                           max={moment(new Date()).format("YYYY-MM-DD")}
@@ -1558,21 +1556,23 @@ const ViewPNSForm = (props) => {
                           results <span style={{ color: "red" }}> *</span>{" "}
                         </Label>
                         <Input
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dateIndexClientConfirmedHiv"
                           id="dateIndexClientConfirmedHiv"
                           value={
-                            htsClientInformation.dateIndexClientConfirmedHiv
+                            props?.patientObj?.confirmatoryTest2?.date2 || ""
                           }
                           onChange={handleHTSClientInputChange}
-                          min="1929-12-31"
                           max={moment(new Date()).format("YYYY-MM-DD")}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          disabled={props.row.action === "view" ? true : false}
+                          // disabled={props.row.action === "view" ? true : false}
+                          disabled
                         />
                         {errors.dateIndexClientConfrimedHiv !== "" ? (
                           <span className={classes.error}>
@@ -1617,15 +1617,17 @@ const ViewPNSForm = (props) => {
                               <span style={{ color: "red" }}> *</span>{" "}
                             </Label>
                             <Input
-                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                              type="date"
+                              onKeyPress={(e) => {
+                                e.preventDefault();
+                              }}
                               name="DateOfTreatmentInitiation"
                               id="DateOfTreatmentInitiation"
                               value={
                                 htsClientInformation.DateOfTreatmentInitiation
                               }
                               onChange={handleHTSClientInputChange}
-                              min="1929-12-31"
+                              min={props?.patientObj?.confirmatoryTest2?.date2}
                               max={moment(new Date()).format("YYYY-MM-DD")}
                               style={{
                                 border: "1px solid #014D88",
@@ -1781,6 +1783,35 @@ const ViewPNSForm = (props) => {
 
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
+                        <Label for="">Date of Elicitation</Label>
+                        <Input
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
+                          name="dateOfElicitation"
+                          id="dateOfElicitation"
+                          value={objValues.dateOfElicitation}
+                          onChange={handleInputChange}
+                          min={props?.patientObj?.confirmatoryTest2?.date2}
+                          max={moment(new Date()).format("YYYY-MM-DD")}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                          // disabled
+                        />
+                        {errors?.dateOfElicitation !== "" ? (
+                          <span className={classes.error}>
+                            {errors?.dateOfElicitation}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
                         <Label for="">Partner ID </Label>
                         <Input
                           type="text"
@@ -1885,6 +1916,7 @@ const ViewPNSForm = (props) => {
                       <FormGroup>
                         <Label for=""> Contact Phone Number</Label>
 
+                      
                         <PhoneInput
                           containerStyle={{
                             width: "100%",
@@ -2153,8 +2185,10 @@ const ViewPNSForm = (props) => {
                               <span style={{ color: "red" }}> *</span>
                             </Label>
                             <Input
-                              type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                              type="date"
+                              onKeyPress={(e) => {
+                                e.preventDefault();
+                              }}
                               name="datePartnerTested"
                               id="datePartnerTested"
                               value={objValues.datePartnerTested}
@@ -2175,8 +2209,10 @@ const ViewPNSForm = (props) => {
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
                         <Input
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
                           name="dateEnrollmentOnART"
                           id="dateEnrollmentOnART"
                           value={objValues.dateEnrollmentOnART}
