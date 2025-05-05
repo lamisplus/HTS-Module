@@ -58,7 +58,6 @@ public class HtsFamilyIndexTestingController {
 
 
 
-
     @GetMapping("/getCurrentTreatment")
     public ResponseEntity<String> getCurrentTreatment(@RequestParam String personUuid) {
 
@@ -72,8 +71,6 @@ public class HtsFamilyIndexTestingController {
 
         String Result =  familyIndexTestingService.getVirallySuppressedByPersonUuid(personUuid);
         return ResponseEntity.ok(Result);
-
-
 
     }
 

@@ -42,9 +42,6 @@ public class FamilyIndexTestingResponseDTO {
     private String dateClientEnrolledOnTreatment;
     private String recencyTesting;
     private List<FamilyIndexResponseDTO> familyIndexList = new ArrayList<>();
-//    private List<FamilyTestingTrackerResponseDTO> familyTestingTrackerResponseDTO = new ArrayList<>();
     private String willingToHaveChildrenTestedElseWhere;
-
-
 
 }
