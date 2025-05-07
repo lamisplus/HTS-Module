@@ -23,6 +23,7 @@ import { Button } from "semantic-ui-react";
 import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import Cookies from "js-cookie";
+import { calculate_age, generateDobFromAge } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -96,10 +97,10 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
-  console.log("props age basicinfo",props.patientAge)
+
 
   const classes = useStyles();
-  //const history = useHistory();
+ 
   const [enrollSetting, setEnrollSetting] = useState([]);
   const [entryPoint, setEntryPoint] = useState([]);
   const [entryPointCommunity, setEntryPointCommunity] = useState([]);
@@ -308,7 +309,7 @@ const BasicInfo = (props) => {
       .catch((error) => {});
   };
 
-  console.log("kpList", kP);
+
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -481,50 +482,43 @@ const handleDobChange = (e) => {
   const dobValue = e.target.value;
 
   if (dobValue) {
-    // Calculate age from the provided DOB
-    const today = new Date();
-    const birthDate = new Date(dobValue);
-    let age_now = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age_now--;
-    }
+ 
+    const age_now = calculate_age(dobValue);
 
-    // Check if the calculated age is valid for the current target group
     if (
       (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
         objValues.targetGroup === "TARGET_GROUP_PD") &&
       age_now > 14
     ) {
-      // Set error in state instead of showing toast
+
       setErrors({
         ...errors,
         age: "For this target group, age cannot be greater than 14 years",
       });
-      return; // Don't update the state
+      return;
     }
 
-    // Clear any existing age errors
+
     setErrors({
       ...errors,
       age: "",
     });
 
-    // Use setState with function to ensure we capture the latest state
+ 
     setObjValues((prevState) => ({
       ...prevState,
       dob: dobValue,
       age: age_now,
     }));
 
-    // Run risk assessment with the new age
+
     displayRiskAssessment(
       riskAssessment.lastHivTestBasedOnRequest,
       age_now,
       isPMTCTModality
     );
   } else {
-    // If DOB is cleared, update the state accordingly
+
     setObjValues((prevState) => ({
       ...prevState,
       dob: "",
@@ -577,27 +571,27 @@ const handleDateOfBirthChange = (e) => {
 const handleAgeChange = (e) => {
   let newAge = e.target.value === "" ? "" : parseInt(e.target.value);
 
-  // Only proceed with updates if we have a valid number or empty string
+
   if (newAge === "" || !isNaN(newAge)) {
-    // Use setState with function to ensure we capture the latest state
+
     setObjValues((prevState) => {
       let updatedState = { ...prevState };
 
-      // If we have a valid number, process it
+
       if (newAge !== "" && !isNaN(newAge)) {
-        // Enforce age restriction for specific target groups
+  
         if (
           (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
             prevState.targetGroup === "TARGET_GROUP_PD") &&
           newAge > 14
         ) {
-          // Set error in state instead of showing toast
+     
           setErrors({
             ...errors,
             age: "For this target group, age cannot be greater than 14 years",
           });
 
-          // Clear age and DOB
+
           return {
             ...prevState,
             age: "",
@@ -605,32 +599,24 @@ const handleAgeChange = (e) => {
           };
         }
 
-        // Clear any existing age errors
+
         setErrors({
           ...errors,
           age: "",
         });
 
-        // Update the age in our state
+
         updatedState.age = newAge;
 
         // If we're not using actual DOB (i.e., age is editable), update the DOB too
         if (!ageDisabled) {
           if (newAge >= 85) {
-            // Schedule the toggle modal to appear after state update
             setTimeout(() => toggle(), 0);
           }
-
-          // Calculate new DOB based on age
-          const currentDate = new Date();
-          currentDate.setDate(15);
-          currentDate.setMonth(5);
-          const estDob = moment(currentDate.toISOString());
-          const dobNew = estDob.add(newAge * -1, "years");
-          updatedState.dob = moment(dobNew).format("YYYY-MM-DD");
+          updatedState.dob = generateDobFromAge(newAge);
         }
 
-        // Schedule risk assessment after state update
+        
         setTimeout(() => {
           displayRiskAssessment(
             riskAssessment.lastHivTestBasedOnRequest,
@@ -639,7 +625,6 @@ const handleAgeChange = (e) => {
           );
         }, 0);
       } else {
-        // For empty input, just update the age field
         updatedState.age = "";
       }
 

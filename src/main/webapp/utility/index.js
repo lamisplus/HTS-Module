@@ -296,36 +296,33 @@ export const getListOfPermission = (permittedForms) => {
 
 
 export const getNextForm = (formName, age, pmtctModality, hivStatus) => {
-  let ageCondition = undefined;
-  let pmctctModalityCondition = undefined;
-  let HivStatuscondition = undefined;
-   pmtctModality = pmtctModality
-     ? pmtctModality
-     : localStorage.getItem("modality");
-
   let authorizedForm = JSON.parse(localStorage.getItem("generatedPermission"));
-
   let lengthOfAuthForm = authorizedForm.length;
 
-  // get the index of the form
+  // Get the index of the current form
   let IndexOfForm = authorizedForm.findIndex((each) => {
     return each.name === formName;
   });
 
-  // use the index of the form to send the code of the next page
-  let nextPage;
-
+  // Check if there are more forms after this one
   if (lengthOfAuthForm > IndexOfForm + 1) {
-    nextPage = IndexOfForm + 1;
+    let nextForm = authorizedForm[IndexOfForm + 1];
 
-    let nextForm = authorizedForm[nextPage];
-
-    // console.log([nextForm.code, authorizedForm[IndexOfForm].code]);
-
-    //  confirm if there are no condition on the  NEXT form
-    if (nextForm.condition.length === 0) {
-      return [nextForm.code, authorizedForm[IndexOfForm].code];
+    // Check if there's another form after the next one (for skipping)
+    let skipToForm = null;
+    if (lengthOfAuthForm > IndexOfForm + 2) {
+      skipToForm = authorizedForm[IndexOfForm + 2];
     } else {
+      // If there's no form to skip to, use the next form as fallback
+      skipToForm = nextForm;
+    }
+
+    // If the next form has no conditions
+    if (nextForm.condition.length === 0) {
+      // Return: [nextFormCode, currentFormCode, skipToFormCode]
+      return [nextForm.code, authorizedForm[IndexOfForm].code, skipToForm.code];
+    } else {
+      // Handle forms with conditions
       let answer = loopThroughForms(
         nextForm,
         authorizedForm[IndexOfForm],
@@ -334,15 +331,21 @@ export const getNextForm = (formName, age, pmtctModality, hivStatus) => {
         pmtctModality,
         hivStatus
       );
+
+      // Add the skip form code to the answer
+      if (Array.isArray(answer) && answer.length === 2) {
+        answer.push(skipToForm.code);
+      }
+
       return answer;
     }
-
-    //
   } else {
-      return [
-        authorizedForm[IndexOfForm].code,
-        authorizedForm[IndexOfForm].code,
-      ];
+    // No more forms, return current form code for all positions
+    return [
+      authorizedForm[IndexOfForm].code,
+      authorizedForm[IndexOfForm].code,
+      authorizedForm[IndexOfForm].code,
+    ];
   }
 };
 

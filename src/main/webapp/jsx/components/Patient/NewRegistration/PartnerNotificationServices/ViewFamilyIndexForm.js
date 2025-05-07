@@ -1536,6 +1536,22 @@ const ViewFamilyIndexTestingForm = (props) => {
       });
   };
 
+   useEffect(() => {
+      if (props.patientObj.targetGroup === "TARGET_GROUP_PD") {
+       
+        setPayload((prevPayload) => ({
+          ...prevPayload,
+          familyIndexClient: "FAMILY_INDEX_CHILD",
+        }));
+  
+    
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          familyIndexClient: "",
+        }));
+      }
+   }, [props.patientObj.targetGroup]);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -1847,7 +1863,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                   </FormGroup>
                 </div>
 
-                <div className="form-group  col-md-4">
+                <div className="form-group col-md-4">
                   <FormGroup>
                     <Label>
                       Family Index client{" "}
@@ -1858,12 +1874,19 @@ const ViewFamilyIndexTestingForm = (props) => {
                       name="familyIndexClient"
                       id="familIndxClient"
                       onChange={handleInputChange}
-                      value={payload.familyIndexClient}
+                      value={
+                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                          ? "FAMILY_INDEX_CHILD"
+                          : payload.familyIndexClient
+                      }
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
                       }}
-                      disabled={props.action === "view" ? true : false}
+                      disabled={
+                        props.action === "view" ||
+                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                      }
                     >
                       <option value={""}>Select</option>
                       {familyIndex &&
@@ -2461,11 +2484,8 @@ const ViewFamilyIndexTestingForm = (props) => {
                     <option value="">Select</option>
                     {familyRelationship
                       .filter((relationship) => {
-                        // Skip filtering if in view mode or no family index selected
-                        if (
-                          props.action === "view" ||
-                          !payload.familyIndexClient
-                        ) {
+                        // Skip filtering if in view mode
+                        if (props.action === "view") {
                           return true;
                         }
 
@@ -2478,11 +2498,16 @@ const ViewFamilyIndexTestingForm = (props) => {
                           FAMILY_INDEX_MOTHER: ["FAMILY_RELATIONSHIP_MOTHER"],
                         };
 
+                        // Get the effective family index value (considering auto-populated value)
+                        const effectiveFamilyIndex =
+                          props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                            ? "FAMILY_INDEX_CHILD"
+                            : payload.familyIndexClient;
+
                         // Get relationship codes to exclude
                         const excludedRelationshipCodes =
-                          familyIndexToRelationshipMap[
-                            payload.familyIndexClient
-                          ] || [];
+                          familyIndexToRelationshipMap[effectiveFamilyIndex] ||
+                          [];
 
                         // Return true if this relationship should not be excluded
                         return !excludedRelationshipCodes.includes(
@@ -3152,10 +3177,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                           id="dateVisit"
                           value={familyTestingTrackerRequestDTO?.dateVisit}
                           onChange={handlefamilyTestingTrackerRequestDTO}
-                          min={
-                          
-                            props?.patientObj?.confirmatoryTest2?.date2
-                          }
+                          min={props?.patientObj?.confirmatoryTest2?.date2}
                           max={moment(new Date()).format("YYYY-MM-DD")}
                           style={{
                             border: "1px solid #014D88",

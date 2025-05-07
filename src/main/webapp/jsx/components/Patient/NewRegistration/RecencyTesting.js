@@ -200,21 +200,14 @@ const Recency = (props) => {
 
   const handleDone = () => {
     toggle();
-    //commenting this out for release
-    // handleItemClick("pns", "recency-testing");
-    handleItemClick(nextForm[0], nextForm[1]);
+    handleItemClick(nextForm[2], nextForm[2]);
   };
   const loadOtherForm = (row) => {
     toggle();
   };
 
   const loadNextForm = (row) => {
-    // setSaving(true);
     handleItemClick(nextForm[0], nextForm[1]);
-
-    // else if (permissions.includes("Nigeria_PNS_Form")) {
-    // }
-
     toggle();
   };
   useEffect(() => {
@@ -1135,15 +1128,15 @@ const Recency = (props) => {
           <Button
             onClick={() => loadNextForm()}
             style={{ backgroundColor: "red", color: "#fff" }}
-            // disabled={saving}
+   
           >
             Yes
-            {/* {saving === false ? "Yes" : "Deleting..."} */}
+
           </Button>
           <Button
             onClick={handleDone}
             style={{ backgroundColor: "#014d88", color: "#fff" }}
-            // disabled={saving}
+
           >
             Skip
           </Button>

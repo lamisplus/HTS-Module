@@ -707,7 +707,7 @@ const RiskStratification = (props) => {
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
-                      Entry Point <span style={{ color: "red" }}> *</span>
+                      Entry Point  <span style={{ color: "red" }}> *</span>
                     </Label>
                     <select
                       className="form-control"

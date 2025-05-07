@@ -100,6 +100,7 @@ const BasicInfo = (props) => {
   //const [hideNumChild, setHideNumChild] = useState(false);
   const [kP, setKP] = useState([]);
   const [enrollSetting, setEnrollSetting] = useState([]);
+ 
   const [sourceReferral, setSourceReferral] = useState([]);
   const [gender, setGender] = useState([]);
   const [counselingType, setCounselingType] = useState([]);
@@ -416,6 +417,21 @@ const BasicInfo = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
+ 
+  const shouldHideMaritalFields = () => {
+    
+    const isPediatricAndUnder15 =
+      objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
+      props.patientAge < 15;
+
+    const isTargetGroupPDorChildrenKP =
+      props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
+      props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
+
+    return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     let latestForm = getNextForm(
@@ -513,7 +529,6 @@ const BasicInfo = (props) => {
                     <option value={""}>Select</option>
                     {kP
                       .filter((value) => {
-                     
                         if (
                           props.patientAge > 14 &&
                           (value.id === 961 || value.id === 475)
@@ -648,7 +663,7 @@ const BasicInfo = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    readOnly={props.activePage.actionType === "view"}
+                    readOnly={props?.activePage?.actionType === "view"}
                   />
                   {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -681,11 +696,12 @@ const BasicInfo = (props) => {
                             </FormGroup>
                             </div>
                             )} */}
-              {props.patientAge > 9 &&
+              {/* Number of wives/co-wives field */}
+              {!shouldHideMaritalFields() &&
                 (props.patientObj.personResponseDto.sex === "Male" ||
                   props.patientObj.personResponseDto.sex === "male" ||
                   props.patientObj.personResponseDto.sex === "MALE") && (
-                  <div className="form-group  col-md-4">
+                  <div className="form-group col-md-4">
                     <FormGroup>
                       <Label>Number of wives/co-wives</Label>
                       <Input
@@ -699,13 +715,15 @@ const BasicInfo = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
-                        readOnly={props.activePage.actionType === "view"}
+                        readOnly={props?.activePage?.actionType === "view"}
                       />
                     </FormGroup>
                   </div>
                 )}
-              {props.patientAge > 9 && (
-                <div className="form-group  col-md-4">
+
+              {/* Number of Children <5 years field */}
+              {!shouldHideMaritalFields() && (
+                <div className="form-group col-md-4">
                   <FormGroup>
                     <Label>Number of Children {"<5"} years</Label>
                     <Input
@@ -719,7 +737,7 @@ const BasicInfo = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      readOnly={props.activePage.actionType === "view"}
+                      readOnly={props?.activePage?.actionType === "view"}
                     />
                   </FormGroup>
                 </div>

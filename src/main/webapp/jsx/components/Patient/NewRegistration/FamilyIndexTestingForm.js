@@ -110,6 +110,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FamilyIndexTestingForm = (props) => {
+
   const classes = useStyles();
   let history = useHistory();
   let VL = "";
@@ -215,13 +216,7 @@ const FamilyIndexTestingForm = (props) => {
       trackerSex: "",
     });
   const [payload, setPayload] = useState({
-    age:
-      props &&
-      calculate_age(
-        props?.basicInfo?.personResponseDto?.dateOfBirth
-          ? props?.basicInfo?.personResponseDto?.dateOfBirth
-          : props?.patientObj?.personResponseDto?.dateOfBirth
-      ),
+    age:null,
     alternatePhoneNumber: "",
     contactId: "",
     dateClientEnrolledOnTreatment: "",
@@ -587,7 +582,7 @@ const FamilyIndexTestingForm = (props) => {
       });
   };
   const getSettings = () => {
-    console.log("Family props", props);
+    
 
     if (props.patientObj.testingSetting.includes("FACILITY")) {
       HTS_ENTRY_POINT_FACILITY();
@@ -827,7 +822,7 @@ const FamilyIndexTestingForm = (props) => {
   const handleDone = () => {
     toggle();
     handleItemClick("new-referral", "");
-  }
+  };
   const loadNextForm = (row) => {
     handleItemClick("pns", "fit");
   };
@@ -1119,25 +1114,41 @@ const FamilyIndexTestingForm = (props) => {
       setAgeDisabled2(false);
     }
   };
-  const handleAgeChange = (e) => {
-    if (!ageDisabled && e.target.value) {
-      // if (e.target.value !== "" && e.target.value >= 85) {
-      //   toggle();
-      // }
-      const currentDate = new Date();
-      currentDate.setDate(15);
-      currentDate.setMonth(5);
-      const estDob = moment(currentDate.toISOString());
-      const dobNew = estDob.add(e.target.value * -1, "years");
-      setPayload({
-        ...payload,
-        dateOfBirth: moment(dobNew).format("YYYY-MM-DD"),
-      });
-      payload.dateOfBirth = moment(dobNew).format("YYYY-MM-DD");
-
-      setPayload({ ...payload, age: e.target.value });
+  useEffect(() => {
+    // Only run this if we haven't initialized yet
+    if (payload.age === null) {
+      const dob = props?.basicInfo?.personResponseDto?.dateOfBirth || 
+                 props?.patientObj?.personResponseDto?.dateOfBirth;
+      
+      if (dob) {
+        const calculatedAge = calculate_age(dob);
+        setPayload({
+          ...payload,
+          age: calculatedAge,
+          dateOfBirth: dob
+        });
+      }
     }
-  };
+  }, []);
+const handleAgeChange = (e) => {
+  e.preventDefault();
+  if (!ageDisabled) {
+    const enteredAge = e.target.value;
+
+    // Get current year and subtract age
+    const currentYear = new Date().getFullYear();
+    const birthYear = currentYear - enteredAge;
+
+    // Always set to January 1st
+    const dobNew = `${birthYear}-01-01`;
+
+    setPayload({
+      ...payload,
+      dateOfBirth: dobNew,
+      age: enteredAge,
+    });
+  }
+};
 
   const getCurrentTreatment = async () => {
     await axios
@@ -1294,6 +1305,24 @@ const FamilyIndexTestingForm = (props) => {
         }
       });
   };
+
+  // Add this useEffect to update the payload when the component mounts or targetGroup changes
+  useEffect(() => {
+    if (props.patientObj.targetGroup === "TARGET_GROUP_PD") {
+      // Update the payload state with the auto-populated value
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        familyIndexClient: "FAMILY_INDEX_CHILD",
+      }));
+
+      // Clear any validation errors for this field
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        familyIndexClient: "",
+      }));
+    }
+  }, [props.patientObj.targetGroup]); // Re-run when targetGroup changes
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -1321,6 +1350,7 @@ const FamilyIndexTestingForm = (props) => {
       lga: lgaInfo,
     };
 
+    
     if (validate()) {
       postPayload(submissionPayload);
     }
@@ -1343,6 +1373,7 @@ const FamilyIndexTestingForm = (props) => {
       setPayload({ ...payload, [inputName]: NumberValue });
     }
   };
+
 
   return (
     <>
@@ -1585,7 +1616,7 @@ const FamilyIndexTestingForm = (props) => {
                   </FormGroup>
                 </div>
 
-                <div className="form-group  col-md-4">
+                <div className="form-group col-md-4">
                   <FormGroup>
                     <Label>
                       Family Index client{" "}
@@ -1596,12 +1627,18 @@ const FamilyIndexTestingForm = (props) => {
                       name="familyIndexClient"
                       id="familyIndexClient"
                       onChange={handleInputChange}
-                      value={payload.familyIndexClient}
+                      value={
+                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                          ? "FAMILY_INDEX_CHILD"
+                          : payload.familyIndexClient
+                      }
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
                       }}
-                      // disabled
+                      disabled={
+                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                      }
                     >
                       <option value={""}>Select</option>
                       {familyIndex &&
@@ -2206,11 +2243,16 @@ const FamilyIndexTestingForm = (props) => {
                           FAMILY_INDEX_MOTHER: ["Mother"],
                         };
 
+                        // Get the effective family index value (considering auto-populated value)
+                        const effectiveFamilyIndex =
+                          props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                            ? "FAMILY_INDEX_CHILD"
+                            : payload.familyIndexClient;
+
                         // Get relationships to exclude based on selected family index
                         const excludedRelationshipDisplays =
-                          familyIndexToRelationshipMap[
-                            payload.familyIndexClient
-                          ] || [];
+                          familyIndexToRelationshipMap[effectiveFamilyIndex] ||
+                          [];
 
                         // Return true if this relationship should be included (not excluded)
                         return !excludedRelationshipDisplays.includes(
@@ -2846,11 +2888,8 @@ const FamilyIndexTestingForm = (props) => {
                       id="dateVisit"
                       value={familyTestingTrackerRequestDTO?.dateVisit}
                       onChange={handlefamilyTestingTrackerRequestDTO}
-                      min={
-                   
-                        props?.patientObj?.confirmatoryTest2?.date2
-                      }
-                       max={moment(new Date()).format("YYYY-MM-DD")}
+                      min={props?.patientObj?.confirmatoryTest2?.date2}
+                      max={moment(new Date()).format("YYYY-MM-DD")}
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
@@ -2991,7 +3030,7 @@ const FamilyIndexTestingForm = (props) => {
                             familyTestingTrackerRequestDTO?.dateTested ||
                             props?.patientObj?.confirmatoryTest2?.date2
                           }
-                           max={moment(new Date()).format("YYYY-MM-DD")}
+                          max={moment(new Date()).format("YYYY-MM-DD")}
                           style={{
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",

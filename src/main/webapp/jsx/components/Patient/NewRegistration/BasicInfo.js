@@ -994,6 +994,20 @@ const BasicInfo = (props) => {
     setObjValues({ ...objValues, [inputName]: NumberValue });
   };
 
+   const shouldHideMaritalFields = () => {
+     // Check if setting is Pediatric and age is less than 15 years
+     const isPediatricAndUnder15 =
+       objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
+       props.patientAge < 15;
+
+     // Check if target group is PD or Children of Most at risk population
+     const isTargetGroupPDorChildrenKP =
+       props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
+       props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
+
+     // Hide fields if either condition is true
+     return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
+   };
   const handleSubmit = (e) => {
     e.preventDefault();
     Cookies.set("serial-number", serialNumber);
@@ -1687,7 +1701,7 @@ const BasicInfo = (props) => {
                             </FormGroup>
                         </div>
                              )} */}
-              {objValues.age > 9 && (
+              {!shouldHideMaritalFields() && (
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>Marital Status</Label>
@@ -1712,30 +1726,33 @@ const BasicInfo = (props) => {
                   </FormGroup>
                 </div>
               )}
-              {objValues.age > 9 &&
-                objValues.sex === "Male" &&
-                objValues.maritalStatusId !== 5 && (
-                  <div className="form-group  col-md-4">
+
+              {!shouldHideMaritalFields() &&
+                (props.patientObj.personResponseDto.sex === "Male" ||
+                  props.patientObj.personResponseDto.sex === "male" ||
+                  props.patientObj.personResponseDto.sex === "MALE") && (
+                  <div className="form-group col-md-4">
                     <FormGroup>
                       <Label>Number of wives/co-wives</Label>
                       <Input
                         type="number"
                         name="numWives"
-                        min={0}
                         id="numWives"
+                        min={0}
                         value={objValues.numWives}
                         onChange={handleInputChange}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        readOnly={props?.activePage?.actionType === "view"}
                       />
                     </FormGroup>
                   </div>
                 )}
               {/* && objValues.maritalStatusId==='6' */}
-              {objValues.age > 9 && (
-                <div className="form-group  col-md-4">
+              {!shouldHideMaritalFields() && (
+                <div className="form-group col-md-4">
                   <FormGroup>
                     <Label>Number of Children {"<5"} years</Label>
                     <Input
@@ -1749,6 +1766,7 @@ const BasicInfo = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
+                      readOnly={props?.activePage?.actionType === "view"}
                     />
                   </FormGroup>
                 </div>
@@ -1774,9 +1792,8 @@ const BasicInfo = (props) => {
                     <option value={""}>Select</option>
                     {kP
                       .filter((value) => {
-                      
                         if (
-                          patientAge > 14 &&
+                          objValues.age > 14 &&
                           (value.id === 961 || value.id === 475)
                         ) {
                           return false;
