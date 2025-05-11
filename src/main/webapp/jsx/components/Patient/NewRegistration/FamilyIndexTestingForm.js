@@ -110,7 +110,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const FamilyIndexTestingForm = (props) => {
-
   const classes = useStyles();
   let history = useHistory();
   let VL = "";
@@ -216,7 +215,7 @@ const FamilyIndexTestingForm = (props) => {
       trackerSex: "",
     });
   const [payload, setPayload] = useState({
-    age:null,
+    age: null,
     alternatePhoneNumber: "",
     contactId: "",
     dateClientEnrolledOnTreatment: "",
@@ -276,9 +275,21 @@ const FamilyIndexTestingForm = (props) => {
     phoneNumber:
       props?.patientObj?.personResponseDto?.contactPoint?.contactPoint[0]
         ?.value,
-    recencyTesting: props?.patientObj?.recency?.finalRecencyResult
-      ? props?.patientObj?.recency?.finalRecencyResult
-      : "Not Done",
+    recencyTesting: (() => {
+      if (
+        props?.patientObj?.recency?.finalRecencyResult &&
+        props?.patientObj?.recency?.finalRecencyResult !== ""
+      ) {
+        return props.patientObj.recency.finalRecencyResult;
+      } else if (
+        props?.patientObj?.recency?.rencencyInterpretation &&
+        props?.patientObj?.recency?.rencencyInterpretation !== ""
+      ) {
+        return props.patientObj.recency.rencencyInterpretation;
+      } else {
+        return "Not Done";
+      }
+    })(),
     setting: props.patientObj.testingSetting,
     // chnage position
     visitDate: "",
@@ -2072,25 +2083,7 @@ const handleAgeChange = (e) => {
                       }}
                       disabled
                     />
-                    {/* <select
-                      className="form-control"
-                      name="recencyTesting"
-                      id="reccencyTesting"
-                      onChange={handleInputChange}
-                      value={payload.recencyTesting}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                      }}
-                    >
-                      <option value="">Select</option> */}
-                    {/* <option value="Recent Infection">Recent Infection</option>
-                      <option value="Long Term Infection">
-                        {" "}
-                        Long Term Infection
-                      </option>
-                      <option value="Not Done">Not Done</option> */}
-                    {/* </select> */}
+                    
                   </FormGroup>
                 </div>
 

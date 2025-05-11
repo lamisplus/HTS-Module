@@ -493,17 +493,17 @@ const HivTestResult = (props) => {
     }
   };
   const validate = () => {
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      (temp.prepOffered = objValues.prepOffered
-        ? ""
-        : "The Prep Offered field is required.");
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      objValues.prepOffered === "true" &&
-      (temp.prepAccepted = objValues.prepAccepted
-        ? ""
-        : "The Prep Accepted field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   (temp.prepOffered = objValues.prepOffered
+    //     ? ""
+    //     : "The Prep Offered field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   objValues.prepOffered === "true" &&
+    //   (temp.prepAccepted = objValues.prepAccepted
+    //     ? ""
+    //     : "The Prep Accepted field is required.");
 
     //initial Test date should not be empty
     temp.initialTest1date = initialTest1.date ? "" : "This field is required.";
@@ -1607,7 +1607,7 @@ const HivTestResult = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                          disabled={props.activePage.actionType === "view"}
+                          disabled={props?.activePage?.actionType === "view"}
                         >
                           <option value={""}></option>
                           <option value="true">Yes</option>

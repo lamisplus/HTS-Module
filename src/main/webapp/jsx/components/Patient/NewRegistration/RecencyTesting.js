@@ -522,7 +522,7 @@ const Recency = (props) => {
     <>
       <Card className={classes.root}>
         <CardBody>
-          <h2>RECENCY FORM</h2>
+          <h2>RECENCY FORM </h2>
           <form>
             <div className="row">
               <LabelRibbon

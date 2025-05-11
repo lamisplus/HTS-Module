@@ -524,17 +524,17 @@ const HivTestResult = (props) => {
   const validate = () => {
     //HTS FORM VALIDATION
 
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      (temp.prepOffered = objValues.prepOffered
-        ? ""
-        : "The Prep Offered field is required.");
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      objValues.prepOffered === "true" &&
-      (temp.prepAccepted = objValues.prepAccepted
-        ? ""
-        : "The Prep Accepted field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   (temp.prepOffered = objValues.prepOffered
+    //     ? ""
+    //     : "The Prep Offered field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   objValues.prepOffered === "true" &&
+    //   (temp.prepAccepted = objValues.prepAccepted
+    //     ? ""
+    //     : "The Prep Accepted field is required.");
 
     //if the initial test date is filled then the initial test result should be compulsory and vice versa
     initialTest1.date !== "" &&
@@ -1678,7 +1678,7 @@ const HivTestResult = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                          disabled={props.activePage.actionType === "view"}
+                          disabled={props?.activePage?.actionType === "view"}
                         >
                           <option value={""}></option>
                           <option value="true">Yes</option>
@@ -1704,7 +1704,7 @@ const HivTestResult = (props) => {
                                 border: "1px solid #014D88",
                                 borderRadius: "0.2rem",
                               }}
-                              disabled={props.activePage.actionType === "view"}
+                              disabled={props?.activePage?.actionType === "view"}
                             >
                               <option value={""}></option>
                               <option value="true">Yes</option>

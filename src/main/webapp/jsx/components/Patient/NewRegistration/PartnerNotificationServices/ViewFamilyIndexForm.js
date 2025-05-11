@@ -285,9 +285,21 @@ const ViewFamilyIndexTestingForm = (props) => {
     phoneNumber:
       props?.patientObj?.personResponseDto?.contactPoint?.contactPoint[0]
         ?.value,
-    recencyTesting: props?.patientObj?.recency?.finalRecencyResult
-      ? props?.patientObj?.recency?.finalRecencyResult
-      : "Not Done",
+    recencyTesting: (() => {
+      if (
+        props?.patientObj?.recency?.finalRecencyResult &&
+        props?.patientObj?.recency?.finalRecencyResult !== ""
+      ) {
+        return props.patientObj.recency.finalRecencyResult;
+      } else if (
+        props?.patientObj?.recency?.rencencyInterpretation &&
+        props?.patientObj?.recency?.rencencyInterpretation !== ""
+      ) {
+        return props.patientObj.recency.rencencyInterpretation;
+      } else {
+        return "Not Done";
+      }
+    })(),
     setting: props.patientObj.testingSetting,
     // chnage position
     visitDate: "",

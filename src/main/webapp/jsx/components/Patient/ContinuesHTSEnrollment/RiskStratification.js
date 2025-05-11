@@ -96,8 +96,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RiskStratification = (props) => {
 
+
+
+const RiskStratification = (props) => {
   const classes = useStyles();
   const history = useHistory();
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -309,7 +311,6 @@ const RiskStratification = (props) => {
       .catch((error) => {});
   };
 
-
   const getMenuLogic = () => {
     //secound logic
     props.setHideOtherMenu(false);
@@ -478,12 +479,28 @@ const RiskStratification = (props) => {
   const validate = () => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
+
+
+     const minVisitDate = getMinVisitDateForRetesting(
+       props.personInfo,
+       props.newHTSType
+     );
+
+     if (minVisitDate && objValues.visitDate) {
+       const selectedDate = new Date(objValues.visitDate);
+       const requiredMinDate = new Date(minVisitDate);
+
+       if (selectedDate < requiredMinDate) {
+         temp.dateVisit = `For retesting after ANC, visit date must be at least 28 days after the last visit (${minVisitDate})`;
+       }
+     }
+
     temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
     temp.testingSetting = objValues.testingSetting
       ? ""
       : "This field is required.";
-    // temp.modality = objValues.modality ? "" : "This field is required.";
 
+  
     temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
       ? ""
       : "This field is required.";
@@ -493,13 +510,6 @@ const RiskStratification = (props) => {
         ? ""
         : "This field is required.");
 
-    // objValues.entryPoint !== "" &&
-    //     objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" &&
-    //     (temp.communityEntryPoint = objValues.communityEntryPoint
-    //       ? ""
-    //       : "This field is required.");
-
-    //
     objValues.testingSetting ===
       "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
       (temp.spokeFacility = objValues.spokeFacility
@@ -511,8 +521,6 @@ const RiskStratification = (props) => {
         ? ""
         : "This field is required.");
     //
-
-    //objValues.age>15 && riskAssessment.lastHivTestBasedOnRequest==='false' && riskAssessment.lastHivTestDone!=="" && riskAssessment.lastHivTestDone!=='Never' && (temp.whatWasTheResult = riskAssessment.whatWasTheResult ? "" : "This field is required." )
 
     //Risk Assement section
     if (
@@ -584,103 +592,138 @@ const RiskStratification = (props) => {
       setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
     }
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    getMenuLogic();
-    let newModality = isPMTCTModality ? "skip" : "fill";
 
-    let latestForm = getNextForm(
-      "Risk_Stratification",
-      objValues.age,
-      newModality,
-      "unknown"
+  // Function to get the minimum allowable visit date (28 days after last ANC visit)
+  const getMinVisitDateForRetesting = (personInfo, newHTSType) => {
+    // Check if this is a retesting case
+    if (newHTSType !== "RETESTING") {
+      return null; 
+    }
+
+    // Find if any previous visit was an ANC testing setting
+    const hasANCVisit = personInfo?.htsClientDtoList?.some(
+      (client) =>
+        client?.riskStratificationResponseDto?.testingSetting ===
+        "FACILITY_HTS_TEST_SETTING_ANC"
     );
 
-    props.patientObj.targetGroup = objValues.targetGroup;
-    props.patientObj.testingSetting = objValues.testingSetting;
-    props.patientObj.dateVisit = objValues.visitDate;
-    props.patientObj.modality = objValues.modality;
-    props.patientObj.riskStratificationResponseDto = objValues;
-    //props.patientObj.riskAssessment =riskAssessment
-
-    objValues.riskAssessment = riskAssessment;
-    if (
-      (props.patientObj.riskStratificationResponseDto &&
-        props.patientObj.riskStratificationResponseDto !== null &&
-        props.patientObj.personId !== "") ||
-      props.patientObj.riskStratificationResponseDto.code !== ""
-    ) {
-      axios
-        .put(
-          `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
-          objValues,
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
-        .then((response) => {
-          setSaving(false);
-          props.patientObj.riskStratificationResponseDto = response.data;
-          objValues.code = response.data.code;
-          props.setExtra(objValues);
-          props.setHideOtherMenu(false);
-          handleItemClick(latestForm[0], latestForm[1]);
-          toast.success("Risk stratification save succesfully!");
-        })
-        .catch((error) => {
-          setSaving(false);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage, {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          } else {
-            toast.error("Something went wrong. Please try again...", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          }
-        });
-    } else {
-      if (validate()) {
-        setSaving(true);
-        axios
-          .post(`${baseUrl}risk-stratification`, objValues, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then((response) => {
-            setSaving(false);
-            objValues.code = response.data.code;
-            props.setExtra(objValues);
-            handleItemClick(latestForm[0], latestForm[1]);
-            props.setHideOtherMenu(false);
-            toast.success("Risk stratification save succesfully!");
-          })
-          .catch((error) => {
-            setSaving(false);
-            if (error.response && error.response.data) {
-              let errorMessage =
-                error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
-                  ? error.response.data.apierror.message
-                  : "Something went wrong, please try again";
-              toast.error(errorMessage, {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
-            } else {
-              toast.error("Something went wrong. Please try again...", {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
-            }
-          });
-      } else {
-        toast.error("All fields are required", {
-          position: toast.POSITION.BOTTOM_CENTER,
-        });
-      }
+    if (!hasANCVisit) {
+      return null; // No ANC visit found, so no special validation
     }
+
+    // Find the most recent visit date across all records
+    let mostRecentVisitDate = null;
+
+    personInfo?.htsClientDtoList?.forEach((client) => {
+      const visitDate = client?.riskStratificationResponseDto?.visitDate;
+
+      if (visitDate) {
+        const currentDate = new Date(visitDate);
+
+        if (
+          !mostRecentVisitDate ||
+          currentDate > new Date(mostRecentVisitDate)
+        ) {
+          mostRecentVisitDate = visitDate;
+        }
+      }
+    });
+
+    if (!mostRecentVisitDate) {
+      return null;
+    }
+
+    // Calculate the date 28 days after the most recent visit
+    const nextEligibleDate = new Date(mostRecentVisitDate);
+    nextEligibleDate.setDate(nextEligibleDate.getDate() + 28);
+
+
+    return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
+
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+
+ 
+   const isValid = validate();
+
+   if (!isValid) {
+     toast.error("Please correct the errors before submitting", {
+       position: toast.POSITION.BOTTOM_CENTER,
+     });
+     return; 
+   }
+
+  
+   getMenuLogic();
+   let newModality = isPMTCTModality ? "skip" : "fill";
+
+   let latestForm = getNextForm(
+     "Risk_Stratification",
+     objValues.age,
+     newModality,
+     "unknown"
+   );
+
+   props.patientObj.targetGroup = objValues.targetGroup;
+   props.patientObj.testingSetting = objValues.testingSetting;
+   props.patientObj.dateVisit = objValues.visitDate;
+   props.patientObj.modality = objValues.modality;
+   props.patientObj.riskStratificationResponseDto = objValues;
+   objValues.riskAssessment = riskAssessment;
+
+   setSaving(true);
+
+   try {
+     let response;
+
+
+     if (
+       (props.patientObj.riskStratificationResponseDto &&
+         props.patientObj.riskStratificationResponseDto !== null &&
+         props.patientObj.personId !== "") ||
+       props.patientObj.riskStratificationResponseDto.code !== ""
+     ) {
+ 
+       response = await axios.put(
+         `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
+         objValues,
+         { headers: { Authorization: `Bearer ${token}` } }
+       );
+     } else {
+  
+       response = await axios.post(`${baseUrl}risk-stratification`, objValues, {
+         headers: { Authorization: `Bearer ${token}` },
+       });
+     }
+
+
+     setSaving(false);
+     props.patientObj.riskStratificationResponseDto = response.data;
+     objValues.code = response.data.code;
+     props.setExtra(objValues);
+     props.setHideOtherMenu(false);
+     handleItemClick(latestForm[0], latestForm[1]);
+     toast.success("Risk stratification saved successfully!");
+   } catch (error) {
+
+     setSaving(false);
+     if (error.response && error.response.data) {
+       let errorMessage =
+         error.response.data.apierror &&
+         error.response.data.apierror.message !== ""
+           ? error.response.data.apierror.message
+           : "Something went wrong, please try again";
+       toast.error(errorMessage, {
+         position: toast.POSITION.BOTTOM_CENTER,
+       });
+     } else {
+       toast.error("Something went wrong. Please try again...", {
+         position: toast.POSITION.BOTTOM_CENTER,
+       });
+     }
+   }
+ };
 
   return (
     <>
@@ -707,7 +750,7 @@ const RiskStratification = (props) => {
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
-                      Entry Point  <span style={{ color: "red" }}> *</span>
+                      Entry Point <span style={{ color: "red" }}> *</span>
                     </Label>
                     <select
                       className="form-control"
@@ -785,6 +828,10 @@ const RiskStratification = (props) => {
                       value={objValues.visitDate}
                       onChange={handleInputChange}
                       min={
+                        getMinVisitDateForRetesting(
+                          props.personInfo,
+                          props.newHTSType
+                        ) ||
                         props?.personInfo?.personResponseDto?.dateOfRegistration
                       }
                       max={moment(new Date()).format("YYYY-MM-DD")}

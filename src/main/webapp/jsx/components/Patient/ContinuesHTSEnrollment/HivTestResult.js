@@ -516,17 +516,17 @@ const handleInputChangeTie2 = (e) => {
     initialTest1.date !== "" &&
       (temp.date = initialTest1.result ? "" : "This field is required.");
 
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      (temp.prepOffered = objValues.prepOffered
-        ? ""
-        : "The Prep Offered field is required.");
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      objValues.prepOffered === "true" &&
-      (temp.prepAccepted = objValues.prepAccepted
-        ? ""
-        : "The Prep Accepted field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   (temp.prepOffered = objValues.prepOffered
+    //     ? ""
+    //     : "The Prep Offered field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   objValues.prepOffered === "true" &&
+    //   (temp.prepAccepted = objValues.prepAccepted
+    //     ? ""
+    //     : "The Prep Accepted field is required.");
 
 
 //initial Test date should not be empty 

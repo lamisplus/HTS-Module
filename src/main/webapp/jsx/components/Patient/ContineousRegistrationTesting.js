@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const UserRegistration = (props) => {
+
     const history = useHistory();
 
   const location = useLocation();
@@ -520,6 +521,10 @@ const UserRegistration = (props) => {
       getCheckModality(patientObj2?.riskStratificationResponseDto?.testingSetting)
     );
   }, [patientObj2]);
+
+
+
+
 
   return (
     <>
