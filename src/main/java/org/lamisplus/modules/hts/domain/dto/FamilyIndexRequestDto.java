@@ -43,6 +43,6 @@ public class FamilyIndexRequestDto {
     private String liveWithParent;
     private Boolean isDateOfBirthEstimated;
     private String isHtsClient;
-    private FamilyTestingTrackerRequestDTO familyTestingTrackerRequestDTO;
+    private List<FamilyTestingTrackerRequestDTO> familyTestingTrackerRequestDTOs;
 
 }
