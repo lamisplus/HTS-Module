@@ -187,7 +187,8 @@ if (objValues.age !== "") {
 
     EntryPoint();
   }, [])
-  //Get list of HIV STATUS ENROLLMENT
+  
+  
   const EnrollmentSetting = () => {
     axios
       .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
@@ -201,6 +202,8 @@ if (objValues.age !== "") {
 
       });
   };
+
+
   const EntryPoint = () => {
     axios
       .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
@@ -223,9 +226,6 @@ if (objValues.age !== "") {
 
       });
   };
-
-
-
 
   const getSpokeFaclityByHubSite = () => {
     let facility =Cookies.get("facilityName")
@@ -307,10 +307,6 @@ if (objValues.age !== "") {
 
       });
   };
-
-
-
-
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -806,7 +802,7 @@ if (objValues.age !== "") {
     <>
       <Card className={classes.root}>
         <CardBody>
-          <h2 style={{ color: "#000" }}>RISK STRATIFICATION</h2>
+          <h2 style={{ color: "#000" }}>RISK STRATIFICATION-1</h2>
           <br />
           <form>
             <div className="row">

@@ -2,6 +2,8 @@ import React, { useState, Fragment, lazy, Suspense } from "react";
 import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
 import Dashboard from "./Patient/PatientList";
 import LoadingSpinner from "../../reuseables/Loading";
+import { useEffect } from "react";
+import { getListOfPermission } from "../../utility";
 const HTSList = lazy(() => import("./Patient/HTSList"));
 const HIVSTPatient = lazy(() => import("./Patient/HIVST/HIVSTPatient"));
 const CheckedInPatients = lazy(() => import("./Patient/CheckedInPatients"));
@@ -13,6 +15,16 @@ const divStyle = {
 
 const Home = () => {
   const [key, setKey] = useState("checkedin");
+
+  useEffect(() => {
+
+    const permissionsHtsForm = JSON.parse(localStorage.getItem("currentUser_Permission")) || []
+
+    const lowerCaseArrayPermissions = permissionsHtsForm?.map(str => str.toLowerCase())
+    console.log("lowerCaseArrayPermissions", lowerCaseArrayPermissions)
+    const htsApprovedForms = getListOfPermission(lowerCaseArrayPermissions)
+    localStorage.setItem("hts_permissions_forms", JSON.stringify(htsApprovedForms))
+  }, [])
 
   return (
     <Fragment>
@@ -46,11 +58,11 @@ const Home = () => {
                     </Suspense>
                   </Tab>
 
-                  <Tab eventKey="home" title="Patients">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "home" && <Dashboard />}
-                    </Suspense>
-                  </Tab>
+                  {/*<Tab eventKey="home" title="Patients">*/}
+                  {/*  <Suspense fallback={<LoadingSpinner />}>*/}
+                  {/*    {key === "home" && <Dashboard />}*/}
+                  {/*  </Suspense>*/}
+                  {/*</Tab>*/}
 
 
 

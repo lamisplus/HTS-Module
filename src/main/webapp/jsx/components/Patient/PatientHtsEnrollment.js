@@ -372,12 +372,12 @@ const UserRegistration = (props) => {
                     extra={extra}
                     activePage={props.activePage}
                     patientObject={locationState.patientObject}
-
                     setActivePage={props.setActivePage}
                     patientAge={props.patientAge}
                     setOrganizationInfo={setOrganizationInfo}
                   />
                 )}
+                
                 {activeItem === "basic" && (
                   <BasicInfo
                     handleItemClick={handleItemClick}
@@ -478,7 +478,6 @@ const UserRegistration = (props) => {
                     setRow={setRow}
                   />
                 )}
-
                 {activeItem === "pns" && (
                   <PnsForm
                     handleItemClick={handleItemClick}
@@ -494,7 +493,6 @@ const UserRegistration = (props) => {
                     history={true}
                   />
                 )}
-
                 {activeItem === "view-pns" && (
                   <ViewPNSForm
                     handleItemClick={handleItemClick}
@@ -510,7 +508,6 @@ const UserRegistration = (props) => {
                     row={row}
                   />
                 )}
-
                 {activeItem === "view-fit" && (
                   <ViewFamilyIndexTestingForm
                     handleItemClick={handleItemClick}
@@ -529,7 +526,6 @@ const UserRegistration = (props) => {
                     selectedRow={selectedRow}
                   />
                 )}
-
                 {activeItem === "fit-history" && (
                   <FamilyIndexHistory
                     handleItemClick={handleItemClick}
@@ -548,7 +544,6 @@ const UserRegistration = (props) => {
                     setAction={setAction}
                   />
                 )}
-
                 {activeItem === "fit" && (
                   <FamilyIndexTestingForm
                     handleItemClick={handleItemClick}

@@ -49,7 +49,7 @@ export const fetchAndStoreAccountData = async () => {
 
     const htsApprovedForms = getListOfPermission(lowerCaseArrayPermissions)
     localStorage.setItem("hts_permissions_forms", JSON.stringify(htsApprovedForms))
-
+     
     return {
       user_account: lowerCaseArrayUserAccount,
       currentUser_Roles: lowerCaseArrayRoles,

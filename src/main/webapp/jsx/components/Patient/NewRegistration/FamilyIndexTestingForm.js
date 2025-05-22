@@ -547,6 +547,8 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         ;
       });
   };
+
+
  const getSettings=()=>{
 
   if(  props.patientObj.testingSetting.includes("FACILITY")){
@@ -554,7 +556,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
   }else if(props.patientObj.testingSetting.includes("COMMUNITY")){
     HTS_ENTRY_POINT_COMMUNITY()
   }
-  }
+}
 
 
 
@@ -599,6 +601,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       })
       .catch(() => {});
   };
+
   const checkPhoneNumberBasic = (e, inputName) => {
     if (e) {
       setErrors({ ...errors, phoneNumber: "" });
@@ -778,14 +781,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         familyRelationship: result2[0].code,
       });
     }
-    // setSaving(true);
-    // if (permissions.canSeeNigeriaPnsForm) {
-    //   handleItemClick("pns", "fit");
-    //   toggle();
-    // } else if (permissions.canSeeRefferalForm) {
-    //   handleItemClick("pns", "client-referral");
-    //   toggle();
-    // }
+    
   };
 
   
@@ -1431,12 +1427,6 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                       }}
                       disabled
                     >
-                      {/* <option>Select Facility</option>
-                                            {facilities.map((facility) => (
-                                                <option key={facility.id} value={facility.id}>
-                                                    {facility.name}
-                                                </option>
-                                            ))} */}
                     </Input>
                     {errors.facilityTransferTo !== "" ? (
                       <span className={classes.error}>
@@ -2507,83 +2497,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                   </FormGroup>
                 </div>
               )}
-              {/* {addIndexTracker && (
-                <div className="form-group mb-3 col-md-12">
-                  <p style={{ color: "red" }}>Fill input in section B</p>
-                </div>
-              )}
-              <div className="form-group mb-3 col-md-6">
-                <LabelSui
-                  as="a"
-                  color="black"
-                  onClick={handleSubmitfamilyIndexRequestDto}
-                  size="small"
-                  style={{ marginTop: 35 }}
-                >
-                  <Icon name="plus" /> Add
-                </LabelSui>
-              </div> */}
-              {/* <div className="form-group mb-3 col-md-6">
-                <Button
-                  content="Add"
-                  type="submit"
-                  icon="right plus"
-                  labelPosition="left"
-                  style={{ backgroundColor: "#000", color: "white" }}
-                  onClick={handleSubmitfamilyIndexRequestDto}
-                  //   disabled={saving}
-                />
-              </div> */}
-
-              {/* {arrayFamilyIndexRequestDto &&
-                arrayFamilyIndexRequestDto.length > 0 && (
-                  <List className="mb-5">
-                    <Table striped responsive>
-                      <thead>
-                        <tr>
-                          <th>Family Relationship</th>
-                          <th>Family Index HIV Status</th>
-                          <th>Mother Dead</th>
-
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {arrayFamilyIndexRequestDto.length > 0 &&
-                          arrayFamilyIndexRequestDto.map((each, index) => {
-                            return (
-                              <tr key={index}>
-                                <td>
-                                  {convertCodeToDisplay(
-                                    "familyRelationship",
-                                    each.familyRelationship
-                                  )}
-                                </td>
-                                <td>
-                                  {convertCodeToDisplay(
-                                    "statusOfContact",
-                                    each.statusOfContact
-                                  )}
-                                </td>
-                                <td>{each.motherDead}</td>
-                                <td>
-                                  {" "}
-                                  <IconButton
-                                    aria-label="delete"
-                                    size="small"
-                                    color="error"
-                                    onClick={() => removeFamilyIndexRow(index)}
-                                  >
-                                    <DeleteIcon fontSize="inherit" />
-                                  </IconButton>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                      </tbody>
-                    </Table>
-                  </List>
-                )} */}
+               
             </div>
 
             <div className="row">

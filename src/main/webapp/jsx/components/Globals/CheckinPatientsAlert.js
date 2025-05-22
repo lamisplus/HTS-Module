@@ -8,11 +8,13 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import { Fab } from '@material-ui/core';
 import { useLocalStorage } from './useLocalStorage';
+// import { useGetCodesets } from '../../hooks/useGetCodesets.hook';
 
 // Hook
 
 
 const CheckedInPatientsAlert = () => {
+
     const lastToastRef = useRef(null);
     const hiddenButtonRef = useRef(null); // Reference to the hidden button
     const [soundEnabled, setSoundEnabled] = useLocalStorage("enableAppSound", true);
@@ -70,6 +72,7 @@ const CheckedInPatientsAlert = () => {
         }
     };
 
+   
 
     return (
         <div>

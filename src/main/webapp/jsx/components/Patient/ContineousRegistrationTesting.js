@@ -643,7 +643,7 @@ const UserRegistration = (props) => {
                             backgroundColor:
                               activeItem === "hiv-test" ? "#000" : "",
                           }}
-                        //disabled={activeItem !== 'hiv-test' ? true : false}
+                      disabled={activeItem !== 'hiv-test' ? true : false}
                         >
                           <span style={{ color: "#fff" }}>
                             Request {"&"} Result Form
@@ -655,6 +655,7 @@ const UserRegistration = (props) => {
                           {/* <Label color='teal'>3</Label> */}
                         </Menu.Item>
                       )}
+                      
                       <Menu.Item
                         name="spam"
                         active={activeItem === "post-test"}

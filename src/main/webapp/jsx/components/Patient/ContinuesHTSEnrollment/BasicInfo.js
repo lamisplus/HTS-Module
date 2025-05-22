@@ -26,6 +26,7 @@ import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import { error } from "highcharts";
 import Cookies from "js-cookie";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -303,13 +304,8 @@ const BasicInfo = (props) => {
     CounselingType();
     PregnancyStatus();
     IndexTesting();
-
     CreateClientCode();
     getSettingList()
-
-
-   
-
 
   }, [props.patientObj, facilityCode]);
 
@@ -332,6 +328,20 @@ const BasicInfo = (props) => {
         });
     }
   };
+
+
+  const { data } = useGetCodesets({
+    codesetsKeys: ["COMMUNITY_HTS_TEST_SETTING", 
+    "FACILITY_HTS_TEST_SETTING", 
+    "TARGET_GROUP",
+    "INDEX_TESTING",
+    "PREGNANCY_STATUS", 
+    "COUNSELING_TYPE",
+    "TEST_SETTING",
+    "SOURCE_REFERRAL",
+    "GENDER",
+    ]
+  })
 
 
 
@@ -358,22 +368,12 @@ const BasicInfo = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
-
         setEnrollSetting(response.data);
       })
       .catch((error) => {
         
       });
   };
-
 
   //Get list of KP
   const KP = () => {
@@ -481,6 +481,8 @@ const BasicInfo = (props) => {
       })
       .catch((error) => {});
   };
+
+
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "indexClientCode" && e.target.value !== "") {
@@ -592,28 +594,7 @@ const BasicInfo = (props) => {
     props.handleItemClick(page, completedMenu);
  
   };
-  //checkClientCode
-  //   const checkClientCode = (e) => {
-  //     async function getIndexClientCode() {
-  //       const indexClientCode = objValues.clientCode;
-  //       const response = await axios.get(
-  //         `${baseUrl}hts/client/${indexClientCode}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "text/plain",
-  //           },
-  //         }
-  //       );
-  //       // if(response.data!=='Record Not Found'){
-  //       //     setClientCodeCheck("Client code already exist")
-  //       // }else{
-  //       //     setClientCodeCheck("")
-  //       // }
-  //     }
-  //     getIndexClientCode();
-  //   };
-  //checkClientCode
+  
   const checkClientCode = (e) => {
     let code = "";
 

@@ -3,20 +3,20 @@ import { QueryClient } from "react-query";
 const queryClientSettings = {
   defaultOptions: {
     queries: {
-      retry: 2,
-      refetchOnMount: "always",
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      cacheTime: 60000,
-      refetchInterval: 10000, 
-      refetchIntervalInBackground: true,
-      suspense: false,
-      staleTime: 30000,
+      retry: 1,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      cacheTime: 1000 * 60 * 10,
+      staleTime: 1000 * 60 * 5,
+      refetchInterval: false,
+      refetchIntervalInBackground: false,
+      suspense: false
     },
     mutations: {
-      retry: 2,
-    },
-  },
+      retry: 1
+    }
+  }
 };
 
 export const queryClient = new QueryClient(queryClientSettings);
