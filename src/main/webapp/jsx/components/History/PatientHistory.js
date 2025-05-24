@@ -307,6 +307,7 @@ const Home = (props) => {
                             patientObj={props?.patientObj}
                             setActiveContent={props.setActivePage}
                             activeContent={props.activePage}
+                            patientInfo={patientInfo}
                           />
                         }
                       </Suspense>

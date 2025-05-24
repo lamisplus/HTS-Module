@@ -101,6 +101,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RiskStratification = (props) => {
+
   const classes = useStyles();
   const history = useHistory();
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -346,8 +347,6 @@ const RiskStratification = (props) => {
       } else {
         setRiskCount(0);
       }
-
-
     }
 
 
@@ -627,6 +626,7 @@ const RiskStratification = (props) => {
       "FACILITY_HTS_TEST_SETTING",
       "TEST_SETTING",
     ],
+    patientId: props.personInfo?.personId,
     onSuccess: loadCodesets
   })
 
