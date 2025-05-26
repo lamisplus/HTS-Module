@@ -12,7 +12,7 @@
 
 	<groupId>org.lamisplus.modules</groupId>
 	<artifactId>hts</artifactId>
-	<version>2.2.0.1-PoC</version>
+	<version>2.2.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Hts</name>
