@@ -703,6 +703,9 @@ const PnsForm = (props) => {
   const validate = () => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
+    temp.partnerName = objValues.htsClientInformation.partnerName ? "" : "This field is required.";
+    temp.partnerAge = objValues.htsClientInformation.partnerAge ? "" : "This field is required.";
+    temp.partnerSex = objValues.htsClientInformation.partnerSex ? "" : "This field is required.";
 
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
@@ -1829,7 +1832,15 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
+                          required
                         />
+                        {errors.partnerName !== "" ? (
+                          <span className={classes.error}>
+                            {errors.partnerName}
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </FormGroup>
                     </div>
                     <div className="form-group  col-md-4">
@@ -1845,6 +1856,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
+                          required
                         >
                           <option value={""}></option>
                           {sexs.map((value) => (
@@ -1853,6 +1865,13 @@ const PnsForm = (props) => {
                             </option>
                           ))}
                         </select>
+                        {errors.partnerSex !== "" ? (
+                          <span className={classes.error}>
+                            {errors.partnerSex}
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </FormGroup>
                     </div>
                     <div className="form-group mb-3 col-md-4">
@@ -1873,6 +1892,13 @@ const PnsForm = (props) => {
                             borderRadius: "0.2rem",
                           }}
                         />
+                        {errors.partnerAge !== "" ? (
+                          <span className={classes.error}>
+                            {errors.partnerAge}
+                          </span>
+                        ) : (
+                          ""
+                        )}
                       </FormGroup>
                     </div>
                     <div className="form-group mb-3 col-md-4">

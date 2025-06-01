@@ -6,7 +6,6 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing ADD COLUMN IF NOT EXISTS contact_id varchar(255);
-
         </sql>
     </changeSet>
 
@@ -19,7 +18,6 @@
         </sql>
     </changeSet>
 
-
     <changeSet failOnError="true" author="Basil" id="20250404-003">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_pns_index_client_partner"/>
@@ -30,4 +28,27 @@
     </changeSet>
 
 
+    <changeSet failOnError="true" author="Basil" id="20250521-002">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing"/>
+        </preConditions>
+        <sql>
+            UPDATE hts_family_index_testing
+            SET contact_id = REGEXP_REPLACE(contact_id, '(.*)/([0-9]+)$', '\1/FMI/\2')
+            WHERE contact_id IS NOT NULL
+              AND contact_id NOT LIKE '%/FMI/%';
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="true" author="Basil" id="20250521-003">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index"/>
+        </preConditions>
+        <sql>
+            UPDATE hts_family_index
+            SET contact_id = REGEXP_REPLACE(contact_id, '(.*)/([0-9]+)$', '\1/FMI/\2')
+            WHERE contact_id IS NOT NULL
+              AND contact_id NOT LIKE '%/FMI/%';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

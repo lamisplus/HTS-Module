@@ -1036,7 +1036,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_NEGATIVE" ||
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE"
       ) {
-       
         setShowHTSDate(true);
       } else {
         setShowHTSDate(false);
@@ -1548,22 +1547,23 @@ const ViewFamilyIndexTestingForm = (props) => {
       });
   };
 
-   useEffect(() => {
-      if (props.patientObj.targetGroup === "TARGET_GROUP_PD") {
-       
-        setPayload((prevPayload) => ({
-          ...prevPayload,
-          familyIndexClient: "FAMILY_INDEX_CHILD",
-        }));
-  
-    
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          familyIndexClient: "",
-        }));
-      }
-   }, [props.patientObj.targetGroup]);
-  
+  useEffect(() => {
+    if (
+      props?.patientObj?.testingSetting ===
+      "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
+    ) {
+      setPayload((prevPayload) => ({
+        ...prevPayload,
+        familyIndexClient: "FAMILY_INDEX_CHILD",
+      }));
+
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        familyIndexClient: "",
+      }));
+    }
+  }, [props?.patientObj?.testingSetting]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -1887,7 +1887,8 @@ const ViewFamilyIndexTestingForm = (props) => {
                       id="familIndxClient"
                       onChange={handleInputChange}
                       value={
-                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                        props?.patientObj?.testingSetting ===
+                        "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
                           ? "FAMILY_INDEX_CHILD"
                           : payload.familyIndexClient
                       }
@@ -1896,8 +1897,9 @@ const ViewFamilyIndexTestingForm = (props) => {
                         borderRadius: "0.2rem",
                       }}
                       disabled={
-                        props.action === "view" ||
-                        props.patientObj.targetGroup === "TARGET_GROUP_PD"
+                        props?.action === "view" ||
+                        props?.patientObj?.testingSetting ===
+                          "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
                       }
                     >
                       <option value={""}>Select</option>

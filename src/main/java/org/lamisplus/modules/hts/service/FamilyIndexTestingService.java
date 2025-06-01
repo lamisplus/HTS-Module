@@ -136,20 +136,20 @@ public class FamilyIndexTestingService {
         }
         List<FamilyIndexTestingResponseDTO> familyIndexList = getFamilyIndexTestingListByHtsClient(htsClientId);
         if (familyIndexList.isEmpty()) {
-            return clientCode + "/001";
+            return clientCode + "/FMI/001";
         } else {
             // Get the last partner ID from the list
             String lastContactId = familyIndexList.get(familyIndexList.size() - 1).getContactId();
 
             // If lastContactId is null or empty, return the first contact ID
             if (lastContactId == null || lastContactId.isEmpty()) {
-                return clientCode + "/001";
+                return clientCode + "/FMI/001";
             }
 
             // Extract the serial number from the last partner ID and increment it
             int serialNumber = Integer.parseInt(lastContactId.substring(lastContactId.lastIndexOf("/") + 1)) + 1;
             // Create a new partner ID for the new PNS partner
-            return clientCode + "/" + String.format("%03d", serialNumber);
+            return clientCode + "/FMI/" + String.format("%03d", serialNumber);
         }
     }
 

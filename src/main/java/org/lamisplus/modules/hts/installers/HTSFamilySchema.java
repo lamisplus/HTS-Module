@@ -8,7 +8,7 @@ import org.springframework.core.annotation.Order;
 @Installer(
         name = "contact-id-update-schema",
         description = "Added Contact Id to family index testing",
-        version = 3
+        version = 5
 )
 public class HTSFamilySchema extends AcrossLiquibaseInstaller {
     public HTSFamilySchema() {
