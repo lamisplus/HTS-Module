@@ -1715,7 +1715,7 @@ const HivTestResult = (props) => {
                   <br /> <br />
                   <div className="form-group  col-md-5">
                     <FormGroup>
-                      <Label>CD4 Count </Label>
+                      <Label>CD4 Type </Label>
                       <select
                         className="form-control"
                         name="cd4Count"
