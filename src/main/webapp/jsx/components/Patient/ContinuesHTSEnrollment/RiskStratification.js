@@ -24,6 +24,7 @@ import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
+import {validateVisitDateWithDOB} from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -643,7 +644,14 @@ const RiskStratification = (props) => {
 
  const handleSubmit = async (e) => {
    e.preventDefault();
+   const visitDateError = validateVisitDateWithDOB(objValues);
 
+   if (visitDateError) {
+     toast.error(visitDateError, {
+       position: toast.POSITION.BOTTOM_CENTER,
+     });
+     return;
+   }
  
    const isValid = validate();
 

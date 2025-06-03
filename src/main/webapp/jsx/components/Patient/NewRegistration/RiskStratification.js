@@ -23,7 +23,7 @@ import { Button } from "semantic-ui-react";
 import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import Cookies from "js-cookie";
-import { calculate_age, generateDobFromAge } from "../../utils";
+import {calculate_age, generateDobFromAge, validateVisitDateWithDOB} from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -147,6 +147,8 @@ const BasicInfo = (props) => {
     spokeFacility: "",
     healthFacility: "",
   });
+
+  // console.log("Risk stratification objValues in newRegistration: ", objValues)
   const [riskAssessment, setRiskAssessment] = useState({
     lastHivTestForceToHaveSex: "",
     lastHivTestHadAnal: "",
@@ -831,7 +833,14 @@ const handleTargetGroupChange = (e) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const visitDateError = validateVisitDateWithDOB(objValues);
 
+    if (visitDateError) {
+      toast.error(visitDateError, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+      return;
+    }
     if (!validate()) {
       // Check specifically if it's an age restriction error
       if (

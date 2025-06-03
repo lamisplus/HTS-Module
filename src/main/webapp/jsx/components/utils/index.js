@@ -38,3 +38,25 @@ export const generateDobFromAge = (age) => {
   const birthYear = currentYear - age;
   return `${birthYear}-01-01`;
 };
+
+export const validateVisitDateWithDOB = (obj) => {
+  const dob = obj.dob;
+  const visitDate = obj.visitDate;
+
+  if (!dob || !visitDate) {
+    return "Please provide both Date of Birth and Visit Date.";
+  }
+
+  const dobDate = new Date(dob);
+  const visitDateDate = new Date(visitDate);
+
+  if (isNaN(dobDate) || isNaN(visitDateDate)) {
+    return "Invalid date format detected. Please enter a valid date (e.g., YYYY-MM-DD).";
+  }
+
+  if (visitDateDate < dobDate) {
+    return "The Visit Date cannot be earlier than the Date of Birth.";
+  }
+
+  return null;
+}
