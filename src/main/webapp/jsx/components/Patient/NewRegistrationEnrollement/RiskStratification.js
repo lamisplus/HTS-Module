@@ -226,7 +226,6 @@ const RiskStratification = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setEnrollSetting(response.data);
       })
       .catch((error) => {
@@ -239,26 +238,13 @@ const RiskStratification = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setEntryPoint(response.data);
       })
       .catch((error) => {
         //console.log(error);
       });
   };
-  // const HTS_ENTRY_POINT_COMMUNITY = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT_COMMUNITY`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       //console.log(response.data);
-  //       setEntryPointCommunity(response.data);
-  //     })
-  //     .catch((error) => {
-  //       //console.log(error);
-  //     });
-  // };
+
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");
@@ -331,14 +317,6 @@ const RiskStratification = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
         setEntryPointSetting(response.data);
       })
       .catch((error) => {
@@ -356,7 +334,6 @@ const RiskStratification = (props) => {
         }
       )
       .then((response) => {
-        //console.log(response.data);
         setEntryPointSetting(response.data);
       })
       .catch((error) => {
@@ -390,8 +367,37 @@ const RiskStratification = (props) => {
     }
   };
 
+  const RESTRICTED_SETTINGS = [
+    "FACILITY_HTS_TEST_SETTING_ANC",
+    "FACILITY_HTS_TEST_SETTING_L&D",
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+  ];
+
+  const MSM_CODE = "TARGET_GROUP_MSM";
+
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
+
+  if( props?.patientObject?.gender === "Male" ) {
+    if (e.target.name === "targetGroup") {
+      const isRestrictedSetting =
+          objValues.testingSetting &&
+          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+      if (e.target.value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
+        toast.error(
+            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+            {
+              position: toast.POSITION.BOTTOM_CENTER,
+            }
+        );
+        return;
+      }
+    }
+  }
+
+    setErrors({ ...temp, [e.target.name]: "" });
+
     if (e.target.name === "testingSetting" && e.target.value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
@@ -635,6 +641,44 @@ const RiskStratification = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const patientGender = props.patientObject?.gender || "";
+
+    // Rule 1: Female patients shouldn't select MSM under restricted settings
+    const isRestrictedSetting =
+        objValues.testingSetting &&
+        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+    const isMSMSelected =
+        objValues.targetGroup === "TARGET_GROUP_MSM";
+
+    const isFemale =
+        patientGender === "Female" || patientGender === "F";
+
+    if (isFemale && isRestrictedSetting && isMSMSelected) {
+      toast.error(
+          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
+      );
+      return;
+    }
+
+    // Rule 2: Male patients shouldn't select female-only settings
+    const isMale =
+        patientGender === "Male" || patientGender === "M";
+
+    if (isMale && isRestrictedSetting) {
+      toast.error(
+          "This setting is only applicable for female patients.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
+      );
+      return;
+    }
+
+    // Validate visit date
     const visitDateError = validateVisitDateWithDOB(objValues);
     if (visitDateError) {
       toast.error(visitDateError, {
@@ -642,111 +686,92 @@ const RiskStratification = (props) => {
       });
       return;
     }
+
     getMenuLogic(objValues);
     let newModality = isPMTCTModality ? "skip" : "fill";
-
     let latestForm = getNextForm(
-      "Risk_Stratification",
-      objValues.age,
-      newModality,
-      "unknown"
+        "Risk_Stratification",
+        objValues.age,
+        newModality,
+        "unknown"
     );
-    //console.log(riskAssessment)
+
     props.patientObj.targetGroup = objValues.targetGroup;
     props.patientObj.testingSetting = objValues.testingSetting;
     props.patientObj.dateVisit = objValues.visitDate;
     props.patientObj.modality = objValues.modality;
     props.patientObj.riskStratificationResponseDto = objValues;
-    //props.patientObj.riskAssessment =riskAssessment
-
     objValues.riskAssessment = riskAssessment;
+
+    // Save logic
     if (
-      props.patientObj.riskStratificationResponseDto &&
-      props.patientObj.riskStratificationResponseDto !== null &&
-      props.patientObj.personId !== "" &&
-      props.patientObj.riskStratificationResponseDto.code !== ""
+        props.patientObj.riskStratificationResponseDto &&
+        props.patientObj.riskStratificationResponseDto.id
     ) {
       if (validate()) {
         setSaving(true);
         handleItemClick(latestForm[0], latestForm[1]);
-
         props.setHideOtherMenu(false);
+
         axios
-          .put(
-            `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
-            objValues,
-            { headers: { Authorization: `Bearer ${token}` } }
-          )
-          .then((response) => {
-            setSaving(false);
-            props.patientObj.riskStratificationResponseDto = response.data;
-            objValues.code = response.data.code;
-            props.setExtra(objValues);
-            //toast.success("Risk stratification save succesfully!");
-          })
-          .catch((error) => {
-            console.log(error);
-            setSaving(false);
-            if (error.response && error.response.data) {
-              let errorMessage =
-                error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
-                  ? error.response.data.apierror.message
-                  : "Something went wrong, please try again";
+            .put(
+                `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
+                objValues,
+                { headers: { Authorization: `Bearer ${token}` } }
+            )
+            .then((response) => {
+              setSaving(false);
+              props.patientObj.riskStratificationResponseDto = response.data;
+              objValues.code = response.data.code;
+              props.setExtra(objValues);
+              toast.success("Risk stratification saved successfully!");
+            })
+            .catch((error) => {
+              setSaving(false);
+              const errorMessage =
+                  error.response?.data?.apierror?.message ||
+                  "Something went wrong. Please try again.";
               toast.error(errorMessage, {
                 position: toast.POSITION.BOTTOM_CENTER,
               });
-            } else {
-              toast.error("Something went wrong. Please try again...", {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
-            }
-          });
+            });
       }
     } else {
-      //console.log("post");
       if (validate()) {
         setSaving(true);
         objValues.dob = props.patientObj.dateOfBirth
-          ? props.patientObj.dateOfBirth
-          : props?.personInfopersonResponseDto?.dateOfBirth;
+            ? props.patientObj.dateOfBirth
+            : props?.personInfopersonResponseDto?.dateOfBirth;
 
         axios
-          .post(`${baseUrl}risk-stratification`, objValues, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .then((response) => {
-            setSaving(false);
-            objValues.code = response.data.code;
-            props.setExtra(objValues);
-            handleItemClick(latestForm[0], latestForm[1]);
-            props.setHideOtherMenu(false);
-            //toast.success("Risk stratification save succesfully!");
-          })
-          .catch((error) => {
-            setSaving(false);
-            if (error.response && error.response.data) {
-              let errorMessage =
-                error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
-                  ? error.response.data.apierror.message
-                  : "Something went wrong, please try again";
+            .post(`${baseUrl}risk-stratification`, objValues, {
+              headers: { Authorization: `Bearer ${token}` },
+            })
+            .then((response) => {
+              setSaving(false);
+              objValues.code = response.data.code;
+              props.setExtra(objValues);
+              handleItemClick(latestForm[0], latestForm[1]);
+              props.setHideOtherMenu(false);
+              toast.success("Risk stratification saved successfully!");
+            })
+            .catch((error) => {
+              setSaving(false);
+              const errorMessage =
+                  error.response?.data?.apierror?.message ||
+                  "Something went wrong. Please try again.";
               toast.error(errorMessage, {
                 position: toast.POSITION.BOTTOM_CENTER,
               });
-            } else {
-              toast.error("Something went wrong. Please try again...", {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
-            }
-          });
+            });
       } else {
-        toast.error("All fields are required", {
+        toast.error("Please correct all errors before submitting.", {
           position: toast.POSITION.BOTTOM_CENTER,
         });
       }
     }
   };
+
 
   return (
     <>

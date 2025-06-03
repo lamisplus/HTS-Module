@@ -724,9 +724,6 @@ const HivTestResult = (props) => {
           .then((response) => {
             setSaving(false);
             props.setPatientObj(response.data);
-            console.log("saved", response.data);
-            //props.setPatientObj(props && props.patientObj ? props.patientObj : "")
-            //toast.success("HIV test successful");
             handleItemClick(latestForm[0], latestForm[1]);
           })
           .catch((error) => {

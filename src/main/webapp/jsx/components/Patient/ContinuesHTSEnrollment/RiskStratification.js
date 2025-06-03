@@ -343,8 +343,34 @@ const RiskStratification = (props) => {
       return false;
     }
   };
+
+  const RESTRICTED_SETTINGS = [
+    "FACILITY_HTS_TEST_SETTING_ANC",
+    "FACILITY_HTS_TEST_SETTING_L&D",
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+  ];
+
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
+
+    if (e.target.name === "targetGroup") {
+      const isRestrictedSetting =
+          objValues.testingSetting &&
+          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+      if (e.target.value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
+        toast.error(
+            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+            {
+              position: toast.POSITION.BOTTOM_CENTER,
+            }
+        );
+        return;
+      }
+    }
+
+    setErrors({ ...temp, [e.target.name]: "" });
+
     if (e.target.name === "testingSetting" && e.target.value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
@@ -642,8 +668,28 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
+
  const handleSubmit = async (e) => {
    e.preventDefault();
+
+   // Check if testingSetting is restricted
+   const isRestrictedSetting =
+       objValues.testingSetting &&
+       RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+   // Check if targetGroup is MSM
+   const isMSMSelected =
+       objValues.targetGroup === "TARGET_GROUP_MSM";
+   // Block submission if restricted setting + MSM
+   if (isRestrictedSetting && isMSMSelected) {
+     toast.error(
+         "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+         {
+           position: toast.POSITION.BOTTOM_CENTER,
+         }
+     );
+     return;
+   }
    const visitDateError = validateVisitDateWithDOB(objValues);
 
    if (visitDateError) {
@@ -1064,6 +1110,16 @@ const RiskStratification = (props) => {
                           ) {
                             return false;
                           }
+                          return true;
+                          // Check if MSM should be hidden
+                          const isRestrictedSetting =
+                              objValues.testingSetting &&
+                              RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+                          if (isRestrictedSetting && value.code === "TARGET_GROUP_MSM") {
+                            return false;
+                          }
+
                           return true;
                         })
                         .map((value) => {

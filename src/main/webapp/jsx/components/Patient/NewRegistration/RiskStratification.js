@@ -98,7 +98,6 @@ const useStyles = makeStyles((theme) => ({
 
 const BasicInfo = (props) => {
 
-
   const classes = useStyles();
  
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -148,7 +147,6 @@ const BasicInfo = (props) => {
     healthFacility: "",
   });
 
-  // console.log("Risk stratification objValues in newRegistration: ", objValues)
   const [riskAssessment, setRiskAssessment] = useState({
     lastHivTestForceToHaveSex: "",
     lastHivTestHadAnal: "",
@@ -344,21 +342,45 @@ const BasicInfo = (props) => {
     }
   };
 
+  const RESTRICTED_SETTINGS = [
+    "FACILITY_HTS_TEST_SETTING_ANC",
+    "FACILITY_HTS_TEST_SETTING_L&D",
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+  ];
+
   const handleInputChange = (e) => {
-    setErrors({ ...temp, [e.target.name]: "" });
-    if (e.target.name === "testingSetting" && e.target.value !== "") {
+    const { name, value } = e.target;
+
+    if (name === "targetGroup") {
+      const isRestrictedSetting =
+          objValues.testingSetting &&
+          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+      if (value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
+        toast.error(
+            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+            {
+              position: toast.POSITION.BOTTOM_CENTER,
+            }
+        );
+        return;
+      }
+    }
+
+    setErrors({ ...temp, [name]: "" });
+
+    if (name === "testingSetting" && value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(e.target.value);
-      setObjValues({ ...objValues, [e.target.name]: e.target.value });
-      let ans = checkPMTCTModality(e.target.value);
+      SettingModality(value);
+      setObjValues({ ...objValues, [name]: value });
+      let ans = checkPMTCTModality(value);
 
       if (
-        e.target.value ===
-          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+          value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
       ) {
         setShowHealthFacility(true);
       } else {
@@ -366,59 +388,58 @@ const BasicInfo = (props) => {
       }
 
       displayRiskAssessment(
-        riskAssessment.lastHivTestBasedOnRequest,
-        objValues.age,
-        ans
+          riskAssessment.lastHivTestBasedOnRequest,
+          objValues.age,
+          ans
       );
 
-      //get spoke sites
+      // Get spoke sites
       if (
-        e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
-        e.target.value ===
-          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+          value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+          value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
       ) {
         getSpokeFaclityByHubSite();
       }
 
-      //set risk count
+      // Set risk count
       if (
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
-        e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
+          value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
+          value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
       ) {
         setRiskCount(1);
       } else if (
-        e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
-        e.target.value === "FACILITY_HTS_TEST_SETTING_CT"
+          value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
+          value === "FACILITY_HTS_TEST_SETTING_CT"
       ) {
         setRiskCount(1);
-      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_TB") {
+      } else if (value === "FACILITY_HTS_TEST_SETTING_TB") {
         setRiskCount(1);
-      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
+      } else if (value === "FACILITY_HTS_TEST_SETTING_STI") {
         setRiskCount(1);
-      } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
+      } else if (value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
         setRiskCount(1);
       } else {
         setRiskCount(0);
       }
+
+      return;
     }
 
-    if (e.target.name === "entryPoint") {
-      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+    if (name === "entryPoint") {
+      if (value === "HTS_ENTRY_POINT_COMMUNITY") {
         HTS_ENTRY_POINT_COMMUNITY();
-      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
+      } else if (value === "HTS_ENTRY_POINT_FACILITY") {
         HTS_ENTRY_POINT_FACILITY();
       } else {
         setEntryPointSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
+    setObjValues({ ...objValues, [name]: value });
   };
-
-
 
 
   // display risk assement function
@@ -833,6 +854,26 @@ const handleTargetGroupChange = (e) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate restricted setting + target group combo
+    const isRestrictedSetting =
+        objValues.testingSetting &&
+        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+    const isMSMSelected =
+        objValues.targetGroup === "TARGET_GROUP_MSM";
+
+    if (isRestrictedSetting && isMSMSelected) {
+      toast.error(
+          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
+      );
+      return;
+    }
+
+    // validate date
     const visitDateError = validateVisitDateWithDOB(objValues);
 
     if (visitDateError) {
@@ -1311,7 +1352,19 @@ const handleTargetGroupChange = (e) => {
                           return false;
                         }
                         return true;
+
+                        // Check if MSM should be hidden
+                        const isRestrictedSetting =
+                            objValues.testingSetting &&
+                            RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+
+                        if (isRestrictedSetting && value.code === "TARGET_GROUP_MSM") {
+                          return false;
+                        }
+
+                        return true;
                       })
+
                       .map((value) => {
                         return (
                           <option key={value.id} value={value.code}>
