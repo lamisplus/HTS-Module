@@ -30,6 +30,8 @@ public class FamilyIndexRequestDto {
 
     private String UAN;
 
+    private String contactId;
+
     private LocalDate dateOfHts;
     private LocalDate dateOfBirth;
     private int age;
@@ -41,6 +43,6 @@ public class FamilyIndexRequestDto {
     private String liveWithParent;
     private Boolean isDateOfBirthEstimated;
     private String isHtsClient;
-    private FamilyTestingTrackerRequestDTO familyTestingTrackerRequestDTO;
+    private List<FamilyTestingTrackerRequestDTO> familyTestingTrackerRequestDTOs;
 
 }

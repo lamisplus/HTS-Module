@@ -135,6 +135,10 @@ public class PersonalNotificationService extends Audit implements Serializable {
     @Column(name ="date_enrollment_on_art")
     private LocalDate dateEnrollmentOnART;
 
+    @Basic
+    @Column(name ="date_of_elicitation")
+    private  LocalDate dateOfElicitation;
+
     @ManyToOne
     @JoinColumn(name = "hts_client_uuid", referencedColumnName = "uuid", insertable = false, updatable = false)
     private HtsClient htsClient;

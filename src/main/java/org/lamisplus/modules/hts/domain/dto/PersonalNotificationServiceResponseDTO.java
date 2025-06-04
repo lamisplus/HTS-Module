@@ -42,6 +42,7 @@ public class PersonalNotificationServiceResponseDTO {
     private String hivTestResult;
     private String acceptedHts;
     private LocalDate dateEnrollmentOnART;
+    private  LocalDate dateOfElicitation;
     private Object htsClientInformation;
     private String partnerId;
     private String familyIndex;

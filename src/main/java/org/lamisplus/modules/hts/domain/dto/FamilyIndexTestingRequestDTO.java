@@ -40,5 +40,5 @@ public class FamilyIndexTestingRequestDTO {
     private FamilyIndexRequestDto familyIndexRequestDto;
     private String willingToHaveChildrenTestedElseWhere;
 
-
+    private String contactId;
 }

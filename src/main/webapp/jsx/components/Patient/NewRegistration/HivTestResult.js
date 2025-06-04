@@ -17,6 +17,7 @@ import { Label as LabelRibbon, Button } from "semantic-ui-react";
 // import 'semantic-ui-css/semantic.min.css';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
+import { calculate_age } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -85,6 +86,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const HivTestResult = (props) => {
+
   const classes = useStyles();
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
@@ -101,21 +103,7 @@ const HivTestResult = (props) => {
     localStorage.getItem("stringifiedPermmision")?.split(",")
   );
   const [nextForm, setNextForm] = useState([]);
-  const calculate_age = (dob) => {
-    var today = new Date();
-    var dateParts = dob.split("-");
-    var dateObject = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
-    var birthDate = new Date(dateObject); // create a date object directlyfrom`dob1`argument
-    var age_now = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age_now--;
-    }
-    if (age_now === 0) {
-      return m + " month(s)";
-    }
-    return age_now;
-  };
+
   const patientAge = calculate_age(
     moment(
       props.patientObj.personResponseDto &&
@@ -124,6 +112,8 @@ const HivTestResult = (props) => {
         : 0
     ).format("DD-MM-YYYY")
   );
+
+ 
 
   const [objValues, setObjValues] = useState({
     confirmatoryTest: {},
@@ -168,32 +158,34 @@ const HivTestResult = (props) => {
   const [finalResult, setFinalResult] = useState("");
 
   const handleInputChangeInitial = (e) => {
-    setErrors({...temp, [e.target.id]:""})
-    if(e.target.name === "result"){
- //  clear the all other fields if there changes in initialTest1 result is changes
-        setConfirmatoryTest({
-            date: "",
-            result: "",
-        })
-        setTieBreakerTest({
-            date: "",
-            result: "",
-        })
-        setInitailTest2({
-            date2: "",
-            result2: "",
-        });
-        setConfirmatoryTest2({
-            date2: "",
-            result2: "",
-        });
-        setTieBreakerTest2({
-            date2: "",
-            result2: "",
-        });
-    setObjValues({...objValues, prepOffered: "", prepAccepted: ""})
+    setErrors({ ...temp, [e.target.id]: "" });
+    if (e.target.name === "result") {
+      //  clear the all other fields if there changes in initialTest1 result is changes
+      setConfirmatoryTest({
+        date: "",
+        result: "",
+      });
+      setTieBreakerTest({
+        date: "",
+        result: "",
+      });
+      setInitailTest2({
+        date2: "",
+        result2: "",
+      });
+      setConfirmatoryTest2({
+        date2: "",
+        result2: "",
+      });
+      setTieBreakerTest2({
+        date2: "",
+        result2: "",
+      });
+      setObjValues({ ...objValues, prepOffered: "", prepAccepted: "" });
 
-    setErrors({...temp, [e.target.id]:"", 
+      setErrors({
+        ...temp,
+        [e.target.id]: "",
         confirmatoryTestdate: "",
         confirmatoryTestresult: "",
         retestingDate: "",
@@ -202,85 +194,73 @@ const HivTestResult = (props) => {
         tieBreakerResult: "",
         confirmatoryTest2Date2: "",
         confirmatoryTestResult2: "",
-        prepOffered: "", 
-        prepAccepted: ""
-        
-      })
-        setInitailTest({...initialTest1, [e.target.name]: e.target.value});
+        prepOffered: "",
+        prepAccepted: "",
+      });
+      setInitailTest({ ...initialTest1, [e.target.name]: e.target.value });
 
-    if (e.target.value === "No") {
-   
+      if (e.target.value === "No") {
         //This is to show cd4 count section
         setShowCD4Count(false);
-    }
-    }else {
-        setInitailTest({...initialTest1, [e.target.name]: e.target.value});
-        setErrors({date: "", prepOffered: "", prepAccepted: ""})
-        //This is to show cd4 count section
-        setShowCD4Count(true);
-    }
-    
-
-
-
-
-
-};
-
-  
-const handleInputChangeInitial2 = (e) => {
-  setErrors({...temp, [e.target.id]:""})
-
-  if(e.target.name === "result2"){
-   //clear the all other the input fields that follows the initialTest2, if there changes in initialTest12 result is changes
-   setInitailTest2({...initialTest12, [e.target.name]: e.target.value});
- 
-  //  setTieBreakerTest({
-  //     date: "",
-  //     result: "",
-  // })
-      setConfirmatoryTest2({
-          date2: "",
-          result2: "",
-      });
-      setTieBreakerTest2({
-          date2: "",
-          result2: "",
-      });
-
-
-      setErrors({...temp, [e.target.id]:"", 
-          
-          tieBreakerDate: "",
-          tieBreakerResult: "",
-          confirmatoryTest2Date: "",
-          confirmatoryTest2Result: "",
-      
-          
-        })
-
-      setObjValues({...objValues, prepOffered: "", prepAccepted: ""})
-      if (e.target.value === "No") {
-
-          setConfirmatoryTest2({
-              date: "",
-              result: "",
-          });
-          setTieBreakerTest2({
-              date: "",
-              result: "",
-          });
-
-
-          //This is to show cd4 count section
-          setShowCD4Count(false);
       }
-  } else {
-      setInitailTest2({...initialTest12, [e.target.name]: e.target.value});
+    } else {
+      setInitailTest({ ...initialTest1, [e.target.name]: e.target.value });
+      setErrors({ date: "", prepOffered: "", prepAccepted: "" });
       //This is to show cd4 count section
       setShowCD4Count(true);
-  }
-};
+    }
+  };
+
+  const handleInputChangeInitial2 = (e) => {
+    setErrors({ ...temp, [e.target.id]: "" });
+
+    if (e.target.name === "result2") {
+      //clear the all other the input fields that follows the initialTest2, if there changes in initialTest12 result is changes
+      setInitailTest2({ ...initialTest12, [e.target.name]: e.target.value });
+
+      //  setTieBreakerTest({
+      //     date: "",
+      //     result: "",
+      // })
+      setConfirmatoryTest2({
+        date2: "",
+        result2: "",
+      });
+      setTieBreakerTest2({
+        date2: "",
+        result2: "",
+      });
+
+      setErrors({
+        ...temp,
+        [e.target.id]: "",
+
+        tieBreakerDate: "",
+        tieBreakerResult: "",
+        confirmatoryTest2Date: "",
+        confirmatoryTest2Result: "",
+      });
+
+      setObjValues({ ...objValues, prepOffered: "", prepAccepted: "" });
+      if (e.target.value === "No") {
+        setConfirmatoryTest2({
+          date: "",
+          result: "",
+        });
+        setTieBreakerTest2({
+          date: "",
+          result: "",
+        });
+
+        //This is to show cd4 count section
+        setShowCD4Count(false);
+      }
+    } else {
+      setInitailTest2({ ...initialTest12, [e.target.name]: e.target.value });
+      //This is to show cd4 count section
+      setShowCD4Count(true);
+    }
+  };
   const [confirmatoryTest, setConfirmatoryTest] = useState({
     date: "",
     result: "",
@@ -290,75 +270,72 @@ const handleInputChangeInitial2 = (e) => {
     result2: "",
   });
   const handleInputChangeConfirmatory = (e) => {
-    setErrors({...temp, [e.target.id]:""})
+    setErrors({ ...temp, [e.target.id]: "" });
     setConfirmatoryTest({
-        ...confirmatoryTest,
-        [e.target.name]: e.target.value,
+      ...confirmatoryTest,
+      [e.target.name]: e.target.value,
     });
 
- // clear all the input fields that follows the confirmatoryTest, if there changes in confirmatoryTest result is changes.
-        if(e.target.name === 'result'){
-            setInitailTest2({
-                date2: "",
-                result2: "",
-            });
-            setConfirmatoryTest2({
-                date2: "",
-                result2: "",
-            });
-            setTieBreakerTest({
-                date: "",
-                result: "",
-            })
-            setTieBreakerTest2({
-                date2: "",
-                result2: "",
-            });
-            setObjValues({...objValues, prepOffered: "", prepAccepted: ""})
+    // clear all the input fields that follows the confirmatoryTest, if there changes in confirmatoryTest result is changes.
+    if (e.target.name === "result") {
+      setInitailTest2({
+        date2: "",
+        result2: "",
+      });
+      setConfirmatoryTest2({
+        date2: "",
+        result2: "",
+      });
+      setTieBreakerTest({
+        date: "",
+        result: "",
+      });
+      setTieBreakerTest2({
+        date2: "",
+        result2: "",
+      });
+      setObjValues({ ...objValues, prepOffered: "", prepAccepted: "" });
 
-            setErrors({...temp, [e.target.id]:"", 
-                retestingDate: "",
-                retestingResult: "",
-                tieBreakerDate: "",
-                tieBreakerResult: "",
-                confirmatoryTest2Date2: "",
-                confirmatoryTestResult2: "",
-          
-          
-              })
-    
-        }
+      setErrors({
+        ...temp,
+        [e.target.id]: "",
+        retestingDate: "",
+        retestingResult: "",
+        tieBreakerDate: "",
+        tieBreakerResult: "",
+        confirmatoryTest2Date2: "",
+        confirmatoryTestResult2: "",
+      });
+    }
 
     //This is to show cd4 count section
     if (initialTest1.result === "Yes" && e.target.value === "Yes") {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     } else {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     }
-};
-const handleInputChangeConfirmatory2 = (e) => {
-  setErrors({...temp, [e.target.id]:""})
+  };
+  const handleInputChangeConfirmatory2 = (e) => {
+    setErrors({ ...temp, [e.target.id]: "" });
 
-  if(e.target.name === 'result2'){
+    if (e.target.name === "result2") {
       setTieBreakerTest2({
-          date2: "",
-          result2: "",
+        date2: "",
+        result2: "",
       });
-      setObjValues({...objValues, prepOffered: "", prepAccepted: ""})
-
-
-  }
-  setConfirmatoryTest2({
+      setObjValues({ ...objValues, prepOffered: "", prepAccepted: "" });
+    }
+    setConfirmatoryTest2({
       ...confirmatoryTest2,
       [e.target.name]: e.target.value,
-  });
-  //This is to show cd4 count section
-  if (initialTest12.result2 === "Yes" && e.target.value === "Yes") {
+    });
+    //This is to show cd4 count section
+    if (initialTest12.result2 === "Yes" && e.target.value === "Yes") {
       setShowCD4Count(true);
-  } else {
+    } else {
       setShowCD4Count(true);
-  }
-};
+    }
+  };
   const [tieBreakerTest, setTieBreakerTest] = useState({
     date: "",
     result: "",
@@ -368,56 +345,53 @@ const handleInputChangeConfirmatory2 = (e) => {
     result2: "",
   });
   const handleInputChangeTie = (e) => {
-    setErrors({...temp, [e.target.id]:""})
-    setTieBreakerTest({...tieBreakerTest, [e.target.name]: e.target.value});
-  
-  
-  
-  if(e.target.name === "result"){
-    setConfirmatoryTest2({
-        date2: "",
-        result2: "",
-    });
-    setTieBreakerTest2({
-        date2: "",
-        result2: "",
-    });
-    // added
-    setInitailTest2({
-      date2: "",
-      result2: "",
-    });
+    setErrors({ ...temp, [e.target.id]: "" });
+    setTieBreakerTest({ ...tieBreakerTest, [e.target.name]: e.target.value });
 
-    
-    setErrors({...temp, [e.target.id]:"", 
-        
+    if (e.target.name === "result") {
+      setConfirmatoryTest2({
+        date2: "",
+        result2: "",
+      });
+      setTieBreakerTest2({
+        date2: "",
+        result2: "",
+      });
+      // added
+      setInitailTest2({
+        date2: "",
+        result2: "",
+      });
+
+      setErrors({
+        ...temp,
+        [e.target.id]: "",
+
         confirmatoryTest2Date2: "",
         confirmatoryTestResult2: "",
-     
-        
-      })
-  }
+      });
+    }
     //This is to show cd4 count section
     if (confirmatoryTest.result === "No" && e.target.value === "Yes") {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     } else if (confirmatoryTest.result === "No" && e.target.value === "No") {
-        setShowCD4Count(false);
+      setShowCD4Count(false);
     } else {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     }
-};
-const handleInputChangeTie2 = (e) => {
+  };
+  const handleInputChangeTie2 = (e) => {
     //setErrors({...temp, [e.target.name]:""})
-    setTieBreakerTest2({...tieBreakerTest2, [e.target.name]: e.target.value});
+    setTieBreakerTest2({ ...tieBreakerTest2, [e.target.name]: e.target.value });
     //This is to show cd4 count section
     if (confirmatoryTest2.result2 === "No" && e.target.value === "Yes") {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     } else if (confirmatoryTest2.result2 === "No" && e.target.value === "No") {
-        setShowCD4Count(false);
+      setShowCD4Count(false);
     } else {
-        setShowCD4Count(true);
+      setShowCD4Count(true);
     }
-};
+  };
   const [syphills, setSyphills] = useState({
     syphilisTestResult: "",
     // result  :"",
@@ -443,7 +417,6 @@ const handleInputChangeTie2 = (e) => {
     adhocCode: "",
   });
   useEffect(() => {
-
     if (props.patientObj) {
       if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
         setHivTestDate(props.patientObj.dateVisit);
@@ -551,17 +524,17 @@ const handleInputChangeTie2 = (e) => {
   const validate = () => {
     //HTS FORM VALIDATION
 
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      (temp.prepOffered = objValues.prepOffered
-        ? ""
-        : "The Prep Offered field is required.");
-    initialTest1.date !== "" &&
-      initialTest1.result === "No" &&
-      objValues.prepOffered === "true" &&
-      (temp.prepAccepted = objValues.prepAccepted
-        ? ""
-        : "The Prep Accepted field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   (temp.prepOffered = objValues.prepOffered
+    //     ? ""
+    //     : "The Prep Offered field is required.");
+    // initialTest1.date !== "" &&
+    //   initialTest1.result === "No" &&
+    //   objValues.prepOffered === "true" &&
+    //   (temp.prepAccepted = objValues.prepAccepted
+    //     ? ""
+    //     : "The Prep Accepted field is required.");
 
     //if the initial test date is filled then the initial test result should be compulsory and vice versa
     initialTest1.date !== "" &&
@@ -593,34 +566,30 @@ const handleInputChangeTie2 = (e) => {
         : "This field is required.");
 
     //if confirmatory test = non-reactive the  Retesting is compulsory
-  confirmatoryTest.result === "No" &&
-    (temp.tieBreakerDate = tieBreakerTest.date
-      ? ""
-      : "This field is required.");
+    confirmatoryTest.result === "No" &&
+      (temp.tieBreakerDate = tieBreakerTest.date
+        ? ""
+        : "This field is required.");
 
+    tieBreakerTest.date !== "" &&
+      (temp.tieBreakerResult = tieBreakerTest.result
+        ? ""
+        : "This field is required.");
 
-   tieBreakerTest.date !== "" &&
-     (temp.tieBreakerResult = tieBreakerTest.result
-       ? ""
-       : "This field is required."); 
-       
-  //if retesting = reactive then confirmatory 2 should be compulsory  
-  initialTest12.result2 === "Yes" &&
-    (temp.confirmatoryTest2Date = confirmatoryTest2.date2
-      ? ""
-      : "This field is required.");
+    //if retesting = reactive then confirmatory 2 should be compulsory
+    initialTest12.result2 === "Yes" &&
+      (temp.confirmatoryTest2Date = confirmatoryTest2.date2
+        ? ""
+        : "This field is required.");
 
-   confirmatoryTest2.date2 !== "" &&
-     (temp.confirmatoryTest2Result = confirmatoryTest2.result2
-       ? ""
-       : "This field is required."); 
-  
+    confirmatoryTest2.date2 !== "" &&
+      (temp.confirmatoryTest2Result = confirmatoryTest2.result2
+        ? ""
+        : "This field is required.");
+
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
-
-
-
 
   // track and set final result
   useEffect(() => {
@@ -782,7 +751,6 @@ const handleInputChangeTie2 = (e) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-
     //GET NEXT FORM
     let latestForm = getNextForm(
       "Request_and_Result_Form",
@@ -790,14 +758,13 @@ const handleInputChangeTie2 = (e) => {
       "",
       "unknown"
     );
-        //SUBMIT FORM
+    //SUBMIT FORM
 
     if (validate()) {
-
-    if (finalResult === "") {
-      toast.error("Final result is required for submission.");
-      return;
-    }
+      if (finalResult === "") {
+        toast.error("Final result is required for submission.");
+        return;
+      }
 
       //logic to get Hiv result test
       if (initialTest12.result2 === "No") {
@@ -910,9 +877,10 @@ const handleInputChangeTie2 = (e) => {
                 <FormGroup>
                   <Label for=""> Date </Label>
                   <Input
-                    type="date"                  
-                    onKeyPress={(e)=>{e.preventDefault()}}
-
+                    type="date"
+                    onKeyPress={(e) => {
+                      e.preventDefault();
+                    }}
                     name="date"
                     id="initialDate"
                     value={initialTest1.date}
@@ -970,8 +938,10 @@ const handleInputChangeTie2 = (e) => {
                     <FormGroup>
                       <Label for=""> Date </Label>
                       <Input
-                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                        type="date"
+                        onKeyPress={(e) => {
+                          e.preventDefault();
+                        }}
                         name="date"
                         id="confirmatoryTestdate"
                         value={confirmatoryTest.date}
@@ -1033,8 +1003,10 @@ const handleInputChangeTie2 = (e) => {
                     <FormGroup>
                       <Label for=""> Date </Label>
                       <Input
-                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                        type="date"
+                        onKeyPress={(e) => {
+                          e.preventDefault();
+                        }}
                         name="date"
                         id="tieBreakerDate"
                         value={tieBreakerTest.date}
@@ -1121,8 +1093,10 @@ const handleInputChangeTie2 = (e) => {
                             <FormGroup>
                               <Label for=""> Date </Label>
                               <Input
-                                type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                                type="date"
+                                onKeyPress={(e) => {
+                                  e.preventDefault();
+                                }}
                                 name="date2"
                                 id="retestingDate"
                                 value={initialTest12.date2}
@@ -1184,8 +1158,10 @@ const handleInputChangeTie2 = (e) => {
                                 <FormGroup>
                                   <Label for=""> Date </Label>
                                   <Input
-                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                                    type="date"
+                                    onKeyPress={(e) => {
+                                      e.preventDefault();
+                                    }}
                                     name="date2"
                                     id="confirmatoryTest2Date"
                                     value={confirmatoryTest2.date2}
@@ -1251,8 +1227,10 @@ const handleInputChangeTie2 = (e) => {
                                 <FormGroup>
                                   <Label for=""> Date </Label>
                                   <Input
-                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                                    type="date"
+                                    onKeyPress={(e) => {
+                                      e.preventDefault();
+                                    }}
                                     name="date2"
                                     id="tieBreaker2Date"
                                     value={tieBreakerTest2.date2}
@@ -1267,7 +1245,7 @@ const handleInputChangeTie2 = (e) => {
                                     }}
                                     required
                                   />
-                                        {errors.tieBreaker2Date !== "" ? (
+                                  {errors.tieBreaker2Date !== "" ? (
                                     <span className={classes.error}>
                                       {errors.tieBreaker2Date}
                                     </span>
@@ -1334,10 +1312,10 @@ const handleInputChangeTie2 = (e) => {
                             <FormGroup>
                               <Label for=""> Date </Label>
                               <Input
-                                type="date"                     
-                                
-                                onKeyPress={(e)=>{e.preventDefault()}}
-
+                                type="date"
+                                onKeyPress={(e) => {
+                                  e.preventDefault();
+                                }}
                                 name="date2"
                                 id="retestingDate"
                                 value={initialTest12.date2}
@@ -1397,8 +1375,10 @@ const handleInputChangeTie2 = (e) => {
                                 <FormGroup>
                                   <Label for=""> Date </Label>
                                   <Input
-                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                                    type="date"
+                                    onKeyPress={(e) => {
+                                      e.preventDefault();
+                                    }}
                                     name="date2"
                                     id="date2"
                                     value={confirmatoryTest2.date2}
@@ -1450,8 +1430,10 @@ const handleInputChangeTie2 = (e) => {
                                 <FormGroup>
                                   <Label for=""> Date </Label>
                                   <Input
-                                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
-
+                                    type="date"
+                                    onKeyPress={(e) => {
+                                      e.preventDefault();
+                                    }}
                                     name="date2"
                                     id="date2"
                                     value={tieBreakerTest2.date2}
@@ -1678,7 +1660,7 @@ const handleInputChangeTie2 = (e) => {
                   {/* END of  result for Test 2*/}
                 </div>
               </div>
-              {initialTest1.result === "No" && (
+              {initialTest1.result === "No" && patientAge >= 10 && (
                 <>
                   <div className="row">
                     <div className="form-group  col-md-4">
@@ -1696,6 +1678,7 @@ const handleInputChangeTie2 = (e) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
+                          disabled={props?.activePage?.actionType === "view"}
                         >
                           <option value={""}></option>
                           <option value="true">Yes</option>
@@ -1721,6 +1704,7 @@ const handleInputChangeTie2 = (e) => {
                                 border: "1px solid #014D88",
                                 borderRadius: "0.2rem",
                               }}
+                              disabled={props?.activePage?.actionType === "view"}
                             >
                               <option value={""}></option>
                               <option value="true">Yes</option>
@@ -1801,7 +1785,7 @@ const handleInputChangeTie2 = (e) => {
                   <br /> <br />
                   <div className="form-group  col-md-5">
                     <FormGroup>
-                      <Label>CD4 Count </Label>
+                      <Label>CD4 Type </Label>
                       <select
                         className="form-control"
                         name="cd4Count"
@@ -1981,7 +1965,8 @@ const handleInputChangeTie2 = (e) => {
               </LabelRibbon>
               <br /> <br />
               {props?.patientObj?.riskStratificationResponseDto !== null &&
-                props?.patientObj?.riskStratificationResponseDto?.communityEntryPoint !== "" && (
+                props?.patientObj?.riskStratificationResponseDto
+                  ?.communityEntryPoint !== "" && (
                   <>
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
