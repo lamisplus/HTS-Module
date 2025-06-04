@@ -218,7 +218,7 @@ const PnsForm = (props) => {
     toggle();
   };
   const [htsClientInformation, sethtsClientInformation] = useState({
-    testingSetting: props.patientObj.testingSetting,
+    testingSetting: props?.patientObj?.testingSetting,
     providerNameCompletingForm: "",
     providerRoleCompletingForm: "",
     maritalStatus: props?.basicInfo?.personResponseDto?.maritalStatus?.id,
@@ -387,8 +387,21 @@ const PnsForm = (props) => {
   };
 
   const loadFamilyIndexSetting = () => {
+      let  testingSetting =  props?.patientObj?.testingSetting
+      let testingType =""
+// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
+    if(testingSetting.includes("COMMUNITY")){
+      testingType= "COMMUNITY_HTS_TEST_SETTING"
+      
+    }
+
+    if(testingSetting.includes("FACILITY")){
+      testingType= "FACILITY_HTS_TEST_SETTING"
+
+      
+    }
     axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
+      .get(`${baseUrl}application-codesets/v2/${testingType}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -505,7 +518,6 @@ const PnsForm = (props) => {
     toggle();
     history.push("/");
   };
-  console.log(props); //Get all recorcd by htsClientId
   const getAllRecordByHTSClientId = () => {
     axios
       .get(`${baseUrl}hts-personal-notification-service/{id}/hts-client`, {
@@ -614,7 +626,6 @@ const PnsForm = (props) => {
     // }
   };
 
-  console.log(objValues);
   //Date of Birth and Age handle
   const handleDobChange = (e) => {
     if (e.target.value) {
@@ -2202,7 +2213,6 @@ const PnsForm = (props) => {
                     disabled={saving}
                   />
 
-                  {console.log(showSaveButton)}
                   {showSaveButton ? (
                     <Button
                       content="Save"

@@ -407,13 +407,37 @@ const RiskStratification = (props) => {
 
     // for the section to show
     //  Conditions are : age > 15, riskAssessment.lastHivTestBasedOnRequest === "false" and PMTCT Modality === true
+  
     if (lastVisit === "false") {
-      if (SecAge > 15 && isPMTCTModalityValue) {
+      if (SecAge < 15 || isPMTCTModalityValue) {
         setShowRiskAssessment(false);
         ans = false;
-      } else if (SecAge > 15) {
+
+       // 
+       if( age !== ""){
+        setRiskAssessment({...riskAssessment,
+          lastHivTestForceToHaveSex: "",
+          lastHivTestHadAnal: "",
+          lastHivTestInjectedDrugs: "",
+          whatWasTheResult: "",
+          lastHivTestDone: "",
+          diagnosedWithTb: "",
+          lastHivTestPainfulUrination: "",
+          lastHivTestBloodTransfusion: "",
+          lastHivTestVaginalOral: "",
+        })
+      }
+
+        // 
+      } else if (SecAge > 15 ) {
         setShowRiskAssessment(true);
         ans = true;
+
+       
+      }else if(lastVisit === "false"){
+        setShowRiskAssessment(true);
+        ans = true;
+
       } else {
         setShowRiskAssessment(false);
         ans = false;
@@ -422,6 +446,7 @@ const RiskStratification = (props) => {
       setShowRiskAssessment(false);
       ans = false;
     }
+
   };
 
 
@@ -543,8 +568,17 @@ const RiskStratification = (props) => {
   const handleInputChangeRiskAssessment = (e) => {
     displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
 
+
+  const handleInputChangeRiskAssessment = (e) => {
+ 
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
+  
+    if(e.target.name === "lastHivTestBasedOnRequest"){
+      displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
+      setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
+
+      }
   };
 
   const handleSubmit = (e) => {

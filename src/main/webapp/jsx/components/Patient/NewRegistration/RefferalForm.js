@@ -94,7 +94,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ClientRefferalForm = (props) => {
   const classes = useStyles();
-  console.log("props.patientObj", props.patientObj)
   const [content, setContent] = useState({
     showReferringUnit: false,
     showServiceProviderUnit: false,
@@ -172,7 +171,6 @@ const ClientRefferalForm = (props) => {
   // }, []);
 
   const handleContentChange = (e) => {
-    console.log(e.target.value);
     setContentDropDown(e.target.value);
     if (e.target.value === "showReferringUnit") {
       setContent({

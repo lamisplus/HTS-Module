@@ -524,7 +524,6 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log("HTS_ENTRY_POINT_FACILITY",response.data);
 
         setSetting(response.data);
       })
@@ -540,7 +539,6 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        console.log("HTS_ENTRY_POINT_COMMUNITY",response.data);
         setSetting(response.data);
       })
       .catch((error) => {
@@ -564,7 +562,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
 
     loadGenders();
     loadStates();
-    loadFamilyIndexSetting();
+    // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
     getMaritalStatus();

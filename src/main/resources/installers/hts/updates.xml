@@ -59,20 +59,7 @@
             );
         </sql>
     </changeSet>
-    <changeSet failOnError="true" author="tyav barnabas" id="hts_345">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT count(column_name)
-                FROM information_schema.columns
-                WHERE table_schema = 'public'
-                  AND table_name = 'hts_client'
-                  AND column_name = 'comment';
-            </sqlCheck>
-        </preConditions>
-        <sql>
-            ALTER TABLE hts_client ADD COLUMN IF NOT EXISTS comment VARCHAR(255);
-        </sql>
-    </changeSet>
+
 
 
     <changeSet failOnError="true" author="Ganiyat" id="20247726-009">
@@ -121,4 +108,31 @@
         </sql>
     </changeSet>
 
+
+
+    <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-001">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempts" />
+
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_family_index_testing_tracker
+                RENAME COLUMN attempts TO attempt;
+
+
+        </sql>
+    </changeSet>
+
+
+    <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-002">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_family_index_testing_tracker"/>
+        </preConditions>
+        <sql>
+
+            ALTER TABLE hts_family_index_testing_tracker
+            ALTER COLUMN attempt TYPE character varying;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

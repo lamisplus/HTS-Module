@@ -15,7 +15,6 @@ public class FamilyIndexResponseDTO {
     private Long id;
     private String uuid;
     private String familyRelationship;
-//    private String familyIndexHivStatus;
     private String statusOfContact;
 
     private int childNumber;

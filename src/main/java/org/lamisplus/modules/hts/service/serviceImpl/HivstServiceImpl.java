@@ -12,6 +12,7 @@ import org.lamisplus.modules.hts.domain.dto.HivstTestKitUserInfoDto;
 import org.lamisplus.modules.hts.domain.entity.Hivst;
 import org.lamisplus.modules.hts.domain.entity.HivstPerson;
 import org.lamisplus.modules.hts.domain.entity.HtsPerson;
+import org.lamisplus.modules.hts.exceptions.HivstProcessingException;
 import org.lamisplus.modules.hts.repository.HivstRepository;
 import org.lamisplus.modules.hts.service.CurrentUserOrganizationService;
 import org.lamisplus.modules.hts.service.HivstService;
@@ -69,7 +70,7 @@ public class HivstServiceImpl implements HivstService {
             try {
                 return HivstDto.fromEntity(each);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new HivstProcessingException("Error on save of record",e);
             }
         }).collect(Collectors.toList());
     }
@@ -97,7 +98,6 @@ public class HivstServiceImpl implements HivstService {
                 hivst.setPatientId(createdPatientId);
                 userInfo.getBasicUserInfo().setPatientId(createdPatientId);
                 updatedUserInfo.add(userInfo);
-//                hivst.setTestKitUserDetails(userInfo);
                 hivstList.add(hivst);
             }
 
@@ -112,66 +112,8 @@ public class HivstServiceImpl implements HivstService {
         return hivstList;
     }
 
-    private List<Hivst> editHivstForPrimaryAndSecondaryPatients(HivstDto hivstDto) {
-        Hivst myselfHivst = null;
-        List<HivstTestKitUserInfoDto> updatedUserInfo = new ArrayList<>();
-        // get the hivstDto
-        // figure out which ones have patient Id
-        // if they have patient Id, find the Hivst for that patient Id and date of visit
-
-        List<Hivst> hivstList = new ArrayList<>();
-        List<HivstTestKitUserInfoDto> listOfUserInfo = hivstDto.getTestKitUserDetails();
-        for (HivstTestKitUserInfoDto userInfo : listOfUserInfo) {
-            if (userInfo.getBasicUserInfo().getUserCategory().equalsIgnoreCase(MYSELF)) {
-                // find my own hivst
-                // update it and keep it in the myself object
-                Optional<Hivst> myHivst = hivstRepository.findOneByPatientIdAndDateOfVisit(hivstDto.getPatientId(), hivstDto.getDateOfVisit());
-                if (myHivst.isPresent()){
-                    Hivst myFoundHivst = myHivst.get();
-                    Hivst hivst = Hivst.fromDto(hivstDto);
-                    hivst.setId(myFoundHivst.getId());
-                    hivst.setPostTestAssessment(objectMapper.valueToTree(userInfo.getPostTestAssessment()));
-                    hivst.setReferralInformation(objectMapper.valueToTree(userInfo.getPostTestAssessment().getReferralInformation()));
-                    updatedUserInfo.add(userInfo);
-                    myselfHivst = hivst;
-                } else {
-                    // create a new hivst
-                    Hivst hivst = Hivst.fromDto(hivstDto);
-                    hivst.setPatientId(getOrCreatePatientId(hivstDto));
-                    hivst.setPostTestAssessment(objectMapper.valueToTree(userInfo.getPostTestAssessment()));
-                    hivst.setReferralInformation(objectMapper.valueToTree(userInfo.getPostTestAssessment().getReferralInformation()));
-                    updatedUserInfo.add(userInfo);
-                    myselfHivst = hivst;
-                }
-            } else {
-                // check if the userInfo has a patient Id
-                // if it does, find that hivst by patient id and date of visit, and update it
-                // if it does not, create a new patient and hivst
-                if (userInfo.getBasicUserInfo().getPatientId() != null){
-                    Optional<Hivst> thisHivst = hivstRepository.findOneByPatientIdAndDateOfVisit(hivstDto.getPatientId(), hivstDto.getDateOfVisit());
-                    if (thisHivst.isPresent()){
-                        Hivst foundHivst = thisHivst.get();
-                        Hivst hivst = Hivst.fromHivstTestKitUserInfoDtoAndHivstDto(userInfo, hivstDto);
-                        hivst.setId(foundHivst.getId());
-                        hivstList.add(hivst);
-                    } else {
-                        createPatientAndHivst(hivstDto, updatedUserInfo, hivstList, userInfo);
-
-                    }
-                } else {
-                    createPatientAndHivst(hivstDto, updatedUserInfo, hivstList, userInfo);
-                }
-            }
-
-            if (myselfHivst != null){
-                myselfHivst.setTestKitUserDetails(objectMapper.valueToTree(updatedUserInfo));
-                hivstList.add(myselfHivst);
-            }
 
 
-        }
-        return hivstList;
-    }
 
     private void createPatientAndHivst(HivstDto hivstDto, List<HivstTestKitUserInfoDto> updatedUserInfo, List<Hivst> hivstList, HivstTestKitUserInfoDto userInfo) {
         PersonDto personDto = HivstBasicUserInfoDto.toPersonDto(userInfo.getBasicUserInfo());
@@ -183,27 +125,6 @@ public class HivstServiceImpl implements HivstService {
         userInfo.getBasicUserInfo().setPatientId(createdPatientId);
         updatedUserInfo.add(userInfo);
     }
-
-//    @Override
-//    public HivstDto updateHivst(HivstDto hivstDto, Long id) {
-//        LOG.info("Finding Hivst by id: {}", id);
-//        Hivst hivst = hivstRepository.findByIdAndArchived(id, UN_ARCHIVED).orElseThrow(() -> new EntityNotFoundException(Hivst.class, "id", id.toString()));
-//        try{
-//            LOG.info("Found. Updating Hivst...");
-//
-//            Hivst hivstUpdate = Hivst.fromDto(hivstDto);
-//            hivstUpdate.setId(id);
-//            hivstUpdate.setTestKitUserDetails(hivst.getTestKitUserDetails());
-//            hivstUpdate.setTestKitUsers(objectMapper.valueToTree(hivst.getTestKitUsers()));
-//            hivstUpdate.setNumberOfHivstKitsReceived(hivst.getNumberOfHivstKitsReceived());
-//            hivstUpdate.setOtherTestKitUserInfoAvailable(hivst.getOtherTestKitUserInfoAvailable());
-//            hivstUpdate.setUserType(hivst.getUserType());
-//
-//            return HivstDto.fromEntity(hivstRepository.save(hivstUpdate));
-//        } catch (JsonProcessingException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     @Override
     public List<HivstDto> updateHivst(HivstDto hivstDto, Long id) {
@@ -221,7 +142,7 @@ public class HivstServiceImpl implements HivstService {
             try {
                 return HivstDto.fromEntity(each);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                throw new HivstProcessingException("Error, could not update the record", e);
             }
         }).collect(Collectors.toList());
     }
@@ -245,7 +166,7 @@ public class HivstServiceImpl implements HivstService {
         try {
             return HivstDto.fromEntity(hivst);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new HivstProcessingException("Error, could not get the record", e);
         }
     }
 
@@ -256,7 +177,7 @@ public class HivstServiceImpl implements HivstService {
                 try {
                     return HivstDto.fromEntity(hivst);
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
+                    throw new HivstProcessingException("Error on fetching data", e);
                 }
             }).collect(Collectors.toList());
     }
@@ -264,7 +185,6 @@ public class HivstServiceImpl implements HivstService {
     @Override
     public Page<HivstPerson> getAllHivstPerson(String searchValue, int pageNo, int pageSize) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
-        //List<HtsPerson> htsPeople = new ArrayList<>();
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         if(!String.valueOf(searchValue).equals("null") && !searchValue.equals("*")){
             searchValue = searchValue.replaceAll("\\s", "");
@@ -310,6 +230,76 @@ public class HivstServiceImpl implements HivstService {
         if (numberInUserInfo > numberOfHivstKitsReceived){
             throw new IllegalTypeException(HivstDto.class, "numberOfHivstKitsReceived: ", "" + numberOfHivstKitsReceived + ".", " Number of test kits unaccounted for." );
         }
+    }
+//    ****
+
+
+    private List<Hivst> editHivstForPrimaryAndSecondaryPatients(HivstDto hivstDto) {
+            List<Hivst> hivstList = new ArrayList<>();
+            List<HivstTestKitUserInfoDto> updatedUserInfo = new ArrayList<>();
+
+            Hivst myselfHivst = processMyselfHivst(hivstDto, updatedUserInfo);
+
+            List<HivstTestKitUserInfoDto> listOfUserInfo = hivstDto.getTestKitUserDetails();
+        for (HivstTestKitUserInfoDto userInfo : listOfUserInfo) {
+            if (!isMyself(userInfo)) {
+                processOtherUsersHivst(hivstDto, userInfo, updatedUserInfo, hivstList);
+            }
+        }
+
+        if (myselfHivst != null) {
+            myselfHivst.setTestKitUserDetails(objectMapper.valueToTree(updatedUserInfo));
+            hivstList.add(myselfHivst);
+        }
+
+        return hivstList;
+    }
+
+    private Hivst processMyselfHivst(HivstDto hivstDto, List<HivstTestKitUserInfoDto> updatedUserInfo) {
+        Optional<Hivst> myHivst = hivstRepository.findOneByPatientIdAndDateOfVisit(hivstDto.getPatientId(), hivstDto.getDateOfVisit());
+        if (myHivst.isPresent()) {
+            return updateExistingMyselfHivst(myHivst.get(), hivstDto, updatedUserInfo);
+        } else {
+            return createNewMyselfHivst(hivstDto, updatedUserInfo);
+        }
+    }
+
+    private Hivst updateExistingMyselfHivst(Hivst existingHivst, HivstDto hivstDto, List<HivstTestKitUserInfoDto> updatedUserInfo) {
+        Hivst hivst = Hivst.fromDto(hivstDto);
+        hivst.setId(existingHivst.getId());
+        hivst.setPostTestAssessment(objectMapper.valueToTree(updatedUserInfo.get(0).getPostTestAssessment()));
+        hivst.setReferralInformation(objectMapper.valueToTree(updatedUserInfo.get(0).getPostTestAssessment().getReferralInformation()));
+        updatedUserInfo.add(updatedUserInfo.get(0));
+        return hivst;
+    }
+
+    private Hivst createNewMyselfHivst(HivstDto hivstDto, List<HivstTestKitUserInfoDto> updatedUserInfo) {
+        Hivst hivst = Hivst.fromDto(hivstDto);
+        hivst.setPatientId(getOrCreatePatientId(hivstDto));
+        hivst.setPostTestAssessment(objectMapper.valueToTree(updatedUserInfo.get(0).getPostTestAssessment()));
+        hivst.setReferralInformation(objectMapper.valueToTree(updatedUserInfo.get(0).getPostTestAssessment().getReferralInformation()));
+        updatedUserInfo.add(updatedUserInfo.get(0));
+        return hivst;
+    }
+
+    private void processOtherUsersHivst(HivstDto hivstDto, HivstTestKitUserInfoDto userInfo, List<HivstTestKitUserInfoDto> updatedUserInfo, List<Hivst> hivstList) {
+        if (userInfo.getBasicUserInfo().getPatientId() != null) {
+            Optional<Hivst> thisHivst = hivstRepository.findOneByPatientIdAndDateOfVisit(hivstDto.getPatientId(), hivstDto.getDateOfVisit());
+            if (thisHivst.isPresent()) {
+                Hivst foundHivst = thisHivst.get();
+                Hivst hivst = Hivst.fromHivstTestKitUserInfoDtoAndHivstDto(userInfo, hivstDto);
+                hivst.setId(foundHivst.getId());
+                hivstList.add(hivst);
+            } else {
+                createPatientAndHivst(hivstDto, updatedUserInfo, hivstList, userInfo);
+            }
+        } else {
+            createPatientAndHivst(hivstDto, updatedUserInfo, hivstList, userInfo);
+        }
+    }
+
+    private boolean isMyself(HivstTestKitUserInfoDto userInfo) {
+        return userInfo.getBasicUserInfo().getUserCategory().equalsIgnoreCase(MYSELF);
     }
 
 }

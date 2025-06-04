@@ -855,7 +855,7 @@ const getSettings=()=>{
     GET_CHILD_NUMBER()
     loadGenders();
     loadStates();
-    loadFamilyIndexSetting();
+    // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
     getMaritalStatus();

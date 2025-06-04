@@ -92,6 +92,7 @@ const FeedbackModal = ({
   setOpenModal,
   predictionValue,
   clientId,
+  setSavingFeedback,
 }) => {
   const classes = useStyles();
   const [saving, setSaving] = useState(false);
@@ -196,6 +197,7 @@ const FeedbackModal = ({
         });
         setSaving(false);
         setOpenModal(!openModal);
+        setSavingFeedback(true);
       })
       .catch((err) => {
         toast.error(`Something went wrong. Please try again...${err}`, {
@@ -526,12 +528,10 @@ const FeedbackModal = ({
                       )}
                     </>
                   )}
-
-                  {payload?.clientTestedDespiteLowRiskScore === "No" && (
                     <div className="form-group col-md-4">
                       <FormGroup>
                         <Label for="riskScoreContributeToTheClinicalDecision ">
-                          Did the ML model's risk score contribute to the
+                          Did the ML model risk score contribute to the
                           clinical decision-making regarding testing for this
                           client?
                         </Label>
@@ -562,8 +562,6 @@ const FeedbackModal = ({
                         )}
                       </FormGroup>
                     </div>
-                  )}
-
                   <br />
 
                   <div className="row">

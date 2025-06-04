@@ -500,7 +500,6 @@ export const loopThroughFormBackward = (
 
 export const getPreviousForm = (formName, age, pmtctModality, hivStatus) => {
 
-  console.log(formName, age, pmtctModality, hivStatus  )  
   let ageCondition = undefined;
   let pmctctModalityCondition = undefined;
   let HivStatuscondition = undefined;

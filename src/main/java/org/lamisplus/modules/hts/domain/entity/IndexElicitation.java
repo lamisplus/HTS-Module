@@ -33,7 +33,7 @@ import java.util.UUID;
         @TypeDef(name = "jsonb-node", typeClass = JsonNodeBinaryType.class),
         @TypeDef(name = "json-node", typeClass = JsonNodeStringType.class),
 })
-public class IndexElicitation extends Audit implements Serializable {
+public class IndexElicitation extends Audit<IndexElicitation> implements Serializable {
     @Id
     @Column(name="id", updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

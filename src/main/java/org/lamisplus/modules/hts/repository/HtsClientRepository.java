@@ -35,20 +35,6 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
 
 
-//    @Query(value = "SELECT p.uuid, p.hospital_number as hospitalNumber,p.id as personId, p.first_name as firstName,\n" +
-//            "            p.surname as surname, p.other_name as otherName,\n" +
-//            "            CAST (EXTRACT(YEAR from AGE(NOW(),  p.date_of_birth)) AS INTEGER) as age,INITCAP(p.sex) as gender\n" +
-//            "            FROM patient_person p\n" +
-//            "            WHERE p.archived=?1 AND p.facility_id=?2 \n" +
-//            "              and ( p.first_name ILIKE ?3 \n" +
-//            "            OR p.surname ILIKE ?3 OR p.other_name ILIKE ?3 \n" +
-//            "            OR p.hospital_number ILIKE ?3 )\n" +
-//            "            AND NOT EXISTS (\n" +
-//            "            SELECT person_uuid \n" +
-//            "            FROM public.hts_client hs \n" +
-//            "            WHERE hs.person_uuid=p.uuid\n" +
-//            "            AND hs.archived=?1 AND hs.facility_id =?2 \n" +
-//            "            )\n", nativeQuery = true)
 
 
     @Query(value =  "SELECT p.hospital_number AS hospitalNumber,  p.id AS personId, p.uuid as personUuid, p.first_name AS firstName, p.surname AS surname,  p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  " +
@@ -127,14 +113,6 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
     Page<HtsPerson> findAllPersonHts(Integer archived, Long facilityId, Pageable pageable);
 
-//    @Query(value = "SELECT hc.client_code as clientCode, p.id as personId, p.first_name as firstName, p.surname as surname, p.other_name as otherName, " +
-//            "p.hospital_number as hospitalNumber, CAST (EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) AS INTEGER) as age, " +
-//            "INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth, CAST (COUNT(hc.person_uuid) AS INTEGER) as htsCount FROM patient_person p " +
-//            "INNER JOIN hts_client hc ON hc.person_uuid = p.uuid AND hc.archived = ?1 " +
-//            "WHERE p.archived=?1 AND p.facility_id=?2 " +
-//            "GROUP BY hc.client_code, p.id, p.first_name, p.first_name, p.surname, " +
-//            "p.other_name, p.hospital_number, p.date_of_birth " +
-//            "ORDER BY p.id DESC", nativeQuery = true)
 
 
     @Query(value = "SELECT DISTINCT  hc.id, hc.client_code AS clientCode, p.id as personId,p.uuid as personUuid, p.first_name as firstName, p.surname as surname, p.other_name as otherName,  \n" +
@@ -164,7 +142,6 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
             "            )\n", nativeQuery = true)
     List<HtsPerson> findAllPersonHts(Integer archived, Long facilityId);
 
-    //<T> T findByLastName(String lastName, Class<T> type);
 
     List<HtsClient> findAllByClientCode(String code);
 

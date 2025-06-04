@@ -1,6 +1,7 @@
 package org.lamisplus.modules.hts.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.hts.domain.dto.HtsClientReferralRequestDTO;
@@ -30,9 +31,9 @@ public class ClientReferralService {
     private final  String clientID = "htsClientId"; 
 
     @Transactional
-    public HtsClientReferralDTO registerClientReferralForm(HtsClientReferralRequestDTO requestDTO) {
-        if (requestDTO == null && requestDTO.getHtsClientId() == null) {
-            throw new IllegalArgumentException("HTS client referral request or client id cannot be null");
+    public HtsClientReferralDTO registerClientReferralForm(@NonNull HtsClientReferralRequestDTO requestDTO) {
+        if (requestDTO.getHtsClientId() == null) {
+            throw new IllegalArgumentException("Client id cannot be null");
         }
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
         HtsClient htsClient = htsClientRepository
@@ -156,11 +157,7 @@ public class ClientReferralService {
         return convertToHtsClientReferralToDTO(existingHtsClientReferral);
     }
 
-//    public HtsClientReferralDTO getHtsClientReferralByHtsClientId(Long htsClientId) {
-//        HtsClientReferral existingHtsClientReferral = htsClientReferralRepository.findByHtsClientId(htsClientId).orElseThrow(() ->
-//                new EntityNotFoundException(HtsClientReferral.class, clientID, "" + htsClientId));
-//        return convertToHtsClientReferralToDTO(existingHtsClientReferral);
-//    }
+
 
 
     public List<HtsClientReferralDTO> getAllHtsClientReferral(Long htsClientId) {

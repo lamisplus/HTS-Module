@@ -16,7 +16,6 @@ import org.lamisplus.modules.hts.domain.entity.RiskStratification;
 import org.lamisplus.modules.hts.domain.enums.Source;
 import org.lamisplus.modules.hts.repository.HtsClientRepository;
 import org.lamisplus.modules.hts.repository.IndexElicitationRepository;
-import org.lamisplus.modules.hts.util.Constants;
 import org.lamisplus.modules.hts.util.RandomCodeGenerator;
 import org.lamisplus.modules.patient.domain.dto.PersonDto;
 import org.lamisplus.modules.patient.domain.dto.PersonResponseDto;
@@ -56,38 +55,27 @@ public class HtsClientService {
 
     public HtsClientDto save(HtsClientRequestDto htsClientRequestDto){
         System.out.println("i am inside the save method");
-        if(htsClientRequestDto.getRiskStratificationCode() != null){
-            System.out.println("getRiskStratificationCode() != null");
-
-
-            if(htsClientRepository.existsByRiskStratificationCode(htsClientRequestDto.getRiskStratificationCode())){
-                throw new IllegalTypeException(HtsClientRequestDto.class, "RiskStratificationCode is ", "already exist for an hts client");
-            }
-        }
 
         if(htsClientRequestDto.getSource().equalsIgnoreCase(Source.Mobile.toString())){
-            System.out.println("i am inside the mobile check");
-
             Optional<HtsClient> htsClientExists = htsClientRepository.findByUuid(htsClientRequestDto.getUuid());
             if (htsClientExists.isPresent()) {
                 LOG.info("HTS Client with code {} has already been synced", htsClientRequestDto.getClientCode());
                 return htsClientToHtsClientDto(htsClientExists.get());
-        }}
+            }}
+
+        if(htsClientRequestDto.getRiskStratificationCode() != null){
+            if(htsClientRepository.existsByRiskStratificationCode(htsClientRequestDto.getRiskStratificationCode())){
+                throw new IllegalTypeException(HtsClientRequestDto.class, "RiskStratificationCode is ", "already exist for an hts client");
+            }
+        }
 
         HtsClient htsClient;
         PersonResponseDto personResponseDto;
         Person person;
         //when it is a new person
         if(htsClientRequestDto.getPersonId() == null){
-            System.out.println("getPersonId() == null");
-            System.out.println(htsClientRequestDto.getPersonDto().toString());
             if(htsClientRequestDto.getPersonDto() == null) throw new EntityNotFoundException(PersonDto.class, "PersonDTO is ", " empty");
-            System.out.println("about to be saved ");
-            System.out.println(htsClientRequestDto.getPersonDto().toString());
-
             personResponseDto = personService.createPerson(htsClientRequestDto.getPersonDto());
-            System.out.println("created person " + personResponseDto.toString());
-
             person = personRepository.findById(personResponseDto.getId()).get();
             String personUuid = person.getUuid();
             htsClient = this.htsClientRequestDtoToHtsClient(htsClientRequestDto, personUuid);
@@ -96,21 +84,16 @@ public class HtsClientService {
             htsClient = this.htsClientRequestDtoToHtsClient(htsClientRequestDto, person.getUuid());
         }
 //       for elicited client
-        System.out.println(htsClientRequestDto.getFamilyIndex());
         if( htsClientRequestDto.getFamilyIndex() != null && !htsClientRequestDto.getFamilyIndex().isEmpty()){
-            System.out.println("inside family index");
             familyIndexTestingService.updateIndexClientStatus(htsClientRequestDto.getFamilyIndex());
         }
-//        if(!htsClientRequestDto.getPartnerNotificationService().isEmpty()){
-//            System.out.println("inside pns");
-//            pnsService.updateIndexClientStatus(htsClientRequestDto.getPartnerNotificationService());
-//        }
         htsClient.setFacilityId(currentUserOrganizationService.getCurrentUserOrganization());
-        htsClient.setLatitude(htsClientRequestDto.getLatitude());
-        htsClient.setLongitude(htsClientRequestDto.getLongitude());
         String sourceSupport = (htsClientRequestDto.getSource() != null && !htsClientRequestDto.getSource().trim().isEmpty()) ? htsClientRequestDto.getSource()  : "Web";
-//                htsClientRequestDto.getSource() == null || htsClientRequestDto.getSource().isEmpty() ? Constants.WEB_SOURCE : Constants.MOBILE_SOURCE;
         htsClient.setSource(sourceSupport);
+        if(sourceSupport.equals("Mobile")) {
+            htsClient.setLatitude(htsClientRequestDto.getLatitude());
+            htsClient.setLongitude(htsClientRequestDto.getLongitude());
+        }
         htsClient.setFamilyIndex(htsClientRequestDto.getFamilyIndex());
         if( htsClientRequestDto.getPartnerNotificationService() != null && !htsClientRequestDto.getPartnerNotificationService().isEmpty()){
             htsClient.setPartnerNotificationService(htsClientRequestDto.getPartnerNotificationService());
@@ -298,6 +281,7 @@ public class HtsClientService {
         htsClient.setSource(htsClientRequestDto.getSource());
         htsClient.setReferredForSti(htsClientRequestDto.getReferredForSti());
         htsClient.setComment(htsClientRequestDto.getComment());
+        htsClient.setUuid(htsClientRequestDto.getUuid());
         return htsClient;
     }
 
@@ -406,7 +390,6 @@ public class HtsClientService {
 
         List<HtsClientDtos> htsClientDtosList =  page.stream()
                 .map(person -> getHtsClientByPersonId(person))
-                //.filter(htsClientDtos ->htsClientDtos.getClientCode() != null)
                 .collect(Collectors.toList());
         return PaginationUtil.generatePagination(page, htsClientDtosList);
     }
@@ -442,11 +425,7 @@ public class HtsClientService {
         htsClientDtos.setHtsCount(htsClientDtoList.size());
         htsClientDtos.setHtsClientDtoList(htsClientDtoList);
         htsClientDtos.setPersonId(pId[0]);
-        /*if(moduleService.exist("HIVModule") && personUuid[0] != null){
-            if(htsClientRepository.findInHivEnrollmentByUuid(personUuid[0]).isPresent()){
-                isPositive = true;
-            }
-        }*/
+
         htsClientDtos.setClientCode(clientCode[0]);
         htsClientDtos.setPersonResponseDto(personResponseDto[0]);
         htsClientDtos.setHivPositive(isPositive);
@@ -564,7 +543,6 @@ public class HtsClientService {
 
     public Page<HtsPerson> getOnlyPersonHts(String search, int pageNo, int pageSize) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
-        //List<HtsPerson> htsPeople = new ArrayList<>();
         Pageable pageable = PageRequest.of(pageNo, pageSize);
         if(!String.valueOf(search).equals("null") && !search.equals("*")){
             search = search.replaceAll("\\s", "");
@@ -592,10 +570,8 @@ public class HtsClientService {
                 htsClientDtos.setPersonResponseDto(personResponseDto);
                 htsClientDtos.setPersonId(personResponseDto.getId());
                 htsClientDtosList.add(htsClientDtos);
-                //LOG.info("hts client is {}", htsClientDtos.getHtsCount());
             } else {
                 htsClientDtosList.add(htsClientToHtsClientDtos(null, clients));
-                //LOG.info("hts client is {}", clients.size());
             }
 
         }
@@ -605,7 +581,6 @@ public class HtsClientService {
 
     public HtsClientDto updatePostTestCounselingKnowledgeAssessment(Long id, PostTestCounselingDto postTestCounselingDto){
         HtsClient htsClient = this.getById(id);
-        //if(htsClient.getPerson().getId().equals(postTestCounselingDto.getPersonId())) throw new IllegalTypeException(Person.class, "Person", "id not match");
         htsClient.setPostTestCounselingKnowledgeAssessment(postTestCounselingDto.getPostTestCounselingKnowledgeAssessment());
 
         HtsClientDto htsClientDto = new HtsClientDto();
@@ -620,15 +595,7 @@ public class HtsClientService {
     }
 
     public HtsClientDto updateIndexNotificationServicesElicitation(Long id, IndexElicitationDto indexElicitationDto){
-        /*HtsClient htsClient = this.getById(id);
-        if(!this.getPersonId(htsClient).equals(indexElicitationDto.getPersonId())) {
-            throw new IllegalTypeException(Person.class, "Person", "id does not match with supplied personId");
-        }
-        htsClient.setIndexNotificationServicesElicitation(indexElicitationDto
-                        .getIndexNotificationServicesElicitation());
 
-        HtsClientDto htsClientDto = new HtsClientDto();
-        BeanUtils.copyProperties(htsClientRepository.save(htsClient), htsClientDto);*/
         return null;
     }
 
@@ -640,7 +607,7 @@ public class HtsClientService {
         }
         String s = "";
         Integer a = s.matches("[0-9.]+")? Integer.valueOf(s):null;
-        Integer.valueOf(s);
+//        Integer.valueOf(s);
         return 1 + random;
     }
 
@@ -659,21 +626,7 @@ public class HtsClientService {
         htsClientRepository.save(htsClient);
     }
 
-    /*public HtsClientDto update(Long id, HtsClientUpdateRequestDto htsClientUpdateRequestDto) {
-        if(!id.equals(htsClientUpdateRequestDto.getId())){
-            throw new IllegalTypeException(Person.class, "Id", "id does not match");
-        }
-        if(!this.getById(htsClientUpdateRequestDto.getId()).getPerson().getId().equals(htsClientUpdateRequestDto.getPersonId())){
-            throw new IllegalTypeException(Person.class, "Person", "id does not match with supplied personId");
-        }
-        Person person = this.getPerson(htsClientUpdateRequestDto.getPersonId());
-        HtsClient htsClient = this.htsClientUpdateRequestDtoToHtsClient(htsClientUpdateRequestDto, person.getUuid());
 
-        htsClient.setFacilityId(currentUserOrganizationService.getCurrentUserOrganization());
-        htsClient = htsClientRepository.save(htsClient);
-        htsClient.setPerson(person);
-        return this.htsClientToHtsClientDto(htsClient);
-    }*/
 
     public HtsClient htsClientUpdateRequestDtoToHtsClient(HtsClientUpdateRequestDto htsClientUpdateRequestDto, @NotNull String personUuid) {
         if ( htsClientUpdateRequestDto == null ) {
@@ -704,30 +657,13 @@ public class HtsClientService {
 
     public String getClientNameByCode(String code) {
         List<HtsClient> htsClients = htsClientRepository.findAllByClientCode(code);
-//        String name = "Record Not Found";
+        Optional<List<HtsClient>> optionalHtsClients = Optional.ofNullable(htsClients);
 
-
-        if(!htsClients.isEmpty()){
-            return  "Client code already exist";
-        }else{
+        if (optionalHtsClients.isPresent() && !optionalHtsClients.get().isEmpty()) {
+            return "Client code already exist";
+        } else {
             return "Client code does not exist";
         }
-
-
-
-
-
-//        if(moduleService.exist("PatientModule")){
-//            Optional<String> firstName = htsClientRepository.findInPatientByHospitalNumber(code);
-//            if(firstName.isPresent()){
-//                return firstName.get();
-//            }
-//        }
-//        if(!htsClients.isEmpty() && name.equals("Record Not Found")){
-//            Person person = htsClients.stream().findFirst().get().getPerson();
-//            return person.getFirstName() + " " + person.getSurname();
-//        }
-//        return name;
     }
 
     public HtsClientDtos getRiskStratificationHtsClients(Long personId) {

@@ -103,6 +103,7 @@ const PostTest = (props) => {
     postTestCounselingKnowledgeAssessment: {},
     personId: patientID,
   });
+  console.log("postTest",props )
   const [postTest, setPostTest] = useState({
     hivTestResult: "",
     hivTestBefore:

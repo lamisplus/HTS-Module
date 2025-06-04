@@ -381,9 +381,23 @@ const ViewPNSForm = (props) => {
     }
   };
 
+
   const loadFamilyIndexSetting = () => {
+      let  testingSetting =  props?.patientObj?.testingSetting
+      let testingType =""
+// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
+    if(testingSetting.includes("COMMUNITY")){
+      testingType= "COMMUNITY_HTS_TEST_SETTING"
+      
+    }
+
+    if(testingSetting.includes("FACILITY")){
+      testingType= "FACILITY_HTS_TEST_SETTING"
+
+      
+    }
     axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
+      .get(`${baseUrl}application-codesets/v2/${testingType}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -391,6 +405,8 @@ const ViewPNSForm = (props) => {
       })
       .catch((error) => {});
   };
+
+
 
   const getMaritalStatus = () => {
     axios

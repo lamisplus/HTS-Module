@@ -219,7 +219,8 @@ const BasicInfo = (props) => {
     pregnant:
       props.patientObj && props.patientObj.pregnant
         ? props.patientObj.pregnant
-        : ""  ,
+        :props.patientObj.riskStratificationResponseDto.testingSetting ===
+        "FACILITY_HTS_TEST_SETTING_ANC"  ? localStorage.getItem("pregnancyCode") : "" ,
     dateOfBirth:
       props.patientObj.personResponseDto &&
       props.patientObj.personResponseDto.dateOfBirth
@@ -429,13 +430,14 @@ const BasicInfo = (props) => {
     EnrollmentSetting();
     SourceReferral();
     Genders();
+    PregnancyStatus();
+
     getStates();
     MaterialStatus();
     determinSex();
     CounselingType();
    
     Sex();
-    PregnancyStatus();
     IndexTesting();
     CreateClientCode();
 
@@ -793,10 +795,7 @@ const BasicInfo = (props) => {
         relationWithIndexClient: "",
         indexClientCode: "",
       });
-    } else if(e.target.name === "sex"){
-      setObjValues({ ...objValues, pregnant: "", [e.target.name]: e.target.value});
-
-    }else {
+    } else {
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
     }
 
@@ -1937,6 +1936,9 @@ const BasicInfo = (props) => {
                   </div>
                 </>
               )}
+
+          
+
               {objValues.sex  === "Female"  && (
                 <>
                   <div className="form-group  col-md-4">

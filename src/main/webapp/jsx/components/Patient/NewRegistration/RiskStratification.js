@@ -184,7 +184,7 @@ if (objValues.age !== "") {
   useEffect(()=>{
     KP();
     TargetGroupSetup();
-
+    PregnancyStatus();
     EntryPoint();
   }, [])
   
@@ -202,7 +202,6 @@ if (objValues.age !== "") {
 
       });
   };
-
 
   const EntryPoint = () => {
     axios
@@ -359,7 +358,8 @@ if (objValues.age !== "") {
       displayRiskAssessment(
         riskAssessment.lastHivTestBasedOnRequest,
         objValues.age,
-        ans
+        ans 
+
       );
 
 
@@ -411,15 +411,39 @@ if (objValues.age !== "") {
     let SecAge = age !== "" ? age : 0;
     let ans;
 
+
     // for the section to show
 
     if (lastVisit === "false") {
-      if (SecAge > 15 && isPMTCTModalityValue) {
+      if (SecAge < 15 || isPMTCTModalityValue) {
         setShowRiskAssessment(false);
         ans = false;
-      } else if (SecAge > 15) {
+
+       // 
+            if( age !== ""){
+              setRiskAssessment({...riskAssessment,
+                lastHivTestForceToHaveSex: "",
+                lastHivTestHadAnal: "",
+                lastHivTestInjectedDrugs: "",
+                whatWasTheResult: "",
+                lastHivTestDone: "",
+                diagnosedWithTb: "",
+                lastHivTestPainfulUrination: "",
+                lastHivTestBloodTransfusion: "",
+                lastHivTestVaginalOral: "",
+              })
+            }
+
+        
+      } else if (SecAge > 15 ) {
         setShowRiskAssessment(true);
         ans = true;
+
+       
+      }else if(lastVisit === "false"){
+        setShowRiskAssessment(true);
+        ans = true;
+
       } else {
         setShowRiskAssessment(false);
         ans = false;
@@ -428,6 +452,7 @@ if (objValues.age !== "") {
       setShowRiskAssessment(false);
       ans = false;
     }
+
   };
   //Date of Birth and Age handle
   const handleDobChange = (e) => {
@@ -596,10 +621,17 @@ if (objValues.age !== "") {
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
 
   const handleInputChangeRiskAssessment = (e) => {
-    displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
-
+  
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
+
+    
+    if(e.target.name === "lastHivTestBasedOnRequest"){
+      displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
+      setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
+
+    }
+
   };
 
 
