@@ -99,6 +99,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
+
   const classes = useStyles();
   const history = useHistory();
   const [errors, setErrors] = useState({});
@@ -176,9 +177,13 @@ const BasicInfo = (props) => {
     props.patientObj.personResponseDto.dateOfBirth
   );
 
-  const [pmtctSetting , setPmtctSetting] = useState(["FACILITY_HTS_TEST_SETTING_ANC", "FACILITY_HTS_TEST_SETTING_L&D", "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"]);
+  const [pmtctSetting, setPmtctSetting] = useState([
+    "FACILITY_HTS_TEST_SETTING_ANC",
+    "FACILITY_HTS_TEST_SETTING_L&D",
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING",
+  ]);
 
-  const [disableVitals, setDisableVitals] = useState(false)
+  const [disableVitals, setDisableVitals] = useState(false);
 
   const [objValues, setObjValues] = useState({
     active: true,
@@ -204,10 +209,8 @@ const BasicInfo = (props) => {
       props.patientObj && props.patientObj.dateVisit
         ? props.patientObj.dateVisit
         : "",
-    firstTimeVisit:
-    props?.patientObj?.firstTimeVisit,
-    indexClient:
-    props?.patientObj?.indexClient,
+    firstTimeVisit: props?.patientObj?.firstTimeVisit,
+    indexClient: props?.patientObj?.indexClient,
     numChildren:
       props.patientObj && props.patientObj.numChildren
         ? props.patientObj.numChildren
@@ -219,8 +222,10 @@ const BasicInfo = (props) => {
     pregnant:
       props.patientObj && props.patientObj.pregnant
         ? props.patientObj.pregnant
-        :props.patientObj.riskStratificationResponseDto.testingSetting ===
-        "FACILITY_HTS_TEST_SETTING_ANC"  ? localStorage.getItem("pregnancyCode") : "" ,
+        : props.patientObj.riskStratificationResponseDto.testingSetting ===
+          "FACILITY_HTS_TEST_SETTING_ANC"
+        ? localStorage.getItem("pregnancyCode")
+        : "",
     dateOfBirth:
       props.patientObj.personResponseDto &&
       props.patientObj.personResponseDto.dateOfBirth
@@ -286,7 +291,15 @@ const BasicInfo = (props) => {
       props.patientObj.personResponseDto &&
       props.patientObj.personResponseDto.sex
         ? props.patientObj.personResponseDto.sex
-        : pmtctSetting.includes(props.patientObj.riskStratificationResponseDto.testingSetting)? "Female": props.patientObj.targetGroup === "TARGET_GROUP_FSW"? "Female":props.patientObj.targetGroup === "TARGET_GROUP_MSM"? "Male": "",
+        : pmtctSetting.includes(
+            props.patientObj.riskStratificationResponseDto.testingSetting
+          )
+        ? "Female"
+        : props.patientObj.targetGroup === "TARGET_GROUP_FSW"
+        ? "Female"
+        : props.patientObj.targetGroup === "TARGET_GROUP_MSM"
+        ? "Male"
+        : "",
     stateId: country && country.stateId ? country.stateId : "",
     riskAssessment:
       props.extra && props.extra.riskAssessment
@@ -317,27 +330,24 @@ const BasicInfo = (props) => {
     familyIndex: "",
   });
 
-
   const convertFromIdToDisplay = (code) => {
     let ans = indexTesting.filter((each, index) => {
       return each.code === code;
     });
-    
-    if(ans[0]?.id){
+
+    if (ans[0]?.id) {
       return ans[0].id;
     }
-    
   };
 
-  const CreateClientCode = async() => {
+  const CreateClientCode = async () => {
     let facilityShortCode = "";
-   let response = await  axios
-      .get(`${baseUrl}hts/get-facility-code`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    let response = await axios.get(`${baseUrl}hts/get-facility-code`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      setFacilityCode(response.data);
-      facilityShortCode= response.data
+    setFacilityCode(response.data);
+    facilityShortCode = response.data;
     let visitDate = new Date(props.patientObj.dateVisit);
 
     let setting = props.patientObj.testingSetting;
@@ -362,46 +372,45 @@ const BasicInfo = (props) => {
       settingCode = "SNS";
     } else if (setting?.includes("OTHER")) {
       settingCode = "OTH";
-    }else if (setting?.includes("SETTING_ANC")) {
+    } else if (setting?.includes("SETTING_ANC")) {
       settingCode = "ANC";
-    }else if (setting?.includes("RETESTING")) {
+    } else if (setting?.includes("RETESTING")) {
       settingCode = "RET";
-    }else if (setting?.includes("SETTING_L&D")) {
+    } else if (setting?.includes("SETTING_L&D")) {
       settingCode = "L&D";
-    }else if (setting?.includes("POST_NATAL_WARD_BREASTFEEDING")) {
+    } else if (setting?.includes("POST_NATAL_WARD_BREASTFEEDING")) {
       settingCode = "PNWB";
-    }else if (setting?.includes("NPATIENT")) {
+    } else if (setting?.includes("NPATIENT")) {
       settingCode = "INP";
-    }else if (setting?.includes("SETTING_CT")) {
+    } else if (setting?.includes("SETTING_CT")) {
       settingCode = "CT";
-    }else if (setting?.includes("SETTING_FP")) {
+    } else if (setting?.includes("SETTING_FP")) {
       settingCode = "FP";
-    }else if (setting?.includes("BLOOD_BANK")) {
+    } else if (setting?.includes("BLOOD_BANK")) {
       settingCode = "BB";
-    }else if (setting?.includes("PEDIATRIC")) {
+    } else if (setting?.includes("PEDIATRIC")) {
       settingCode = "PED";
-    }else if (setting?.includes("MALNUTRITION")) {
+    } else if (setting?.includes("MALNUTRITION")) {
       settingCode = "Mal";
-    }else if (setting?.includes("PREP_TESTING")) {
+    } else if (setting?.includes("PREP_TESTING")) {
       settingCode = "PrEPT";
-    }else if (setting?.includes("SPOKE_HEALTH_FACILITY")) {
+    } else if (setting?.includes("SPOKE_HEALTH_FACILITY")) {
       settingCode = "SPHF";
-    }else if (setting?.includes("STANDALONE")) {
+    } else if (setting?.includes("STANDALONE")) {
       settingCode = "STAN";
-    }else if (setting?.includes("CONGREGATIONAL")) {
+    } else if (setting?.includes("CONGREGATIONAL")) {
       settingCode = "CON";
-    }else if (setting?.includes("DELIVERY_HOMES")) {
+    } else if (setting?.includes("DELIVERY_HOMES")) {
       settingCode = "DEL";
-    }    else if (setting?.includes("TBA_ORTHODOX")) {
+    } else if (setting?.includes("TBA_ORTHODOX")) {
       settingCode = "TBAO";
-    }    else if (setting?.includes("TBA_RT-HCW")) {
+    } else if (setting?.includes("TBA_RT-HCW")) {
       settingCode = "TBAH";
-    }    else if (setting?.includes("SETTING_OVC")) {
+    } else if (setting?.includes("SETTING_OVC")) {
       settingCode = "OVC";
-    }    else if (setting?.includes("OUTREACH")) {
+    } else if (setting?.includes("OUTREACH")) {
       settingCode = "OUT";
-    }  
-
+    }
 
     let month = visitDate.getMonth();
     let year = visitDate.getFullYear();
@@ -409,21 +418,13 @@ const BasicInfo = (props) => {
       "C" + facilityCode + "/" + settingCode + "/" + month + "/" + year + "/";
     setCreatedCode(codeCreated);
 
-
-    if(!props.patientObj.id){
+    if (!props.patientObj.id) {
       setObjValues({ ...objValues, clientCode: codeCreated });
-    }else{
-          setSerialNumber(Cookies.get("serial-number"))
-          setDisableVitals(true)
+    } else {
+      setSerialNumber(Cookies.get("serial-number"));
+      setDisableVitals(true);
     }
   };
-
-
-
-
-
-
-
 
   useEffect(() => {
     KP();
@@ -436,16 +437,19 @@ const BasicInfo = (props) => {
     MaterialStatus();
     determinSex();
     CounselingType();
-   
+
     Sex();
     IndexTesting();
     CreateClientCode();
 
     //ellicited patient
 
-
-    let checkEnrollIndex =  JSON.parse(localStorage.getItem("index"))
-    if (checkEnrollIndex&& checkEnrollIndex?.type === "family" && checkEnrollIndex?.clientCode) {
+    let checkEnrollIndex = JSON.parse(localStorage.getItem("index"));
+    if (
+      checkEnrollIndex &&
+      checkEnrollIndex?.type === "family" &&
+      checkEnrollIndex?.clientCode
+    ) {
       setObjValues({
         ...objValues,
         familyIndex: checkEnrollIndex.uuid,
@@ -462,19 +466,15 @@ const BasicInfo = (props) => {
         ...objValues,
         partnerNotificationService: checkEnrollIndex.uuid,
         indexClient: "true",
-        relationWithIndexClient: convertFromIdToDisplay(
-         "INDEX_TESTING_SEXUAL"
-        ),
+        relationWithIndexClient: convertFromIdToDisplay("INDEX_TESTING_SEXUAL"),
         indexClientCode: checkEnrollIndex.clientCode,
       });
       setDisableIndexInfo(true);
     }
 
-    if(props.patientObj.id && props.completed.includes("basic") ){
-      setDisableVitals(true)
-      setSerialNumber(Cookies.get(("serial-number")))
-
-
+    if (props.patientObj.id && props.completed.includes("basic")) {
+      setDisableVitals(true);
+      setSerialNumber(Cookies.get("serial-number"));
     }
     setModalityCheck(
       getCheckModality(
@@ -490,10 +490,8 @@ const BasicInfo = (props) => {
     if (country && country.stateId !== "") {
       getProvincesId(country.stateId);
     }
- 
 
-      // Cleanup logic here
-
+    // Cleanup logic here
   }, [objValues.age, props.patientObj, props.extra.age, facilityCode]);
   //Get list of KP
   const KP = () => {
@@ -529,7 +527,7 @@ const BasicInfo = (props) => {
       })
       .then((response) => {
         setPregnancyStatus(response.data);
-        determinPregnancy(response.data)
+        determinPregnancy(response.data);
       })
       .catch((error) => {
         //console.log(error);
@@ -549,13 +547,15 @@ const BasicInfo = (props) => {
       });
   };
 
-
   const HTS_ENTRY_POINT_COMMUNITY = () => {
     axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(
+        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+ `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
         //console.log(response.data);
         setEnrollSetting(response.data);
@@ -572,7 +572,7 @@ const BasicInfo = (props) => {
       })
       .then((response) => {
         //Remove retesting from the codeset
-          let facilityList = []
+        let facilityList = [];
         // response.data.map((each, index)=>{
         //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
         //         facilityList.push(each);
@@ -587,9 +587,6 @@ const BasicInfo = (props) => {
       });
   };
 
-
-
-
   //Get list of HIV STATUS ENROLLMENT
   const EnrollmentSetting = () => {
     axios
@@ -597,25 +594,24 @@ const BasicInfo = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-
-        if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-                HTS_ENTRY_POINT_COMMUNITY()
-              }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
-    
-                HTS_ENTRY_POINT_FACILITY()
-              }else{
-                setEnrollSetting([]);
-    
-              }
-
-        
+        if (
+          props.patientObj.riskStratificationResponseDto.entryPoint ===
+          "HTS_ENTRY_POINT_COMMUNITY"
+        ) {
+          HTS_ENTRY_POINT_COMMUNITY();
+        } else if (
+          props.patientObj.riskStratificationResponseDto.entryPoint ===
+          "HTS_ENTRY_POINT_FACILITY"
+        ) {
+          HTS_ENTRY_POINT_FACILITY();
+        } else {
+          setEnrollSetting([]);
+        }
       })
       .catch((error) => {
         //console.log(error);
       });
   };
-
-
 
   //Get list of HIV STATUS ENROLLMENT
   const MaterialStatus = () => {
@@ -667,7 +663,6 @@ const BasicInfo = (props) => {
         //console.log(response.data);
         setSexs(response.data);
         // determinSex()
-
       })
       .catch((error) => {
         //console.log(error);
@@ -732,11 +727,10 @@ const BasicInfo = (props) => {
     if (e.target.name === "firstName" && e.target.value !== "") {
       const name = alphabetOnly(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: name });
-    }else if(e.target.name === "serialNumber" ){
-      setSerialNumber(e.target.value)
-      checkClientCode(e)
-
-    }else if (e.target.name === "lastName" && e.target.value !== "") {
+    } else if (e.target.name === "serialNumber") {
+      setSerialNumber(e.target.value);
+      checkClientCode(e);
+    } else if (e.target.name === "lastName" && e.target.value !== "") {
       const name = alphabetOnly(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: name });
     } else if (e.target.name === "middleName" && e.target.value !== "") {
@@ -801,12 +795,10 @@ const BasicInfo = (props) => {
 
     if (e.target.name === "sex" && e.target.value.toLowerCase() === "female") {
       setShowPregnancy(true);
-  
 
       setErrors({ ...errors, pregnant: "" });
     }
   };
-
 
   //checkClientCode
   const checkClientCode = (e) => {
@@ -827,12 +819,11 @@ const BasicInfo = (props) => {
           },
         }
       );
-      if(response.data ==='Client code already exist'){
+      if (response.data === "Client code already exist") {
         // setErrors({...errors,clientCode: "Client code already exist" })
-         setClientCodeCheck("Client code already exist")
-     
-      }else {
-          setClientCodeCheck("")
+        setClientCodeCheck("Client code already exist");
+      } else {
+        setClientCodeCheck("");
       }
     }
     getIndexClientCode();
@@ -873,41 +864,41 @@ const BasicInfo = (props) => {
     }
   };
 
+  const determinPregnancy = (pregList) => {
+    // get  the value of pregnancy being used
+    let pregnancyUsed = "";
+    if (pregList.length > 0) {
+      pregList.map((each, index) => {
+        if (each.code === "PREGANACY_STATUS_PREGNANT") {
+          pregnancyUsed = each.id;
+        }
+      });
+    }
 
-  const determinPregnancy =(pregList)=>{
-   // get  the value of pregnancy being used   
-   let pregnancyUsed  =""
-   if(pregList.length > 0){
-    pregList.map((each, index)=>{
+    if (
+      props.patientObj.riskStratificationResponseDto.testingSetting ===
+      "FACILITY_HTS_TEST_SETTING_ANC"
+    ) {
+      setObjValues({ ...objValues, pregnant: pregnancyUsed });
+    }
+  };
 
-       if(each.code === "PREGANACY_STATUS_PREGNANT"){
-        pregnancyUsed =each.id 
-       }
-     })
-   }
-
-   if(props.patientObj.riskStratificationResponseDto.testingSetting ===
-    "FACILITY_HTS_TEST_SETTING_ANC" 
-  ){
-    setObjValues({...objValues, pregnant: pregnancyUsed})
-
-  }
-  }
-
-  const determinSex= ()=>{  
-      if(props.patientObj.riskStratificationResponseDto.testingSetting ===
-    "FACILITY_HTS_TEST_SETTING_ANC" || props.patientObj.riskStratificationResponseDto.testingSetting ===
-    "FACILITY_HTS_TEST_SETTING_L&D" || props.patientObj.riskStratificationResponseDto.testingSetting ===
-    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
-  ){
-    setShowPregnancy(true)
-      setdisableSex(true)
-  }else{
-    setShowPregnancy(false)
-    setdisableSex(false)
-
-  }}
-
+  const determinSex = () => {
+    if (
+      props.patientObj.riskStratificationResponseDto.testingSetting ===
+        "FACILITY_HTS_TEST_SETTING_ANC" ||
+      props.patientObj.riskStratificationResponseDto.testingSetting ===
+        "FACILITY_HTS_TEST_SETTING_L&D" ||
+      props.patientObj.riskStratificationResponseDto.testingSetting ===
+        "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+    ) {
+      setShowPregnancy(true);
+      setdisableSex(true);
+    } else {
+      setShowPregnancy(false);
+      setdisableSex(false);
+    }
+  };
 
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
@@ -946,9 +937,8 @@ const BasicInfo = (props) => {
       : "This field is required.";
     temp.targetGroup = objValues.targetGroup ? "" : "This field is required.";
     temp.referredFrom = objValues.referredFrom ? "" : "This field is required.";
-    temp.previouslyTested = objValues.previouslyTested !== ""
-      ? ""
-      : "This field is required.";
+    temp.previouslyTested =
+      objValues.previouslyTested !== "" ? "" : "This field is required.";
     temp.surname = objValues.surname ? "" : "This field is required.";
     temp.sex = objValues.sex ? "" : "This field is required.";
     temp.clientCode = objValues.clientCode ? "" : "This field is required.";
@@ -958,10 +948,10 @@ const BasicInfo = (props) => {
     //temp.dateOfRegistration = objValues.dateOfRegistration ? "" : "This field is required."
     //temp.numChildren = objValues.numChildren ? "" : "This field is required."
     temp.address = objValues.address ? "" : "This field is required.";
-    temp.indexClient = objValues.indexClient !== "" ? "" : "This field is required.";
-    temp.firstTimeVisit = objValues.firstTimeVisit !== ""
-      ? ""
-      : "This field is required.";
+    temp.indexClient =
+      objValues.indexClient !== "" ? "" : "This field is required.";
+    temp.firstTimeVisit =
+      objValues.firstTimeVisit !== "" ? "" : "This field is required.";
     temp.dateVisit = objValues.dateVisit ? "" : "This field is required.";
     temp.dob = objValues.dob ? "" : "This field is required.";
     temp.age = objValues.age ? "" : "This field is required.";
@@ -1004,9 +994,23 @@ const BasicInfo = (props) => {
     setObjValues({ ...objValues, [inputName]: NumberValue });
   };
 
+   const shouldHideMaritalFields = () => {
+     // Check if setting is Pediatric and age is less than 15 years
+     const isPediatricAndUnder15 =
+       objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
+       props.patientAge < 15;
+
+     // Check if target group is PD or Children of Most at risk population
+     const isTargetGroupPDorChildrenKP =
+       props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
+       props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
+
+     // Hide fields if either condition is true
+     return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
+   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    Cookies.set("serial-number", serialNumber)
+    Cookies.set("serial-number", serialNumber);
     // check next form
     let latestForm = getNextForm(
       "Client_intake_form",
@@ -1017,7 +1021,6 @@ const BasicInfo = (props) => {
 
     if (validate() && clientCodeCheck === "") {
       setSaving(true);
-
 
       const getSexId = sexs.find((x) => x.display === objValues.sex); //get patient sex ID by filtering the request
       //basicInfo.sexId=getSexId.id
@@ -1072,7 +1075,6 @@ const BasicInfo = (props) => {
           otherName: objValues.otherName,
           sexId: getSexId.id,
           surname: objValues.surname,
-          
         },
         personId: "",
         hospitalNumber: objValues.clientCode,
@@ -1094,94 +1096,86 @@ const BasicInfo = (props) => {
 
       props.setPatientObj({ ...props.patientObj, ...objValues });
 
-
-
-      if(props.patientObj.id && props.completed.includes("basic") ){
-        patientForm.id= props?.patientObj?.id
-        patientForm.personId= props?.patientObj?.personId
+      if (props.patientObj.id && props.completed.includes("basic")) {
+        patientForm.id = props?.patientObj?.id;
+        patientForm.personId = props?.patientObj?.personId;
 
         axios
-        .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setSaving(false);
-          let obj = {
-            uuid: "",
-            type: "",
-            clientCode: "",
-          };
-          localStorage.setItem("index", JSON.stringify(obj));
+          .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setSaving(false);
+            let obj = {
+              uuid: "",
+              type: "",
+              clientCode: "",
+            };
+            localStorage.setItem("index", JSON.stringify(obj));
 
-          props.setPatientObj(response.data);
-          props.setBasicInfo(response.data);
-          toast.success("Form submitted successfully");
+            props.setPatientObj(response.data);
+            props.setBasicInfo(response.data);
+            toast.success("Form submitted successfully");
 
-          handleItemClick(latestForm[0], latestForm[1]);
-        })
-        .catch((error) => {
-          setSaving(false);
-          console.log(error);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage, {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          } else {
-            toast.error("Something went wrong. Please try again...", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          }
-        });
-      
-      }else{
+            handleItemClick(latestForm[0], latestForm[1]);
+          })
+          .catch((error) => {
+            setSaving(false);
+            console.log(error);
+            if (error.response && error.response.data) {
+              let errorMessage =
+                error.response.data.apierror &&
+                error.response.data.apierror.message !== ""
+                  ? error.response.data.apierror.message
+                  : "Something went wrong, please try again";
+              toast.error(errorMessage, {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            } else {
+              toast.error("Something went wrong. Please try again...", {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            }
+          });
+      } else {
         axios
-        .post(`${baseUrl}hts`, patientForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setSaving(false);
-          let obj = {
-            uuid: "",
-            type: "",
-            clientCode: "",
-          };
-          localStorage.setItem("index", JSON.stringify(obj));
+          .post(`${baseUrl}hts`, patientForm, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setSaving(false);
+            let obj = {
+              uuid: "",
+              type: "",
+              clientCode: "",
+            };
+            localStorage.setItem("index", JSON.stringify(obj));
 
-          props.setPatientObj(response.data);
-          props.setBasicInfo(response.data);
-          toast.success("Form submitted successfully");
+            props.setPatientObj(response.data);
+            props.setBasicInfo(response.data);
+            toast.success("Form submitted successfully");
 
-          handleItemClick(latestForm[0], latestForm[1]);
-        })
-        .catch((error) => {
-          setSaving(false);
-          console.log(error);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage, {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          } else {
-            toast.error("Something went wrong. Please try again...", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          }
-        });
-
+            handleItemClick(latestForm[0], latestForm[1]);
+          })
+          .catch((error) => {
+            setSaving(false);
+            console.log(error);
+            if (error.response && error.response.data) {
+              let errorMessage =
+                error.response.data.apierror &&
+                error.response.data.apierror.message !== ""
+                  ? error.response.data.apierror.message
+                  : "Something went wrong, please try again";
+              toast.error(errorMessage, {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            } else {
+              toast.error("Something went wrong. Please try again...", {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            }
+          });
       }
-  
-
-
-
     } else {
       toast.error("All fields are required", {
         position: toast.POSITION.BOTTOM_CENTER,
@@ -1218,10 +1212,10 @@ const BasicInfo = (props) => {
                     />
                   </FormGroup>
                   {errors.serialNumber !== "" ? (
-                      <span className={classes.error}>{errors.serialNumber}</span>
-                    ) : (
-                      ""
-                    )}
+                    <span className={classes.error}>{errors.serialNumber}</span>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <div className="form-group mb-3 col-md-4">
                   <FormGroup>
@@ -1242,7 +1236,6 @@ const BasicInfo = (props) => {
                         borderRadius: "0.25rem",
                       }}
                     />
-               
                   </FormGroup>
                   {/* {errors.clientCode !== "" ? (
                       <span className={classes.error}>{errors.clientCode}</span>
@@ -1668,12 +1661,10 @@ const BasicInfo = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    disabled={
-                      disableSex
-                    }
+                    disabled={disableSex}
                   >
                     <option value={""}></option>
-                   
+
                     {sexs.map((value) => (
                       <option key={value.id} value={value.display}>
                         {value.display}
@@ -1710,7 +1701,7 @@ const BasicInfo = (props) => {
                             </FormGroup>
                         </div>
                              )} */}
-              {objValues.age > 9 && (
+              {!shouldHideMaritalFields() && (
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>Marital Status</Label>
@@ -1735,30 +1726,33 @@ const BasicInfo = (props) => {
                   </FormGroup>
                 </div>
               )}
-              {objValues.age > 9 &&
-                objValues.sex === "Male" &&
-                objValues.maritalStatusId !== 5 && (
-                  <div className="form-group  col-md-4">
+
+              {!shouldHideMaritalFields() &&
+                (props.patientObj.personResponseDto.sex === "Male" ||
+                  props.patientObj.personResponseDto.sex === "male" ||
+                  props.patientObj.personResponseDto.sex === "MALE") && (
+                  <div className="form-group col-md-4">
                     <FormGroup>
                       <Label>Number of wives/co-wives</Label>
                       <Input
                         type="number"
                         name="numWives"
-                        min={0}
                         id="numWives"
+                        min={0}
                         value={objValues.numWives}
                         onChange={handleInputChange}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
+                        readOnly={props?.activePage?.actionType === "view"}
                       />
                     </FormGroup>
                   </div>
                 )}
               {/* && objValues.maritalStatusId==='6' */}
-              {objValues.age > 9 && (
-                <div className="form-group  col-md-4">
+              {!shouldHideMaritalFields() && (
+                <div className="form-group col-md-4">
                   <FormGroup>
                     <Label>Number of Children {"<5"} years</Label>
                     <Input
@@ -1772,12 +1766,13 @@ const BasicInfo = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
+                      readOnly={props?.activePage?.actionType === "view"}
                     />
                   </FormGroup>
                 </div>
               )}
               {/* objValues.maritalStatusId==='6' && */}
-          
+
               <div className="form-group  col-md-4">
                 <FormGroup>
                   <Label>
@@ -1793,39 +1788,25 @@ const BasicInfo = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    //disabled
                   >
-                    <option value={""}></option>
-                    {kP.map((value) => (
-                                           <option key={value.id} value={value.code}>
-                                               {value.display}
-                                           </option>
-                                       ))}
-                    {/* {objValues?.sex.toLowerCase() === "female" && (
-                      <>
-                        {" "}
-                        {kP
-                          .filter((x) => x.display !== "MSM")
-                          .map((value) => (
-                            <option key={value.id} value={value.code}>
-                              {value.display}
-                            </option>
-                          ))}
-                      </>
-                    )} */}
-{/* 
-                    {(objValues.sex === "Male" || objValues.sex === "male") && (
-                      <>
-                        {" "}
-                        {kP
-                          .filter((x) => x.display !== "FSW")
-                          .map((value) => (
-                            <option key={value.id} value={value.code}>
-                              {value.display}
-                            </option>
-                          ))}{" "}
-                      </>
-                    )} */}
+                    <option value={""}>Select</option>
+                    {kP
+                      .filter((value) => {
+                        if (
+                          objValues.age > 14 &&
+                          (value.id === 961 || value.id === 475)
+                        ) {
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map((value) => {
+                        return (
+                          <option key={value.id} value={value.code}>
+                            {value.display}
+                          </option>
+                        );
+                      })}
                   </select>
                   {errors.targetGroup !== "" ? (
                     <span className={classes.error}>{errors.targetGroup}</span>
@@ -1881,7 +1862,6 @@ const BasicInfo = (props) => {
                           borderRadius: "0.2rem",
                         }}
                         disabled={disableIndexInfo}
-
                       >
                         <option value={""}></option>
                         {indexTesting.map((value) => (
@@ -1916,7 +1896,6 @@ const BasicInfo = (props) => {
                           borderRadius: "0.25rem",
                         }}
                         disabled={disableIndexInfo}
-
                       />
                       {errors.indexClientCode !== "" ? (
                         <span className={classes.error}>
@@ -1940,9 +1919,7 @@ const BasicInfo = (props) => {
                 </>
               )}
 
-          
-
-              {objValues.sex  === "Female"  && (
+              {objValues.sex === "Female" && (
                 <>
                   <div className="form-group  col-md-4">
                     <FormGroup>
@@ -1960,20 +1937,18 @@ const BasicInfo = (props) => {
                           borderRadius: "0.2rem",
                         }}
                         disabled={
-                          props.patientObj.riskStratificationResponseDto.testingSetting ===
-                            "FACILITY_HTS_TEST_SETTING_ANC" 
+                          props.patientObj.riskStratificationResponseDto
+                            .testingSetting === "FACILITY_HTS_TEST_SETTING_ANC"
                             ? true
                             : false
                         }
                       >
                         <option value={""}></option>
-                        {pregnancyStatus.map((value) =>
-                        
-                            <option key={value.id} value={value.id}>
-                              {value.display}
-                            </option>
-                        
-                        )}
+                        {pregnancyStatus.map((value) => (
+                          <option key={value.id} value={value.id}>
+                            {value.display}
+                          </option>
+                        ))}
                       </select>
                       {errors.pregnant !== "" ? (
                         <span className={classes.error}>{errors.pregnant}</span>
@@ -2135,7 +2110,7 @@ const BasicInfo = (props) => {
                     onClick={() => handleItemClick("risk", "risk")}
                   /> */}
                   <Button
-                    content="Save & Continue"
+                    content="Saves & Continue"
                     type="submit"
                     icon="right arrow"
                     labelPosition="right"

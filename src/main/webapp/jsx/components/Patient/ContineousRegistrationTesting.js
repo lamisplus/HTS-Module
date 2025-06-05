@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const UserRegistration = (props) => {
+
     const history = useHistory();
 
   const location = useLocation();
@@ -521,6 +522,10 @@ const UserRegistration = (props) => {
     );
   }, [patientObj2]);
 
+
+
+
+
   return (
     <>
       <ToastContainer autoClose={3000} hideProgressBar />
@@ -530,7 +535,7 @@ const UserRegistration = (props) => {
           <form>
             <div className="row">
               <h3>
-                HIV COUNSELLING AND TESTING
+                HIV COUNSELLING AND TESTING 
                 {showBackButton &&  <div>
                     {/* <Link to={"/"}> */}
                     <Button

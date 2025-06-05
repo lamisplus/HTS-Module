@@ -17,7 +17,11 @@ const divStyle = {
   fontSize: 14,
 };
 
+
+
 const Home = (props) => {
+
+  // State definitions
   const [patientList, setPatientList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newHTSType, setNewHTSType] = useState("NEW HTS");
@@ -28,121 +32,88 @@ const Home = (props) => {
       ? props.patientObj.personId
       : props.patientObj.id
       ? props.patientObj.id
-      : "";
+        : "";
+  
+  console.log("patientId", patientId);
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
   );
 
   const [lastHts, setLastHTS] = useState({});
-
   const [patientInfo, setPatientInfo] = useState(null);
   const [permissions, setPermission] = useState(
     JSON.parse(localStorage.getItem("stringifiedPermmision"))
   );
   const [lastVisitCount, setLastVisitCount] = useState(null);
   const [checkModality, setCheckModality] = useState("");
-  const [lastVistAndModality, setLastVistAndModality] = useState("");
-  const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] =
-    useState(lastVistAndModality || props.checkedInPatient ? true : false);
+  const [lastVistAndModality, setLastVistAndModality] = useState(false);
+  const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] = useState(false);
 
-  //Calculate last date of visit
+
+
   const calculateLastVisitDate = (visitDate) => {
+    if (!visitDate) return 0;
+    
     const monthDifference = moment(
       new Date(moment(new Date()).format("YYYY-MM-DD"))
     ).diff(new Date(visitDate), "months", true);
+    
+  
+    
     return monthDifference;
   };
 
+  // Main function to determine retesting status
+  const determineRetestingStatus = async (lastRecord) => {
+
+    let htsType = "NEW HTS";
+
+   
+    let hivResult = lastRecord?.hivTestResult || lastRecord?.hivTestResult2;
 
 
-
-const getRetestingStatus= (lastRecord)=>{
-  let hivResult = lastRecord?.hivTestResult? lastRecord?.hivTestResult: lastRecord?.hivTestResult2
-  let weekRange = 40 + 52;
-
-// does the patient has HTS record
-
-  if(lastRecord?.id){
-      //is the record negative
-    if(hivResult){
-     let hasHivNegative = hivResult.toLowerCase() === "negative"? true : false;
-
-        if(hasHivNegative){
-     //is the patient on ANC table  and get the lmp 
-     async  function getLmpFromANC(){
-      await  axios
-        .get(`${baseUrl}hts/get-anc-lmp?personUuid=${props.patientObj.personUuid}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          if(response.data.result ){
-          let lmpDate = moment(response.data.result).format("YYYY-MM-DD")
-          // let EDD =moment(response.data.result).add(40, 'weeks').format("YYYY-MM-DD")
-
-          // get retesting range date 
-          let retestingRangeDate = moment(response.data.result).add(40 + 52, 'weeks').format("YYYY-MM-DD")
-          let today = moment()
-
-          let r =moment(retestingRangeDate)
-
-
-
-              if( r.diff(today, 'days')> 0){
-
-                setNewHTSType("RETESTING");
-
-              }else{
-                setNewHTSType("NEW HTS");
-
-              }
-
-          }else{
-            setNewHTSType("NEW HTS");
-
-          }
-
-          //  return response.data
-    
-          setLMP(response.data)
-        })
-        .catch((error) => {
-          return "";
-        });
-    }
+    if (lastRecord?.id && hivResult && hivResult.toLowerCase() === "negative") {
+     
       
-    
-    getLmpFromANC()
- 
+      try {
+     
+        const response = await axios.get(
+          `${baseUrl}hts/get-anc-lmp?personUuid=${props.patientObj.personUuid}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        // If LMP data exists, calculate retesting date range
+        if (response.data.result) {
+          let lmpDate = moment(response.data.result);
+          let retestingRangeDate = moment(lmpDate).add(40 + 52, "weeks");
+          let today = moment();
 
-
-        }else{
-          setNewHTSType("NEW HTS");
-
-        }
-
-    }else{
-       setNewHTSType("NEW HTS");
+          // If today is within the retesting range (today is before the end date)
+          if (retestingRangeDate.diff(today, "days") > 0) {
+            htsType = "RETESTING";
+          } 
+        } 
+        // Set LMP data
+        setLMP(response.data);
+      } catch (error) {
+        console.error("Error fetching ANC LMP data:", error);
+      }
+    } else {
+      console.log(
+        "Patient either has no record, no HIV result, or result isn't negative. Keeping type as NEW HTS"
+      );
     }
-  }else{
-    setNewHTSType("NEW HTS");
-  }
 
+    setNewHTSType(htsType);
 
-
-
- 
-
-
-
-
-}
-
+    return htsType;
+  };
 
   useEffect(() => {
-// 
     patients();
     patientsCurrentHts();
+    
     if (props.activePage.activePage === "home") {
       setKey("home");
     }
@@ -150,65 +121,76 @@ const getRetestingStatus= (lastRecord)=>{
       setKey("new");
     }
   }, [props.patientObj, props.activePage]);
-  ///GET LIST OF Patients
 
+  // Get list of patients
   async function patients() {
+    console.log("Fetching patient list for ID:", patientId);
     setLoading(true);
-    axios
-      .get(`${baseUrl}hts/persons/${patientId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setLoading(false);
-        setPatientList(response.data.htsClientDtoList);
-      })
-      .catch((error) => {
-        setLoading(false);
-      });
+    
+    try {
+      const response = await axios.get(
+        `${baseUrl}hts/persons/${patientId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPatientList(response.data.htsClientDtoList);
+    } catch (error) {
+      console.error("Error fetching patient list:", error);
+    } finally {
+      setLoading(false);
+    }
   }
+
+
   async function patientsCurrentHts() {
- 
+
     setLoading(true);
-    axios
-      .get(`${baseUrl}hts/persons/${patientId}/current-hts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //set the last date of visit after the response
-        setPatientInfo(response.data);
-        setLastVisitCount(
-          Math.round(calculateLastVisitDate(response.data.dateVisit))
-        );
-        setCheckModality(
-          getCheckModalityForHTS(
-            response.data.riskStratificationResponseDto?.testingSetting
-          )
-        );
+    
+    try {
+      const response = await axios.get(
+        `${baseUrl}hts/persons/${patientId}/current-hts`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        // new adjustment-- for patient with pmtct modality, they should skip the 3 month
-        let condition =
-          Math.round(calculateLastVisitDate(response.data.dateVisit)) >= 3 ||
-          getCheckModalityForHTS(
-            response.data.riskStratificationResponseDto?.testingSetting
-          ) === "show"
-            ? true
-            : false;
+      // Set patient info
+      setPatientInfo(response.data);
+      
+      // Calculate visit metrics
+      const visitCount = Math.round(calculateLastVisitDate(response.data.dateVisit));
+      setLastVisitCount(visitCount);
+      
+      
+      // Check modality
+      const modality = getCheckModalityForHTS(
+        response.data.riskStratificationResponseDto?.testingSetting
+      );
+      setCheckModality(modality);
 
-        setLastVistAndModality(condition);
-        setLastVisitModalityAndCheckedIn(
-          condition || props.checkedInPatient ? true : false
-        );
 
-        //get the last HTS 
+      // Calculate condition for showing tabs
+      const condition =
+        visitCount >= 3 || modality === "show"
+          ? true
+          : false;
+      
+ 
+      setLastVistAndModality(condition);
+      
+      const finalCondition = condition || props.checkedInPatient;
+      console.log("Final condition with checked-in status:", finalCondition);
+      setLastVisitModalityAndCheckedIn(finalCondition);
 
-      getRetestingStatus(response.data);
-
-        setLastHTS(response.data)
-      })
-      .catch((error) => {
-        //setLoading(false)
-      });
+      await determineRetestingStatus(response.data);
+      
+      setLastHTS(response.data);
+      
+    } catch (error) {
+      console.error("Error fetching current HTS:", error);
+    } finally {
+      setLoading(false);
+    }
   }
+
+
 
   return (
     <Fragment>
@@ -222,10 +204,12 @@ const getRetestingStatus= (lastRecord)=>{
                 <Tabs
                   id="controlled-tab-example"
                   activeKey={key}
-                  onSelect={(k) => setKey(k)}
+                  onSelect={(k) => {
+                    console.log("Tab selected:", k);
+                    setKey(k);
+                  }}
                   className="mb-3"
                 >
-
                   <Tab eventKey="home" title="HTS HISTORY">
                     <History
                       patientObj={props.patientObj}
@@ -239,10 +223,13 @@ const getRetestingStatus= (lastRecord)=>{
                       loading={loading}
                     />
                   </Tab>
-                  {/* lastVistAndModality */}
-
+                  
                   {lastVisitModalityAndCheckedIn && (
-                    <Tab eventKey="new" title={newHTSType}>
+                    <Tab 
+                      eventKey="new" 
+                      title={newHTSType}
+                      tabClassName={newHTSType === "RETESTING" ? "retesting-tab" : ""}
+                    >
                       <ContineousRegistrationTesting
                         patientObj={patientInfo}
                         activePage={props.activePage}
@@ -258,7 +245,7 @@ const getRetestingStatus= (lastRecord)=>{
                       />
                     </Tab>
                   )}
-                  {/* uncomment E001 */}
+                  
                   <Tab eventKey="hivst-history" title="HIVST HISTORY">
                     <HIVSTPatientHistory
                       patientObj={props.patientObj}
@@ -272,6 +259,7 @@ const getRetestingStatus= (lastRecord)=>{
                       loading={loading}
                     />
                   </Tab>
+                  
                   <Tab eventKey="new-hivst" title="NEW HIVST">
                     <ExistenceClientHIVSTRegistration
                       patientObj={props.patientObj}

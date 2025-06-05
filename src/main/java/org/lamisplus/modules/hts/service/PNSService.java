@@ -130,6 +130,7 @@ public class PNSService {
         pnsDTO.setPhoneNumber(pns.getPhoneNumber());
         pnsDTO.setDatePartnerTested(pns.getDatePartnerTested());
         pnsDTO.setDateEnrollmentOnART(pns.getDateEnrollmentOnART());
+        pnsDTO.setDateOfElicitation(pns.getDateOfElicitation());
         pnsDTO.setKnownHivPositive(pns.getKnownHivPositive());
         pnsDTO.setSex(pns.getSex());
         pnsDTO.setRelationshipToIndexClient(pns.getRelationshipToIndexClient());
@@ -159,6 +160,7 @@ public class PNSService {
         pns.setAlternatePhoneNumber(req.getAlternatePhoneNumber());
         pns.setDatePartnerTested(req.getDatePartnerTested());
         pns.setDateEnrollmentOnART(req.getDateEnrollmentOnART());
+        pns.setDateOfElicitation(req.getDateOfElicitation());
         pns.setKnownHivPositive(req.getKnownHivPositive());
         pns.setDob(req.getDob());
         pns.setSex(req.getSex());
@@ -198,6 +200,7 @@ public class PNSService {
         pns.setAlternatePhoneNumber(res.getAlternatePhoneNumber());
         pns.setDatePartnerTested(res.getDatePartnerTested());
         pns.setDateEnrollmentOnART(res.getDateEnrollmentOnART());
+        pns.setDateOfElicitation(res.getDateOfElicitation());
         pns.setKnownHivPositive(res.getKnownHivPositive());
         pns.setDob(res.getDob());
         pns.setSex(res.getSex());

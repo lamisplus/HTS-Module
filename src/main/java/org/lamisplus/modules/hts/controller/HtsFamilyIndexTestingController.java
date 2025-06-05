@@ -7,12 +7,15 @@ import org.lamisplus.modules.hts.domain.dto.*;
 import org.lamisplus.modules.hts.domain.entity.FamilyIndex;
 import org.lamisplus.modules.hts.domain.entity.FamilyTestingTracker;
 import org.lamisplus.modules.hts.service.FamilyIndexTestingService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.sql.SQLOutput;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.lamisplus.modules.base.util.Constants.ArchiveStatus.UN_ARCHIVED;
 
@@ -55,7 +58,6 @@ public class HtsFamilyIndexTestingController {
 
 
 
-
     @GetMapping("/getCurrentTreatment")
     public ResponseEntity<String> getCurrentTreatment(@RequestParam String personUuid) {
 
@@ -69,8 +71,6 @@ public class HtsFamilyIndexTestingController {
 
         String Result =  familyIndexTestingService.getVirallySuppressedByPersonUuid(personUuid);
         return ResponseEntity.ok(Result);
-
-
 
     }
 
@@ -127,6 +127,19 @@ public class HtsFamilyIndexTestingController {
     public ResponseEntity<String> updateFamilyIndexTestingAndIndex(@PathVariable Long id, @RequestBody FamilyIndexTestingResponseDTO req) {
         String response = familyIndexTestingService.updateFamilyIndexTestingAndIndex(id, req);
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/get-contact-id")
+    public ResponseEntity<String> generatePartnerId(@RequestParam Long htsClientId, @RequestParam String clientCode) {
+        return ResponseEntity.ok(this.familyIndexTestingService.generateContactId(htsClientId, clientCode));
+    }
+
+
+    @GetMapping("/hts-client-uuid")
+    public ResponseEntity<UuidProjection> getHTSClientUUID(@RequestParam String uuid) {
+        UuidProjection result = this.familyIndexTestingService.getHTSClientUUID(uuid);
+        return ResponseEntity.ok(result);
     }
 
 }

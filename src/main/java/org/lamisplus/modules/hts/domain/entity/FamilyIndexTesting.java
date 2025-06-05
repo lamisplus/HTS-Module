@@ -153,6 +153,10 @@ public class FamilyIndexTesting extends Audit implements Serializable {
     private String recencyTesting;
 
     @Basic
+    @Column(name = "contact_id")
+    private String contactId;
+
+    @Basic
     @Column(name="willing_to_have_children_tested_else_where")
     private String willingToHaveChildrenTestedElseWhere;
 

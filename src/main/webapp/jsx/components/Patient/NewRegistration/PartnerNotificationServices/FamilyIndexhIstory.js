@@ -263,15 +263,17 @@ const FamilyIndexHistory = (props) => {
           // title=''
           columns={[
             { title: "ID", field: "id" },
+            { title: "Contact Id", field: "contactId"},
             { title: "Date Of Birth", field: "date" },
             { title: "family Relationship", field: "familyRelationship" },
-            // { title: "Index Notification", field: "indexNotifiation", filtering: false },
+            
 
             { title: "Actions", field: "actions", filtering: false },
           ]}
           isLoading={props.loading}
           data={familyIndexList.map((row) => ({
             id: row.id,
+            contactId:row.contactId,
             date: row.dateOfBirth,
             familyRelationship: convertRelationship(row.familyRelationship),
 

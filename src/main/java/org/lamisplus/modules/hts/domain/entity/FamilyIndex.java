@@ -72,7 +72,10 @@ public class FamilyIndex extends Audit implements Serializable  {
     @Basic
     @Column(name = "status_of_contact")
     private String statusOfContact;
-//    private String familyIndexHivStatus;
+
+    @Basic
+    @Column(name = "contact_id")
+    private String contactId;
 
     @Basic
     @Column(name = "child_number")
