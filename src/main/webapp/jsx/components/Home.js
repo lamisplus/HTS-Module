@@ -58,14 +58,6 @@ const Home = () => {
                     </Suspense>
                   </Tab>
 
-                  {/*<Tab eventKey="home" title="Patients">*/}
-                  {/*  <Suspense fallback={<LoadingSpinner />}>*/}
-                  {/*    {key === "home" && <Dashboard />}*/}
-                  {/*  </Suspense>*/}
-                  {/*</Tab>*/}
-
-
-
                   <Tab eventKey="hts" title="HTS Patients">
                     <Suspense fallback={<LoadingSpinner />}>
                       {key === "hts" && <HTSList />}

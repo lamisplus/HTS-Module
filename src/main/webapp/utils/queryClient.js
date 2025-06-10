@@ -5,7 +5,7 @@ const queryClientSettings = {
     queries: {
       retry: 1,
       refetchOnMount: true,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       cacheTime: 1000,
       staleTime: 1000,
