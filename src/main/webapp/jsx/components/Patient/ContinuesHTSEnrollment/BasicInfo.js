@@ -188,10 +188,12 @@ const BasicInfo = (props) => {
   const getSettingList=()=>{
 
     if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
-      HTS_ENTRY_POINT_COMMUNITY()
+      
+      setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
     }else if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase()  === "facility"|| "hts_entry_point_facility"){
 
-      HTS_ENTRY_POINT_FACILITY()
+      
+      setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
     }else{
       setEnrollSetting([]);
 
@@ -204,10 +206,10 @@ const BasicInfo = (props) => {
     );
   }
 
-  console.log("clent intake form 1", props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase())
+  
 
   useEffect(() => {
-    EnrollmentSetting();
+    // EnrollmentSetting();
     getSettingList()
 
   }, [props.patientObj, facilityCode]);
@@ -232,55 +234,7 @@ const BasicInfo = (props) => {
     }
   };
 
-
-   
-
-
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-      
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-    
-      });
-  };
-
-
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        
-      });
-  };
-
  
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-       
-      });
-  };
 
 
   const handleInputChange = (e) => {
@@ -436,7 +390,7 @@ const BasicInfo = (props) => {
       "unknown"
     );
 
-    console.log("latestForm", latestForm)
+    
 
     const patientForm = {
       clientCode: objValues.clientCode,
@@ -769,7 +723,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {enrollSetting.map((value) => (
+                    {enrollSetting?.map?.((value) => (
                       <option key={value.id} value={value.code}>
                         {value.display}
                       </option>

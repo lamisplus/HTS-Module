@@ -31,6 +31,7 @@ import {
 import { calculate_age } from "../../utils";
 import { useHistory } from "react-router-dom";
 import DualListBox from "react-dual-listbox";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -134,6 +135,7 @@ const RefferralUnit = (props) => {
   const [selectedReceivingFacility, setSelectedReceivingFacility] = useState(
     {}
   );
+  const [codesets, setCodesets] = useState({})
   const [selectedReceivingLga, setSelectedReceivingLga] = useState({});
   const history = useHistory();
   const [serviceNeeded, setServiceNeeded] = useState([]);
@@ -183,13 +185,8 @@ const RefferralUnit = (props) => {
     htsClientId: props && props.patientObj ? props.patientObj?.id : "",
     htsClientUuid: props && props.patientObj ? props.patientObj?.uuid : "",
   });
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
+
+
 
   const getProvincesWithId = (id) => {
     getAllProvinces(id)
@@ -211,7 +208,7 @@ const RefferralUnit = (props) => {
   };
 
   useEffect(() => {
-    loadGenders();
+    // loadGenders();
     getCountry();
     getStateByCountryId();
   
@@ -222,17 +219,8 @@ const RefferralUnit = (props) => {
     }
   }, []);
 
-  const getSex = async () => {
-    try {
-      const response = await axios.get(
-        `${baseUrl}application-codesets/v2/GENDER`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      return response.data;
-    } catch (e) {}
-  };
+ 
+
   //Get list of State
   const getStateByCountryId = () => {
     getAllStateByCountryId()
@@ -241,6 +229,7 @@ const RefferralUnit = (props) => {
       })
       .catch(() => {});
   };
+
   const checkPhoneNumberBasic = (e, inputName) => {
     if (e) {
       setErrors({ ...errors, phoneNumber: "" });
@@ -258,6 +247,7 @@ const RefferralUnit = (props) => {
       setPayload({ ...payload, phoneNoOfReceivingFacility: e.slice(0, limit) });
     }
   };
+
 
   // handle Facility Name to slect drop down
   const handleInputChangeObject = (e) => {
@@ -285,6 +275,7 @@ const RefferralUnit = (props) => {
       })
       .catch((e) => {});
   };
+
   const getCountry = () => {
     getAllCountry()
       .then((res) => {
@@ -298,6 +289,7 @@ const RefferralUnit = (props) => {
     const acceptedNumber = e.slice(0, limit);
     return acceptedNumber;
   };
+
   const handleInputChangePhoneNumber = (e, inputName) => {
     const limit = 11;
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
@@ -359,37 +351,24 @@ const RefferralUnit = (props) => {
       .catch((e) => {});
   };
 
-  const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          // create array of objects from the response
-          const serviceNeeded = response.data.map((service) => {
-            return {
-              value: service.display,
-              label: service.display,
-            };
-          });
-          setServiceNeeded(serviceNeeded);
-        }
-      })
-      .catch((e) => {
-        // handle error
-      });
-  };
+ 
 
   useEffect(() => {
     loadStates();
-    SERVICE_NEEDED();
   }, []);
 
-  // ###########################################################################
-  //Get list of HIV STATUS ENROLLMENT
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceNeeded(data["SERVICE_PROVIDED"])
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
+
 
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });

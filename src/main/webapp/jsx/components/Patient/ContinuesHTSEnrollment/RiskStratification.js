@@ -180,9 +180,9 @@ const RiskStratification = (props) => {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
-      SettingModality(
-        props?.patientObj?.riskStratificationResponseDto?.testingSetting
-      );
+      // SettingModality(
+      //   props?.patientObj?.riskStratificationResponseDto?.testingSetting
+      // );
 
       setRiskAssessment(
         props.patientObj.riskStratificationResponseDto &&
@@ -286,7 +286,7 @@ const RiskStratification = (props) => {
     if (e.target.name === "testingSetting" && e.target.value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(e.target.value);
+      // SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
       let ans = checkPMTCTModality(e.target.value);
 
@@ -396,19 +396,19 @@ const RiskStratification = (props) => {
 
   //Date of Birth and Age handle
   //Get list of DSD Model Type
-  function SettingModality(settingId) {
-    const setting = settingId;
-    axios
-      .get(`${baseUrl}application-codesets/v2/${setting}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
+  // function SettingModality(settingId) {
+  //   const setting = settingId;
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/${setting}`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setSetting(response.data);
+  //     })
+  //     .catch((error) => {
 
-      });
-  }
+  //     });
+  // }
   //End of Date of Birth and Age handling
   /*****  Validation  */
   const validate = () => {

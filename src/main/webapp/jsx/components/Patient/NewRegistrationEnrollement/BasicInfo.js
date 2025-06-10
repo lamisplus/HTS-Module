@@ -478,9 +478,9 @@ const BasicInfo = (props) => {
 
 
                     <option value={""}></option>
-                    {enrollSetting.map((value) => (
-                      <option key={value.id} value={value.code}>
-                        {value.display}
+                    {enrollSetting?.map?.((value) => (
+                      <option key={value?.id} value={value?.code}>
+                        {value?.display}
                       </option>
                     ))}
                   </select>

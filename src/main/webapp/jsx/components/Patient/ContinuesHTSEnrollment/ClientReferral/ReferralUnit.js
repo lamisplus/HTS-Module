@@ -31,6 +31,7 @@ import { useHistory } from "react-router-dom";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { CardBody, FormGroup, Input, Label } from "reactstrap";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -136,6 +137,7 @@ const ReferralUnit = (props) => {
   const [selectedReceivingFacility, setSelectedReceivingFacility] = useState(
     {}
   );
+  const [codesets, setCodesets] = useState({})
   const [selectedReceivingLga, setSelectedReceivingLga] = useState({});
   const history = useHistory();
 
@@ -202,7 +204,7 @@ const ReferralUnit = (props) => {
   }, []);
 
   useEffect(() => {
-    loadGenders();
+    // loadGenders();
     getCountry();
     getStateByCountryId();
     if (props?.patientObj?.personResponseDto?.address?.address[0]?.stateId) {
@@ -265,6 +267,7 @@ const ReferralUnit = (props) => {
       })
       .catch((e) => {});
   };
+
   const getCountry = () => {
     getAllCountry()
       .then((res) => {
@@ -340,26 +343,23 @@ const ReferralUnit = (props) => {
       });
   };
 
-  const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          setServiceNeeded(response.data);
-        }
-      })
-      .catch((e) => {
-        
-      });
-  };
+  
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceNeeded(data["SERVICE_PROVIDED"])
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   useEffect(() => {
     loadStates();
-    SERVICE_NEEDED();
+    // SERVICE_NEEDED();
   }, []);
 
   // ###########################################################################

@@ -21,6 +21,7 @@ import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import Remove from "@material-ui/icons/Remove";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import { makeStyles } from "@material-ui/core/styles";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -101,36 +102,45 @@ const ClientRerralList = (props) => {
   const patientId =
     props.patientObj && props.patientObj.id ? props.patientObj.id : null;
   //const [key, setKey] = useState('home');
-  
+
   useEffect(() => {
     patients();
   }, []);
+
+  const [codesets, setCodesets] = useState({})
+
   //get services needed
   const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          setServiceNeeded(response.data);
-          const mapping = {};
-          response.data.forEach((item) => {
-            mapping[item.code] = item.display;
-          });
-          setServiceMapping(mapping);
-        }
-      })
-      .catch((e) => {
-        console.error("Fetch Services error:", e);
-      });
+
+    const mapping = {};
+    codesets?.["SERVICE_PROVIDED"]?.forEach((item) => {
+      mapping[item.code] = item.display;
+    });
+    setServiceMapping(mapping);
+
+
   };
 
   useEffect(() => {
     SERVICE_NEEDED();
   }, []);
+
+
+
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceNeeded(data["SERVICE_PROVIDED"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "SERVICE_PROVIDED",
+    ],
+    patientId: patientId,
+    onSuccess: loadCodesets
+  })
 
   async function patients() {
     axios
@@ -141,8 +151,9 @@ const ClientRerralList = (props) => {
         // console.log(response.data);
         setIndexClientList(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }
+
   const addNewPns = (e) => {
     e.preventDefault();
     props.handleItemClick("client-referral");
@@ -172,7 +183,7 @@ const ClientRerralList = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -189,7 +200,7 @@ const ClientRerralList = (props) => {
           color="primary"
           className=" float-end  mr-2 mt-2"
           onClick={(e) => addNewPns(e)}
-          //startIcon={<FaUserPlus size="10"/>}
+        //startIcon={<FaUserPlus size="10"/>}
         >
           <span style={{ textTransform: "capitalize" }}> Refer Client</span>
         </Button>
@@ -213,7 +224,7 @@ const ClientRerralList = (props) => {
             .map((row) => ({
               date: row.dateVisit,
               // service: serviceMapping[row.serviceNeeded] || row.serviceNeeded,
-                service: Object.values(row.serviceNeeded).join(', '),
+              service: Object.values(row.serviceNeeded).join(', '),
               // phone: row.phoneNumber,
               receiving: row.nameOfReceivingFacility,
               actions: (
@@ -221,40 +232,40 @@ const ClientRerralList = (props) => {
                   <Menu.Menu position="right">
                     <Menu.Item>
                       <Button
-                          style={{ backgroundColor: "rgb(153,46,98)" }}
-                          primary
-                          onClick={(e) => {
-                            e.preventDefault();
-                          }}
-                      >
-                      <Dropdown
-                        item
-                        text="Action"
+                        style={{ backgroundColor: "rgb(153,46,98)" }}
+                        primary
                         onClick={(e) => {
                           e.preventDefault();
                         }}
                       >
-                        <Dropdown.Menu style={{ marginTop: "10px" }}>
-                          <Dropdown.Item
-                            onClick={(e) => LoadViewPage(row, "view")}
-                          >
-                            {" "}
-                            <Icon name="eye" />
-                            View
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={() => LoadViewPage(row, "update")}
-                          >
-                            <Icon name="edit" />
-                            Edit
-                          </Dropdown.Item>
-                          <Dropdown.Item onClick={() => LoadModal(row)}>
-                            <Icon name="delete" />
-                            Delete
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-                       </Button>
+                        <Dropdown
+                          item
+                          text="Action"
+                          onClick={(e) => {
+                            e.preventDefault();
+                          }}
+                        >
+                          <Dropdown.Menu style={{ marginTop: "10px" }}>
+                            <Dropdown.Item
+                              onClick={(e) => LoadViewPage(row, "view")}
+                            >
+                              {" "}
+                              <Icon name="eye" />
+                              View
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() => LoadViewPage(row, "update")}
+                            >
+                              <Icon name="edit" />
+                              Edit
+                            </Dropdown.Item>
+                            <Dropdown.Item onClick={() => LoadModal(row)}>
+                              <Icon name="delete" />
+                              Delete
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      </Button>
                     </Menu.Item>
                   </Menu.Menu>
                 </div>
@@ -302,7 +313,7 @@ const ClientRerralList = (props) => {
           <Button
             onClick={() => LoadDeletePage(recordSelected)}
             style={{ backgroundColor: "red", color: "#fff" }}
-            // disabled={saving}
+          // disabled={saving}
           >
             Yes
             {/* {saving === false ? "Yes" : "Deleting..."} */}
@@ -310,7 +321,7 @@ const ClientRerralList = (props) => {
           <Button
             onClick={toggle}
             style={{ backgroundColor: "#014d88", color: "#fff" }}
-            // disabled={saving}
+          // disabled={saving}
           >
             No
           </Button>

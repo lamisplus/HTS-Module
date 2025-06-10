@@ -28,6 +28,7 @@ import {
 } from "../../../../utility";
 import { calculate_age } from "../../utils/index.js";
 import { usePermissions } from "../../../../hooks/usePermissions";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -102,10 +103,11 @@ const useStyles = makeStyles((theme) => ({
 
 const FamilyIndexTestingForm = (props) => {
   const classes = useStyles();
-  const { hasPermission }  = usePermissions()
+  const { hasPermission } = usePermissions()
   let history = useHistory();
-    let VL =""
+  let VL = ""
   const [errors, setErrors] = useState({});
+  const [codesets, setCodesets] = useState({})
   const [ageDisabled2, setAgeDisabled2] = useState(true);
   const [saving, setSaving] = useState(false);
   let temp = { ...errors };
@@ -254,8 +256,8 @@ const FamilyIndexTestingForm = (props) => {
     htsClientId: props && props.patientObj ? props.patientObj?.id : "",
     htsClientUuid: props?.patientObj?.htsClientUUid
       ? props?.patientObj?.htsClientUUid
-      : props?.basicInfo?.htsClientUUid?  props?.basicInfo?.htsClientUUid: JSON.parse(localStorage.getItem("htsClientUUid"))
-      ,
+      : props?.basicInfo?.htsClientUUid ? props?.basicInfo?.htsClientUUid : JSON.parse(localStorage.getItem("htsClientUUid"))
+    ,
     indexClientId: props?.patientObj?.clientCode,
     isClientCurrentlyOnHivTreatment: "",
     lga: "",
@@ -301,12 +303,13 @@ const FamilyIndexTestingForm = (props) => {
           setStates(response.data);
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   const loadOtherForm = (row) => {
     toggle();
   };
+
   const loadLGA = (id) => {
     axios
       .get(`${baseUrl}organisation-units/parent-organisation-units/${id}`, {
@@ -325,7 +328,7 @@ const FamilyIndexTestingForm = (props) => {
   };
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page, completedMenu);
- 
+
   };
 
   //Date of Birth and Age handle
@@ -339,7 +342,7 @@ const FamilyIndexTestingForm = (props) => {
       if (age_now <= 0 && m < 0 && today.getDate() < birthDate.getDate()) {
         age_now--;
       }
-      
+
       familyIndexRequestDto.age = age_now;
       familyTestingTrackerRequestDTO.trackerAge = age_now;
 
@@ -374,207 +377,199 @@ const FamilyIndexTestingForm = (props) => {
   };
 
   const getIntPosition = (ex) => {
-    let code =[]
+    let code = []
 
-let main =  childNumber.map((each,index )=>{
-if(each.code !==  "CHILD_NUMBER_OTHERS"){
-  code.push({ id: each.id,
-    value : index+ 1,})
-}
-})
-
-  if(ex){
-      let ans =  code.filter((each)=>{
-        return  each.id === parseInt(ex)
+    let main = childNumber.map((each, index) => {
+      if (each.code !== "CHILD_NUMBER_OTHERS") {
+        code.push({
+          id: each.id,
+          value: index + 1,
         })
+      }
+    })
 
-  let  result = ans.length > 0 ? ans[0].value: ""
-   return  result
-  }else{
-    return ""
-  }
+    if (ex) {
+      let ans = code.filter((each) => {
+        return each.id === parseInt(ex)
+      })
+
+      let result = ans.length > 0 ? ans[0].value : ""
+      return result
+    } else {
+      return ""
+    }
   };
   const TargetGroupSetup = () => {
 
     const userAccountData = localStorage.getItem('user_account');
     if (userAccountData) {
-        try {
-          const storedValues = JSON.parse(userAccountData);
-          setFacilityInfo(storedValues)
-          return storedValues
-        } catch (error) {
-            console.error('Error parsing user_account JSON:', error);
-            return null; // Return null if parsing fails
-        }
+      try {
+        const storedValues = JSON.parse(userAccountData);
+        setFacilityInfo(storedValues)
+        return storedValues
+      } catch (error) {
+        console.error('Error parsing user_account JSON:', error);
+        return null; // Return null if parsing fails
+      }
     }
-    return null; 
+    return null;
   };
 
 
-  const loadFamilyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const loadFamilyIndexSetting = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setSetting(response.data);
+  //     })
+  //     .catch((error) => {});
+  // };
 
-  const getMaritalStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const getMaritalStatus = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setMaritalStatus(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
-  const getFamilyRelationship = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_RELATIONSHIP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyRelationship(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const getFamilyRelationship = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/FAMILY_RELATIONSHIP`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setFamilyRelationship(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
   // get family index hiv status
-  const FAMILY_INDEX_HIV_STATUS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX_HIV_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndexHivStatus(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const FAMILY_INDEX_HIV_STATUS = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX_HIV_STATUS`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setFamilyIndexHivStatus(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
   // get family index
 
-  const FAMILY_INDEX = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndex(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const FAMILY_INDEX = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setFamilyIndex(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
-  const FOLLOW_UP_APPOINTMENT_LOCATION = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FOLLOW UP_APPOINTMENT_LOCATION`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFollowUpAppointmentLocation(response.data);
-      })
-      .catch((error) => {});
-  };
+
+  // const FOLLOW_UP_APPOINTMENT_LOCATION = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/FOLLOW_UP_APPOINTMENT_LOCATION`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setFollowUpAppointmentLocation(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
   const GET_CHILD_NUMBER = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CHILD_NUMBER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setChildNumber(response.data);
-
-        let ans = response.data.filter((each) => {
-          return each.code === "CHILD_NUMBER_OTHERS";
-        });
-
-        setRetrieveFromIdToCode(ans[0]?.id);
-      })
-      .catch((error) => {});
+      let ans = codesets["CHILD_NUMBER"].filter((each) => {
+        return each.code === "CHILD_NUMBER_OTHERS";
+      });
+      setRetrieveFromIdToCode(ans[0]?.id);
   };
 
   // GET
-  const INDEX_VISIT_ATTEMPTS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_VISIT_ATTEMPTS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexVisitAttempt(response.data);
-      })
-      .catch((error) => {});
-  };
+  // const INDEX_VISIT_ATTEMPTS = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/INDEX_VISIT_ATTEMPTS`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setIndexVisitAttempt(response.data);
+  //     })
+  //     .catch((error) => { });
+  // };
 
 
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
+  // const loadGenders = useCallback(async () => {
+  //   getAllGenders()
+  //     .then((response) => {
+  //       setGenders(response);
+  //     })
+  //     .catch(() => { });
+  // }, []);
 
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+//   const HTS_ENTRY_POINT_FACILITY = () => {
+//     axios
+//       .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       })
+//       .then((response) => {
+//         setSetting(response.data);
+//       })
+//       .catch((error) => {
+//         ;
+//       });
+//   };
 
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+//   const HTS_ENTRY_POINT_COMMUNITY = () => {
+//     axios
+//       .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+//  `, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       })
+//       .then((response) => {
+//         setSetting(response.data);
+//       })
+//       .catch((error) => {
+//         ;
+//       });
+//   };
 
 
- const getSettings=()=>{
+//   const getSettings = () => {
 
-  if(  props.patientObj.testingSetting.includes("FACILITY")){
-    HTS_ENTRY_POINT_FACILITY()
-  }else if(props.patientObj.testingSetting.includes("COMMUNITY")){
-    HTS_ENTRY_POINT_COMMUNITY()
-  }
-}
+//     if (props.patientObj.testingSetting.includes("FACILITY")) {
+//       HTS_ENTRY_POINT_FACILITY()
+//     } else if (props.patientObj.testingSetting.includes("COMMUNITY")) {
+//       HTS_ENTRY_POINT_COMMUNITY()
+//     }
+//   }
 
 
 
   useEffect(() => {
 
-    loadGenders();
+    // loadGenders();
     loadStates();
     // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
-    getMaritalStatus();
-    getFamilyRelationship();
-    FAMILY_INDEX_HIV_STATUS();
-    FAMILY_INDEX();
-    FOLLOW_UP_APPOINTMENT_LOCATION();
-    INDEX_VISIT_ATTEMPTS();
+    // getMaritalStatus();
+    // getFamilyRelationship();
+    // FAMILY_INDEX_HIV_STATUS();
+    // FAMILY_INDEX();
+    // FOLLOW_UP_APPOINTMENT_LOCATION();
+    // INDEX_VISIT_ATTEMPTS();
     GET_CHILD_NUMBER();
     getVL();
     getCurrentTreatment();
-    getSettings()
+    // getSettings()
     if (
       props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId ||
       props?.patientObj?.personResponseDto?.address?.address[0]?.stateId
@@ -597,7 +592,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       .then((res) => {
         setStates(res);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
   const checkPhoneNumberBasic = (e, inputName) => {
@@ -664,23 +659,23 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         ...familyIndexRequestDto,
         [e.target.name]: e.target.value,
         otherChildNumber: "",
-      });     
-      
+      });
+
       if (res) {
         setShowOther(true);
       } else {
-      let deductedValue =   getIntPosition(e.target.value)
-             //set position to child number
-      setFamilyTestingTrackerRequestDTO({
-        ...familyTestingTrackerRequestDTO,
-        positionOfChildEnumerated: deductedValue,
-      });
+        let deductedValue = getIntPosition(e.target.value)
+        //set position to child number
+        setFamilyTestingTrackerRequestDTO({
+          ...familyTestingTrackerRequestDTO,
+          positionOfChildEnumerated: deductedValue,
+        });
         setShowOther(false);
       }
 
-  
 
- 
+
+
     } else if (e.target.name === "otherChildNumber") {
       setFamilyIndexRequestDto({
         ...familyIndexRequestDto,
@@ -702,7 +697,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
         e.target.value ===
-          "FAMILY_INDEX_HIV_STATUS_REFERRED_ESCORTED_FOR_ART_INITIATION"
+        "FAMILY_INDEX_HIV_STATUS_REFERRED_ESCORTED_FOR_ART_INITIATION"
       ) {
         setShowHTSDate(true);
       }
@@ -779,10 +774,10 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         familyRelationship: result2[0].code,
       });
     }
-    
+
   };
 
-  
+
 
   //fetch province
   const getProvinces = (e) => {
@@ -795,7 +790,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       .then((res) => {
         setProvinces(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
   const getCountry = () => {
     getAllCountry()
@@ -830,23 +825,23 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       // Reset uan when family relationship changes
       uan:
         value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_SIBLINGS"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_MOTHER" ||
+          value === "FAMILY_RELATIONSHIP_SIBLINGS"
           ? ""
           : prevPayload.uan,
       // Reset motherDead when family relationship changes
       motherDead:
         value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
           ? ""
           : prevPayload.motherDead,
       // Reset yearMotherDied when family relationship changes
       yearMotherDied:
         value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
           ? ""
           : prevPayload.yearMotherDied,
     }));
@@ -998,8 +993,8 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
           e.target.value === "FAMILY_INDEX_MOTHER"
             ? "SEX_FEMALE"
             : e.target.value === "FAMILY_INDEX_FATHER"
-            ? "SEX_MALE"
-            : "",
+              ? "SEX_MALE"
+              : "",
       });
     } else {
       setPayload({ ...payload, [e.target.name]: e.target.value });
@@ -1051,6 +1046,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       setAgeDisabled2(false);
     }
   };
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       // if (e.target.value !== "" && e.target.value >= 85) {
@@ -1071,8 +1067,8 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
     }
   };
 
-  const getCurrentTreatment = async() => {
-   await  axios
+  const getCurrentTreatment = async () => {
+    await axios
       .get(
         `${baseUrl}hts-family-index-testing/getCurrentTreatment?personUuid=${props.patientObj.personResponseDto.uuid}`,
         {
@@ -1087,7 +1083,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
             ...payload,
             isClientCurrentlyOnHivTreatment: "Yes",
             dateClientEnrolledOnTreatment: response.data,
-            virallyUnSuppressed:VL, 
+            virallyUnSuppressed: VL,
           });
           setDisableCurrenTreatment(true);
 
@@ -1098,8 +1094,8 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
       });
   };
 
-  const getVL = async() => {
-  await  axios
+  const getVL = async () => {
+    await axios
       .get(
         `${baseUrl}hts-family-index-testing/getViralLoad?personUuid=${props.patientObj.personResponseDto.uuid}`,
         {
@@ -1115,11 +1111,11 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
             if (parseInt(response.data) > 1000) {
               setPayload({ ...payload, virallyUnSuppressed: "Yes" });
               setDisableVL(true);
-              VL= "Yes"
+              VL = "Yes"
             } else if (parseInt(response.data) < 1000) {
-              setPayload({ ...payload, virallyUnSuppressed: "No",  });
+              setPayload({ ...payload, virallyUnSuppressed: "No", });
               setDisableVL(true);
-              VL=  "No"
+              VL = "No"
 
 
             }
@@ -1199,14 +1195,14 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
         toast.success("Family Index form save succesfully!");
         handleItemClick("fit-history", "fit");
 
-       
+
       })
       .catch((error) => {
         setSaving(false);
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage, {
@@ -1263,6 +1259,42 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
     }),
     [hasPermission]
   );
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setFamilyRelationship(data["FAMILY_RELATIONSHIP"])
+    setFamilyIndexHivStatus(data["FAMILY_INDEX_HIV_STATUS"])
+    setFamilyIndex(data["FAMILY_INDEX"])
+    setFollowUpAppointmentLocation(data["FOLLOW_UP_APPOINTMENT_LOCATION"])
+    setChildNumber(data["CHILD_NUMBER"])
+    setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
+    setGenders(data["SEX"])
+
+
+    if (props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else if (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community") {
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["MARITAL_STATUS",
+      "FAMILY_RELATIONSHIP",
+      "FAMILY_INDEX_HIV_STATUS",
+      "FAMILY_INDEX",
+      "FOLLOW_UP_APPOINTMENT_LOCATION",
+      "CHILD_NUMBER",
+      "INDEX_VISIT_ATTEMPTS",
+      "SEX",
+      "FACILITY_HTS_TEST_SETTING",
+      "COMMUNITY_HTS_TEST_SETTING"
+    ],
+    patientId: props?.basicInfo?.personResponseDto?.address,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>
@@ -1456,7 +1488,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errors.visitDate !== "" ? (
                       <span className={classes.error}>{errors.visitDate}</span>
@@ -1514,7 +1546,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
                       }}
-                      // disabled
+                    // disabled
                     >
                       <option value={""}>Select</option>
                       {familyIndex &&
@@ -1561,7 +1593,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                 <div className="form-group mb-3 col-md-4">
                   <FormGroup>
                     <Label for="lastName">
-                      Middle Name 
+                      Middle Name
                     </Label>
                     <Input
                       className="form-control"
@@ -1744,7 +1776,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         borderRadius: "0.2rem",
                       }}
                       disabled
-                      // disabled={props.activePage.actionType === "view"}
+                    // disabled={props.activePage.actionType === "view"}
                     >
                       <option value={""}></option>
                       {maritalStatus.map((value) => (
@@ -1811,7 +1843,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>
-                    Descriptive Residential Address{" "}
+                      Descriptive Residential Address{" "}
                       <span style={{ color: "red" }}> *</span>
                     </Label>
                     <input
@@ -1861,7 +1893,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                       disabled
                     />
                     {errors.dateIndexClientConfirmedHivPositiveTestResult !==
-                    "" ? (
+                      "" ? (
                       <span className={classes.error}>
                         {errors.referralDate}
                       </span>
@@ -1898,7 +1930,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         <option value="NA">NA</option>
                       </select>
                       {errors.reasonForIndexClientDateHivConfirmedNotSelected !==
-                      "" ? (
+                        "" ? (
                         <span className={classes.error}>
                           {
                             errors.reasonForIndexClientDateHivConfirmedNotSelected
@@ -2212,33 +2244,33 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
 
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="childNumber">Child Number</Label>
-                    <select
-                      className="form-control"
-                      id="childNumber"
-                      name="childNumber"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.childNumber}
-                    >
-                      <option value="">Select</option>
-                      {childNumber.map((each) => (
-                        <option key={each.id} value={each.id}>
-                          {each.display}
-                        </option>
-                      ))}
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="childNumber">Child Number</Label>
+                      <select
+                        className="form-control"
+                        id="childNumber"
+                        name="childNumber"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.childNumber}
+                      >
+                        <option value="">Select</option>
+                        {childNumber.map((each) => (
+                          <option key={each.id} value={each.id}>
+                            {each.display}
+                          </option>
+                        ))}
 
-                      {/* <option value="others">Others</option> */}
-                    </select>
-                    {errorFamilyIndexDTO.childNumber && (
-                      <span className={classes.error}>
-                        {errorFamilyIndexDTO.childNumber}
-                      </span>
-                    )}
-                  </FormGroup>
-                </div>
-              )}
+                        {/* <option value="others">Others</option> */}
+                      </select>
+                      {errorFamilyIndexDTO.childNumber && (
+                        <span className={classes.error}>
+                          {errorFamilyIndexDTO.childNumber}
+                        </span>
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
 
               {showOther && (
                 <div className="form-group  col-md-4">
@@ -2270,28 +2302,28 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
               )}
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="childNumber">Child Dead</Label>
-                    <select
-                      className="form-control"
-                      id="childDead"
-                      name="childDead"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.childDead}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
-                    {/* {errorFamilyIndexDTO.childNumber && (
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="childNumber">Child Dead</Label>
+                      <select
+                        className="form-control"
+                        id="childDead"
+                        name="childDead"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.childDead}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                      {/* {errorFamilyIndexDTO.childNumber && (
                       <span className={classes.error}>
                         {errorFamilyIndexDTO.childNumber}
                       </span>
                     )} */}
-                  </FormGroup>
-                </div>
-              )}
+                    </FormGroup>
+                  </div>
+                )}
               {/* <div className="form-group col-md-4">
                 <FormGroup>
                   <Label for="DateofHTS">Other Child Number </Label>
@@ -2319,23 +2351,23 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
               </div> */}
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="liveWithParent">Live with Parent</Label>
-                    <select
-                      className="form-control"
-                      id="liveWithParent"
-                      name="liveWithParent"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.liveWithParent}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
-                  </FormGroup>
-                </div>
-              )}
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="liveWithParent">Live with Parent</Label>
+                      <select
+                        className="form-control"
+                        id="liveWithParent"
+                        name="liveWithParent"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.liveWithParent}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </FormGroup>
+                  </div>
+                )}
 
               <div className="form-group col-md-4">
                 <FormGroup>
@@ -2382,7 +2414,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errorFamilyIndexDTO.familyRelationship && (
                       <span className={classes.error}>
@@ -2395,7 +2427,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
 
               {familyIndexRequestDto.statusOfContact &&
                 familyIndexRequestDto.statusOfContact ===
-                  "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" && (
+                "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" && (
                   <div className="form-group col-md-4">
                     <FormGroup>
                       <Label for="uan">Unique Art No (UAN)</Label>
@@ -2420,7 +2452,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
 
               {familyIndexRequestDto.familyRelationship &&
                 familyIndexRequestDto.familyRelationship !==
-                  "FAMILY_RELATIONSHIP_MOTHER" && (
+                "FAMILY_RELATIONSHIP_MOTHER" && (
                   <div className="form-group col-md-4">
                     <FormGroup>
                       <Label for="motherDead">Mother Dead?</Label>
@@ -2495,7 +2527,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                   </FormGroup>
                 </div>
               )}
-               
+
             </div>
 
             <div className="row">
@@ -2612,7 +2644,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {/* {errors.referralDate !== "" ? (
                         <span className={classes.error}>
@@ -2641,7 +2673,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errorFamilyIndexTracker.dateVisit !== "" ? (
                       <span className={classes.error}>
@@ -2731,7 +2763,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                   )}
                 {familyTestingTrackerRequestDTO?.knownHivPositive &&
                   familyTestingTrackerRequestDTO?.knownHivPositive ===
-                    "Yes" && (
+                  "Yes" && (
                     <div className="form-group col-md-4 ">
                       <Label>HIV Test Result </Label>
                       <FormGroup>
@@ -2774,7 +2806,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
-                        // disabled
+                      // disabled
                       />
                       {errors.referralDate !== "" ? (
                         <span className={classes.error}>
@@ -2807,7 +2839,7 @@ if(each.code !==  "CHILD_NUMBER_OTHERS"){
                           border: "1px solid #014D88",
                           borderRadius: "0.25rem",
                         }}
-                        // disabled
+                      // disabled
                       />
                       {errors.referralDate !== "" ? (
                         <span className={classes.error}>

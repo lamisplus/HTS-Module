@@ -26,6 +26,7 @@ import { alphabetOnly, getCheckModality } from "../../../../utility";
 import { getDoubleSkipForm } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -177,6 +178,7 @@ const BasicInfo = (props) => {
   );
 
   const [pmtctSetting , setPmtctSetting] = useState(["FACILITY_HTS_TEST_SETTING_ANC", "FACILITY_HTS_TEST_SETTING_L&D", "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"]);
+  const [codesets, setCodesets] = useState({})
 
   const [disableVitals, setDisableVitals] = useState(false)
 
@@ -418,27 +420,20 @@ const BasicInfo = (props) => {
     }
   };
 
-
-
-
-
-
-
-
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    PregnancyStatus();
+    // KP();
+    // EnrollmentSetting();
+    // SourceReferral();
+    // Genders();
+    // PregnancyStatus();
 
-    getStates();
-    MaterialStatus();
+    // getStates();
+    // MaterialStatus();
     determinSex();
-    CounselingType();
+    // CounselingType();
    
-    Sex();
-    IndexTesting();
+    // Sex();
+    // IndexTesting();
     CreateClientCode();
 
     //ellicited patient
@@ -490,187 +485,241 @@ const BasicInfo = (props) => {
     if (country && country.stateId !== "") {
       getProvincesId(country.stateId);
     }
- 
 
-      // Cleanup logic here
 
   }, [objValues.age, props.patientObj, props.extra.age, facilityCode]);
   //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+  // const KP = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setKP(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+
   //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+  // const IndexTesting = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setIndexTesting(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
   //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-        determinPregnancy(response.data)
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
 
 
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+  // const PregnancyStatus = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setPregnancyStatus(response.data);
+  //       determinPregnancy(response.data)
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+
+  //Get list of KP
+  // const CounselingType = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setCounselingType(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+
+//   const HTS_ENTRY_POINT_COMMUNITY = () => {
+//     axios
+//       .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+//  `, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       })
+//       .then((response) => {
         
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+//         setEnrollSetting(response.data);
+//       })
+//       .catch((error) => {
+//         ;
+//       });
+//   };
 
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-          let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
+//   const HTS_ENTRY_POINT_FACILITY = () => {
+//     axios
+//       .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//       })
+//       .then((response) => {
+//         //Remove retesting from the codeset
+//           let facilityList = []
+//         // response.data.map((each, index)=>{
+//         //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
+//         //         facilityList.push(each);
+//         //       }
 
-        // })
+//         // })
 
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+//         setEnrollSetting(response.data);
+//       })
+//       .catch((error) => {
+//         ;
+//       });
+//   };
+
+
+  
 
 
 
 
   //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+  // const EnrollmentSetting = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
 
-        if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-                HTS_ENTRY_POINT_COMMUNITY()
-              }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
+  //       if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
+  //               HTS_ENTRY_POINT_COMMUNITY()
+  //             }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
     
-                HTS_ENTRY_POINT_FACILITY()
-              }else{
-                setEnrollSetting([]);
+  //               HTS_ENTRY_POINT_FACILITY()
+  //             }else{
+  //               setEnrollSetting([]);
     
-              }
+  //             }
 
         
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
 
   //Get list of HIV STATUS ENROLLMENT
-  const MaterialStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+  // const MaterialStatus = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setMaritalStatus(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+
   //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setGender(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setSexs(response.data);
-        // determinSex()
+  // const SourceReferral = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+  //       setSourceReferral(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
 
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+
+  //Get list of Genders from
+  // const Genders = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/GENDER`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+        
+  //       setGender(response.data);
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+  //Get list of Genders from
+  // const Sex = () => {
+  //   axios
+  //     .get(`${baseUrl}application-codesets/v2/SEX`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     })
+  //     .then((response) => {
+        
+  //       setSexs(response.data);
+  //       // determinSex()
+
+  //     })
+  //     .catch((error) => {
+  //       ;
+  //     });
+  // };
+
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    
+    setKP(data["TARGET_GROUP"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setPregnancyStatus(data["PREGNANCY_STATUS"])
+    determinPregnancy(data["PREGNANCY_STATUS"])
+    setCounselingType(data["COUNSELING_TYPE"]);
+
+    if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "facility" || "hts_entry_point_facility"){
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
+    }else{
+      setEnrollSetting([]);
+    }
+
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setSourceReferral(data["SOURCE_REFERRAL"])
+    setGender(data["GENDER"])
+    setSexs(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COUNSELING_TYPE",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "TEST_SETTING",
+      "MARITAL_STATUS",
+      "SOURCE_REFERRAL",
+      "GENDER",
+      "SEX"
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   //Get States from selected country
   const getStates = () => {
@@ -691,6 +740,7 @@ const BasicInfo = (props) => {
         ;
       });
   }
+
   function getProvincesId(getStateId) {
     axios
       .get(
@@ -704,6 +754,7 @@ const BasicInfo = (props) => {
         ;
       });
   }
+
   //fetch province
   const getProvinces = (e) => {
     const stateId = e.target.value;
@@ -1309,9 +1360,9 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}>Select</option>
-                    {enrollSetting.map((value) => (
-                      <option key={value.id} value={value.code}>
-                        {value.display}
+                    {enrollSetting?.map?.((value) => (
+                      <option key={value?.id} value={value?.code}>
+                        {value?.display}
                       </option>
                     ))}
                   </select>
