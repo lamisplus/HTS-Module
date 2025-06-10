@@ -615,8 +615,6 @@ const BasicInfo = (props) => {
       });
   };
 
-
-
   //Get list of HIV STATUS ENROLLMENT
   const MaterialStatus = () => {
     axios
@@ -924,11 +922,7 @@ const BasicInfo = (props) => {
     }
     setObjValues({ ...objValues, age: e.target.value });
   };
-  //End of Date of Birth and Age handling
-  const checkPhoneNumberBasic = (e, inputName) => {
-    const limit = 10;
-    setObjValues({ ...objValues, [inputName]: e.slice(0, limit) });
-  };
+  
  
 
   /*****  Validation  */
@@ -1175,10 +1169,6 @@ const BasicInfo = (props) => {
         });
 
       }
-  
-
-
-
     } else {
       toast.error("All fields are required", {
         position: toast.POSITION.BOTTOM_CENTER,
@@ -1190,7 +1180,7 @@ const BasicInfo = (props) => {
     <>
       <Card className={classes.root}>
         <CardBody>
-          <h2 style={{ color: "#000" }}>CLIENT INTAKE FORM </h2>
+          <h2 style={{ color: "#000" }}>CLIENT INTAKE FORM</h2>
           <br />
           <form>
             <div className="row">

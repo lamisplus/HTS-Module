@@ -25,6 +25,9 @@ import { Modal } from "react-bootstrap";
 //import { objectValues } from "react-toastify/dist/utils";
 import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+
+
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -104,8 +107,9 @@ const BasicInfo = (props) => {
   const [counselingType, setCounselingType] = useState([]);
   const [pregnancyStatus, setPregnancyStatus] = useState([]);
   const [indexTesting, setIndexTesting] = useState([]);
+  const [codesets, setCodsets] = useState({})
   let temp = { ...errors };
- 
+
   const [modalityCheck, setModalityCheck] = useState("");
   const [objValues, setObjValues] = useState({
     active: true,
@@ -147,169 +151,23 @@ const BasicInfo = (props) => {
     relationWithIndexClient:
       props.activePage?.activeObject?.relationWithIndexClient,
     indexClientCode: "",
-    comment: "",  
+    comment: "",
     partnerNotificationService: "",
     familyIndex: "",
 
   });
 
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    CounselingType();
-    PregnancyStatus();
-    IndexTesting();
-    setObjValues({...props.activePage.activeObject, testingSetting: props.activePage.activeObject.riskStratificationResponseDto.testingSetting });
-
-
-    // if(props.patientObj){
-    //     objValues.referredFrom=props.patientObj.referredFrom
-    // }
-    //setObjValues({...objectValues, genderId: props.patientObj.personResponseDto.gender.id})
-    //objValues.genderId = props.patientObj && props.patientObj.personResponseDto ? props.patientObj.personResponseDto.gender.id : ""
+    setObjValues({ ...props.activePage.activeObject, testingSetting: props.activePage.activeObject.riskStratificationResponseDto.testingSetting });
     setModalityCheck(
-      getCheckModality( 
+      getCheckModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       )
     );
   }, [props.patientObj]);
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-
-
   
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
-
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-
-    if(props.patientObj.riskStratificationResponseDto.entryPoint.includes("HTS_ENTRY_POINT_COMMUNITY")){
-      HTS_ENTRY_POINT_COMMUNITY()
-    }else if(props.patientObj.riskStratificationResponseDto.entryPoint.includes("HTS_ENTRY_POINT_FACILITY")){
-
-      HTS_ENTRY_POINT_FACILITY()
-    }else{
-      setEnrollSetting([]);
-
-    }
-  };
 
 
-  //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setGender(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
   const handleInputChange = (e) => {
     if (e.target.name === "numChildren") {
       if (e.target.value >= 0) {
@@ -325,9 +183,9 @@ const BasicInfo = (props) => {
         ...objValues,
         [e.target.name]: e.target.value,
         relationWithIndexClient: "",
-        indexClientCode:"",
+        indexClientCode: "",
       });
-      setErrors({...errors, relationWithIndexClient: "", indexClientCode: "" })
+      setErrors({ ...errors, relationWithIndexClient: "", indexClientCode: "" })
 
     } else if (e.target.name === "numWives") {
       if (e.target.value >= 0) {
@@ -344,19 +202,7 @@ const BasicInfo = (props) => {
     setErrors({ ...temp, [e.target.name]: "" });
   };
 
-  const handleClientCodeCheck = (e) => {
-    axios
-      .get(`${baseUrl}hts/clientCodeCheck`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setGender(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
+  
   /*****  Validation  */
   const validate = () => {
     //HTS FORM VALIDATION
@@ -380,22 +226,22 @@ const BasicInfo = (props) => {
       objValues.firstTimeVisit !== "" ? "" : "This field is required.";
     temp.dateVisit = objValues.dateVisit ? "" : "This field is required.";
 
-          props?.patientObject?.gender &&
-            props?.patientObject?.gender.toLowerCase() === "female" &&
-            (temp.pregnant =
-              objValues.pregnant !== "" ? "" : "This field is required.");
+    props?.patientObject?.gender &&
+      props?.patientObject?.gender.toLowerCase() === "female" &&
+      (temp.pregnant =
+        objValues.pregnant !== "" ? "" : "This field is required.");
 
-          objValues.indexClient === "true" &&
-            (temp.relationWithIndexClient =
-              objValues.relationWithIndexClient !== ""
-                ? ""
-                : "This field is required.");
+    objValues.indexClient === "true" &&
+      (temp.relationWithIndexClient =
+        objValues.relationWithIndexClient !== ""
+          ? ""
+          : "This field is required.");
 
-          objValues.indexClient === "true" &&
-            (temp.indexClientCode =
-              objValues.indexClientCode !== ""
-                ? ""
-                : "This field is required.");
+    objValues.indexClient === "true" &&
+      (temp.indexClientCode =
+        objValues.indexClientCode !== ""
+          ? ""
+          : "This field is required.");
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
@@ -460,7 +306,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage);
@@ -476,6 +322,44 @@ const BasicInfo = (props) => {
       handleItemClick(latestForm[0], latestForm[1]);
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setKP(data["TARGET_GROUP"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setPregnancyStatus(data["PREGNANCY_STATUS"])
+    setCounselingType(data["COUNSELING_TYPE"])
+    setSourceReferral(data["SOURCE_REFERRAL"])
+    setGender(data["GENDER"])
+
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else {
+      setEnrollSetting([]);
+    }
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "SOURCE_REFERRAL",
+      "GENDER",
+
+      "TEST_SETTING", //just in case
+
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
+
 
   return (
     <>
@@ -591,7 +475,7 @@ const BasicInfo = (props) => {
                     }}
                     disabled={props.activePage.actionType === "view"}
                   >
-                     
+
 
                     <option value={""}></option>
                     {enrollSetting.map((value) => (
@@ -615,7 +499,7 @@ const BasicInfo = (props) => {
                     Visit Date <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="dateVisit"
                     id="dateVisit"
@@ -766,7 +650,7 @@ const BasicInfo = (props) => {
                   <div className="form-group  col-md-4">
                     <FormGroup>
                       <Label>Index Client Code/ID
-                      <span style={{ color: "red" }}> *</span>
+                        <span style={{ color: "red" }}> *</span>
 
                       </Label>
                       <Input
@@ -794,7 +678,7 @@ const BasicInfo = (props) => {
               )}
               {props.patientObj.personResponseDto.sex &&
                 props.patientObj.personResponseDto.sex.toLowerCase() ===
-                  "female" && (
+                "female" && (
                   <>
                     <div className="form-group  col-md-4">
                       <FormGroup>
@@ -818,17 +702,17 @@ const BasicInfo = (props) => {
                               "FACILITY_HTS_TEST_SETTING_ANC"
                               ? true
                               : props.activePage.actionType === "view"
-                              ? true
-                              : false
+                                ? true
+                                : false
                           }
                         >
                           <option value={""}></option>
                           {pregnancyStatus.map((value) =>
                             (props.patientObj.riskStratificationResponseDto
                               .testingSetting ===
-                              "FACILITY_HTS_TEST_SETTING_ANC") 
+                              "FACILITY_HTS_TEST_SETTING_ANC")
                               &&
-                            value.code === "PREGANACY_STATUS_NOT_PREGNANT" ? (
+                              value.code === "PREGANACY_STATUS_NOT_PREGNANT" ? (
                               <></>
                             ) : (
                               <option key={value.id} value={value.id}>

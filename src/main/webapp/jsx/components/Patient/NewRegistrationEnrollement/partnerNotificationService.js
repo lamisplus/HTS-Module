@@ -17,6 +17,7 @@ import { Label as LabelRibbon, Button, Message } from 'semantic-ui-react'
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import * as moment from "moment";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 // import {
 //   getAllStateByCountryId,
 //   getAllCountry,
@@ -199,23 +200,6 @@ const PartnerNotificationService = (props) => {
     });
   };
 
-  const familyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-      });
-  };
-
-  useEffect(() => {
-    familyIndexSetting();
-
-  }, [props.patientObj])
-
 
   useEffect(() => {
 
@@ -236,6 +220,7 @@ const PartnerNotificationService = (props) => {
       knowledgeAssessment.clientPregnant = props.patientObj.pregnant === 73 ? "true" : "";
     }
   }, [props.patientObj]);
+
   const handleItemClick = (page, completedMenu) => {
     if (props.completed.includes(completedMenu)) {
     } else {
@@ -281,6 +266,7 @@ const PartnerNotificationService = (props) => {
   const stiCount = actualStiTrue.filter((x) => x === 'true')
 
   const [tbCount, settbCount] = useState(0);
+  const [codesets, setCodsets] = useState({})
   const handleInputChangeTbScreening = e => {
     //setErrors({...temp, [e.target.name]:""})
 
@@ -359,6 +345,19 @@ const PartnerNotificationService = (props) => {
 
     }
   }
+
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setSetting(data["TEST_SETTING"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TEST_SETTING"      
+    ],
+    patientId: patientID || clientId,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

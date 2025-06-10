@@ -120,7 +120,7 @@ const RiskStratification = (props) => {
   const [isPMTCTModality, setIsPMTCTModality] = useState(false);
   const [showRiskAssessment, setShowRiskAssessment] = useState(false);
   let communitySpokeList = ["COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING", "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES", "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX", "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"]
-
+  const [codesets, setCodsets] = useState({})
   const [spokeFacList, setSpokeFacList] = useState([]);
   const [showHealthFacility, setShowHealthFacility] = useState(communitySpokeList.includes(props?.activePage?.activeObject?.riskStratificationResponseDto.testingSetting) ? true : false);
 
@@ -161,8 +161,6 @@ const RiskStratification = (props) => {
   useEffect(() => {
     KP();
 
-    EntryPoint();
-
     if (props.activePage.activeObject.riskStratificationResponseDto !== null) {
 
       if (props.activePage.activeObject.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY") {
@@ -187,33 +185,6 @@ const RiskStratification = (props) => {
   //Get list of HIV STATUS ENROLLMENT\
 
 
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-
-        setEntryPoint(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
 
 
   const getSpokeFaclityByHubSite = () => {
@@ -229,9 +200,6 @@ const RiskStratification = (props) => {
         ;
       });
   };
-
-
-
 
   //Get list of KP
   const KP = () => {
@@ -280,9 +248,6 @@ const RiskStratification = (props) => {
     props.setHideOtherMenu(false);
   };
 
-
-
-
   const HTS_ENTRY_POINT_FACILITY = () => {
     axios
       .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
@@ -311,7 +276,6 @@ const RiskStratification = (props) => {
         ;
       });
   };
-
 
   const checkPMTCTModality = (modality) => {
     if (
@@ -383,8 +347,6 @@ const RiskStratification = (props) => {
       } else {
         setRiskCount(0);
       }
-
-
     }
 
     if (e.target.name === "entryPoint") {
@@ -392,7 +354,6 @@ const RiskStratification = (props) => {
       if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
         HTS_ENTRY_POINT_COMMUNITY()
       } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
-
         HTS_ENTRY_POINT_FACILITY()
       }
     }
@@ -483,12 +444,6 @@ const RiskStratification = (props) => {
         ? ""
         : "This field is required.");
 
-    // objValues.entryPoint !== "" &&
-    //     objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" &&
-    //     (temp.communityEntryPoint = objValues.communityEntryPoint
-    //       ? ""
-    //       : "This field is required.");
-
 
     objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
       (temp.spokeFacility = objValues.spokeFacility
@@ -564,9 +519,6 @@ const RiskStratification = (props) => {
   const actualRiskCountTrue = Object.values(riskAssessment);
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
 
-
-  const handleInputChangeRiskAssessment = (e) => {
-    displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
 
 
   const handleInputChangeRiskAssessment = (e) => {
@@ -687,6 +639,24 @@ const RiskStratification = (props) => {
       }
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setEnrollSetting(data["TEST_SETTING"]);
+    setEntryPoint(data["HTS_ENTRY_POINT"])
+    
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TEST_SETTING",
+      "HTS_ENTRY_POINT",
+      "FACILITY_HTS_TEST_SETTING",
+      "COMMUNITY_HTS_TEST_SETTING"
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

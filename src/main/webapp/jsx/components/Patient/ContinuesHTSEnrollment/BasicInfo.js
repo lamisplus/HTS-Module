@@ -123,7 +123,7 @@ const BasicInfo = (props) => {
   const [facilityCode, setFacilityCode] = useState("");
   const [serialNumber, setSerialNumber] = useState(null);
   const [disableModality, setDisableModality] = useState(props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ? true: false);
-
+  const [codesets, setCodsets] = useState({})
   const [modalityCheck, setModality] = useState("");
   const [showPregancy, setShowPregnancy] = useState(false);
 
@@ -183,103 +183,13 @@ const BasicInfo = (props) => {
 
   });
 
-  const CreateClientCode = () => {
-    let facilityShortCode = "";
-    axios
-      .get(`${baseUrl}hts/get-facility-code`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFacilityCode(response.data);
-      })
-      .catch((error) => {
-     
-      });
-
-    let visitDate = new Date(props.patientObj.dateVisit);
-
-    let setting = props.patientObj.testingSetting;
-    let settingCode = "";
-    if (setting?.includes("SETTING_STI")) {
-      settingCode = "STI";
-    } else if (setting?.includes("EMERGENCY")) {
-      settingCode = "EME";
-    } else if (setting?.includes("SETTING_INDEX")) {
-      settingCode = "IND";
-    } else if (setting?.includes("INPATIENT")) {
-      settingCode = "INP";
-    } else if (setting?.includes("PMTCT")) {
-      settingCode = "PMTCT";
-    } else if (setting?.includes("TB")) {
-      settingCode = "TB";
-    } else if (setting?.includes("VCT")) {
-      settingCode = "VCT";
-    } else if (setting?.includes("MOBILE")) {
-      settingCode = "MOB";
-    } else if (setting?.includes("SETTING_SNS")) {
-      settingCode = "SNS";
-    } else if (setting?.includes("OTHER")) {
-      settingCode = "OTH";
-    }else if (setting?.includes("SETTING_ANC")) {
-      settingCode = "ANC";
-    }else if (setting?.includes("RETESTING")) {
-      settingCode = "RET";
-    }else if (setting?.includes("SETTING_L&D")) {
-      settingCode = "L&D";
-    }else if (setting?.includes("POST_NATAL_WARD_BREASTFEEDING")) {
-      settingCode = "PNWB";
-    }else if (setting?.includes("NPATIENT")) {
-      settingCode = "INP";
-    }else if (setting?.includes("SETTING_CT")) {
-      settingCode = "CT";
-    }else if (setting?.includes("SETTING_FP")) {
-      settingCode = "FP";
-    }else if (setting?.includes("BLOOD_BANK")) {
-      settingCode = "BB";
-    }else if (setting?.includes("PEDIATRIC")) {
-      settingCode = "PED";
-    }else if (setting?.includes("MALNUTRITION")) {
-      settingCode = "Mal";
-    }else if (setting?.includes("PREP_TESTING")) {
-      settingCode = "PrEPT";
-    }else if (setting?.includes("SPOKE_HEALTH_FACILITY")) {
-      settingCode = "SPHF";
-    }else if (setting?.includes("STANDALONE")) {
-      settingCode = "STAN";
-    }else if (setting?.includes("CONGREGATIONAL")) {
-      settingCode = "CON";
-    }else if (setting?.includes("DELIVERY_HOMES")) {
-      settingCode = "DEL";
-    }    else if (setting?.includes("TBA_ORTHODOX")) {
-      settingCode = "TBAO";
-    }    else if (setting?.includes("TBA_RT-HCW")) {
-      settingCode = "TBAH";
-    }    else if (setting?.includes("SETTING_OVC")) {
-      settingCode = "OVC";
-    }    else if (setting?.includes("OUTREACH")) {
-      settingCode = "OUT";
-    }  
-
-    let month = visitDate.getMonth();
-    let year = visitDate.getFullYear();
-    let generatedCode =
-      "C" + facilityCode + "/" + settingCode + "/" + month + "/" + year + "/";
-    setCreatedCode(generatedCode);
-    if(!props.patientObj.id){
-      setObjValues({ ...objValues, clientCode: generatedCode });
-    }else{
-          setSerialNumber(Cookies.get("serial-number"))
-          setDisableVitals(true)
-    }
-  };
-
 
 
   const getSettingList=()=>{
 
-    if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
+    if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
       HTS_ENTRY_POINT_COMMUNITY()
-    }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
+    }else if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase()  === "facility"|| "hts_entry_point_facility"){
 
       HTS_ENTRY_POINT_FACILITY()
     }else{
@@ -294,17 +204,10 @@ const BasicInfo = (props) => {
     );
   }
 
+  console.log("clent intake form 1", props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase())
 
   useEffect(() => {
-
-    KP();
     EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    CounselingType();
-    PregnancyStatus();
-    IndexTesting();
-    CreateClientCode();
     getSettingList()
 
   }, [props.patientObj, facilityCode]);
@@ -330,18 +233,7 @@ const BasicInfo = (props) => {
   };
 
 
-  const { data } = useGetCodesets({
-    codesetsKeys: ["COMMUNITY_HTS_TEST_SETTING", 
-    "FACILITY_HTS_TEST_SETTING", 
-    "TARGET_GROUP",
-    "INDEX_TESTING",
-    "PREGNANCY_STATUS", 
-    "COUNSELING_TYPE",
-    "TEST_SETTING",
-    "SOURCE_REFERRAL",
-    "GENDER",
-    ]
-  })
+   
 
 
 
@@ -375,76 +267,7 @@ const BasicInfo = (props) => {
       });
   };
 
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-      
-      });
-  };
-  //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-               let pregnancyCode = response.data.filter((each, index)=>{
-
-                return each.code === "PREGANACY_STATUS_PREGNANT"
-               })                                                        
-
-
-        if (props?.patientObject?.gender.toLowerCase() === "female" ) {
-            if( props.extra.testingSetting ===
-              "FACILITY_HTS_TEST_SETTING_ANC" 
-           ){
-              setShowPregnancy(true);
-
-
-              setObjValues({...objValues, pregnant:pregnancyCode[0].id })
-            }
-          }
-      })
-      .catch((error) => {
-      
-      });
-  };
-
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        
-      });
-  };
-  //Get list of HIV STATUS ENROLLMENT
+ 
   const EnrollmentSetting = () => {
     axios
       .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
@@ -457,29 +280,6 @@ const BasicInfo = (props) => {
       .catch((error) => {
        
       });
-  };
-
-  //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {});
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setGender(response.data);
-      })
-      .catch((error) => {});
   };
 
 
@@ -762,14 +562,45 @@ const BasicInfo = (props) => {
     }
   };
 
-  // useEffect(async ()=> {
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setKP(data["TARGET_GROUP"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setPregnancyStatus(data["PREGNANCY_STATUS"])
+    setCounselingType(data["COUNSELING_TYPE"])
+    setSourceReferral(data["SOURCE_REFERRAL"])
+    setGender(data["GENDER"])
 
-  //   await handleClientCodeCheck();
-  //   temp.clientCode = clientCodeCheck === true ? "" : "This field is required.";
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      console.log("code ran here...")
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else {
+      setEnrollSetting([]);
 
-  // },[objValues.clientCode])
+    }
 
+  }
+ 
 
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "SOURCE_REFERRAL",
+      "GENDER",
+
+      "TEST_SETTING", //just in case
+
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

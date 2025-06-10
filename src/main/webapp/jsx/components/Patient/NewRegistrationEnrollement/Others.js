@@ -7,17 +7,10 @@ import * as moment from 'moment';
 import {makeStyles} from "@material-ui/core/styles";
 import {Card, CardContent} from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
-// import AddIcon from "@material-ui/icons/Add";
-// import CancelIcon from "@material-ui/icons/Cancel";
-// import {ToastContainer, toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
-// import {Link, useHistory, useLocation} from "react-router-dom";
-// import {TiArrowBack} from 'react-icons/ti'
-// import {token, url as baseUrl } from "../../../api";
 import 'react-phone-input-2/lib/style.css'
 import {Label as LabelRibbon} from 'semantic-ui-react'
-// import 'semantic-ui-css/semantic.min.css';
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 

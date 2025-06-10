@@ -196,30 +196,7 @@ const RiskStratification = (props) => {
     retestingInfo()
 
   }, [entryPointSetting, entryPoint, props.newHTSType])
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-      });
-  };
 
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEntryPoint(response.data);
-      })
-      .catch((error) => {
-      });
-  };
 
 
   const getSpokeFaclityByHubSite = () => {
@@ -416,8 +393,6 @@ const RiskStratification = (props) => {
 
 
   };
-
-
 
   //Date of Birth and Age handle
   //Get list of DSD Model Type

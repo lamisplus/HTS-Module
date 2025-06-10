@@ -17,6 +17,7 @@ import { Label as LabelRibbon, Button, Message } from "semantic-ui-react";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import * as moment from "moment";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -98,6 +99,7 @@ const FamilyIndexTesting = (props) => {
     props.patientObj && props.patientObj ? props.patientObj.id : "";
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  const [codesets, setCodsets] = useState({})
   const [setting, setSetting] = useState([]); //[ 'Select setting',  'ART', 'CT', 'TB', 'STI', 'FP','OPD', 'WARD', 'Outreach', 'Standalone', 'HTS', 'Others' ]
   const familyIndexClient = [
     "Select family index client",
@@ -192,20 +194,7 @@ const FamilyIndexTesting = (props) => {
     });
   };
 
-  const familyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  useEffect(() => {
-    familyIndexSetting();
-  }, [props.patientObj]);
+ 
 
   useEffect(() => {
     if (props.patientObj) {
@@ -262,6 +251,7 @@ const FamilyIndexTesting = (props) => {
         props.patientObj.pregnant === 73 ? "true" : "";
     }
   }, [props.patientObj]);
+
   const handleItemClick = (page, completedMenu) => {
     if (props.completed.includes(completedMenu)) {
     } else {
@@ -417,6 +407,20 @@ const FamilyIndexTesting = (props) => {
       });
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setSetting(data["TEST_SETTING"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TEST_SETTING"      
+    ],
+    patientId: patientID || clientId,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>
