@@ -20,6 +20,7 @@ import PhoneInput from "react-phone-input-2";
 import { getAllGenders, alphabetOnly } from "../../../../utility";
 import {useHistory} from "react-router-dom";
 import DualListBox from "react-dual-listbox";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -100,6 +101,7 @@ const ServicesProvided = (props) => {
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [saving, setSaving] = useState(false);
   let temp = { ...errors };
+  const [codesets, setCodesets] = useState({})
   const [open, setOpen] = React.useState(false);
   const toggle = () => setOpen(!open);
   const [genders, setGenders] = useState([]);
@@ -150,33 +152,29 @@ const ServicesProvided = (props) => {
         setPayload({ ...payload, [inputName]: NumberValue });
     };
 
+  
 
-  // ##############################################
-
-    const SERVICE_NEEDED = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                if (response.data) {
-                    // create array of objects from the response
-                    const serviceNeeded = response.data.map((service) => {
-                        return {
-                            value: service.display,
-                            label: service.display
-                        }
-                    });
-                    setServiceNeeded(serviceNeeded);
-                    // console.log("serviceNeeded", serviceNeeded)
-                }
-            })
-            .catch((e) => {
-                // handle error
-            });
-    };
+    const loadCodesets = (data) => {
+      setCodesets(data)
+      
+      const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+          return {
+              value: service.display,
+              label: service.display
+          }
+      });
+      setServiceNeeded(serviceNeeded);
+      setGenders( data["GENDER"]);
+    }
+  
+    useGetCodesets({
+      codesetsKeys: [
+       "SERVICE_PROVIDED",
+       "GENDER"
+      ],
+      patientId: props?.patientObj?.id || props?.basicInfo.id,
+      onSuccess: loadCodesets
+    })
 
     useEffect(() => {
         // Fetch the saved serviceNeeded from the backend
@@ -271,22 +269,13 @@ const ServicesProvided = (props) => {
 
   };
   // ################################################
-  const getGenders = () => {
-    getAllGenders()
-      .then((res) => {
-        setGenders(res);
-      })
-      .catch((e) => {
-        // console.log("error", e);
-      });
-    // ;
-  };
+ 
 
 
   useEffect(() => {
-    getGenders();
+   
     loadStates1()
-    SERVICE_NEEDED()
+  
   }, []);
 
   const checkPhoneNumberBasic = (e, inputName) => {

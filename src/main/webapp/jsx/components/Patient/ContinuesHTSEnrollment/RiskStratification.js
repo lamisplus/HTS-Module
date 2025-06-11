@@ -394,23 +394,7 @@ const RiskStratification = (props) => {
 
   };
 
-  //Date of Birth and Age handle
-  //Get list of DSD Model Type
-  // function SettingModality(settingId) {
-  //   const setting = settingId;
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/${setting}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setSetting(response.data);
-  //     })
-  //     .catch((error) => {
-
-  //     });
-  // }
-  //End of Date of Birth and Age handling
-  /*****  Validation  */
+  
   const validate = () => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";

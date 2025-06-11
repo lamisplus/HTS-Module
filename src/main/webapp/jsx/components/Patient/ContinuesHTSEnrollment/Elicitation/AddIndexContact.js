@@ -21,6 +21,7 @@ import "react-phone-input-2/lib/style.css";
 import Badge from "@mui/material/Badge";
 import PersonIcon from "@mui/icons-material/Person";
 import { alphabetOnly } from "../../../../../utility";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -108,7 +109,7 @@ const AddIndexContact = (props) => {
     indexNotificationServicesElicitation: {},
     personId: null,
   });
-
+  const [codesets, setCodesets] = useState({})
   const [objValues, setObjValues] = useState({
     firstName: "",
     middleName: "",
@@ -138,11 +139,7 @@ const AddIndexContact = (props) => {
   });
 
   useEffect(() => {
-    Sex();
     getStates();
-    NotificationContact();
-    IndexTesting();
-    Consent();
     if (props.patientObj) {
       if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
         setHivTestDate(props.patientObj.dateVisit);
@@ -205,57 +202,28 @@ const AddIndexContact = (props) => {
     setObjValues({ ...objValues, countryId: 1 });
   };
 
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSexs(response.data);
-      })
-      .catch((error) => {
-       
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        
-      });
-  };
-  ///CONSENT	Yes		en	CONSENT
-  const Consent = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CONSENT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setConsent(response.data);
-      })
-      .catch((error) => {
-       
-      });
-  };
-  const NotificationContact = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/NOTIFICATION_CONTACT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setNotificationContact(response.data);
-      })
-      .catch((error) => {
-        
-      });
-  };
+  
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    
+    setSexs(data["SEX"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setConsent(data["CONSENT"])
+    setNotificationContact(data["NOTIFICATION_CONTACT"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+     "SEX",
+     "INDEX_TESTING",
+     "CONSENT",
+     "NOTIFICATION_CONTACT"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
+
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {

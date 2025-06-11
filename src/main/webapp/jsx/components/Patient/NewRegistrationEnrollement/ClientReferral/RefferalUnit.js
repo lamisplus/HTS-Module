@@ -362,30 +362,7 @@ const RefferralUnit = (props) => {
       });
   };
 
-  // const SERVICE_NEEDED = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     .then((response) => {
-  //       if (response.data) {
-  //         // create array of objects from the response
-  //         const serviceNeeded = response.data.map((service) => {
-  //           return {
-  //             value: service.display,
-  //             label: service.display
-  //           }
-  //         });
-  //         setServiceNeeded(serviceNeeded);
-  //         // console.log("serviceNeeded", serviceNeeded)
-  //       }
-  //     })
-  //     .catch((e) => {
-  //       // handle error
-  //     });
-  // };
+
 
 
   useEffect(() => {

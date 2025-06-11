@@ -21,6 +21,7 @@ import PhoneInput from "react-phone-input-2";
 // import { getAllGenders, alphabetOnly } from "../../../../utility";
 import { alphabetOnly, getAllGenders } from  "../../../../../utility";
 import Select from "react-select";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -129,24 +130,27 @@ const ServicesProvided = (props) => {
   const [selectedState, setSelectedState] = useState({})
   const [selectedFacility, setSelectedFacility] = useState({});
   const [selectedLga, setSelectedLga] = useState({});
+  const [codesets, setCodesets] = useState({})
 
-  const SERVICE_NEEDED = () => {
-    axios.get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-        .then((response) => {
-          if (response.data) {
-            setServiceCategories(response.data);
-          }
-        })
-        .catch((e) => {
-          // console.log("Fetch Facilities error" + e);
-        });
+ 
+  
 
+  const loadCodesets = (data) => {
+    setCodesets(data)
+
+    setServiceCategories( data["SERVICE_PROVIDED"]);
+    setGenders( data["GENDER"]);
+    
   }
-  // ########################################################################
+
+  useGetCodesets({
+    codesetsKeys: [
+     "SERVICE_PROVIDED",
+     "GENDER"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
   const loadStates1 = () => {
     axios.get(`${baseUrl}organisation-units/parent-organisation-units/1`, {
       headers: {
@@ -201,22 +205,15 @@ const ServicesProvided = (props) => {
         });
   };
 
-  // ###########################################################################
+  
 
   useEffect(() => {
     loadStates1();
-    SERVICE_NEEDED();
   }, []);
-  const getGenders = () => {
-    getAllGenders()
-      .then((res) => {
-        setGenders(res);
-      })
-      .catch((e) => {
-        // console.log("error", e);
-      });
-    // ;
-  };
+
+ 
+
+
   // handle Facility Name to slect drop down
   const handleInputChangeObject = (e) => {
     // console.log(e);
@@ -228,9 +225,7 @@ const ServicesProvided = (props) => {
     setErrors({ ...errors, nameOfRecievingFacility: "" });
 
   };
-  useEffect(() => {
-    getGenders();
-  }, []);
+ 
 
   const checkPhoneNumberBasic = (e, inputName) => {
     if (e) {

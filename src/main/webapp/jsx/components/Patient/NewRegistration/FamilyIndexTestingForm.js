@@ -416,157 +416,11 @@ const FamilyIndexTestingForm = (props) => {
   };
 
 
-  // const loadFamilyIndexSetting = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setSetting(response.data);
-  //     })
-  //     .catch((error) => {});
-  // };
-
-  // const getMaritalStatus = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setMaritalStatus(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-  // const getFamilyRelationship = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/FAMILY_RELATIONSHIP`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setFamilyRelationship(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-  // get family index hiv status
-  // const FAMILY_INDEX_HIV_STATUS = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX_HIV_STATUS`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setFamilyIndexHivStatus(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-  // get family index
-
-  // const FAMILY_INDEX = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setFamilyIndex(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-
-  // const FOLLOW_UP_APPOINTMENT_LOCATION = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/FOLLOW_UP_APPOINTMENT_LOCATION`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setFollowUpAppointmentLocation(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-  const GET_CHILD_NUMBER = () => {
-      let ans = codesets["CHILD_NUMBER"].filter((each) => {
-        return each.code === "CHILD_NUMBER_OTHERS";
-      });
-      setRetrieveFromIdToCode(ans[0]?.id);
-  };
-
-  // GET
-  // const INDEX_VISIT_ATTEMPTS = () => {
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/INDEX_VISIT_ATTEMPTS`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setIndexVisitAttempt(response.data);
-  //     })
-  //     .catch((error) => { });
-  // };
-
-
-  // const loadGenders = useCallback(async () => {
-  //   getAllGenders()
-  //     .then((response) => {
-  //       setGenders(response);
-  //     })
-  //     .catch(() => { });
-  // }, []);
-
-//   const HTS_ENTRY_POINT_FACILITY = () => {
-//     axios
-//       .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       })
-//       .then((response) => {
-//         setSetting(response.data);
-//       })
-//       .catch((error) => {
-//         ;
-//       });
-//   };
-
-//   const HTS_ENTRY_POINT_COMMUNITY = () => {
-//     axios
-//       .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
-//  `, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       })
-//       .then((response) => {
-//         setSetting(response.data);
-//       })
-//       .catch((error) => {
-//         ;
-//       });
-//   };
-
-
-//   const getSettings = () => {
-
-//     if (props.patientObj.testingSetting.includes("FACILITY")) {
-//       HTS_ENTRY_POINT_FACILITY()
-//     } else if (props.patientObj.testingSetting.includes("COMMUNITY")) {
-//       HTS_ENTRY_POINT_COMMUNITY()
-//     }
-//   }
-
-
 
   useEffect(() => {
-
-    // loadGenders();
     loadStates();
-    // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
-    // getMaritalStatus();
-    // getFamilyRelationship();
-    // FAMILY_INDEX_HIV_STATUS();
-    // FAMILY_INDEX();
-    // FOLLOW_UP_APPOINTMENT_LOCATION();
-    // INDEX_VISIT_ATTEMPTS();
-    GET_CHILD_NUMBER();
     getVL();
     getCurrentTreatment();
     // getSettings()
@@ -1268,6 +1122,12 @@ const FamilyIndexTestingForm = (props) => {
     setFamilyIndex(data["FAMILY_INDEX"])
     setFollowUpAppointmentLocation(data["FOLLOW_UP_APPOINTMENT_LOCATION"])
     setChildNumber(data["CHILD_NUMBER"])
+
+    let ans = data?.["CHILD_NUMBER"]?.filter?.((each) => {
+      return each.code === "CHILD_NUMBER_OTHERS";
+    });
+    setRetrieveFromIdToCode(ans[0]?.id);
+
     setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
     setGenders(data["SEX"])
 

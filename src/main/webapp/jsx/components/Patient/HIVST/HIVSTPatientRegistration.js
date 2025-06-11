@@ -30,6 +30,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import DualListBox from "react-dual-listbox";
 import {calculate_age} from "../../utils";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -106,6 +107,7 @@ const HIVSTPatientRegistration = (props) => {
     const patient = props.patientObject;
     const [saving, setSaving] = useState(false)
     const classes = useStyles();
+    const [codesets, setCodesets] = useState({})
     const history = useHistory();
     const [errors, setErrors] = useState({});
     let temp = { ...errors };
@@ -211,33 +213,7 @@ const HIVSTPatientRegistration = (props) => {
     const style = {fontSize: matches ? '12px' : '16px',};
 
 
-    const SERVICE_NEEDED = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                if (response.data) {
-                    // create array of objects from the response
-                    const serviceNeeded = response.data.map((service) => {
-                        return {
-                            value: service.display,
-                            label: service.display
-                        }
-                    });
-                    setServiceNeeded(serviceNeeded);
-                }
-            })
-            .catch((e) => {
-                // handle error
-            });
-    };
-
-    useEffect(() => {
-        SERVICE_NEEDED();
-    }, []);
+   
 
     const validateObjValues = () => {
         temp.dateOfVisit = objValues.dateOfVisit ? "" : "This field is required.";
@@ -283,6 +259,8 @@ const HIVSTPatientRegistration = (props) => {
             return Object.values(temp).every((x) => x == "");
         // }
     }
+
+
     const handleInputChange = (e) => {
         const {name, value} = e.target;
         let newObjectValues = {...objValues};
@@ -331,7 +309,6 @@ const HIVSTPatientRegistration = (props) => {
 
         setObjValues(newObjectValues);
     }
-
 
     const handleUserInformationInputChange = (e, section) => {
         const {name, value} = e.target;
@@ -438,9 +415,6 @@ const HIVSTPatientRegistration = (props) => {
         setUserInformation(newUserInformation);
     };
 
-
-// Function to add a testKitUserDetails object to the list
-
     const addUserInformation = () => {
         if(validateUserInformation()) {
             if(userInformationList.length <= objValues.numberOfHivstKitsReceived) {
@@ -521,14 +495,14 @@ const HIVSTPatientRegistration = (props) => {
         }
 
     }
-// Function to remove a testKitUserDetails object from the list based on index
+
     const removeUserInformation = (index) => {
         const updatedUserInformationList = userInformationList.filter((_, i) => i !== index);
         setUserInformationList(updatedUserInformationList);
         setObjValues({...objValues, testKitUserDetails: updatedUserInformationList});
     };
 
-// Function to update a testKitUserDetails object in the list based on index
+
     const updateUserInformation = (index, updatedUserInformation) => {
         const updatedUserInformationList = userInformationList.map((testKitUserDetails, i) =>
             i === index ? updatedUserInformation : testKitUserDetails
@@ -604,38 +578,34 @@ const HIVSTPatientRegistration = (props) => {
     };
 
 
-    const Sex = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SEX`, {
-                headers: {Authorization: `Bearer ${token}`},
-            })
-            .then((response) => {
-               
-                setSexs(response.data);
-            })
-            .catch((error) => {
-                
-            });
-    };
+  
 
-    const MARITALSTATUS = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-                headers: {Authorization: `Bearer ${token}`},
-            })
-            .then((response) => {
-              
-                setMaritalStatus(response.data);
-            })
-            .catch((error) => {
-               
-            });
-    };
+   
 
-    useEffect(() => {
-        Sex();
-        MARITALSTATUS();
-    }, []);
+    const loadCodesets = (data) => {
+        setCodesets(data)
+        
+        setSexs(data["SEX"])
+        setMaritalStatus(data["MARITAL_STATUS"])
+        const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+            return {
+                value: service.display,
+                label: service.display
+            }
+        });
+        setServiceNeeded(serviceNeeded);
+      }
+    
+      useGetCodesets({
+        codesetsKeys: [
+         "SEX",
+         "MARITAL_STATUS",
+         "SERVICE_PROVIDED"
+        ],
+        patientId: props?.patientObj?.id || props?.basicInfo.id,
+        onSuccess: loadCodesets
+      })
+    
 
 
     const setAge = () => {
