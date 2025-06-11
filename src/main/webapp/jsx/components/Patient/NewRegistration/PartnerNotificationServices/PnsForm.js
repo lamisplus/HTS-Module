@@ -703,9 +703,9 @@ const PnsForm = (props) => {
   const validate = () => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
-    temp.partnerName = objValues.htsClientInformation.partnerName ? "" : "This field is required.";
-    temp.partnerAge = objValues.htsClientInformation.partnerAge ? "" : "This field is required.";
-    temp.partnerSex = objValues.htsClientInformation.partnerSex ? "" : "This field is required.";
+    // temp.partnerName = objValues.htsClientInformation.partnerName ? "" : "This field is required.";
+    // temp.partnerAge = objValues.htsClientInformation.partnerAge ? "" : "This field is required.";
+    // temp.partnerSex = objValues.htsClientInformation.partnerSex ? "" : "This field is required.";
 
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
@@ -731,6 +731,7 @@ const PnsForm = (props) => {
     //   : "This field is required.";
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
+
   };
   // const handleSubmit = (e) => {
   //   e.preventDefault();
@@ -739,8 +740,12 @@ const PnsForm = (props) => {
 
   //   console.log(objValues);
   // };
+
+  console.log("temp", temp);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("save pns clicked 1")
     let age = calculate_age(
       props?.basicInfo?.personResponseDto?.dateOfBirth
         ? props?.basicInfo?.personResponseDto?.dateOfBirth
@@ -750,13 +755,18 @@ const PnsForm = (props) => {
     let hivStatus = props?.patientObj?.hivTestResult;
     let latestForm = getNextForm("Nigeria_PNS_Form", age, "", hivStatus);
 
+    console.log("save pns clicked 2")
     setNextForm(latestForm);
 
+    console.log("save pns clicked 3")
     objValues.htsClientInformation = htsClientInformation;
     objValues.contactTracing = contactTracing;
     objValues.partnerId = partnerId;
+
+    console.log("save pns clicked 4")
     // if (validate()) {
     if (validate()) {
+      console.log("save pns clicked 5")
       setSaving(true);
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;
@@ -1834,13 +1844,13 @@ const PnsForm = (props) => {
                           }}
                           required
                         />
-                        {errors.partnerName !== "" ? (
-                          <span className={classes.error}>
-                            {errors.partnerName}
-                          </span>
-                        ) : (
-                          ""
-                        )}
+                        {/*{errors.partnerName !== "" ? (*/}
+                        {/*  <span className={classes.error}>*/}
+                        {/*    {errors.partnerName}*/}
+                        {/*  </span>*/}
+                        {/*) : (*/}
+                        {/*  ""*/}
+                        {/*)}*/}
                       </FormGroup>
                     </div>
                     <div className="form-group  col-md-4">
@@ -1865,13 +1875,13 @@ const PnsForm = (props) => {
                             </option>
                           ))}
                         </select>
-                        {errors.partnerSex !== "" ? (
-                          <span className={classes.error}>
-                            {errors.partnerSex}
-                          </span>
-                        ) : (
-                          ""
-                        )}
+                        {/*{errors.partnerSex !== "" ? (*/}
+                        {/*  <span className={classes.error}>*/}
+                        {/*    {errors.partnerSex}*/}
+                        {/*  </span>*/}
+                        {/*) : (*/}
+                        {/*  ""*/}
+                        {/*)}*/}
                       </FormGroup>
                     </div>
                     <div className="form-group mb-3 col-md-4">
@@ -1892,13 +1902,13 @@ const PnsForm = (props) => {
                             borderRadius: "0.2rem",
                           }}
                         />
-                        {errors.partnerAge !== "" ? (
-                          <span className={classes.error}>
-                            {errors.partnerAge}
-                          </span>
-                        ) : (
-                          ""
-                        )}
+                        {/*{errors.partnerAge !== "" ? (*/}
+                        {/*  <span className={classes.error}>*/}
+                        {/*    {errors.partnerAge}*/}
+                        {/*  </span>*/}
+                        {/*) : (*/}
+                        {/*  ""*/}
+                        {/*)}*/}
                       </FormGroup>
                     </div>
                     <div className="form-group mb-3 col-md-4">
