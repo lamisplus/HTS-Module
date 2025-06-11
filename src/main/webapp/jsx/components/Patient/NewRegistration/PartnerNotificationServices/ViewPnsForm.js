@@ -19,6 +19,7 @@ import "react-phone-input-2/lib/style.css";
 
 import { calculate_age } from "../../../utils";
 import { alphabetOnly } from "../../../../../utility";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -130,6 +131,7 @@ const ViewPNSForm = (props) => {
     partnerPhoneNumber: "",
     numberOfAttempt: "",
   });
+  const [codesets, setCodesets] = useState({})
 
   const [objValues, setObjValues] = useState({
     acceptedHts: "",
@@ -291,52 +293,9 @@ const ViewPNSForm = (props) => {
   };
 
   useEffect(() => {
-    // getPartnerId();
-    Sex();
     getStates();
-    NotificationContact();
-    IndexTesting();
-    Consent();
-    getMaritalStatus();
-    PROVIDER_ROLE();
     viewPnIsnfo();
-    // if (props.patientObj) {
-    //   if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
-    //     setHivTestDate(props.patientObj.dateVisit);
-    //   } else {
-    //     setHivTestDate("");
-    //   }
-
-    //   setObjValues({
-    //     ...objValues,
-    //     firstName: props.patientObj.personResponseDto.firstName,
-    //     middleName: props?.patientObj?.personResponseDto?.otherName,
-    //     lastName: props?.patientObj?.personResponseDto?.surname,
-    //     sex: props?.patientObj?.personResponseDto?.gender.id,
-    //     dob: props?.patientObj?.personResponseDto?.dateOfBirth,
-    //     phoneNumber:
-    //       props?.patientObj?.personResponseDto?.contactPoint?.contactPoint[0]
-    //         ?.value,
-    //   });
-
-    //   sethtsClientInformation({
-    //     ...htsClientInformation,
-    //     maritalStatus: props?.patientObj?.personResponseDto?.maritalStatus.id,
-    //     descriptiveResidentialAddress:
-    //       props?.patientObj?.personResponseDto?.address?.address[0].city,
-    //   });
-
-    // offeredPns: props.patientObj.personResponseDto.firstName
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    // })
-    // }
+    
 
     if (
       props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId ||
@@ -354,9 +313,7 @@ const ViewPNSForm = (props) => {
     }
   }, [props.patientObj]);
 
-  useEffect(() => {
-    loadFamilyIndexSetting();
-  }, []);
+  
 
   // console.log(props.basicInfo);
   const handleHTSClientInputChange = (e) => {
@@ -382,53 +339,11 @@ const ViewPNSForm = (props) => {
   };
 
 
-  const loadFamilyIndexSetting = () => {
-      let  testingSetting =  props?.patientObj?.testingSetting
-      let testingType =""
-// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
-    if(testingSetting.includes("COMMUNITY")){
-      testingType= "COMMUNITY_HTS_TEST_SETTING"
-      
-    }
+  
 
-    if(testingSetting.includes("FACILITY")){
-      testingType= "FACILITY_HTS_TEST_SETTING"
+  
 
-      
-    }
-    axios
-      .get(`${baseUrl}application-codesets/v2/${testingType}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-
-
-
-  const getMaritalStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const PROVIDER_ROLE = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PROVIDER_ROLE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setRoleProvider(response.data);
-      })
-      .catch((error) => {});
-  };
+ 
 
   function getStateByCountryId(getCountryId) {
     axios
@@ -483,49 +398,7 @@ const ViewPNSForm = (props) => {
     getStateByCountryId("1");
     // setObjValues({ ...objValues, countryId: 1 });
   };
-
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setSexs(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  console.log(props);
-  //Get all recorcd by htsClientId
-  const getAllRecordByHTSClientId = () => {
-    axios
-      .get(`${baseUrl}hts-personal-notification-service/{id}/hts-client`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get view pns info
+  
   const viewPnIsnfo = () => {
     axios
       .get(`${baseUrl}hts-personal-notification-service/${props.row.row.id}`, {
@@ -540,32 +413,7 @@ const ViewPNSForm = (props) => {
         ;
       });
   };
-  ///CONSENT	Yes		en	CONSENT
-  const Consent = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CONSENT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setConsent(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  const NotificationContact = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/NOTIFICATION_CONTACT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setNotificationContact(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page, completedMenu);
  
@@ -587,6 +435,8 @@ const ViewPNSForm = (props) => {
       setContactTracing({ ...contactTracing, [e.target.name]: e.target.value });
     }
   };
+
+
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (
@@ -621,6 +471,8 @@ const ViewPNSForm = (props) => {
     // }
     setObjValues({ ...objValues, [e.target.name]: e.target.value });
   };
+
+
   //Date of Birth and Age handle
   const handleDobChange = (e) => {
     if (e.target.value) {
@@ -641,6 +493,8 @@ const ViewPNSForm = (props) => {
 
     setObjValues({ ...objValues, dob: e.target.value });
   };
+
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value === "Actual") {
       objValues.isDateOfBirthEstimated = false;
@@ -650,6 +504,7 @@ const ViewPNSForm = (props) => {
       setAgeDisabled(false);
     }
   };
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       const currentDate = new Date();
@@ -663,6 +518,8 @@ const ViewPNSForm = (props) => {
 
     setObjValues({ ...objValues, [e.target.name]: e.target.value });
   };
+
+
   //End of Date of Birth and Age handling
   const checkPhoneNumberBasic = (e, inputName) => {
     const limit = 10;
@@ -700,13 +557,8 @@ const ViewPNSForm = (props) => {
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   objValues.htsClientInformation = htsClientInformation;
-  //   objValues.contactTracing = contactTracing;
+  
 
-  //   console.log(objValues);
-  // };
   const handleSubmit = (e) => {
     e.preventDefault();
     objValues.htsClientInformation = htsClientInformation;
@@ -791,6 +643,42 @@ const ViewPNSForm = (props) => {
         });
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    if ((props?.patientObj?.testingSetting.toLowerCase() === "community" || "hts_entry_point_community")
+    || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
+    ){
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
+    else if ((props?.patientObj?.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility")
+    || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    }
+
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setRoleProvider(data["PROVIDER_ROLE"])
+    setSexs(data["SEX"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setConsent(data["CONSENT"])
+    setNotificationContact(data["NOTIFICATION_CONTACT"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+     "COMMUNITY_HTS_TEST_SETTING",
+     "FACILITY_HTS_TEST_SETTING",
+     "MARITAL_STATUS",
+     "PROVIDER_ROLE",
+     "SEX",
+     "INDEX_TESTING",
+     "CONSENT",
+     "NOTIFICATION_CONTACT"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

@@ -21,6 +21,7 @@ import "react-phone-input-2/lib/style.css";
 import Badge from "@mui/material/Badge";
 import PersonIcon from "@mui/icons-material/Person";
 import { alphabetOnly } from "../../../../../utility";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -101,6 +102,7 @@ const AddIndexContact = (props) => {
   const [states, setStates] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [elicitedCount, setElicitedCount] = useState(0);
+  const [codesets, setCodesets] = useState({})
 
   let temp = { ...errors };
   const [objValuesIndex, setObjValuesIndex] = useState({
@@ -138,11 +140,7 @@ const AddIndexContact = (props) => {
   });
 
   useEffect(() => {
-    Sex();
     getStates();
-    NotificationContact();
-    IndexTesting();
-    Consent();
     if (props.patientObj) {
       if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
         setHivTestDate(props.patientObj.dateVisit);
@@ -205,59 +203,30 @@ const AddIndexContact = (props) => {
     setObjValues({ ...objValues, countryId: 1 });
   };
 
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setSexs(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  ///CONSENT	Yes		en	CONSENT
-  const Consent = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CONSENT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setConsent(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
-  const NotificationContact = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/NOTIFICATION_CONTACT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        
-        setNotificationContact(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  };
+  
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    
+    setSexs(data["SEX"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setConsent(data["CONSENT"])
+    setNotificationContact(data["NOTIFICATION_CONTACT"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+     "SEX",
+     "INDEX_TESTING",
+     "CONSENT",
+     "NOTIFICATION_CONTACT"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
+
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -265,9 +234,11 @@ const AddIndexContact = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
   const handleItemClickPage = (page) => {
     props.handleIClickPage(page);
   };
+
   const handleInputChange = (e) => {
     //setErrors({...temp, [e.target.name]:""})
     if (e.target.name === "firstName" && e.target.value !== "") {
@@ -289,6 +260,7 @@ const AddIndexContact = (props) => {
     // }
     setObjValues({ ...objValues, [e.target.name]: e.target.value });
   };
+
   //Date of Birth and Age handle
   const handleDobChange = (e) => {
     if (e.target.value) {
@@ -309,6 +281,7 @@ const AddIndexContact = (props) => {
 
     setObjValues({ ...objValues, dob: e.target.value });
   };
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value === "Actual") {
       objValues.isDateOfBirthEstimated = false;
@@ -318,6 +291,7 @@ const AddIndexContact = (props) => {
       setAgeDisabled(false);
     }
   };
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       const currentDate = new Date();

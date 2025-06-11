@@ -370,20 +370,6 @@ const RiskStratification = (props) => {
   };
 
 
-  // function SettingModality(settingId) {
-  //   const setting = settingId;
-  //   axios
-  //     .get(`${baseUrl}application-codesets/v2/${setting}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     })
-  //     .then((response) => {
-  //       setSetting(response.data);
-  //     })
-  //     .catch((error) => {
-  //       ;
-  //     });
-  // }
-
   const validate = () => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
@@ -604,7 +590,6 @@ const RiskStratification = (props) => {
     setEnrollSetting(data["TEST_SETTING"]);
     setEntryPoint(data["HTS_ENTRY_POINT"])
     setKP(data["TARGET_GROUP"])
-
   }
 
   useGetCodesets({

@@ -23,6 +23,7 @@ import { Button } from "semantic-ui-react";
 import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import Cookies from "js-cookie";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 
 
@@ -159,16 +160,17 @@ const BasicInfo = (props) => {
     lastHivTestVaginalOral: "",
     lastHivTestBasedOnRequest: "",
   });
+  const [codesets, setCodesets] = useState({})
   useEffect(() => {
 
 
-if (objValues.age !== "") {
+    if (objValues.age !== "") {
       props.setPatientObjAge(objValues.age);
     }
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
-      if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
+      if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
         HTS_ENTRY_POINT_COMMUNITY()
-      }else if(props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint=== "HTS_ENTRY_POINT_FACILITY"){
+      } else if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
 
         HTS_ENTRY_POINT_FACILITY()
       }
@@ -181,53 +183,19 @@ if (objValues.age !== "") {
   }, [objValues.age]);
 
 
-  useEffect(()=>{
-    KP();
+  useEffect(() => {
+  
     TargetGroupSetup();
-    PregnancyStatus();
-    EntryPoint();
+    
   }, [])
-  
-  
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
 
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
 
-      });
-  };
 
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
 
-        setEntryPoint(response.data);
-        if(props?.patientObj?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-          HTS_ENTRY_POINT_COMMUNITY()
-        }else if(props?.patientObj?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
 
-          HTS_ENTRY_POINT_FACILITY()
-        }else{
-          setEntryPointSetting([]);
-
-        }
-      })
-      .catch((error) => {
-
-      });
-  };
 
   const getSpokeFaclityByHubSite = () => {
-    let facility =Cookies.get("facilityName")
+    let facility = Cookies.get("facilityName")
     axios
       .get(`${baseUrl}hts/spoke-site?hubSite=${facility}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -243,69 +211,54 @@ if (objValues.age !== "") {
   };
 
 
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
 
-          let facilityList = []
-
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-
-      });
-  };
-
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-
-      });
-  };
 
 
 
   const TargetGroupSetup = () => {
     const userAccountData = localStorage.getItem('user_account');
     if (userAccountData) {
-        try {
-          const storedValues = JSON.parse(userAccountData);
-          props.setOrganizationInfo(storedValues);
-          setTargetGroupValue(storedValues);
-          return storedValues
-        } catch (error) {
-            console.error('Error parsing user_account JSON:', error);
-            return null; // Return null if parsing fails
-        }
+      try {
+        const storedValues = JSON.parse(userAccountData);
+        props.setOrganizationInfo(storedValues);
+        setTargetGroupValue(storedValues);
+        return storedValues
+      } catch (error) {
+        console.error('Error parsing user_account JSON:', error);
+        return null; // Return null if parsing fails
+      }
     }
-    return null; 
+    return null;
   };
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+  
+  
 
-        setKP(response.data);
-      })
-      .catch((error) => {
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setKP(data["TARGET_GROUP"])
+    setEntryPoint(data["HTS_ENTRY_POINT"]);
 
-      });
-  };
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+      setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+    } else if (props?.patientObj?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+    } else {
+      setEntryPointSetting([]);
+
+    }
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "COMMUNITY_HTS_TEST_SETTING",
+      "TARGET_GROUP",
+      "FACILITY_HTS_TEST_SETTING",
+      "HTS_ENTRY_POINT"
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -319,7 +272,8 @@ if (objValues.age !== "") {
       setting === "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
 
     ) {
-      setErrors({...errors,
+      setErrors({
+        ...errors,
         lastHivTestDone: "",
         whatWasTheResult: "",
         lastHivTestVaginalOral: "",
@@ -329,7 +283,7 @@ if (objValues.age !== "") {
         lastHivTestInjectedDrugs: "",
         lastHivTestHadAnal: "",
         lastHivTestForceToHaveSex: "",
-       })
+      })
       setIsPMTCTModality(true);
       return true;
     } else {
@@ -342,63 +296,61 @@ if (objValues.age !== "") {
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "testingSetting" && e.target.value !== "") {
-      setErrors({ ...temp, spokeFacility: "",  healthFacility: ""});
+      setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
       let ans = checkPMTCTModality(e.target.value);
 
-     if(e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
-            setShowHealthFacility(true)
-      }else{
-            setShowHealthFacility(false)
-
-       }
+      if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW") {
+        setShowHealthFacility(true)
+      } else {
+        setShowHealthFacility(false)
+      }
 
       displayRiskAssessment(
         riskAssessment.lastHivTestBasedOnRequest,
         objValues.age,
-        ans 
+        ans
 
       );
 
 
       //get spoke sites
-      if(e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||  e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW" ){
+      if (e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" || e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW") {
 
         getSpokeFaclityByHubSite();
       }
 
       //set risk count
-              if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS"   || e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS") {
-                setRiskCount(1);
-              }   else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT"  || e.target.value === "FACILITY_HTS_TEST_SETTING_CT") {
-                setRiskCount(1);
-              } else if (e.target.value ==="FACILITY_HTS_TEST_SETTING_TB") {
-                setRiskCount(1);
-              } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
-                setRiskCount(1);
-              } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
-                setRiskCount(1);
-              } else {
-                setRiskCount(0);
-              }
+      if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" || e.target.value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS") {
+        setRiskCount(1);
+      } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_CT" || e.target.value === "FACILITY_HTS_TEST_SETTING_CT") {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_TB") {
+        setRiskCount(1);
+      } else if (e.target.value === "FACILITY_HTS_TEST_SETTING_STI") {
+        setRiskCount(1);
+      } else if (e.target.value === "COMMUNITY_HTS_TEST_SETTING_OUTREACH") {
+        setRiskCount(1);
+      } else {
+        setRiskCount(0);
+      }
 
 
     }
 
 
-    if(e.target.name === "entryPoint"){
+    if (e.target.name === "entryPoint") {
 
-          if(e.target.value === "HTS_ENTRY_POINT_COMMUNITY"){
-            HTS_ENTRY_POINT_COMMUNITY()
-          }else if(e.target.value === "HTS_ENTRY_POINT_FACILITY"){
+      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+        HTS_ENTRY_POINT_COMMUNITY()
+      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
 
-            HTS_ENTRY_POINT_FACILITY()
-          }else{
-            setEntryPointSetting([]);
+        HTS_ENTRY_POINT_FACILITY()
+      } else {
+        setEntryPointSetting([]);
 
-          }
+      }
 
     }
 
@@ -419,28 +371,29 @@ if (objValues.age !== "") {
         setShowRiskAssessment(false);
         ans = false;
 
-       // 
-            if( age !== ""){
-              setRiskAssessment({...riskAssessment,
-                lastHivTestForceToHaveSex: "",
-                lastHivTestHadAnal: "",
-                lastHivTestInjectedDrugs: "",
-                whatWasTheResult: "",
-                lastHivTestDone: "",
-                diagnosedWithTb: "",
-                lastHivTestPainfulUrination: "",
-                lastHivTestBloodTransfusion: "",
-                lastHivTestVaginalOral: "",
-              })
-            }
+        // 
+        if (age !== "") {
+          setRiskAssessment({
+            ...riskAssessment,
+            lastHivTestForceToHaveSex: "",
+            lastHivTestHadAnal: "",
+            lastHivTestInjectedDrugs: "",
+            whatWasTheResult: "",
+            lastHivTestDone: "",
+            diagnosedWithTb: "",
+            lastHivTestPainfulUrination: "",
+            lastHivTestBloodTransfusion: "",
+            lastHivTestVaginalOral: "",
+          })
+        }
 
-        
-      } else if (SecAge > 15 ) {
+
+      } else if (SecAge > 15) {
         setShowRiskAssessment(true);
         ans = true;
 
-       
-      }else if(lastVisit === "false"){
+
+      } else if (lastVisit === "false") {
         setShowRiskAssessment(true);
         ans = true;
 
@@ -471,7 +424,7 @@ if (objValues.age !== "") {
         age_now,
         isPMTCTModality
       );
-;
+      ;
     } else {
       setObjValues({ ...objValues, age: "" });
     }
@@ -509,20 +462,7 @@ if (objValues.age !== "") {
     }
     setObjValues({ ...objValues, age: e.target.value });
   };
-  //Get list of DSD Model Type
-  function SettingModality(settingId) {
-    const setting = settingId;
-    axios
-      .get(`${baseUrl}application-codesets/v2/${setting}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        ;
-      });
-  }
+
   //End of Date of Birth and Age handling
   /*****  Validation  */
   const validate = () => {
@@ -547,16 +487,16 @@ if (objValues.age !== "") {
         ? ""
         : "This field is required.");
 
-//
-      objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
+    //
+    objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
       (temp.spokeFacility = objValues.spokeFacility
         ? ""
         : "This field is required.");
 
-        showHealthFacility &&
-        (temp.healthFacility = objValues.healthFacility
-          ? ""
-          : "This field is required.");
+    showHealthFacility &&
+      (temp.healthFacility = objValues.healthFacility
+        ? ""
+        : "This field is required.");
 
 
     //Risk Assement section
@@ -621,12 +561,12 @@ if (objValues.age !== "") {
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
 
   const handleInputChangeRiskAssessment = (e) => {
-  
+
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
-    
-    if(e.target.name === "lastHivTestBasedOnRequest"){
+
+    if (e.target.name === "lastHivTestBasedOnRequest") {
       displayRiskAssessment(e.target.value, objValues.age, isPMTCTModality);
       setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
@@ -644,8 +584,8 @@ if (objValues.age !== "") {
     e.preventDefault();
     // get next form
     let newModality = isPMTCTModality ? "skip" : "fill";
-  
-  let latestForm =  getNextForm("risk_stratification", objValues.age, newModality, "unknown")
+
+    let latestForm = getNextForm("risk_stratification", objValues.age, newModality, "unknown")
 
     getMenuLogic(objValues);
     props.patientObj.riskStratificationResponseDto = objValues;
@@ -691,7 +631,7 @@ if (objValues.age !== "") {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -733,7 +673,7 @@ if (objValues.age !== "") {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -770,7 +710,7 @@ if (objValues.age !== "") {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -809,7 +749,7 @@ if (objValues.age !== "") {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -890,7 +830,7 @@ if (objValues.age !== "") {
                     <Input
                       type="date"
 
-                      onKeyPress={(e)=>{e.preventDefault()}}
+                      onKeyPress={(e) => { e.preventDefault() }}
 
                       name="visitDate"
                       id="visitDate"
@@ -932,12 +872,12 @@ if (objValues.age !== "") {
                       </option>
                       {entryPointSetting && entryPointSetting.map((value) =>
 
-                              <option key={value.id} value={value.code}>
-                                {value.display}
-                              </option>
+                        <option key={value.id} value={value.code}>
+                          {value.display}
+                        </option>
 
-                          )
-                        }
+                      )
+                      }
 
                     </select>
                     {errors.testingSetting !== "" ? (
@@ -951,14 +891,14 @@ if (objValues.age !== "") {
                 </div>
                 {/*  */}
 
-{ objValues.testingSetting ===  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && <div className="form-group  col-md-6">
+                {objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
-                    Spoke Health Facility <span style={{ color: "red" }}> *</span>
+                      Spoke Health Facility <span style={{ color: "red" }}> *</span>
                     </Label>
 
 
-                   { spokeFacList.length > 0 ?   <> <select
+                    {spokeFacList.length > 0 ? <> <select
                       className="form-control"
                       name="spokeFacility"
                       id="spokeFacility"
@@ -967,29 +907,29 @@ if (objValues.age !== "") {
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
+                        textTransform: "capitalize  !important"
                       }}
                     >
                       <option value={""}>Select</option>
                       {spokeFacList.map((value) => (
                         <option key={value.id} value={value.spokeSite}
-                     >
+                        >
                           {value.spokeSite}
                         </option>
                       ))}
-                    </select></>: <Input
-                    type="text"
-                    name="spokeFacility"
-                    id="spokeFacility"
-                    value={objValues.spokeFacility}
-                    //value={Math.floor(Math.random() * 1093328)}
-                    // onBlur={checkClientCode}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
+                    </select></> : <Input
+                      type="text"
+                      name="spokeFacility"
+                      id="spokeFacility"
+                      value={objValues.spokeFacility}
+                      //value={Math.floor(Math.random() * 1093328)}
+                      // onBlur={checkClientCode}
+                      onChange={handleInputChange}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.25rem",
+                      }}
+                    />}
                     {errors.spokeFacility !== "" ? (
                       <span className={classes.error}>{errors.spokeFacility}</span>
                     ) : (
@@ -1003,9 +943,9 @@ if (objValues.age !== "") {
                 {showHealthFacility && <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
-                     Health Facility <span style={{ color: "red" }}> *</span>
+                      Health Facility <span style={{ color: "red" }}> *</span>
                     </Label>
-                    { spokeFacList.length > 0 ?    <select
+                    {spokeFacList.length > 0 ? <select
                       className="form-control"
                       name="healthFacility"
                       id="healthFacility"
@@ -1014,28 +954,28 @@ if (objValues.age !== "") {
                       style={{
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
-                        textTransform:"capitalize  !important"
+                        textTransform: "capitalize  !important"
                       }}
                     >
                       <option value={""}>Select</option>
                       {spokeFacList.map((value) => (
                         <option key={value.id} value={value.spokeSite}
-                     >
+                        >
                           {value.spokeSite}
                         </option>
                       ))}
-                    </select>:  <Input
-                    type="text"
-                    name="healthFacility"
-                    id="healthFacility"
-                    value={objValues.healthFacility}
+                    </select> : <Input
+                      type="text"
+                      name="healthFacility"
+                      id="healthFacility"
+                      value={objValues.healthFacility}
 
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.25rem",
-                    }}
-                  /> }
+                      onChange={handleInputChange}
+                      style={{
+                        border: "1px solid #014D88",
+                        borderRadius: "0.25rem",
+                      }}
+                    />}
                     {errors.healthFacility !== "" ? (
                       <span className={classes.error}>{errors.healthFacility}</span>
                     ) : (
@@ -1124,7 +1064,7 @@ if (objValues.age !== "") {
                     className="form-control"
                     type="date"
 
-                    onKeyPress={(e)=>{e.preventDefault()}}
+                    onKeyPress={(e) => { e.preventDefault() }}
 
                     name="dob"
                     id="dob"
