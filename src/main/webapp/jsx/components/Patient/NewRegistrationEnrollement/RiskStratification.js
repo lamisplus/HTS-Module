@@ -677,9 +677,8 @@ const RiskStratification = (props) => {
       );
       return;
     }
-
     // Validate visit date
-    const visitDateError = validateVisitDateWithDOB(objValues);
+    const visitDateError = validateVisitDateWithDOB(objValues.dob, objValues.visitDate);
     if (visitDateError) {
       toast.error(visitDateError, {
         position: toast.POSITION.BOTTOM_CENTER,

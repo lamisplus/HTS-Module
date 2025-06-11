@@ -874,7 +874,7 @@ const handleTargetGroupChange = (e) => {
     }
 
     // validate date
-    const visitDateError = validateVisitDateWithDOB(objValues);
+    const visitDateError = validateVisitDateWithDOB(objValues.dob, objValues.visitDate);
 
     if (visitDateError) {
       toast.error(visitDateError, {

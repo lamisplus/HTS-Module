@@ -669,6 +669,7 @@ const RiskStratification = (props) => {
   };
 
 
+
  const handleSubmit = async (e) => {
    e.preventDefault();
 
@@ -690,7 +691,7 @@ const RiskStratification = (props) => {
      );
      return;
    }
-   const visitDateError = validateVisitDateWithDOB(objValues);
+   const visitDateError = validateVisitDateWithDOB(props.patientObject.dateOfBirth, objValues.visitDate);
 
    if (visitDateError) {
      toast.error(visitDateError, {
