@@ -668,7 +668,8 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
-
+console.log("props.patientObjc incontinous registartion", props.patientObject)
+console.log("person info", props.personInfo)
 
  const handleSubmit = async (e) => {
    e.preventDefault();
@@ -691,7 +692,7 @@ const RiskStratification = (props) => {
      );
      return;
    }
-   const visitDateError = validateVisitDateWithDOB(props.patientObject.dateOfBirth, objValues.visitDate);
+   const visitDateError = validateVisitDateWithDOB(props.personInfo?.personResponseDto?.dateOfBirth, objValues.visitDate);
 
    if (visitDateError) {
      toast.error(visitDateError, {
@@ -926,16 +927,7 @@ const RiskStratification = (props) => {
                             {value.display}
                           </option>
                         ))}
-                      {/* <option value="TEST_SETTING_CT">CT</option>
-                                        <option value="TEST_SETTING_TB">TB</option>
-                                        <option value="TEST_SETTING_STI">STI</option>
-                                        <option value="TEST_SETTING_OPD">OPD</option>
-                                        <option value="TEST_SETTING_WARD">WARD</option>
-                                        <option value="TEST_SETTING_STANDALONE_HTS">STANDALONE HTS</option>
-                                        
-                                        <option value="TEST_SETTING_FP">FP</option>
-                                        <option value="TEST_SETTING_OUTREACH">OUTREACH</option>
-                                        <option value="TEST_SETTING_OTHERS">OTHERS</option> */}
+            
                     </select>
                     {errors.testingSetting !== "" ? (
                       <span className={classes.error}>
@@ -946,36 +938,6 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                      Modality <span style={{ color: "red" }}> *</span>
-                    </Label>
-                    <select
-                      className="form-control"
-                      name="modality"
-                      id="modality"
-                      value={objValues.modality}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {setting.map((value) => (
-                        <option key={value.id} value={value.code}>
-                          {value.display}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.modality !== "" ? (
-                      <span className={classes.error}>{errors.modality}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div> */}
 
                 {objValues.testingSetting ===
                   "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
