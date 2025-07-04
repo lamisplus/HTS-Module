@@ -121,7 +121,7 @@ const BasicInfo = (props) => {
 
   const [facilityCode, setFacilityCode] = useState("");
   const [serialNumber, setSerialNumber] = useState(null);
-  const [disableModality, setDisableModality] = useState(props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ? true: false);
+  // const [disableModality, setDisableModality] = useState(props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ? true: false);
 
   const [modalityCheck, setModality] = useState("");
   const [showPregancy, setShowPregnancy] = useState(false);
@@ -181,6 +181,8 @@ const BasicInfo = (props) => {
     familyIndex: "",
 
   });
+
+  console.log("object in basic info continous, ", objValues)
 
   const CreateClientCode = () => {
     let facilityShortCode = "";
@@ -786,12 +788,20 @@ const BasicInfo = (props) => {
     }
   };
 
-  // useEffect(async ()=> {
+const testingSetting = objValues.testingSetting;
 
-  //   await handleClientCodeCheck();
-  //   temp.clientCode = clientCodeCheck === true ? "" : "This field is required.";
+useEffect(() => {
+  const shouldAutoFill =
+    testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+    testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
 
-  // },[objValues.clientCode])
+  if (shouldAutoFill && objValues.pregnant !== "73") {
+    setObjValues((prev) => ({
+      ...prev,
+      pregnant: "73",
+    }));
+  }
+}, [testingSetting]);
 
 
 
@@ -1167,7 +1177,11 @@ const BasicInfo = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                          disabled={disableModality}
+                           disabled={
+  testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+  testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
+}
+                          
                         >
                           <option value={""}></option>
                           {pregnancyStatus.map((value) => {

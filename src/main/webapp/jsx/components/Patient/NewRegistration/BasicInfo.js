@@ -330,6 +330,9 @@ const BasicInfo = (props) => {
     familyIndex: "",
   });
 
+
+  console.log("Object in cleint intake", objValues)
+
   const convertFromIdToDisplay = (code) => {
     let ans = indexTesting.filter((each, index) => {
       return each.code === code;
@@ -527,7 +530,7 @@ const BasicInfo = (props) => {
       })
       .then((response) => {
         setPregnancyStatus(response.data);
-        determinPregnancy(response.data);
+        // determinPregnancy(response.data);
       })
       .catch((error) => {
         //console.log(error);
@@ -864,24 +867,24 @@ const BasicInfo = (props) => {
     }
   };
 
-  const determinPregnancy = (pregList) => {
-    // get  the value of pregnancy being used
-    let pregnancyUsed = "";
-    if (pregList.length > 0) {
-      pregList.map((each, index) => {
-        if (each.code === "PREGANACY_STATUS_PREGNANT") {
-          pregnancyUsed = each.id;
-        }
-      });
-    }
+  // const determinPregnancy = (pregList) => {
+  //   // get  the value of pregnancy being used
+  //   let pregnancyUsed = "";
+  //   if (pregList.length > 0) {
+  //     pregList.map((each, index) => {
+  //       if (each.code === "PREGANACY_STATUS_PREGNANT") {
+  //         pregnancyUsed = each.id;
+  //       }
+  //     });
+  //   }
 
-    if (
-      props.patientObj.riskStratificationResponseDto.testingSetting ===
-      "FACILITY_HTS_TEST_SETTING_ANC"
-    ) {
-      setObjValues({ ...objValues, pregnant: pregnancyUsed });
-    }
-  };
+  //   if (
+  //     props.patientObj.riskStratificationResponseDto.testingSetting ===
+  //     "FACILITY_HTS_TEST_SETTING_ANC"
+  //   ) {
+  //     setObjValues({ ...objValues, pregnant: pregnancyUsed });
+  //   }
+  // };
 
   const determinSex = () => {
     if (
@@ -1182,6 +1185,35 @@ const BasicInfo = (props) => {
       });
     }
   };
+
+// useEffect(() => {
+//   if (
+//     objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_L&D" &&
+//     objValues.pregnant === ""
+//   ) {
+//     setObjValues((prev) => ({
+//       ...prev,
+//       pregnant: "73",
+//     }));
+//   }
+// }, [objValues.testingSetting]);
+
+const testingSetting = props.patientObj.riskStratificationResponseDto.testingSetting;
+
+useEffect(() => {
+  const shouldAutoFill =
+    testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+    testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
+
+  if (shouldAutoFill && objValues.pregnant !== "73") {
+    setObjValues((prev) => ({
+      ...prev,
+      pregnant: "73",
+    }));
+  }
+}, [testingSetting]);
+
+
 
   return (
     <>
@@ -1936,12 +1968,16 @@ const BasicInfo = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.2rem",
                         }}
+                        // disabled={
+                        //   props.patientObj.riskStratificationResponseDto
+                        //     .testingSetting === "FACILITY_HTS_TEST_SETTING_ANC"
+                        //     ? true
+                        //     : false
+                        // }
                         disabled={
-                          props.patientObj.riskStratificationResponseDto
-                            .testingSetting === "FACILITY_HTS_TEST_SETTING_ANC"
-                            ? true
-                            : false
-                        }
+  testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+  testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
+}
                       >
                         <option value={""}></option>
                         {pregnancyStatus.map((value) => (
