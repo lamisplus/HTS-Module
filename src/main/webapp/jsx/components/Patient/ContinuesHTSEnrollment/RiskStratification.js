@@ -662,11 +662,7 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
-  console.log(
-    "props.patientObjc incontinous registartion",
-    props.patientObject
-  );
-  console.log("person info", props.personInfo);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

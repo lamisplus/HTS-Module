@@ -99,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
-
   const classes = useStyles();
   const history = useHistory();
   const [errors, setErrors] = useState({});
@@ -330,8 +329,6 @@ const BasicInfo = (props) => {
     familyIndex: "",
   });
 
-
-  console.log("Object in cleint intake", objValues)
 
   const convertFromIdToDisplay = (code) => {
     let ans = indexTesting.filter((each, index) => {
@@ -997,20 +994,20 @@ const BasicInfo = (props) => {
     setObjValues({ ...objValues, [inputName]: NumberValue });
   };
 
-   const shouldHideMaritalFields = () => {
-     // Check if setting is Pediatric and age is less than 15 years
-     const isPediatricAndUnder15 =
-       objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
-       props.patientAge < 15;
+  const shouldHideMaritalFields = () => {
+    // Check if setting is Pediatric and age is less than 15 years
+    const isPediatricAndUnder15 =
+      objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
+      props.patientAge < 15;
 
-     // Check if target group is PD or Children of Most at risk population
-     const isTargetGroupPDorChildrenKP =
-       props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
-       props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
+    // Check if target group is PD or Children of Most at risk population
+    const isTargetGroupPDorChildrenKP =
+      props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
+      props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
 
-     // Hide fields if either condition is true
-     return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
-   };
+    // Hide fields if either condition is true
+    return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     Cookies.set("serial-number", serialNumber);
@@ -1186,34 +1183,33 @@ const BasicInfo = (props) => {
     }
   };
 
-// useEffect(() => {
-//   if (
-//     objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_L&D" &&
-//     objValues.pregnant === ""
-//   ) {
-//     setObjValues((prev) => ({
-//       ...prev,
-//       pregnant: "73",
-//     }));
-//   }
-// }, [objValues.testingSetting]);
+  // useEffect(() => {
+  //   if (
+  //     objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_L&D" &&
+  //     objValues.pregnant === ""
+  //   ) {
+  //     setObjValues((prev) => ({
+  //       ...prev,
+  //       pregnant: "73",
+  //     }));
+  //   }
+  // }, [objValues.testingSetting]);
 
-const testingSetting = props.patientObj.riskStratificationResponseDto.testingSetting;
+  const testingSetting =
+    props.patientObj.riskStratificationResponseDto.testingSetting;
 
-useEffect(() => {
-  const shouldAutoFill =
-    testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
-    testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
+  useEffect(() => {
+    const shouldAutoFill =
+      testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+      testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
 
-  if (shouldAutoFill && objValues.pregnant !== "73") {
-    setObjValues((prev) => ({
-      ...prev,
-      pregnant: "73",
-    }));
-  }
-}, [testingSetting]);
-
-
+    if (shouldAutoFill && objValues.pregnant !== "73") {
+      setObjValues((prev) => ({
+        ...prev,
+        pregnant: "73",
+      }));
+    }
+  }, [testingSetting]);
 
   return (
     <>
@@ -1975,9 +1971,9 @@ useEffect(() => {
                         //     : false
                         // }
                         disabled={
-  testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
-  testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
-}
+                          testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+                          testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
+                        }
                       >
                         <option value={""}></option>
                         {pregnancyStatus.map((value) => (

@@ -112,7 +112,7 @@ const BasicInfo = (props) => {
   const [pregnancyStatus, setPregnancyStatus] = useState([]);
   const [indexTesting, setIndexTesting] = useState([]);
   let temp = { ...errors };
-  const [disableVitals, setDisableVitals] = useState(false)
+  const [disableVitals, setDisableVitals] = useState(false);
 
   const [clientCodeetail, setclientCodeetail] = useState("");
   const [clientCodeetail2, setclientCodeetail2] = useState("");
@@ -141,11 +141,8 @@ const BasicInfo = (props) => {
       props.patientObj && props.patientObj.dateVisit
         ? props.patientObj.dateVisit
         : "",
-    firstTimeVisit:
-       props?.patientObj?.firstTimeVisit
-       ,
-    indexClient: props?.patientObj?.indexClient
-        ,
+    firstTimeVisit: props?.patientObj?.firstTimeVisit,
+    indexClient: props?.patientObj?.indexClient,
     numChildren:
       props.patientObj && props.patientObj.numChildren
         ? props.patientObj.numChildren
@@ -158,7 +155,7 @@ const BasicInfo = (props) => {
       props.patientObj && props.patientObj.pregnant
         ? props.patientObj.pregnant
         : "",
-    previouslyTested:  props?.patientObj?.previouslyTested ,
+    previouslyTested: props?.patientObj?.previouslyTested,
     referredFrom: props.patientObj ? props.patientObj.referredFrom : "",
     riskAssessment:
       props.patientObj && props.patientObj.riskAssessment
@@ -179,10 +176,8 @@ const BasicInfo = (props) => {
     comment: props?.patientObj?.comment,
     partnerNotificationService: "",
     familyIndex: "",
-
   });
 
-  console.log("object in basic info continous, ", objValues)
 
   const CreateClientCode = () => {
     let facilityShortCode = "";
@@ -221,71 +216,72 @@ const BasicInfo = (props) => {
       settingCode = "SNS";
     } else if (setting?.includes("OTHER")) {
       settingCode = "OTH";
-    }else if (setting?.includes("SETTING_ANC")) {
+    } else if (setting?.includes("SETTING_ANC")) {
       settingCode = "ANC";
-    }else if (setting?.includes("RETESTING")) {
+    } else if (setting?.includes("RETESTING")) {
       settingCode = "RET";
-    }else if (setting?.includes("SETTING_L&D")) {
+    } else if (setting?.includes("SETTING_L&D")) {
       settingCode = "L&D";
-    }else if (setting?.includes("POST_NATAL_WARD_BREASTFEEDING")) {
+    } else if (setting?.includes("POST_NATAL_WARD_BREASTFEEDING")) {
       settingCode = "PNWB";
-    }else if (setting?.includes("NPATIENT")) {
+    } else if (setting?.includes("NPATIENT")) {
       settingCode = "INP";
-    }else if (setting?.includes("SETTING_CT")) {
+    } else if (setting?.includes("SETTING_CT")) {
       settingCode = "CT";
-    }else if (setting?.includes("SETTING_FP")) {
+    } else if (setting?.includes("SETTING_FP")) {
       settingCode = "FP";
-    }else if (setting?.includes("BLOOD_BANK")) {
+    } else if (setting?.includes("BLOOD_BANK")) {
       settingCode = "BB";
-    }else if (setting?.includes("PEDIATRIC")) {
+    } else if (setting?.includes("PEDIATRIC")) {
       settingCode = "PED";
-    }else if (setting?.includes("MALNUTRITION")) {
+    } else if (setting?.includes("MALNUTRITION")) {
       settingCode = "Mal";
-    }else if (setting?.includes("PREP_TESTING")) {
+    } else if (setting?.includes("PREP_TESTING")) {
       settingCode = "PrEPT";
-    }else if (setting?.includes("SPOKE_HEALTH_FACILITY")) {
+    } else if (setting?.includes("SPOKE_HEALTH_FACILITY")) {
       settingCode = "SPHF";
-    }else if (setting?.includes("STANDALONE")) {
+    } else if (setting?.includes("STANDALONE")) {
       settingCode = "STAN";
-    }else if (setting?.includes("CONGREGATIONAL")) {
+    } else if (setting?.includes("CONGREGATIONAL")) {
       settingCode = "CON";
-    }else if (setting?.includes("DELIVERY_HOMES")) {
+    } else if (setting?.includes("DELIVERY_HOMES")) {
       settingCode = "DEL";
-    }    else if (setting?.includes("TBA_ORTHODOX")) {
+    } else if (setting?.includes("TBA_ORTHODOX")) {
       settingCode = "TBAO";
-    }    else if (setting?.includes("TBA_RT-HCW")) {
+    } else if (setting?.includes("TBA_RT-HCW")) {
       settingCode = "TBAH";
-    }    else if (setting?.includes("SETTING_OVC")) {
+    } else if (setting?.includes("SETTING_OVC")) {
       settingCode = "OVC";
-    }    else if (setting?.includes("OUTREACH")) {
+    } else if (setting?.includes("OUTREACH")) {
       settingCode = "OUT";
-    }  
+    }
 
     let month = visitDate.getMonth();
     let year = visitDate.getFullYear();
     let generatedCode =
       "C" + facilityCode + "/" + settingCode + "/" + month + "/" + year + "/";
     setCreatedCode(generatedCode);
-    if(!props.patientObj.id){
+    if (!props.patientObj.id) {
       setObjValues({ ...objValues, clientCode: generatedCode });
-    }else{
-          setSerialNumber(Cookies.get("serial-number"))
-          setDisableVitals(true)
+    } else {
+      setSerialNumber(Cookies.get("serial-number"));
+      setDisableVitals(true);
     }
   };
 
-
-
-  const getSettingList=()=>{
-
-    if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"){
-      HTS_ENTRY_POINT_COMMUNITY()
-    }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "HTS_ENTRY_POINT_FACILITY"){
-
-      HTS_ENTRY_POINT_FACILITY()
-    }else{
+  const getSettingList = () => {
+    if (
+      props.patientObj.riskStratificationResponseDto.entryPoint ===
+      "HTS_ENTRY_POINT_COMMUNITY"
+    ) {
+      HTS_ENTRY_POINT_COMMUNITY();
+    } else if (
+      props.patientObj.riskStratificationResponseDto.entryPoint ===
+      "HTS_ENTRY_POINT_FACILITY"
+    ) {
+      HTS_ENTRY_POINT_FACILITY();
+    } else {
       setEnrollSetting([]);
-
     }
 
     setModality(
@@ -293,11 +289,9 @@ const BasicInfo = (props) => {
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       )
     );
-  }
-
+  };
 
   useEffect(() => {
-
     KP();
     EnrollmentSetting();
     SourceReferral();
@@ -307,12 +301,7 @@ const BasicInfo = (props) => {
     IndexTesting();
 
     CreateClientCode();
-    getSettingList()
-
-
-   
-
-
+    getSettingList();
   }, [props.patientObj, facilityCode]);
 
   const handleSubmitCheckOut = () => {
@@ -335,14 +324,15 @@ const BasicInfo = (props) => {
     }
   };
 
-
-
   const HTS_ENTRY_POINT_COMMUNITY = () => {
     axios
-      .get(`${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(
+        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
+ `,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
       .then((response) => {
         //console.log(response.data);
         setEnrollSetting(response.data);
@@ -351,8 +341,6 @@ const BasicInfo = (props) => {
         //console.log(error);
       });
   };
-
-
 
   const HTS_ENTRY_POINT_FACILITY = () => {
     axios
@@ -375,7 +363,6 @@ const BasicInfo = (props) => {
         //console.log(error);
       });
   };
-
 
   //Get list of KP
   const KP = () => {
@@ -411,22 +398,17 @@ const BasicInfo = (props) => {
       })
       .then((response) => {
         setPregnancyStatus(response.data);
-               let pregnancyCode = response.data.filter((each, index)=>{
+        let pregnancyCode = response.data.filter((each, index) => {
+          return each.code === "PREGANACY_STATUS_PREGNANT";
+        });
 
-                return each.code === "PREGANACY_STATUS_PREGNANT"
-               })                                                        
+        if (props?.patientObject?.gender.toLowerCase() === "female") {
+          if (props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC") {
+            setShowPregnancy(true);
 
-
-        if (props?.patientObject?.gender.toLowerCase() === "female" ) {
-            if( props.extra.testingSetting ===
-              "FACILITY_HTS_TEST_SETTING_ANC" 
-           ){
-              setShowPregnancy(true);
-
-
-              setObjValues({...objValues, pregnant:pregnancyCode[0].id })
-            }
+            setObjValues({ ...objValues, pregnant: pregnancyCode[0].id });
           }
+        }
       })
       .catch((error) => {
         //console.log(error);
@@ -509,21 +491,23 @@ const BasicInfo = (props) => {
       setObjValues({
         ...objValues,
         [e.target.name]: e.target.value,
-   
       });
-    }else if(e.target.name === "serialNumber" ){
-      setSerialNumber(e.target.value )
-      checkClientCode(e)
-
+    } else if (e.target.name === "serialNumber") {
+      setSerialNumber(e.target.value);
+      checkClientCode(e);
     } else if (e.target.name === "indexClient") {
-        setObjValues({
-          ...objValues,
-          [e.target.name]: e.target.value,
-          relationWithIndexClient: "",
-          indexClientCode: "",
-        });
+      setObjValues({
+        ...objValues,
+        [e.target.name]: e.target.value,
+        relationWithIndexClient: "",
+        indexClientCode: "",
+      });
 
-        setErrors({...errors, relationWithIndexClient: "", indexClientCode: "" })
+      setErrors({
+        ...errors,
+        relationWithIndexClient: "",
+        indexClientCode: "",
+      });
     } else if (e.target.name === "numChildren") {
       if (e.target.value >= 0) {
         setObjValues({ ...objValues, [e.target.name]: e.target.value });
@@ -560,31 +544,28 @@ const BasicInfo = (props) => {
       : "This field is required.";
     temp.targetGroup = objValues.targetGroup ? "" : "This field is required.";
     temp.referredFrom = objValues.referredFrom ? "" : "This field is required.";
-    temp.previouslyTested = objValues.previouslyTested !== ""
-      ? ""
-      : "This field is required.";
-    temp.indexClient = objValues.indexClient !== "" ? "" : "This field is required.";
-    temp.firstTimeVisit = objValues.firstTimeVisit !== ""
-      ? ""
-      : "This field is required.";
+    temp.previouslyTested =
+      objValues.previouslyTested !== "" ? "" : "This field is required.";
+    temp.indexClient =
+      objValues.indexClient !== "" ? "" : "This field is required.";
+    temp.firstTimeVisit =
+      objValues.firstTimeVisit !== "" ? "" : "This field is required.";
     temp.dateVisit = objValues.dateVisit ? "" : "This field is required.";
-        
 
-    
-      props?.patientObject?.gender &&
+    props?.patientObject?.gender &&
       props?.patientObject?.gender.toLowerCase() === "female" &&
-     ( temp.pregnant =
+      (temp.pregnant =
         objValues.pregnant !== "" ? "" : "This field is required.");
 
-      objValues.indexClient === "true"  &&
+    objValues.indexClient === "true" &&
       (temp.relationWithIndexClient =
-              objValues.relationWithIndexClient !== ""
-                ? ""
-                : "This field is required.");
+        objValues.relationWithIndexClient !== ""
+          ? ""
+          : "This field is required.");
 
     objValues.indexClient === "true" &&
-                  (temp.indexClientCode =
-          objValues.indexClientCode !== "" ? "" : "This field is required.");
+      (temp.indexClientCode =
+        objValues.indexClientCode !== "" ? "" : "This field is required.");
 
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
@@ -621,9 +602,8 @@ const BasicInfo = (props) => {
   const checkClientCode = (e) => {
     let code = "";
 
-
     if (e.target.name === "serialNumber") {
-      // 
+      //
       code = createdCode + e.target.value;
 
       setObjValues({ ...objValues, clientCode: code });
@@ -638,13 +618,11 @@ const BasicInfo = (props) => {
           },
         }
       );
-      if(response.data ==='Client code already exist'){
+      if (response.data === "Client code already exist") {
         // setErrors({...errors,clientCode: "Client code already exist" })
-         setClientCodeCheck("Client code already exist")
-         
-      }else {
-          setClientCodeCheck("")
-     
+        setClientCodeCheck("Client code already exist");
+      } else {
+        setClientCodeCheck("");
       }
     }
     getIndexClientCode();
@@ -685,102 +663,93 @@ const BasicInfo = (props) => {
       comment: objValues.comment,
       partnerNotificationService: objValues.partnerNotificationService,
       familyIndex: objValues.familyIndex,
-
     };
 
     props.setPatientObj({ ...props.patientObj, ...objValues });
-    Cookies.set("serial-number", serialNumber)
+    Cookies.set("serial-number", serialNumber);
 
     if (validate() && clientCodeCheck === "") {
       setSaving(true);
 
-      if(props.patientObj.id && props.completed.includes("basic") ){
-        patientForm.id= props?.patientObj?.id
-        patientForm.personId= props?.patientObj?.personId
+      if (props.patientObj.id && props.completed.includes("basic")) {
+        patientForm.id = props?.patientObj?.id;
+        patientForm.personId = props?.patientObj?.personId;
 
         axios
-        .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setSaving(false);
-          let obj = {
-            uuid: "",
-            type: "",
-            clientCode: "",
-          };
-          localStorage.setItem("index", JSON.stringify(obj));
+          .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setSaving(false);
+            let obj = {
+              uuid: "",
+              type: "",
+              clientCode: "",
+            };
+            localStorage.setItem("index", JSON.stringify(obj));
 
-          props.setPatientObj(response.data);
-          props.setBasicInfo(response.data);
-          toast.success("Form submitted successfully");
+            props.setPatientObj(response.data);
+            props.setBasicInfo(response.data);
+            toast.success("Form submitted successfully");
 
-          handleItemClick(latestForm[0], latestForm[1]);
-        })
-        .catch((error) => {
-          setSaving(false);
-          console.log(error);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage, {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          } else {
-            toast.error("Something went wrong. Please try again...", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          }
-        });
-
-      }else{
+            handleItemClick(latestForm[0], latestForm[1]);
+          })
+          .catch((error) => {
+            setSaving(false);
+            console.log(error);
+            if (error.response && error.response.data) {
+              let errorMessage =
+                error.response.data.apierror &&
+                error.response.data.apierror.message !== ""
+                  ? error.response.data.apierror.message
+                  : "Something went wrong, please try again";
+              toast.error(errorMessage, {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            } else {
+              toast.error("Something went wrong. Please try again...", {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            }
+          });
+      } else {
         axios
-        .post(`${baseUrl}hts`, patientForm, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          if (props.checkedInPatient) {
-            handleSubmitCheckOut();
-          }
+          .post(`${baseUrl}hts`, patientForm, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            if (props.checkedInPatient) {
+              handleSubmitCheckOut();
+            }
 
-          setSaving(false);
-          props.setPatientObj(response.data);
-          if (response.data && response.data.htsClientUUid) {
-            localStorage.setItem(
-              "htsClientUUid",
-              JSON.stringify(response.data.htsClientUUid)
-            );
-          }
-          handleItemClick(latestForm[0], latestForm[1]);
-
-        })
-        .catch((error) => {
-          setSaving(false);
-          if (error.response && error.response.data) {
-            let errorMessage =
-              error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
-                ? error.response.data.apierror.message
-                : "Something went wrong, please try again";
-            toast.error(errorMessage, {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          } else {
-            toast.error("Something went wrong. Please try again...", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
-          }
-        });
-
+            setSaving(false);
+            props.setPatientObj(response.data);
+            if (response.data && response.data.htsClientUUid) {
+              localStorage.setItem(
+                "htsClientUUid",
+                JSON.stringify(response.data.htsClientUUid)
+              );
+            }
+            handleItemClick(latestForm[0], latestForm[1]);
+          })
+          .catch((error) => {
+            setSaving(false);
+            if (error.response && error.response.data) {
+              let errorMessage =
+                error.response.data.apierror &&
+                error.response.data.apierror.message !== ""
+                  ? error.response.data.apierror.message
+                  : "Something went wrong, please try again";
+              toast.error(errorMessage, {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            } else {
+              toast.error("Something went wrong. Please try again...", {
+                position: toast.POSITION.BOTTOM_CENTER,
+              });
+            }
+          });
       }
-
-
-     
-
-    
     } else {
       toast.error("All fields are required", {
         position: toast.POSITION.BOTTOM_CENTER,
@@ -788,22 +757,20 @@ const BasicInfo = (props) => {
     }
   };
 
-const testingSetting = objValues.testingSetting;
+  const testingSetting = objValues.testingSetting;
 
-useEffect(() => {
-  const shouldAutoFill =
-    testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
-    testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
+  useEffect(() => {
+    const shouldAutoFill =
+      testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+      testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
 
-  if (shouldAutoFill && objValues.pregnant !== "73") {
-    setObjValues((prev) => ({
-      ...prev,
-      pregnant: "73",
-    }));
-  }
-}, [testingSetting]);
-
-
+    if (shouldAutoFill && objValues.pregnant !== "73") {
+      setObjValues((prev) => ({
+        ...prev,
+        pregnant: "73",
+      }));
+    }
+  }, [testingSetting]);
 
   return (
     <>
@@ -833,7 +800,6 @@ useEffect(() => {
                     <option value={""}>Select</option>
                     {kP
                       .filter((value) => {
-                     
                         if (
                           props.patientAge > 14 &&
                           (value.id === 961 || value.id === 475)
@@ -1177,11 +1143,11 @@ useEffect(() => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                           disabled={
-  testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
-  testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
-}
-                          
+                          disabled={
+                            testingSetting ===
+                              "FACILITY_HTS_TEST_SETTING_ANC" ||
+                            testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
+                          }
                         >
                           <option value={""}></option>
                           {pregnancyStatus.map((value) => {
