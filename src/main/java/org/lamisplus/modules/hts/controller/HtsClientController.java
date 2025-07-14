@@ -32,6 +32,7 @@ public class HtsClientController {
         return ResponseEntity.ok(this.htsClientService.save(htsClientRequestDto));
     }
 
+    //update four variables
     @PutMapping(HTS_URL_VERSION_ONE +"/{id}")
     public ResponseEntity<HtsClientDto> update(@PathVariable Long id, @Valid @RequestBody HtsClientDto htsClientDto) {
         return ResponseEntity.ok(this.htsClientService.update(id, htsClientDto));
