@@ -203,7 +203,7 @@ const Recency = (props) => {
     handleItemClick(nextForm[2], nextForm[2]);
   };
   const loadOtherForm = (row) => {
-    console.log("loadOtherForm called, setting open to true");
+    console.log("loadOtherForm called - opening modal");
     setOpen(true);
   };
 
@@ -211,7 +211,7 @@ const Recency = (props) => {
     handleItemClick(nextForm[0], nextForm[1]);
     toggle();
   };
-
+  
   useEffect(() => {
     if (props.patientObj && props.patientObj.recency !== null) {
       console.log(props.patientObj.recency);
@@ -368,7 +368,6 @@ const Recency = (props) => {
       });
 
       setErrors({
-        ...errors,
         optOutRTRITestName: "",
         optOutRTRITestDate: "",
         rencencyId: "",
@@ -404,7 +403,7 @@ const Recency = (props) => {
 
   /*****  Validation - FIXED VERSION  */
   const validate = () => {
-    let temp = { ...errors };
+    let temp = {};
 
     // Only validate fields when NOT opting out of RTRI
     if (recency.optOutRTRI === "false") {
@@ -424,7 +423,9 @@ const Recency = (props) => {
         ? ""
         : "This field is required.";
 
-      temp.longTermLine = recency.longTermLine ? "" : "This field is required.";
+      temp.longTermLine = recency.longTermLine
+        ? ""
+        : "This field is required.";
 
       temp.rencencyInterpretation = recency.rencencyInterpretation
         ? ""
@@ -455,9 +456,9 @@ const Recency = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    console.log("=== HANDLE SUBMIT CALLED ===");
     console.log("Opt Out RTRI:", recency.optOutRTRI);
-    console.log("Validation result:", validate());
-
+    
     let age = calculate_age(props?.patientObj?.personResponseDto?.dateOfBirth);
     let latestForm = getNextForm(
       "HIV_Recency_Testing",
@@ -465,39 +466,49 @@ const Recency = (props) => {
       "",
       props?.patientObj?.hivTestResult
     );
+    console.log("Next form:", latestForm);
     setNextForm(latestForm);
+    
     objValues.htsClientId = clientId;
     objValues.recency = recency;
     objValues.personId = patientID;
-    //console.log(recency)
-    if (validate()) {
-      console.log("Validation passed, making API call");
+    
+    const validationResult = validate();
+    console.log("Validation result:", validationResult);
+    console.log("Errors:", errors);
+    
+    if (validationResult) {
+      console.log("Validation passed - making API call");
       setSaving(true);
       axios
         .put(`${baseUrl}hts/${clientId}/recency`, objValues, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
+          console.log("API call successful");
           setSaving(false);
           props.setPatientObj(response.data);
 
-          // If user opted out of RTRI, always show the modal for next form
+          // Check if user opted out of RTRI
           if (recency.optOutRTRI === "true") {
-            console.log("User opted out, showing modal");
+            console.log("User opted out - calling loadOtherForm");
             loadOtherForm();
           } else if (
             latestForm[0] === "recency-testing" &&
             latestForm[1] === "recency-testing"
           ) {
             // if there are no other form then we should hide the save button
+            console.log("No other forms - hiding save button");
             setShowSaveButton(false);
           } else {
+            console.log("Other forms available - calling loadOtherForm");
             loadOtherForm();
           }
           //toast.success("Risk Assesment successful");
           // history.push('/')
         })
         .catch((error) => {
+          console.log("API call failed:", error);
           setSaving(false);
           if (error.response && error.response.data) {
             let errorMessage =
@@ -511,7 +522,7 @@ const Recency = (props) => {
           }
         });
     } else {
-      console.log("Validation failed, errors:", errors);
+      console.log("Validation failed - errors:", errors);
     }
   };
 
@@ -579,9 +590,7 @@ const Recency = (props) => {
                         <option value="Others">Others</option>
                       </select>
                       {errors.optOutRTRITestName !== "" ? (
-                        <span className={classes.error}>
-                          {errors.optOutRTRITestName}
-                        </span>
+                        <span className={classes.error}>{errors.optOutRTRITestName}</span>
                       ) : (
                         ""
                       )}
@@ -613,9 +622,7 @@ const Recency = (props) => {
                         }}
                       />
                       {errors.optOutRTRITestDate !== "" ? (
-                        <span className={classes.error}>
-                          {errors.optOutRTRITestDate}
-                        </span>
+                        <span className={classes.error}>{errors.optOutRTRITestDate}</span>
                       ) : (
                         ""
                       )}
@@ -639,9 +646,7 @@ const Recency = (props) => {
                         }}
                       />
                       {errors.rencencyId !== "" ? (
-                        <span className={classes.error}>
-                          {errors.rencencyId}
-                        </span>
+                        <span className={classes.error}>{errors.rencencyId}</span>
                       ) : (
                         ""
                       )}
@@ -668,9 +673,7 @@ const Recency = (props) => {
                         <option value="false">No</option>
                       </select>
                       {errors.controlLine !== "" ? (
-                        <span className={classes.error}>
-                          {errors.controlLine}
-                        </span>
+                        <span className={classes.error}>{errors.controlLine}</span>
                       ) : (
                         ""
                       )}
@@ -698,9 +701,7 @@ const Recency = (props) => {
                         <option value="false">No</option>
                       </select>
                       {errors.verififcationLine !== "" ? (
-                        <span className={classes.error}>
-                          {errors.verififcationLine}
-                        </span>
+                        <span className={classes.error}>{errors.verififcationLine}</span>
                       ) : (
                         ""
                       )}
@@ -727,9 +728,7 @@ const Recency = (props) => {
                         <option value="false">No</option>
                       </select>
                       {errors.longTermLine !== "" ? (
-                        <span className={classes.error}>
-                          {errors.longTermLine}
-                        </span>
+                        <span className={classes.error}>{errors.longTermLine}</span>
                       ) : (
                         ""
                       )}
@@ -755,9 +754,7 @@ const Recency = (props) => {
                         }}
                       />
                       {errors.rencencyInterpretation !== "" ? (
-                        <span className={classes.error}>
-                          {errors.rencencyInterpretation}
-                        </span>
+                        <span className={classes.error}>{errors.rencencyInterpretation}</span>
                       ) : (
                         ""
                       )}
@@ -768,7 +765,6 @@ const Recency = (props) => {
                       <FormGroup>
                         <Label>
                           Has Viral Load been ordered?{" "}
-                          <span style={{ color: "red" }}> *</span>
                           <span style={{ color: "red" }}> *</span>
                         </Label>
                         <select
@@ -787,9 +783,7 @@ const Recency = (props) => {
                           <option value="false">No</option>
                         </select>
                         {errors.hasViralLoad !== "" ? (
-                          <span className={classes.error}>
-                            {errors.hasViralLoad}
-                          </span>
+                          <span className={classes.error}>{errors.hasViralLoad}</span>
                         ) : (
                           ""
                         )}
@@ -1129,7 +1123,7 @@ const Recency = (props) => {
 
       <Modal
         show={open}
-        toggle={toggle}
+        onHide={toggle}
         className="fade"
         size="lg"
         aria-labelledby="contained-modal-title-vcenter"
