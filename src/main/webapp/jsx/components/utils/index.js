@@ -39,9 +39,9 @@ export const generateDobFromAge = (age) => {
   return `${birthYear}-01-01`;
 };
 
-export const validateVisitDateWithDOB = (obj) => {
-  const dob = obj.dob;
-  const visitDate = obj.visitDate;
+export const validateVisitDateWithDOB = (dob, visitDate) => {
+  // const dob = obj.dob;
+  // const visitDate = obj.visitDate;
 
   if (!dob || !visitDate) {
     return "Please provide both Date of Birth and Visit Date.";

@@ -91,7 +91,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PnsForm = (props) => {
-  console.log("PNS", props.patientObj.confirmatoryTest2.date2);
   const classes = useStyles();
   const [saving, setSaving] = useState(false);
   const [sexs, setSexs] = useState([]);
@@ -157,7 +156,7 @@ const PnsForm = (props) => {
       numberOfAttempt: "",
     },
     dateEnrollmentOnART: "",
-    dateOfElicitation:"",
+    dateOfElicitation: "",
     datePartnerTested: "",
     dob: props?.basicInfo?.personResponseDto?.dateOfBirth,
     facilityId: props?.organizationInfo?.currentOrganisationUnitId,
@@ -289,7 +288,6 @@ const PnsForm = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-   
         setFacilityInfo(response.data.currentOrganisationUnitName);
       })
       .catch((error) => {
@@ -387,18 +385,15 @@ const PnsForm = (props) => {
   };
 
   const loadFamilyIndexSetting = () => {
-      let  testingSetting =  props?.patientObj?.testingSetting
-      let testingType =""
-// COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
-    if(testingSetting.includes("COMMUNITY")){
-      testingType= "COMMUNITY_HTS_TEST_SETTING"
-      
+    let testingSetting = props?.patientObj?.testingSetting;
+    let testingType = "";
+    // COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
+    if (testingSetting.includes("COMMUNITY")) {
+      testingType = "COMMUNITY_HTS_TEST_SETTING";
     }
 
-    if(testingSetting.includes("FACILITY")){
-      testingType= "FACILITY_HTS_TEST_SETTING"
-
-      
+    if (testingSetting.includes("FACILITY")) {
+      testingType = "FACILITY_HTS_TEST_SETTING";
     }
     axios
       .get(`${baseUrl}application-codesets/v2/${testingType}`, {
@@ -493,7 +488,6 @@ const PnsForm = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        //console.log(response.data);
         setSexs(response.data);
       })
       .catch((error) => {
@@ -703,9 +697,15 @@ const PnsForm = (props) => {
   const validate = () => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
-    temp.partnerName = objValues.htsClientInformation.partnerName ? "" : "This field is required.";
-    temp.partnerAge = objValues.htsClientInformation.partnerAge ? "" : "This field is required.";
-    temp.partnerSex = objValues.htsClientInformation.partnerSex ? "" : "This field is required.";
+    temp.partnerName = objValues.htsClientInformation.partnerName
+      ? ""
+      : "This field is required.";
+    temp.partnerAge = objValues.htsClientInformation.partnerAge
+      ? ""
+      : "This field is required.";
+    temp.partnerSex = objValues.htsClientInformation.partnerSex
+      ? ""
+      : "This field is required.";
 
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
@@ -717,28 +717,12 @@ const PnsForm = (props) => {
           ? ""
           : "This field is required.";
     }
-    // temp.lga = objValues.lga ? "" : "This field is required.";
-    // temp.facilityId = objValues.facilityId ? "" : "This field is required.";
-    // temp.testingSetting = htsClientInformation.testingSetting
-    //   ? ""
-    //   : "This field is required.";
-    // temp.providerRoleCompletingForm =
-    //   htsClientInformation.providerRoleCompletingForm
-    //     ? ""
-    //     : "This field is required.";
-    // temp.relativeToIndexClient = htsClientInformation.relativeToIndexClient
-    //   ? ""
-    //   : "This field is required.";
+   
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   objValues.htsClientInformation = htsClientInformation;
-  //   objValues.contactTracing = contactTracing;
 
-  //   console.log(objValues);
-  // };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     let age = calculate_age(
@@ -755,8 +739,10 @@ const PnsForm = (props) => {
     objValues.htsClientInformation = htsClientInformation;
     objValues.contactTracing = contactTracing;
     objValues.partnerId = partnerId;
+
     // if (validate()) {
     if (validate()) {
+      console.log("save pns clicked 5");
       setSaving(true);
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;

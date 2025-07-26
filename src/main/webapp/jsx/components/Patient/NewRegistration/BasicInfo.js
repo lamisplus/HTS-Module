@@ -99,7 +99,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
-
   const classes = useStyles();
   const history = useHistory();
   const [errors, setErrors] = useState({});
@@ -330,6 +329,7 @@ const BasicInfo = (props) => {
     familyIndex: "",
   });
 
+
   const convertFromIdToDisplay = (code) => {
     let ans = indexTesting.filter((each, index) => {
       return each.code === code;
@@ -527,7 +527,7 @@ const BasicInfo = (props) => {
       })
       .then((response) => {
         setPregnancyStatus(response.data);
-        determinPregnancy(response.data);
+        // determinPregnancy(response.data);
       })
       .catch((error) => {
         //console.log(error);
@@ -864,24 +864,24 @@ const BasicInfo = (props) => {
     }
   };
 
-  const determinPregnancy = (pregList) => {
-    // get  the value of pregnancy being used
-    let pregnancyUsed = "";
-    if (pregList.length > 0) {
-      pregList.map((each, index) => {
-        if (each.code === "PREGANACY_STATUS_PREGNANT") {
-          pregnancyUsed = each.id;
-        }
-      });
-    }
+  // const determinPregnancy = (pregList) => {
+  //   // get  the value of pregnancy being used
+  //   let pregnancyUsed = "";
+  //   if (pregList.length > 0) {
+  //     pregList.map((each, index) => {
+  //       if (each.code === "PREGANACY_STATUS_PREGNANT") {
+  //         pregnancyUsed = each.id;
+  //       }
+  //     });
+  //   }
 
-    if (
-      props.patientObj.riskStratificationResponseDto.testingSetting ===
-      "FACILITY_HTS_TEST_SETTING_ANC"
-    ) {
-      setObjValues({ ...objValues, pregnant: pregnancyUsed });
-    }
-  };
+  //   if (
+  //     props.patientObj.riskStratificationResponseDto.testingSetting ===
+  //     "FACILITY_HTS_TEST_SETTING_ANC"
+  //   ) {
+  //     setObjValues({ ...objValues, pregnant: pregnancyUsed });
+  //   }
+  // };
 
   const determinSex = () => {
     if (
@@ -994,20 +994,20 @@ const BasicInfo = (props) => {
     setObjValues({ ...objValues, [inputName]: NumberValue });
   };
 
-   const shouldHideMaritalFields = () => {
-     // Check if setting is Pediatric and age is less than 15 years
-     const isPediatricAndUnder15 =
-       objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
-       props.patientAge < 15;
+  const shouldHideMaritalFields = () => {
+    // Check if setting is Pediatric and age is less than 15 years
+    const isPediatricAndUnder15 =
+      objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
+      props.patientAge < 15;
 
-     // Check if target group is PD or Children of Most at risk population
-     const isTargetGroupPDorChildrenKP =
-       props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
-       props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
+    // Check if target group is PD or Children of Most at risk population
+    const isTargetGroupPDorChildrenKP =
+      props.patientObj.targetGroup === "TARGET_GROUP_PD" ||
+      props.patientObj.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP";
 
-     // Hide fields if either condition is true
-     return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
-   };
+    // Hide fields if either condition is true
+    return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
+  };
   const handleSubmit = (e) => {
     e.preventDefault();
     Cookies.set("serial-number", serialNumber);
@@ -1182,6 +1182,34 @@ const BasicInfo = (props) => {
       });
     }
   };
+
+  // useEffect(() => {
+  //   if (
+  //     objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_L&D" &&
+  //     objValues.pregnant === ""
+  //   ) {
+  //     setObjValues((prev) => ({
+  //       ...prev,
+  //       pregnant: "73",
+  //     }));
+  //   }
+  // }, [objValues.testingSetting]);
+
+  const testingSetting =
+    props.patientObj.riskStratificationResponseDto.testingSetting;
+
+  useEffect(() => {
+    const shouldAutoFill =
+      testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+      testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
+
+    if (shouldAutoFill && objValues.pregnant !== "73") {
+      setObjValues((prev) => ({
+        ...prev,
+        pregnant: "73",
+      }));
+    }
+  }, [testingSetting]);
 
   return (
     <>
@@ -1936,11 +1964,15 @@ const BasicInfo = (props) => {
                           border: "1px solid #014D88",
                           borderRadius: "0.2rem",
                         }}
+                        // disabled={
+                        //   props.patientObj.riskStratificationResponseDto
+                        //     .testingSetting === "FACILITY_HTS_TEST_SETTING_ANC"
+                        //     ? true
+                        //     : false
+                        // }
                         disabled={
-                          props.patientObj.riskStratificationResponseDto
-                            .testingSetting === "FACILITY_HTS_TEST_SETTING_ANC"
-                            ? true
-                            : false
+                          testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ||
+                          testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
                         }
                       >
                         <option value={""}></option>
