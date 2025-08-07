@@ -104,7 +104,6 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN health_facility varchar(255);
-
         </sql>
     </changeSet>
 

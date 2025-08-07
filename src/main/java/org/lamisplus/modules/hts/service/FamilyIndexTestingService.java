@@ -41,7 +41,6 @@ public class FamilyIndexTestingService {
         HtsClient htsClient = htsClientRepository
                 .findByIdAndArchivedAndFacilityId(htsClientId, UN_ARCHIVED, facilityId)
                 .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, "htsClientId", "" + htsClientId));
-
         if (!htsClient.getUuid().equals(htsClientUuid)) {
             throw new IllegalArgumentException("The provided htsClientUuid does not match the uuid of the retrieved htsClient");
         }
@@ -388,7 +387,7 @@ public class FamilyIndexTestingService {
         // if provided id does not match the id of the family testing tracker in the database, throw an exception
         if (!familyTestingTrackerRequestDTO.getId().equals(id) && familyTestingTracker == null ) {
             throw new IllegalArgumentException("The provided id does not match the id of the family testing tracker");
-        }
+         }
         BeanUtils.copyProperties(familyTestingTrackerRequestDTO, familyTestingTracker);
         familyTestingTracker.setFamilyIndexUuid(familyTestingTracker.getFamilyIndex().getUuid());
         familyTestingTracker.setFamilyIndex(familyTestingTracker.getFamilyIndex());
