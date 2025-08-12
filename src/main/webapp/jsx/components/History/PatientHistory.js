@@ -64,6 +64,7 @@ const Home = (props) => {
     return monthDifference;
   };
 
+
   // Main function to determine retesting status
   const determineRetestingStatus = async (lastRecord) => {
 
@@ -100,6 +101,7 @@ const Home = (props) => {
         console.error("Error fetching ANC LMP data:", error);
       }
     } else {
+      setLastVisitModalityAndCheckedIn(true)
       console.log(
         "Patient either has no record, no HIV result, or result isn't negative. Keeping type as NEW HTS"
       );
@@ -124,7 +126,6 @@ const Home = (props) => {
 
   // Get list of patients
   async function patients() {
-    console.log("Fetching patient list for ID:", patientId);
     setLoading(true);
     
     try {
@@ -151,6 +152,7 @@ const Home = (props) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      // 
       // Set patient info
       setPatientInfo(response.data);
       
@@ -176,8 +178,7 @@ const Home = (props) => {
       setLastVistAndModality(condition);
       
       const finalCondition = condition || props.checkedInPatient;
-      console.log("Final condition with checked-in status:", finalCondition);
-      setLastVisitModalityAndCheckedIn(finalCondition);
+        setLastVisitModalityAndCheckedIn(finalCondition);
 
       await determineRetestingStatus(response.data);
       
@@ -205,7 +206,6 @@ const Home = (props) => {
                   id="controlled-tab-example"
                   activeKey={key}
                   onSelect={(k) => {
-                    console.log("Tab selected:", k);
                     setKey(k);
                   }}
                   className="mb-3"
@@ -224,11 +224,12 @@ const Home = (props) => {
                     />
                   </Tab>
                   
+
                   {lastVisitModalityAndCheckedIn && (
                     <Tab 
                       eventKey="new" 
                       title={newHTSType}
-                      tabClassName={newHTSType === "RETESTING" ? "retesting-tab" : ""}
+                       tabClassName={newHTSType === "RETESTING" ? "retesting-tab" : ""}
                     >
                       <ContineousRegistrationTesting
                         patientObj={patientInfo}

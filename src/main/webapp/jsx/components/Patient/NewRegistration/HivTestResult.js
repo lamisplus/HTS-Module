@@ -1808,7 +1808,7 @@ const HivTestResult = (props) => {
                   {cd4Count.cd4Count === "Semi-Quantitative" && (
                     <div className="form-group  col-md-5">
                       <FormGroup>
-                        <Label>CD4 Count Value</Label>
+                        <Label>CD4 Type Value</Label>
                         <select
                           className="form-control"
                           name="cd4SemiQuantitative"
@@ -1830,7 +1830,7 @@ const HivTestResult = (props) => {
                   {cd4Count.cd4Count === "Flow Cyteometry" && (
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label for="">CD4 Count Value</Label>
+                        <Label for="">CD4 Type Value</Label>
                         <Input
                           type="number"
                           name="cd4FlowCyteometry"

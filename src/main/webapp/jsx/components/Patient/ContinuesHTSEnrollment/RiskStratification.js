@@ -24,7 +24,7 @@ import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
-import {validateVisitDateWithDOB} from "../../utils";
+import { validateVisitDateWithDOB } from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -96,9 +96,6 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-
-
-
 
 const RiskStratification = (props) => {
   const classes = useStyles();
@@ -347,7 +344,7 @@ const RiskStratification = (props) => {
   const RESTRICTED_SETTINGS = [
     "FACILITY_HTS_TEST_SETTING_ANC",
     "FACILITY_HTS_TEST_SETTING_L&D",
-    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING",
   ];
 
   const handleInputChange = (e) => {
@@ -355,15 +352,15 @@ const RiskStratification = (props) => {
 
     if (e.target.name === "targetGroup") {
       const isRestrictedSetting =
-          objValues.testingSetting &&
-          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+        objValues.testingSetting &&
+        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
       if (e.target.value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
         toast.error(
-            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-            {
-              position: toast.POSITION.BOTTOM_CENTER,
-            }
+          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
         );
         return;
       }
@@ -507,27 +504,25 @@ const RiskStratification = (props) => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
 
+    const minVisitDate = getMinVisitDateForRetesting(
+      props.personInfo,
+      props.newHTSType
+    );
 
-     const minVisitDate = getMinVisitDateForRetesting(
-       props.personInfo,
-       props.newHTSType
-     );
+    if (minVisitDate && objValues.visitDate) {
+      const selectedDate = new Date(objValues.visitDate);
+      const requiredMinDate = new Date(minVisitDate);
 
-     if (minVisitDate && objValues.visitDate) {
-       const selectedDate = new Date(objValues.visitDate);
-       const requiredMinDate = new Date(minVisitDate);
-
-       if (selectedDate < requiredMinDate) {
-         temp.dateVisit = `For retesting after ANC, visit date must be at least 28 days after the last visit (${minVisitDate})`;
-       }
-     }
+      if (selectedDate < requiredMinDate) {
+        temp.dateVisit = `For retesting after ANC, visit date must be at least 28 days after the last visit (${minVisitDate})`;
+      }
+    }
 
     temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
     temp.testingSetting = objValues.testingSetting
       ? ""
       : "This field is required.";
 
-  
     temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
       ? ""
       : "This field is required.";
@@ -624,7 +619,7 @@ const RiskStratification = (props) => {
   const getMinVisitDateForRetesting = (personInfo, newHTSType) => {
     // Check if this is a retesting case
     if (newHTSType !== "RETESTING") {
-      return null; 
+      return null;
     }
 
     // Find if any previous visit was an ANC testing setting
@@ -664,120 +659,120 @@ const RiskStratification = (props) => {
     const nextEligibleDate = new Date(mostRecentVisitDate);
     nextEligibleDate.setDate(nextEligibleDate.getDate() + 28);
 
-
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
 
-   // Check if testingSetting is restricted
-   const isRestrictedSetting =
-       objValues.testingSetting &&
-       RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-   // Check if targetGroup is MSM
-   const isMSMSelected =
-       objValues.targetGroup === "TARGET_GROUP_MSM";
-   // Block submission if restricted setting + MSM
-   if (isRestrictedSetting && isMSMSelected) {
-     toast.error(
-         "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-         {
-           position: toast.POSITION.BOTTOM_CENTER,
-         }
-     );
-     return;
-   }
-   const visitDateError = validateVisitDateWithDOB(objValues);
+    // Check if testingSetting is restricted
+    const isRestrictedSetting =
+      objValues.testingSetting &&
+      RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
-   if (visitDateError) {
-     toast.error(visitDateError, {
-       position: toast.POSITION.BOTTOM_CENTER,
-     });
-     return;
-   }
- 
-   const isValid = validate();
+    // Check if targetGroup is MSM
+    const isMSMSelected = objValues.targetGroup === "TARGET_GROUP_MSM";
+    // Block submission if restricted setting + MSM
+    if (isRestrictedSetting && isMSMSelected) {
+      toast.error(
+        "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+        {
+          position: toast.POSITION.BOTTOM_CENTER,
+        }
+      );
+      return;
+    }
+    const visitDateError = validateVisitDateWithDOB(
+      props.personInfo?.personResponseDto?.dateOfBirth,
+      objValues.visitDate
+    );
 
-   if (!isValid) {
-     toast.error("Please correct the errors before submitting", {
-       position: toast.POSITION.BOTTOM_CENTER,
-     });
-     return; 
-   }
+    if (visitDateError) {
+      toast.error(visitDateError, {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+      return;
+    }
 
-  
-   getMenuLogic();
-   let newModality = isPMTCTModality ? "skip" : "fill";
+    const isValid = validate();
 
-   let latestForm = getNextForm(
-     "Risk_Stratification",
-     objValues.age,
-     newModality,
-     "unknown"
-   );
+    if (!isValid) {
+      toast.error("Please correct the errors before submitting", {
+        position: toast.POSITION.BOTTOM_CENTER,
+      });
+      return;
+    }
 
-   props.patientObj.targetGroup = objValues.targetGroup;
-   props.patientObj.testingSetting = objValues.testingSetting;
-   props.patientObj.dateVisit = objValues.visitDate;
-   props.patientObj.modality = objValues.modality;
-   props.patientObj.riskStratificationResponseDto = objValues;
-   objValues.riskAssessment = riskAssessment;
+    getMenuLogic();
+    let newModality = isPMTCTModality ? "skip" : "fill";
 
-   setSaving(true);
+    let latestForm = getNextForm(
+      "Risk_Stratification",
+      objValues.age,
+      newModality,
+      "unknown"
+    );
 
-   try {
-     let response;
+    props.patientObj.targetGroup = objValues.targetGroup;
+    props.patientObj.testingSetting = objValues.testingSetting;
+    props.patientObj.dateVisit = objValues.visitDate;
+    props.patientObj.modality = objValues.modality;
+    props.patientObj.riskStratificationResponseDto = objValues;
+    objValues.riskAssessment = riskAssessment;
 
+    setSaving(true);
 
-     if (
-       (props.patientObj.riskStratificationResponseDto &&
-         props.patientObj.riskStratificationResponseDto !== null &&
-         props.patientObj.personId !== "") ||
-       props.patientObj.riskStratificationResponseDto.code !== ""
-     ) {
- 
-       response = await axios.put(
-         `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
-         objValues,
-         { headers: { Authorization: `Bearer ${token}` } }
-       );
-     } else {
-  
-       response = await axios.post(`${baseUrl}risk-stratification`, objValues, {
-         headers: { Authorization: `Bearer ${token}` },
-       });
-     }
+    try {
+      let response;
 
+      if (
+        (props.patientObj.riskStratificationResponseDto &&
+          props.patientObj.riskStratificationResponseDto !== null &&
+          props.patientObj.personId !== "") ||
+        props.patientObj.riskStratificationResponseDto.code !== ""
+      ) {
+        response = await axios.put(
+          `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
+          objValues,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        response = await axios.post(
+          `${baseUrl}risk-stratification`,
+          objValues,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      }
 
-     setSaving(false);
-     props.patientObj.riskStratificationResponseDto = response.data;
-     objValues.code = response.data.code;
-     props.setExtra(objValues);
-     props.setHideOtherMenu(false);
-     handleItemClick(latestForm[0], latestForm[1]);
-     toast.success("Risk stratification saved successfully!");
-   } catch (error) {
-
-     setSaving(false);
-     if (error.response && error.response.data) {
-       let errorMessage =
-         error.response.data.apierror &&
-         error.response.data.apierror.message !== ""
-           ? error.response.data.apierror.message
-           : "Something went wrong, please try again";
-       toast.error(errorMessage, {
-         position: toast.POSITION.BOTTOM_CENTER,
-       });
-     } else {
-       toast.error("Something went wrong. Please try again...", {
-         position: toast.POSITION.BOTTOM_CENTER,
-       });
-     }
-   }
- };
+      setSaving(false);
+      props.patientObj.riskStratificationResponseDto = response.data;
+      objValues.code = response.data.code;
+      props.setExtra(objValues);
+      props.setHideOtherMenu(false);
+      handleItemClick(latestForm[0], latestForm[1]);
+      toast.success("Risk stratification saved successfully!");
+    } catch (error) {
+      setSaving(false);
+      if (error.response && error.response.data) {
+        let errorMessage =
+          error.response.data.apierror &&
+          error.response.data.apierror.message !== ""
+            ? error.response.data.apierror.message
+            : "Something went wrong, please try again";
+        toast.error(errorMessage, {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      } else {
+        toast.error("Something went wrong. Please try again...", {
+          position: toast.POSITION.BOTTOM_CENTER,
+        });
+      }
+    }
+  };
 
   return (
     <>
@@ -918,23 +913,35 @@ const RiskStratification = (props) => {
                       }}
                       disabled={disableInput}
                     >
-                      <option value={""}>Select</option>
+                      {/* <option value={""}>Select</option>
                       {entryPointSetting &&
                         entryPointSetting.map((value) => (
                           <option key={value.id} value={value.code}>
                             {value.display}
                           </option>
                         ))}
-                      {/* <option value="TEST_SETTING_CT">CT</option>
-                                        <option value="TEST_SETTING_TB">TB</option>
-                                        <option value="TEST_SETTING_STI">STI</option>
-                                        <option value="TEST_SETTING_OPD">OPD</option>
-                                        <option value="TEST_SETTING_WARD">WARD</option>
-                                        <option value="TEST_SETTING_STANDALONE_HTS">STANDALONE HTS</option>
-                                        
-                                        <option value="TEST_SETTING_FP">FP</option>
-                                        <option value="TEST_SETTING_OUTREACH">OUTREACH</option>
-                                        <option value="TEST_SETTING_OTHERS">OTHERS</option> */}
+             */}
+
+                      <option value="">Select</option>
+                      {entryPointSetting &&
+                        entryPointSetting
+                          .filter((setting) => {
+                            // Only filter if gender is Male
+                            if (
+                              props.personInfo?.personResponseDto?.sex ===
+                              "Male"
+                            ) {
+                              return !RESTRICTED_SETTINGS.includes(
+                                setting.code
+                              );
+                            }
+                            return true; // Show all if Female or unknown
+                          })
+                          .map((value) => (
+                            <option key={value.id} value={value.code}>
+                              {value.display}
+                            </option>
+                          ))}
                     </select>
                     {errors.testingSetting !== "" ? (
                       <span className={classes.error}>
@@ -945,36 +952,6 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                      Modality <span style={{ color: "red" }}> *</span>
-                    </Label>
-                    <select
-                      className="form-control"
-                      name="modality"
-                      id="modality"
-                      value={objValues.modality}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                      }}
-                    >
-                      <option value={""}>Select</option>
-                      {setting.map((value) => (
-                        <option key={value.id} value={value.code}>
-                          {value.display}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.modality !== "" ? (
-                      <span className={classes.error}>{errors.modality}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div> */}
 
                 {objValues.testingSetting ===
                   "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
@@ -1113,10 +1090,15 @@ const RiskStratification = (props) => {
                           return true;
                           // Check if MSM should be hidden
                           const isRestrictedSetting =
-                              objValues.testingSetting &&
-                              RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+                            objValues.testingSetting &&
+                            RESTRICTED_SETTINGS.includes(
+                              objValues.testingSetting
+                            );
 
-                          if (isRestrictedSetting && value.code === "TARGET_GROUP_MSM") {
+                          if (
+                            isRestrictedSetting &&
+                            value.code === "TARGET_GROUP_MSM"
+                          ) {
                             return false;
                           }
 

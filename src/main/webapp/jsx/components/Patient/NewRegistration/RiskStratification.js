@@ -23,7 +23,11 @@ import { Button } from "semantic-ui-react";
 import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import Cookies from "js-cookie";
-import {calculate_age, generateDobFromAge, validateVisitDateWithDOB} from "../../utils";
+import {
+  calculate_age,
+  generateDobFromAge,
+  validateVisitDateWithDOB,
+} from "../../utils";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -97,9 +101,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const BasicInfo = (props) => {
-
   const classes = useStyles();
- 
+
   const [enrollSetting, setEnrollSetting] = useState([]);
   const [entryPoint, setEntryPoint] = useState([]);
   const [entryPointCommunity, setEntryPointCommunity] = useState([]);
@@ -309,8 +312,6 @@ const BasicInfo = (props) => {
       .catch((error) => {});
   };
 
-
-
   //Set HTS menu registration
   const getMenuLogic = () => {
     props.setHideOtherMenu(false);
@@ -345,7 +346,7 @@ const BasicInfo = (props) => {
   const RESTRICTED_SETTINGS = [
     "FACILITY_HTS_TEST_SETTING_ANC",
     "FACILITY_HTS_TEST_SETTING_L&D",
-    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+    "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING",
   ];
 
   const handleInputChange = (e) => {
@@ -353,15 +354,15 @@ const BasicInfo = (props) => {
 
     if (name === "targetGroup") {
       const isRestrictedSetting =
-          objValues.testingSetting &&
-          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+        objValues.testingSetting &&
+        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
       if (value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
         toast.error(
-            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-            {
-              position: toast.POSITION.BOTTOM_CENTER,
-            }
+          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
         );
         return;
       }
@@ -377,10 +378,10 @@ const BasicInfo = (props) => {
       let ans = checkPMTCTModality(value);
 
       if (
-          value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+        value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
       ) {
         setShowHealthFacility(true);
       } else {
@@ -388,31 +389,31 @@ const BasicInfo = (props) => {
       }
 
       displayRiskAssessment(
-          riskAssessment.lastHivTestBasedOnRequest,
-          objValues.age,
-          ans
+        riskAssessment.lastHivTestBasedOnRequest,
+        objValues.age,
+        ans
       );
 
       // Get spoke sites
       if (
-          value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
-          value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
+        value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
+        value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
       ) {
         getSpokeFaclityByHubSite();
       }
 
       // Set risk count
       if (
-          value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
-          value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
+        value === "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS" ||
+        value === "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS"
       ) {
         setRiskCount(1);
       } else if (
-          value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
-          value === "FACILITY_HTS_TEST_SETTING_CT"
+        value === "COMMUNITY_HTS_TEST_SETTING_CT" ||
+        value === "FACILITY_HTS_TEST_SETTING_CT"
       ) {
         setRiskCount(1);
       } else if (value === "FACILITY_HTS_TEST_SETTING_TB") {
@@ -440,7 +441,6 @@ const BasicInfo = (props) => {
 
     setObjValues({ ...objValues, [name]: value });
   };
-
 
   // display risk assement function
 
@@ -487,234 +487,218 @@ const BasicInfo = (props) => {
   };
   //Date of Birth and Age handle
 
-
- const validateAgeRestriction = (formData) => {
-   // Check if we have a restricted target group with age > 14
-   if (
-     formData &&
-     (formData.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-       formData.targetGroup === "TARGET_GROUP_PD") &&
-     formData.age > 14
-   ) {
-     return false;
-   }
-   return true;
- };
-
-const handleDobChange = (e) => {
-  const dobValue = e.target.value;
-
-  if (dobValue) {
- 
-    const age_now = calculate_age(dobValue);
-
+  const validateAgeRestriction = (formData) => {
+    // Check if we have a restricted target group with age > 14
     if (
-      (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-        objValues.targetGroup === "TARGET_GROUP_PD") &&
-      age_now > 14
+      formData &&
+      (formData.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+        formData.targetGroup === "TARGET_GROUP_PD") &&
+      formData.age > 14
     ) {
-
-      setErrors({
-        ...errors,
-        age: "For this target group, age cannot be greater than 14 years",
-      });
-      return;
+      return false;
     }
+    return true;
+  };
 
+  const handleDobChange = (e) => {
+    const dobValue = e.target.value;
 
-    setErrors({
-      ...errors,
-      age: "",
-    });
+    if (dobValue) {
+      const age_now = calculate_age(dobValue);
 
- 
-    setObjValues((prevState) => ({
-      ...prevState,
-      dob: dobValue,
-      age: age_now,
-    }));
+      if (
+        (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+          objValues.targetGroup === "TARGET_GROUP_PD") &&
+        age_now > 14
+      ) {
+        setErrors({
+          ...errors,
+          age: "For this target group, age cannot be greater than 14 years",
+        });
+        return;
+      }
 
-
-    displayRiskAssessment(
-      riskAssessment.lastHivTestBasedOnRequest,
-      age_now,
-      isPMTCTModality
-    );
-  } else {
-
-    setObjValues((prevState) => ({
-      ...prevState,
-      dob: "",
-      age: "",
-    }));
-  }
-};
-
-const handleDateOfBirthChange = (e) => {
-  const dateType = e.target.value;
-  const isEstimated = dateType === "Estimated";
-
-  // Toggle age input disabled state - this is critical
-  setAgeDisabled(!isEstimated);
-
-  // Use setState with function to ensure we capture the latest state
-  setObjValues((prevState) => {
-    let updatedState = {
-      ...prevState,
-      isDateOfBirthEstimated: isEstimated,
-    };
-
-    // Check if current age exceeds limit for restricted groups
-    if (
-      (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-        prevState.targetGroup === "TARGET_GROUP_PD") &&
-      prevState.age > 14
-    ) {
-      // Clear age and DOB instead of adjusting
-      updatedState.age = "";
-      updatedState.dob = "";
-
-      // Set error in state instead of showing toast
-      setErrors({
-        ...errors,
-        age: "The current age exceeds the limit of 14 for this target group",
-      });
-    } else {
-      // Clear any existing age errors
       setErrors({
         ...errors,
         age: "",
       });
+
+      setObjValues((prevState) => ({
+        ...prevState,
+        dob: dobValue,
+        age: age_now,
+      }));
+
+      displayRiskAssessment(
+        riskAssessment.lastHivTestBasedOnRequest,
+        age_now,
+        isPMTCTModality
+      );
+    } else {
+      setObjValues((prevState) => ({
+        ...prevState,
+        dob: "",
+        age: "",
+      }));
     }
+  };
 
-    return updatedState;
-  });
-};
+  const handleDateOfBirthChange = (e) => {
+    const dateType = e.target.value;
+    const isEstimated = dateType === "Estimated";
 
-const handleAgeChange = (e) => {
-  let newAge = e.target.value === "" ? "" : parseInt(e.target.value);
+    // Toggle age input disabled state - this is critical
+    setAgeDisabled(!isEstimated);
 
-
-  if (newAge === "" || !isNaN(newAge)) {
-
+    // Use setState with function to ensure we capture the latest state
     setObjValues((prevState) => {
-      let updatedState = { ...prevState };
+      let updatedState = {
+        ...prevState,
+        isDateOfBirthEstimated: isEstimated,
+      };
 
+      // Check if current age exceeds limit for restricted groups
+      if (
+        (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+          prevState.targetGroup === "TARGET_GROUP_PD") &&
+        prevState.age > 14
+      ) {
+        // Clear age and DOB instead of adjusting
+        updatedState.age = "";
+        updatedState.dob = "";
 
-      if (newAge !== "" && !isNaN(newAge)) {
-  
-        if (
-          (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-            prevState.targetGroup === "TARGET_GROUP_PD") &&
-          newAge > 14
-        ) {
-     
-          setErrors({
-            ...errors,
-            age: "For this target group, age cannot be greater than 14 years",
-          });
-
-
-          return {
-            ...prevState,
-            age: "",
-            dob: "",
-          };
-        }
-
-
+        // Set error in state instead of showing toast
+        setErrors({
+          ...errors,
+          age: "The current age exceeds the limit of 14 for this target group",
+        });
+      } else {
+        // Clear any existing age errors
         setErrors({
           ...errors,
           age: "",
         });
-
-
-        updatedState.age = newAge;
-
-        // If we're not using actual DOB (i.e., age is editable), update the DOB too
-        if (!ageDisabled) {
-          if (newAge >= 85) {
-            setTimeout(() => toggle(), 0);
-          }
-          updatedState.dob = generateDobFromAge(newAge);
-        }
-
-        
-        setTimeout(() => {
-          displayRiskAssessment(
-            riskAssessment.lastHivTestBasedOnRequest,
-            newAge,
-            isPMTCTModality
-          );
-        }, 0);
-      } else {
-        updatedState.age = "";
       }
 
       return updatedState;
     });
-  }
-};
+  };
 
-const handleTargetGroupChange = (e) => {
-  // Clear any errors
-  setErrors({ ...temp, [e.target.name]: "" });
+  const handleAgeChange = (e) => {
+    let newAge = e.target.value === "" ? "" : parseInt(e.target.value);
 
-  // Get the new target group value
-  const newTargetGroup = e.target.value;
+    if (newAge === "" || !isNaN(newAge)) {
+      setObjValues((prevState) => {
+        let updatedState = { ...prevState };
 
-  // First, let's get the current age
-  const currentAge = objValues.age;
+        if (newAge !== "" && !isNaN(newAge)) {
+          if (
+            (prevState.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+              prevState.targetGroup === "TARGET_GROUP_PD") &&
+            newAge > 14
+          ) {
+            setErrors({
+              ...errors,
+              age: "For this target group, age cannot be greater than 14 years",
+            });
 
-  // Update the target group immediately
-  // Important: Use a callback form of setState to ensure we're working with the latest state
-  setObjValues((prevState) => {
-    let updatedState = { ...prevState, targetGroup: newTargetGroup };
+            return {
+              ...prevState,
+              age: "",
+              dob: "",
+            };
+          }
 
-    // If selecting a restricted group and age is over 14, clear the age and DOB
-    if (
-      (newTargetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-        newTargetGroup === "TARGET_GROUP_PD") &&
-      currentAge > 14
-    ) {
-      // Clear age and DOB instead of adjusting
-      updatedState.age = "";
-      updatedState.dob = "";
+          setErrors({
+            ...errors,
+            age: "",
+          });
 
-      // Set error in state instead of showing toast
-      setErrors({
-        ...errors,
-        age: "The current age exceeds the limit of 14 for this target group",
-      });
-    } else if (newTargetGroup === "") {
-      // If target group is cleared, also clear age and DOB
-      updatedState.age = "";
-      updatedState.dob = "";
-    } else {
-      // For other target groups or valid age, keep existing values
+          updatedState.age = newAge;
 
-      // If age is not set but DOB is estimated, calculate a default DOB
-      // (maintaining your original logic for this case)
-      if (!updatedState.age && prevState.isDateOfBirthEstimated) {
-        const currentDate = new Date();
-        currentDate.setDate(15);
-        currentDate.setMonth(5);
-        const estDob = moment(currentDate.toISOString());
-        // Don't set a specific age since we want the user to enter it
-        updatedState.dob = moment(estDob).format("YYYY-MM-DD");
-      }
+          // If we're not using actual DOB (i.e., age is editable), update the DOB too
+          if (!ageDisabled) {
+            if (newAge >= 85) {
+              setTimeout(() => toggle(), 0);
+            }
+            updatedState.dob = generateDobFromAge(newAge);
+          }
 
-      // Clear any existing age errors if group changes to non-restricted
-      setErrors({
-        ...errors,
-        age: "",
+          setTimeout(() => {
+            displayRiskAssessment(
+              riskAssessment.lastHivTestBasedOnRequest,
+              newAge,
+              isPMTCTModality
+            );
+          }, 0);
+        } else {
+          updatedState.age = "";
+        }
+
+        return updatedState;
       });
     }
+  };
 
-    return updatedState;
-  });
-};
-   const isAgeValid = validateAgeRestriction(objValues);
+  const handleTargetGroupChange = (e) => {
+    // Clear any errors
+    setErrors({ ...temp, [e.target.name]: "" });
+
+    // Get the new target group value
+    const newTargetGroup = e.target.value;
+
+    // First, let's get the current age
+    const currentAge = objValues.age;
+
+    // Update the target group immediately
+    // Important: Use a callback form of setState to ensure we're working with the latest state
+    setObjValues((prevState) => {
+      let updatedState = { ...prevState, targetGroup: newTargetGroup };
+
+      // If selecting a restricted group and age is over 14, clear the age and DOB
+      if (
+        (newTargetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+          newTargetGroup === "TARGET_GROUP_PD") &&
+        currentAge > 14
+      ) {
+        // Clear age and DOB instead of adjusting
+        updatedState.age = "";
+        updatedState.dob = "";
+
+        // Set error in state instead of showing toast
+        setErrors({
+          ...errors,
+          age: "The current age exceeds the limit of 14 for this target group",
+        });
+      } else if (newTargetGroup === "") {
+        // If target group is cleared, also clear age and DOB
+        updatedState.age = "";
+        updatedState.dob = "";
+      } else {
+        // For other target groups or valid age, keep existing values
+
+        // If age is not set but DOB is estimated, calculate a default DOB
+        // (maintaining your original logic for this case)
+        if (!updatedState.age && prevState.isDateOfBirthEstimated) {
+          const currentDate = new Date();
+          currentDate.setDate(15);
+          currentDate.setMonth(5);
+          const estDob = moment(currentDate.toISOString());
+          // Don't set a specific age since we want the user to enter it
+          updatedState.dob = moment(estDob).format("YYYY-MM-DD");
+        }
+
+        // Clear any existing age errors if group changes to non-restricted
+        setErrors({
+          ...errors,
+          age: "",
+        });
+      }
+
+      return updatedState;
+    });
+  };
+  const isAgeValid = validateAgeRestriction(objValues);
   //Get list of DSD Model Type
   function SettingModality(settingId) {
     const setting = settingId;
@@ -731,100 +715,100 @@ const handleTargetGroupChange = (e) => {
   }
   //End of Date of Birth and Age handling
   /*****  Validation  */
- const validate = () => {
-   //HTS FORM VALIDATION
-   let temp = { ...errors };
+  const validate = () => {
+    //HTS FORM VALIDATION
+    let temp = { ...errors };
 
-   temp.visitDate = objValues.visitDate ? "" : "This field is required.";
-   temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
-   temp.testingSetting = objValues.testingSetting
-     ? ""
-     : "This field is required.";
+    temp.visitDate = objValues.visitDate ? "" : "This field is required.";
+    temp.entryPoint = objValues.entryPoint ? "" : "This field is required.";
+    temp.testingSetting = objValues.testingSetting
+      ? ""
+      : "This field is required.";
 
-   temp.dob = objValues.dob ? "" : "This field is required.";
-   temp.age = objValues.age ? "" : "This field is required.";
+    temp.dob = objValues.dob ? "" : "This field is required.";
+    temp.age = objValues.age ? "" : "This field is required.";
 
-   // Check age restriction only if target group and age are provided
-   if (
-     objValues.targetGroup &&
-     objValues.age &&
-     (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-       objValues.targetGroup === "TARGET_GROUP_PD") &&
-     objValues.age > 14
-   ) {
-     temp.age = "For this target group, age cannot be greater than 14 years";
-   }
+    // Check age restriction only if target group and age are provided
+    if (
+      objValues.targetGroup &&
+      objValues.age &&
+      (objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
+        objValues.targetGroup === "TARGET_GROUP_PD") &&
+      objValues.age > 14
+    ) {
+      temp.age = "For this target group, age cannot be greater than 14 years";
+    }
 
-   temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
-     ? ""
-     : "This field is required.";
+    temp.lastHivTestBasedOnRequest = riskAssessment.lastHivTestBasedOnRequest
+      ? ""
+      : "This field is required.";
 
-   objValues.age > 15 &&
-     (temp.targetGroup = objValues.targetGroup
-       ? ""
-       : "This field is required.");
+    objValues.age > 15 &&
+      (temp.targetGroup = objValues.targetGroup
+        ? ""
+        : "This field is required.");
 
-   // Remaining validation logic...
-   objValues.testingSetting ===
-     "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
-     (temp.spokeFacility = objValues.spokeFacility
-       ? ""
-       : "This field is required.");
+    // Remaining validation logic...
+    objValues.testingSetting ===
+      "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" &&
+      (temp.spokeFacility = objValues.spokeFacility
+        ? ""
+        : "This field is required.");
 
-   showHealthFacility &&
-     (temp.healthFacility = objValues.healthFacility
-       ? ""
-       : "This field is required.");
+    showHealthFacility &&
+      (temp.healthFacility = objValues.healthFacility
+        ? ""
+        : "This field is required.");
 
-   //Risk Assement section
-   if (
-     objValues.age > 15 &&
-     riskAssessment.lastHivTestBasedOnRequest === "false" &&
-     showRiskAssessment
-   ) {
-     temp.lastHivTestDone = riskAssessment.lastHivTestDone
-       ? ""
-       : "This field is required.";
-     riskAssessment.lastHivTestDone !== "" &&
-       riskAssessment.lastHivTestDone !== "Never" &&
-       (temp.whatWasTheResult = riskAssessment.whatWasTheResult
-         ? ""
-         : "This field is required.");
+    //Risk Assement section
+    if (
+      objValues.age > 15 &&
+      riskAssessment.lastHivTestBasedOnRequest === "false" &&
+      showRiskAssessment
+    ) {
+      temp.lastHivTestDone = riskAssessment.lastHivTestDone
+        ? ""
+        : "This field is required.";
+      riskAssessment.lastHivTestDone !== "" &&
+        riskAssessment.lastHivTestDone !== "Never" &&
+        (temp.whatWasTheResult = riskAssessment.whatWasTheResult
+          ? ""
+          : "This field is required.");
 
-     temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
-       ? ""
-       : "This field is required.";
+      temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
+        ? ""
+        : "This field is required.";
 
-     temp.lastHivTestBloodTransfusion =
-       riskAssessment.lastHivTestBloodTransfusion
-         ? ""
-         : "This field is required.";
+      temp.lastHivTestBloodTransfusion =
+        riskAssessment.lastHivTestBloodTransfusion
+          ? ""
+          : "This field is required.";
 
-     temp.lastHivTestPainfulUrination =
-       riskAssessment.lastHivTestPainfulUrination
-         ? ""
-         : "This field is required.";
+      temp.lastHivTestPainfulUrination =
+        riskAssessment.lastHivTestPainfulUrination
+          ? ""
+          : "This field is required.";
 
-     temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
-       ? ""
-       : "This field is required.";
+      temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
+        ? ""
+        : "This field is required.";
 
-     temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
-       ? ""
-       : "This field is required.";
+      temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
+        ? ""
+        : "This field is required.";
 
-     temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
-       ? ""
-       : "This field is required.";
+      temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
+        ? ""
+        : "This field is required.";
 
-     temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
-       ? ""
-       : "This field is required.";
-   }
+      temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
+        ? ""
+        : "This field is required.";
+    }
 
-   setErrors({ ...temp });
-   return Object.values(temp).every((x) => x == "");
- };
+    setErrors({ ...temp });
+    return Object.values(temp).every((x) => x == "");
+  };
 
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
@@ -857,24 +841,26 @@ const handleTargetGroupChange = (e) => {
 
     // Validate restricted setting + target group combo
     const isRestrictedSetting =
-        objValues.testingSetting &&
-        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+      objValues.testingSetting &&
+      RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
-    const isMSMSelected =
-        objValues.targetGroup === "TARGET_GROUP_MSM";
+    const isMSMSelected = objValues.targetGroup === "TARGET_GROUP_MSM";
 
     if (isRestrictedSetting && isMSMSelected) {
       toast.error(
-          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-          {
-            position: toast.POSITION.BOTTOM_CENTER,
-          }
+        "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+        {
+          position: toast.POSITION.BOTTOM_CENTER,
+        }
       );
       return;
     }
 
     // validate date
-    const visitDateError = validateVisitDateWithDOB(objValues);
+    const visitDateError = validateVisitDateWithDOB(
+      objValues.dob,
+      objValues.visitDate
+    );
 
     if (visitDateError) {
       toast.error(visitDateError, {
@@ -910,8 +896,6 @@ const handleTargetGroupChange = (e) => {
       newModality,
       "unknown"
     );
-
-
 
     getMenuLogic(objValues);
     props.patientObj.riskStratificationResponseDto = objValues;
@@ -1355,10 +1339,15 @@ const handleTargetGroupChange = (e) => {
 
                         // Check if MSM should be hidden
                         const isRestrictedSetting =
-                            objValues.testingSetting &&
-                            RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+                          objValues.testingSetting &&
+                          RESTRICTED_SETTINGS.includes(
+                            objValues.testingSetting
+                          );
 
-                        if (isRestrictedSetting && value.code === "TARGET_GROUP_MSM") {
+                        if (
+                          isRestrictedSetting &&
+                          value.code === "TARGET_GROUP_MSM"
+                        ) {
                           return false;
                         }
 
