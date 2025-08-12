@@ -2189,12 +2189,12 @@ const PnsForm = (props) => {
                       </FormGroup>
                     </div>
 
-                    {objValues.partnerCurrentHivStatus !== "" &&
-                      objValues.partnerCurrentHivStatus === "positive" && (
+                    {/* {objValues.hivTestResult !== "" &&
+                      objValues.hivTestResult === "positive" && ( */}
                         <div className="form-group mb-3 col-md-4">
                           <FormGroup>
                             <Label for="">
-                              Date Tested?{" "}
+                              Date Partner Tested?{" "}
                               <span style={{ color: "red" }}> *</span>
                             </Label>
                             <Input
@@ -2214,7 +2214,7 @@ const PnsForm = (props) => {
                             />
                           </FormGroup>
                         </div>
-                      )}
+                      {/* )} */}
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
