@@ -170,9 +170,7 @@ const RefferralUnit = (props) => {
         htsClientId: props && props.patientObj ? props.patientObj?.id : "",
         htsClientUuid: props && props.patientObj ? props.patientObj?.uuid : ""
     });
-    // console.log("payload in referalUnit", payload)
-    // console.log("PAYLOAD", payload);
-   
+    
 
     useEffect(() => {
         getCountry();
