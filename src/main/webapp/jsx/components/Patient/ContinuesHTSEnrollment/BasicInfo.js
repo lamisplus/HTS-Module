@@ -26,6 +26,7 @@ import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import { error } from "highcharts";
 import Cookies from "js-cookie";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -122,7 +123,7 @@ const BasicInfo = (props) => {
   const [facilityCode, setFacilityCode] = useState("");
   const [serialNumber, setSerialNumber] = useState(null);
   // const [disableModality, setDisableModality] = useState(props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ? true: false);
-
+  const [codesets, setCodsets] = useState({})
   const [modalityCheck, setModality] = useState("");
   const [showPregancy, setShowPregnancy] = useState(false);
 
@@ -269,19 +270,17 @@ const BasicInfo = (props) => {
     }
   };
 
-  const getSettingList = () => {
-    if (
-      props.patientObj.riskStratificationResponseDto.entryPoint ===
-      "HTS_ENTRY_POINT_COMMUNITY"
-    ) {
-      HTS_ENTRY_POINT_COMMUNITY();
-    } else if (
-      props.patientObj.riskStratificationResponseDto.entryPoint ===
-      "HTS_ENTRY_POINT_FACILITY"
-    ) {
-      HTS_ENTRY_POINT_FACILITY();
-    } else {
+  const getSettingList=()=>{
+
+    if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
+      setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+    }else if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase()  === "facility"|| "hts_entry_point_facility"){
+
+      
+      setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+    }else{
       setEnrollSetting([]);
+
     }
 
     setModality(
@@ -289,17 +288,9 @@ const BasicInfo = (props) => {
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       )
     );
-  };
+  }
 
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    CounselingType();
-    PregnancyStatus();
-    IndexTesting();
-
     CreateClientCode();
     getSettingList();
   }, [props.patientObj, facilityCode]);
@@ -324,147 +315,8 @@ const BasicInfo = (props) => {
     }
   };
 
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
 
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
 
-        // })
-
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-        let pregnancyCode = response.data.filter((each, index) => {
-          return each.code === "PREGANACY_STATUS_PREGNANT";
-        });
-
-        if (props?.patientObject?.gender.toLowerCase() === "female") {
-          if (props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC") {
-            setShowPregnancy(true);
-
-            setObjValues({ ...objValues, pregnant: pregnancyCode[0].id });
-          }
-        }
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {});
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setGender(response.data);
-      })
-      .catch((error) => {});
-  };
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "indexClientCode" && e.target.value !== "") {
@@ -533,8 +385,7 @@ const BasicInfo = (props) => {
 
   /*****  Validation  */
   const validate = () => {
-    //HTS FORM VALIDATION
-
+    
     temp.clientCode = objValues.clientCode ? "" : "This field is required.";
     temp.typeCounseling = objValues.typeCounseling
       ? ""
@@ -570,6 +421,7 @@ const BasicInfo = (props) => {
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -577,28 +429,7 @@ const BasicInfo = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-  //checkClientCode
-  //   const checkClientCode = (e) => {
-  //     async function getIndexClientCode() {
-  //       const indexClientCode = objValues.clientCode;
-  //       const response = await axios.get(
-  //         `${baseUrl}hts/client/${indexClientCode}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "text/plain",
-  //           },
-  //         }
-  //       );
-  //       // if(response.data!=='Record Not Found'){
-  //       //     setClientCodeCheck("Client code already exist")
-  //       // }else{
-  //       //     setClientCodeCheck("")
-  //       // }
-  //     }
-  //     getIndexClientCode();
-  //   };
-  //checkClientCode
+  
   const checkClientCode = (e) => {
     let code = "";
 
@@ -608,6 +439,7 @@ const BasicInfo = (props) => {
 
       setObjValues({ ...objValues, clientCode: code });
     }
+
     async function getIndexClientCode() {
       const response = await axios.get(
         `${baseUrl}hts/get-client-code?code=${code}`,
@@ -625,8 +457,10 @@ const BasicInfo = (props) => {
         setClientCodeCheck("");
       }
     }
+
     getIndexClientCode();
   };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     // check next form
@@ -771,6 +605,45 @@ const BasicInfo = (props) => {
       }));
     }
   }, [testingSetting]);
+
+  const loadCodesets = (data) => {
+    setCodsets(data)
+    setKP(data["TARGET_GROUP"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setPregnancyStatus(data["PREGNANCY_STATUS"])
+    setCounselingType(data["COUNSELING_TYPE"])
+    setSourceReferral(data["SOURCE_REFERRAL"])
+    setGender(data["GENDER"])
+    setEnrollSetting(["TEST_SETTING"])
+
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else {
+      setEnrollSetting([]);
+
+    }
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "SOURCE_REFERRAL",
+      "GENDER",
+      "TEST_SETTING", 
+
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

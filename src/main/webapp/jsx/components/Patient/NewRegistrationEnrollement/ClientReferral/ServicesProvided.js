@@ -21,6 +21,7 @@ import PhoneInput from "react-phone-input-2";
 // import { getAllGenders, alphabetOnly } from "../../../../utility";
 import { alphabetOnly, getAllGenders } from  "../../../../../utility";
 import Select from "react-select";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -120,33 +121,19 @@ const ServicesProvided = (props) => {
     categoryOfService: props?.formInfo?.receivingOrganization?.categoryOfService,
     receivingFacilityStateName: props?.formInfo?.receivingOrganization?.receivingFacilityStateName,
     receivingFacilityLgaName: props?.formInfo?.receivingOrganization?.receivingFacilityLgaName,
-
   });
 
   const [states1, setStates1] = useState([])
   const [lgas1, setLGAs1] = useState([])
   const [facilities1, setFacilities1] = useState([])
   const [selectedState, setSelectedState] = useState({})
+  const [codesets, setCodesets] = useState({})
   const [selectedFacility, setSelectedFacility] = useState({});
   const [selectedLga, setSelectedLga] = useState({});
 
-  const SERVICE_NEEDED = () => {
-    axios.get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-        .then((response) => {
-          if (response.data) {
-            setServiceCategories(response.data);
-          }
-        })
-        .catch((e) => {
-          // console.log("Fetch Facilities error" + e);
-        });
+  
 
-  }
-  // ########################################################################
+  
   const loadStates1 = () => {
     axios.get(`${baseUrl}organisation-units/parent-organisation-units/1`, {
       headers: {
@@ -197,40 +184,15 @@ const ServicesProvided = (props) => {
           }
         })
         .catch((e) => {
-          // console.log("Fetch Facilities error" + e);
+          
         });
   };
 
-  // ###########################################################################
-
+  
   useEffect(() => {
     loadStates1();
-    SERVICE_NEEDED();
   }, []);
-  const getGenders = () => {
-    getAllGenders()
-      .then((res) => {
-        setGenders(res);
-      })
-      .catch((e) => {
-        // console.log("error", e);
-      });
-    // ;
-  };
-  // handle Facility Name to slect drop down
-  const handleInputChangeObject = (e) => {
-    // console.log(e);
-    setPayload({
-      ...payload,
-      nameOfFacilityProvider: e.name,
-      addressOfFacilityProvider: e.parentParentOrganisationUnitName,
-    });
-    setErrors({ ...errors, nameOfRecievingFacility: "" });
-
-  };
-  useEffect(() => {
-    getGenders();
-  }, []);
+ 
 
   const checkPhoneNumberBasic = (e, inputName) => {
     if (e) {
@@ -272,39 +234,9 @@ const ServicesProvided = (props) => {
     }
   };
 
-  const postPayload = (payload) => {
-    setSaving(true);
-    // props.setHideOtherMenu(false);
-    axios
-      .post(`${baseUrl}risk-stratification`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSaving(false);
-        // console.log(response.data);
-        //toast.success("Risk stratification save succesfully!");
-      })
-      .catch((error) => {
-        setSaving(false);
-        if (error.response && error.response.data) {
-          let errorMessage =
-            error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
-              ? error.response.data.apierror.message
-              : "Something went wrong, please try again";
-          toast.error(errorMessage, {
-            position: toast.POSITION.BOTTOM_CENTER,
-          });
-        } else {
-          toast.error("Something went wrong. Please try again...", {
-            position: toast.POSITION.BOTTOM_CENTER,
-          });
-        }
-      });
-  };
+  
 
-  // console.log("props.formInfo", props.formInfo);
-  /*****  Validation  */
+  
   const validate = () => {
     //HTS FORM VALIDATION
 
@@ -360,12 +292,27 @@ const ServicesProvided = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // console.log(payload);
+    
     if (validate()) {
       // console.log(payload);
       //   postPayload(payload);
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceCategories(data["SERVICE_PROVIDED"])
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "SERVICE_PROVIDED",
+      "SEX"
+    ],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

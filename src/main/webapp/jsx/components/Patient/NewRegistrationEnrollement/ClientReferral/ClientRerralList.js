@@ -21,6 +21,7 @@ import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import Remove from "@material-ui/icons/Remove";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import { makeStyles } from "@material-ui/core/styles";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -94,43 +95,18 @@ const ClientRerralList = (props) => {
 
   const [open, setOpen] = React.useState(false);
   const [serviceMapping, setServiceMapping] = useState({});
+  const [codesets, setCodesets] = useState({});
   const [serviceNeeded, setServiceNeeded] = useState([]);
   const toggle = () => setOpen(!open);
 
-  //const [patientObj, setpatientObj] = useState([])
+  
   const patientId =
     props.patientObj && props.patientObj.id ? props.patientObj.id : null;
-  //const [key, setKey] = useState('home');
-  //console.log(props)
+  
   useEffect(() => {
     patients();
   }, []);
-  //get services needed
-  const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          setServiceNeeded(response.data);
-          const mapping = {};
-          response.data.forEach((item) => {
-            mapping[item.code] = item.display;
-          });
-          setServiceMapping(mapping);
-        }
-      })
-      .catch((e) => {
-        console.error("Fetch Services error:", e);
-      });
-  };
-
-  useEffect(() => {
-    SERVICE_NEEDED();
-  }, []);
+  
 
   async function patients() {
     axios
@@ -151,9 +127,9 @@ const ClientRerralList = (props) => {
     props.handleItemClick("view-referral");
     props.setRow({ row: row, action: actionType });
   };
+
   const LoadModal = (row) => {
     toggle();
-    // console.log(row);
     setRecordSelected(row);
   };
   const LoadDeletePage = (row) => {
@@ -181,6 +157,22 @@ const ClientRerralList = (props) => {
         }
       });
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceNeeded(data["SERVICE_PROVIDED"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "SERVICE_PROVIDED",
+    ],
+    patientId: patientId,
+    onSuccess: loadCodesets
+  })
+
+
   return (
     <>
       <div>

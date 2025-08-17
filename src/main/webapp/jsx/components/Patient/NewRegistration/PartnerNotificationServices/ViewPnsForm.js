@@ -22,6 +22,7 @@ import Badge from "@mui/material/Badge";
 
 import { calculate_age } from "../../../utils";
 import PersonIcon from "@mui/icons-material/Person";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 const useStyles = makeStyles((theme) => ({
   card: {
     margin: theme.spacing(20),
@@ -113,6 +114,8 @@ const ViewPNSForm = (props) => {
       ? props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId
       : props?.patientObj?.personResponseDto?.address?.address[0]?.stateId
   );
+
+  const [, setCodesets] = useState({})
 
   const [lgaInfo, setLgaInfo] = useState(
     props?.basicInfo?.personResponseDto?.address?.address[0].district
@@ -233,16 +236,7 @@ const ViewPNSForm = (props) => {
     numberOfPartnerIdentifiedFromClientIndex: "",
   });
 
-  //   const getPNSInfo = (id) => {
-  //     axios
-  //       .get(`${baseUrl}hts-personal-notification-service/${id}/hts-client`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       })
-  //       .then((response) => {
-  //         setMaritalStatus(response.data);
-  //       })
-  //       .catch((error) => {});
-  //   };
+
 
   const checkNumberLimit = (e) => {
     const limit = 11;
@@ -286,57 +280,12 @@ const ViewPNSForm = (props) => {
       .then((response) => {
         setPartnerId(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   useEffect(() => {
-    // getPartnerId();
-    Sex();
     getStates();
-    NotificationContact();
-    IndexTesting();
-    Consent();
-    getMaritalStatus();
-    PROVIDER_ROLE();
     viewPnIsnfo();
-    // if (props.patientObj) {
-    //   if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
-    //     setHivTestDate(props.patientObj.dateVisit);
-    //   } else {
-    //     setHivTestDate("");
-    //   }
-
-    //   setObjValues({
-    //     ...objValues,
-    //     firstName: props.patientObj.personResponseDto.firstName,
-    //     middleName: props?.patientObj?.personResponseDto?.otherName,
-    //     lastName: props?.patientObj?.personResponseDto?.surname,
-    //     sex: props?.patientObj?.personResponseDto?.gender.id,
-    //     dob: props?.patientObj?.personResponseDto?.dateOfBirth,
-    //     phoneNumber:
-    //       props?.patientObj?.personResponseDto?.contactPoint?.contactPoint[0]
-    //         ?.value,
-    //   });
-
-    //   sethtsClientInformation({
-    //     ...htsClientInformation,
-    //     maritalStatus: props?.patientObj?.personResponseDto?.maritalStatus.id,
-    //     descriptiveResidentialAddress:
-    //       props?.patientObj?.personResponseDto?.address?.address[0].city,
-    //   });
-
-    // offeredPns: props.patientObj.personResponseDto.firstName
-
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    // })
-    // }
-
     if (
       props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId ||
       props?.patientObj?.personResponseDto?.address?.address[0]?.stateId
@@ -353,9 +302,7 @@ const ViewPNSForm = (props) => {
     }
   }, [props.patientObj]);
 
-  useEffect(() => {
-    loadFamilyIndexSetting();
-  }, []);
+ 
 
   // console.log(props.basicInfo);
   const handleHTSClientInputChange = (e) => {
@@ -380,48 +327,8 @@ const ViewPNSForm = (props) => {
     }
   };
 
-  const loadFamilyIndexSetting = () => {
-    let testingSetting = props?.patientObj?.testingSetting;
-    let testingType = "";
-    // COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES
-    if (testingSetting.includes("COMMUNITY")) {
-      testingType = "COMMUNITY_HTS_TEST_SETTING";
-    }
+  
 
-    if (testingSetting.includes("FACILITY")) {
-      testingType = "FACILITY_HTS_TEST_SETTING";
-    }
-    axios
-      .get(`${baseUrl}application-codesets/v2/${testingType}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const getMaritalStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const PROVIDER_ROLE = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PROVIDER_ROLE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setRoleProvider(response.data);
-      })
-      .catch((error) => {});
-  };
 
   function getStateByCountryId(getCountryId) {
     axios
@@ -472,53 +379,16 @@ const ViewPNSForm = (props) => {
       });
   };
 
+
   const getStates = () => {
     getStateByCountryId("1");
     // setObjValues({ ...objValues, countryId: 1 });
   };
 
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setSexs(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  console.log(props);
-  //Get all recorcd by htsClientId
-  const getAllRecordByHTSClientId = () => {
-    axios
-      .get(`${baseUrl}hts-personal-notification-service/{id}/hts-client`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get view pns info
+
+
+  
+  
   const viewPnIsnfo = () => {
     axios
       .get(`${baseUrl}hts-personal-notification-service/${props.row.row.id}`, {
@@ -534,31 +404,8 @@ const ViewPNSForm = (props) => {
       });
   };
   ///CONSENT	Yes		en	CONSENT
-  const Consent = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CONSENT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setConsent(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const NotificationContact = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/NOTIFICATION_CONTACT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setNotificationContact(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
+  
+ 
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -691,7 +538,7 @@ const ViewPNSForm = (props) => {
         : "This field is required.";
       temp.otherReasonForDecline =
         objValues.reasonForDecline === "others" &&
-        objValues.otherReasonForDecline
+          objValues.otherReasonForDecline
           ? ""
           : "This field is required.";
     }
@@ -776,7 +623,7 @@ const ViewPNSForm = (props) => {
           if (error.response && error.response.data) {
             let errorMessage =
               error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
+                error.response.data.apierror.message !== ""
                 ? error.response.data.apierror.message
                 : "Something went wrong, please try again";
             toast.error(errorMessage, {
@@ -790,6 +637,42 @@ const ViewPNSForm = (props) => {
         });
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    if ((props?.patientObj?.testingSetting.toLowerCase() === "community" || "hts_entry_point_community")
+      || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
+    ) {
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
+    else if ((props?.patientObj?.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility")
+      || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    }
+
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setRoleProvider(data["PROVIDER_ROLE"])
+    setSexs(data["SEX"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setConsent(data["CONSENT"])
+    setNotificationContact(data["NOTIFICATION_CONTACT"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "MARITAL_STATUS",
+      "PROVIDER_ROLE",
+      "SEX",
+      "INDEX_TESTING",
+      "CONSENT",
+      "NOTIFICATION_CONTACT"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>
@@ -1373,7 +1256,7 @@ const ViewPNSForm = (props) => {
                             props?.basicInfo?.personResponseDto?.dateOfBirth
                               ? props?.basicInfo?.personResponseDto?.dateOfBirth
                               : props?.patientObj?.personResponseDto
-                                  ?.dateOfBirth
+                                ?.dateOfBirth
                           )}
                           // disabled={ageDisabled}
                           disabled
@@ -1401,7 +1284,7 @@ const ViewPNSForm = (props) => {
                             borderRadius: "0.2rem",
                           }}
                           disabled
-                          // disabled={props.activePage.actionType === "view"}
+                        // disabled={props.activePage.actionType === "view"}
                         >
                           <option value={""}></option>
                           {maritalStatus.map((value) => (
@@ -1799,7 +1682,7 @@ const ViewPNSForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // disabled
+                        // disabled
                         />
                         {errors?.dateOfElicitation !== "" ? (
                           <span className={classes.error}>
@@ -1916,7 +1799,7 @@ const ViewPNSForm = (props) => {
                       <FormGroup>
                         <Label for=""> Contact Phone Number</Label>
 
-                      
+
                         <PhoneInput
                           containerStyle={{
                             width: "100%",
@@ -1935,7 +1818,7 @@ const ViewPNSForm = (props) => {
                           }}
                           disabled={props.row.action === "view" ? true : false}
 
-                          //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
+                        //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
                         />
                         {errors.partnerPhoneNumber !== "" ? (
                           <span className={classes.error}>
@@ -2017,7 +1900,7 @@ const ViewPNSForm = (props) => {
                           }}
                           disabled={props.row.action === "view" ? true : false}
 
-                          // disabled
+                        // disabled
                         />
                       </FormGroup>
                     </div>
@@ -2178,33 +2061,33 @@ const ViewPNSForm = (props) => {
 
                     {/* {objValues.partnerCurrentHivStatus !== "" &&
                       objValues.partnerCurrentHivStatus === "positive" && ( */}
-                        <div className="form-group mb-3 col-md-4">
-                          <FormGroup>
-                            <Label for="">
-                            Date Partner Tested?{" "}
-                              <span style={{ color: "red" }}> *</span>
-                            </Label>
-                            <Input
-                              type="date"
-                              onKeyPress={(e) => {
-                                e.preventDefault();
-                              }}
-                              name="datePartnerTested"
-                              id="datePartnerTested"
-                              value={objValues.datePartnerTested}
-                              onChange={handleInputChange}
-                              max={moment(new Date()).format("YYYY-MM-DD")}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.25rem",
-                              }}
-                              disabled={
-                                props.row.action === "view" ? true : false
-                              }
-                            />
-                          </FormGroup>
-                        </div>
-                      {/* )} */}
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label for="">
+                          Date Partner Tested?{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <Input
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
+                          name="datePartnerTested"
+                          id="datePartnerTested"
+                          value={objValues.datePartnerTested}
+                          onChange={handleInputChange}
+                          max={moment(new Date()).format("YYYY-MM-DD")}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                          disabled={
+                            props.row.action === "view" ? true : false
+                          }
+                        />
+                      </FormGroup>
+                    </div>
+                    {/* )} */}
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
@@ -2225,7 +2108,7 @@ const ViewPNSForm = (props) => {
                           }}
                           disabled={props.row.action === "view" ? true : false}
 
-                          // disabled
+                        // disabled
                         />
                         {errors.referralDate !== "" ? (
                           <span className={classes.error}>

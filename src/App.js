@@ -7,31 +7,49 @@ import "./../src/main/webapp/css/style.css";
 import "bootstrap/dist/css/bootstrap.css";
 import Home from "./main/webapp/jsx/components/Home";
 import RegisterPatient from "./main/webapp/jsx/components/Patient/RegisterPatient";
-//import RegisterPatientEnrollment from './main/webapp/jsx/components/Patient/RegisterPatientEnrollment';
 import PatientDetail from "./main/webapp/jsx/components/Patient/PatientDetail";
-// import HIVSTPatientRegistration from './main/webapp/jsx/components/Patient/HIVST/HIVSTPatientRegistration';
 import HIVSTPatient from "./main/webapp/jsx/components/Patient/HIVST/HIVSTPatient";
+import CheckedInPatientsAlert from "./main/webapp/jsx/components/Globals/CheckinPatientsAlert";
+import { QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
+import { queryClient } from "./main/webapp/utils/queryClient";
+import { useRoles } from "./main/webapp/hooks/useRoles";
+import { useMemo } from "react";
 
 export default function App() {
+  const { hasRole } = useRoles();
+  const isRDE = hasRole("RDE");
+
+  const permissions = useMemo(
+    () => ({
+      canSeeCheckedInPatientsAlert: !isRDE, // POC users see this
+    }),
+    [isRDE]
+  );
+
   return (
     <div>
-      <ToastContainer />
-      {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
-      <Switch>
-        <Route path="/patient-history">
-          <PatientDetail />
-        </Route>
-        <Route path="/register-patient">
-          <RegisterPatient />
-        </Route>
-        <Route path="/register-hivst-patient">
-          <HIVSTPatient />
-        </Route>
-        <Route path="/">
-          <Home />
-        </Route>
-      </Switch>
+      <QueryClientProvider client={queryClient}>
+        <ToastContainer />
+        {permissions.canSeeCheckedInPatientsAlert && (
+          <CheckedInPatientsAlert />
+        )}
+        <Switch>
+          <Route path="/patient-history">
+            <PatientDetail />
+          </Route>
+          <Route path="/register-patient">
+            <RegisterPatient />
+          </Route>
+          <Route path="/register-hivst-patient">
+            <HIVSTPatient />
+          </Route>
+          <Route path="/">
+            <Home />
+          </Route>
+        </Switch>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </div>
   );
 }

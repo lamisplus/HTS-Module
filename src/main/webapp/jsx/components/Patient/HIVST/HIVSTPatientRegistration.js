@@ -30,6 +30,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import DualListBox from "react-dual-listbox";
 import {calculate_age} from "../../utils";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
     card: {
@@ -108,6 +109,7 @@ const HIVSTPatientRegistration = (props) => {
     const classes = useStyles();
     const history = useHistory();
     const [errors, setErrors] = useState({});
+    const [codesets, setCodesets] = useState({})
     let temp = { ...errors };
     const [serialNumber, setSerialNumber] = useState(null);
     const [createdCode, setCreatedCode] = useState("");
@@ -127,21 +129,7 @@ const HIVSTPatientRegistration = (props) => {
     const toggle = () => setOpen(!open);
 
     const [objValues, setObjValues] = useState({
-        patientId: patient?.personId ? patient.personId : "",
-        // patientObject: {
-        //     surname: patient?.surname ? patient.surname : "",
-        //     firstName: patient?.firstName ? patient.firstName : "",
-        //     otherName: patient?.otherName ? patient.otherName : "",
-        //     dateOfBirth: patient?.dateOfBirth ? patient.dateOfBirth : "",
-        //     maritalStatusId: "1",
-        //     genderId: patient.gender ? patient.gender : "",
-        //     sexId: patient.personResponseDto && patient.personResponseDto.sex !== null
-        //         ? patient.personResponseDto.sex
-        //         : "",
-        //     address: "",
-        //     dateOfRegistration: "",
-        //     hospitalNumber: patient?.hospitalNumber ? patient?.hospitalNumber : "",
-        // },
+        patientId: patient?.personId ? patient?.personId : "",
         dateOfVisit: "",
         serviceDeliveryPoint: "",
         userType: "",
@@ -211,34 +199,7 @@ const HIVSTPatientRegistration = (props) => {
     const style = {fontSize: matches ? '12px' : '16px',};
 
 
-    const SERVICE_NEEDED = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                if (response.data) {
-                    // create array of objects from the response
-                    const serviceNeeded = response.data.map((service) => {
-                        return {
-                            value: service.display,
-                            label: service.display
-                        }
-                    });
-                    setServiceNeeded(serviceNeeded);
-                }
-            })
-            .catch((e) => {
-                // handle error
-            });
-    };
-
-    useEffect(() => {
-        SERVICE_NEEDED();
-    }, []);
-
+   
     const validateObjValues = () => {
         temp.dateOfVisit = objValues.dateOfVisit ? "" : "This field is required.";
         temp.clientCode = objValues.clientCode ? "" : "This field is required.";
@@ -604,39 +565,7 @@ const HIVSTPatientRegistration = (props) => {
     };
 
 
-    const Sex = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SEX`, {
-                headers: {Authorization: `Bearer ${token}`},
-            })
-            .then((response) => {
-                //// console.log(response.data);
-                setSexs(response.data);
-            })
-            .catch((error) => {
-                //// console.log(error);
-            });
-    };
-
-    const MARITALSTATUS = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-                headers: {Authorization: `Bearer ${token}`},
-            })
-            .then((response) => {
-                //// console.log(response.data);
-                setMaritalStatus(response.data);
-            })
-            .catch((error) => {
-                //// console.log(error);
-            });
-    };
-
-    useEffect(() => {
-        Sex();
-        MARITALSTATUS();
-    }, []);
-
+   
 
     const setAge = () => {
         const age = calculate_age(testKitUserDetails.basicUserInfo?.dateOfBirth);
@@ -751,9 +680,30 @@ const HIVSTPatientRegistration = (props) => {
         }
     };
 
-
-
-
+    const loadCodesets = (data) => {
+        setCodesets(data)
+        
+        setSexs(data["SEX"])
+        setMaritalStatus(data["MARITAL_STATUS"])
+        const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+            return {
+                value: service.display,
+                label: service.display
+            }
+        });
+        setServiceNeeded(serviceNeeded);
+      }
+    
+      useGetCodesets({
+        codesetsKeys: [
+         "SEX",
+         "MARITAL_STATUS",
+         "SERVICE_PROVIDED"
+        ],
+        patientId: props?.patientObj?.id || props?.basicInfo.id,
+        onSuccess: loadCodesets
+      })
+    
     return (
         <>
             <Card className={classes.root}>

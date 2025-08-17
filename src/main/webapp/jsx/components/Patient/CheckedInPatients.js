@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
-import MaterialTable from "material-table";
-import axios from "axios";
-import { url as baseUrl, token } from "./../../../api";
-import { calculate_age } from "../../components/utils";
+import { useEffect, useState, useRef, useMemo, memo } from "react";
+import { url as baseUrl, token, wsUrl } from "./../../../api";
 import { forwardRef } from "react";
 import "semantic-ui-css/semantic.min.css";
 import { Link } from "react-router-dom";
@@ -23,15 +20,67 @@ import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
 import { Card, CardBody } from "reactstrap";
 import "react-toastify/dist/ReactToastify.css";
-import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { TiArrowForward } from "react-icons/ti";
 import { MdDashboard } from "react-icons/md";
-import { Menu, MenuList, MenuButton, MenuItem } from "@reach/menu-button";
 import "@reach/menu-button/styles.css";
 import { Label } from "semantic-ui-react";
-import moment from "moment";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useCheckedInPatientData } from "../../../hooks/useCheckedInPatientData";
+import CustomTable from "../../../reuseables/CustomTable";
+import { calculate_age } from "../../components/utils";
+import SockJsClient from "react-stomp";
+import { Box, Typography, IconButton, Slide } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { useLocalStorage } from "../Globals/useLocalStorage";
+
+const FloatingAlert = ({ message, type = 'info', onClose }) => {
+  const closeIconBackground = {
+    info: '#014d88', // Blue
+    success: '#4CAF50', // Green
+    warning: '#FFC107', // Yellow
+    error: '#F44336', // Red
+  };
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: '#fff',
+        color: '#000',
+        padding: '16px 24px',
+        borderRadius: '8px',
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+        display: 'flex',
+        alignItems: 'center',
+        fontFamily: "Roboto",
+        gap: '16px',
+        maxWidth: '400px',
+        border: `1px solid ${closeIconBackground[type] || '#2196F3'}`,
+      }}
+    >
+      <Typography variant="body1" sx={{ flex: 1 }}>
+        {message}
+      </Typography>
+      <IconButton
+        size="small"
+        sx={{
+          backgroundColor: closeIconBackground[type] || '#2196F3',
+          color: '#fff',
+          '&:hover': {
+            backgroundColor: closeIconBackground[type] || '#1976D2',
+          },
+        }}
+        onClick={onClose}
+        aria-label="close"
+      >
+        <CloseIcon />
+      </IconButton>
+    </Box>
+  );
+};
+
+
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -57,204 +106,328 @@ const tableIcons = {
   ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
 };
 
-const useStyles = makeStyles((theme) => ({
-  card: {
-    margin: theme.spacing(20),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  cardBottom: {
-    marginBottom: 20,
-  },
-  Select: {
-    height: 45,
-    width: 350,
-  },
-  button: {
-    margin: theme.spacing(1),
-  },
-
-  root: {
-    "& > *": {
-      margin: theme.spacing(1),
-    },
-  },
-  input: {
-    display: "none",
-  },
-  error: {
-    color: "#f85032",
-    fontSize: "11px",
-  },
-  success: {
-    color: "#4BB543 ",
-    fontSize: "11px",
-  },
-}));
-
 const CheckedInPatients = (props) => {
-  const permissions = localStorage.getItem("permissions")?.split(",");
-  const [patientList, setPatientList] = useState([]);
+  const { hasPermission } = usePermissions();
+  const [showPPI, setShowPPI] = useState(true);
+  const { fetchPatients } = useCheckedInPatientData(baseUrl, token);
+  const [tableRefreshTrigger, setTableRefreshTrigger] = useState(0);
+  const [showCustomAlert, setShowCustomAlert] = useState(false);
+  const [numberOfExceedingPatients, setNumberOfExceedingPatients] = useState(0);
+  const [alertThresholdMinutes, setAlertThresholdMinutes] = useState(15);
+  const hiddenButtonRef = useRef(null); // 
+  const audioRefs = useRef({
+    waiting: new Audio(`${process.env.PUBLIC_URL}/notification.mp3`),
+  });
 
-  const getServiceCode = () => {
-    axios
-      .get(`${baseUrl}opd-setting`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        let data = response.data;
-        let htsCode = data.find(
-          (item) => item.moduleServiceName.toUpperCase() === "HTS"
-        )?.moduleServiceCode;
-        if (htsCode !== null || htsCode !== null) {
-          patients(htsCode);
-        }
-      })
-      .catch((error) => {});
+  const permissions = useMemo(
+    () => ({
+      canSeeEnrollButton: hasPermission("hts_register"),
+    }),
+    [hasPermission]
+  );
+
+  const handleCheckBox = (e) => {
+    setShowPPI(!e.target.checked);
   };
 
-  useEffect(() => {
-    getServiceCode();
-  }, []);
-  ///GET LIST OF Patients
-  async function patients(htsCode) {
-    axios
-      .get(`${baseUrl}patient/checked-in-by-service/${htsCode}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
+  const getData = async (query) => {
+    try {
+      const data = await fetchPatients(query);
+      const reversedData = [...(data || [])].reverse();
 
-        setPatientList(response.data.reverse());
-      })
-      .catch((error) => {});
-  }
+      // Sync localStorage with API response
+      const now = new Date();
+      const storedPatients = JSON.parse(localStorage.getItem("patientsQueue")) || {};
+      const updatedPatients = {};
+
+      reversedData.forEach((patient) => {
+        if (!storedPatients[patient.id]) {
+          // Add new patients with a timestamp
+          updatedPatients[patient.id] = { ...patient, timestamp: now };
+        } else {
+          updatedPatients[patient.id] = storedPatients[patient.id];
+        }
+      });
+
+      // Remove patients no longer in the queue
+      Object.keys(storedPatients).forEach((id) => {
+        if (!updatedPatients[id]) {
+          delete storedPatients[id];
+        }
+      });
+
+      localStorage.setItem("patientsQueue", JSON.stringify(updatedPatients));
+      return {
+        data: reversedData,
+        page: query?.page || 0,
+        totalCount: reversedData.length || 0,
+      };
+    } catch (error) {
+      return {
+        data: [],
+        page: 0,
+        totalCount: 0,
+      };
+    }
+  };
 
   const getHospitalNumber = (identifier) => {
     const identifiers = identifier;
     const hospitalNumber = identifiers.identifier.find(
-      (obj) => obj.type == "HospitalNumber"
+      (obj) => obj?.type == "HospitalNumber"
     );
     return hospitalNumber ? hospitalNumber.value : "";
   };
 
-  return (
-    <div>
-      <MaterialTable
-        icons={tableIcons}
-        title="Checked In Patients "
-        columns={[
-          // { title: " ID", field: "Id" },
-          {
-            title: "Patient Name",
-            field: "name",
-          },
-          {
-            title: "Hospital Number",
-            field: "hospital_number",
-            filtering: false,
-          },
-          { title: "Sex", field: "gender", filtering: false },
-          { title: "Age", field: "age", filtering: false },
-          //   { title: "ART Status", field: "status", filtering: false },
-          { title: "Actions", field: "actions", filtering: false },
-        ]}
-        data={patientList.map((row) => ({
-          name: row.fullname,
-          hospital_number: row.hospitalNumber,
-          gender: row.sex,
-          age:
-            row.dateOfBirth === 0 ||
-            row.dateOfBirth === undefined ||
-            row.dateOfBirth === null ||
-            row.dateOfBirth === ""
-              ? 0
-              : calculate_age(row.dateOfBirth),
 
-          actions: (
+  const columns = useMemo(
+    () => [
+      {
+        title: "Patient Name",
+        field: "fullname",
+        hidden: showPPI,
+        render: (rowData) => (
+          <p>
+            {`${rowData?.firstName} ${rowData?.surname || rowData?.lastName}`}
+          </p>
+        ),
+      },
+      {
+        title: "Hospital Number",
+        field: "hospitalNumber",
+        render: (rowData) => (
+          <p>
+            {rowData?.hospitalNumber || getHospitalNumber?.(rowData?.identifier) || ""}
+          </p>
+        ),
+      },
+      { title: "Sex", field: "sex" },
+      {
+        title: "Age", field: "age",
+        render: (rowData) => (
+          <p>
+            {
+              rowData?.dateOfBirth === 0 ||
+                rowData?.dateOfBirth === undefined ||
+                rowData?.dateOfBirth === null ||
+                rowData?.dateOfBirth === ""
+                ? 0
+                : calculate_age(rowData?.dateOfBirth)
+            }
+          </p>
+        )
+      },
+
+      {
+        title: "Biometrics",
+        field: "biometricStatus",
+        render: (rowData) =>
+          rowData.biometricStatus === true ? (
+            <Label color="green" size="mini">
+              Biometric Captured
+            </Label>
+          ) : (
+            <Label color="red" size="mini">
+              No Biometric
+            </Label>
+          ),
+      },
+      {
+        title: "ART Status",
+        field: "currentStatus",
+        render: (rowData) => (
+          <Label color="blue" size="mini">
+            {rowData?.currentStatus || "Not Enrolled"}
+          </Label>
+        ),
+      },
+      {
+        title: "Actions",
+        field: "actions",
+        render: (rowData) => {
+          const isOnHts = rowData?.isOnHts;
+
+          return (
             <div>
-              <>
-                <Link
-                  to={{
-                    pathname: "/patient-history",
-                    state: {
-                      patientObject: row,
-                      patientObj: row,
-                      clientCode: row?.clientCode,
-                      activepage: "NEW HTS",
-                      checkedInPatient: true
-                    },
-                  }}
-                >
-                  <ButtonGroup
-                    variant="contained"
-                    aria-label="split button"
-                    style={{
-                      backgroundColor: "rgb(153, 46, 98)",
-                      height: "30px",
-                      width: "215px",
+              {permissions.canSeeEnrollButton &&
+                
+                  <Link
+                    to={{
+                      pathname: "/patient-history",
+                      state: {
+                        patientObject: rowData,
+                        patientObj: rowData,
+                        clientCode: rowData?.clientCode,
+                        activepage: isOnHts ? "home" : "NEW HTS",
+                        checkedInPatient: true
+                      },
+
                     }}
-                    size="large"
                   >
-                    <Button
-                      color="primary"
-                      size="small"
-                      aria-label="select merge strategy"
-                      aria-haspopup="menu"
+                    <ButtonGroup
+                      variant="contained"
+                      aria-label="split button"
                       style={{
                         backgroundColor: "rgb(153, 46, 98)",
+                        height: "30px",
+                        width: "215px",
                       }}
+                      size="large"
                     >
-                      <TiArrowForward />
-                    </Button>
-                    <Button
-                      style={{
-                        backgroundColor: "rgb(153, 46, 98)",
-                      }}
-                    >
-                      <span
+                      <Button
+                        color="primary"
+                        size="small"
+                        aria-label="select merge strategy"
+                        aria-haspopup="menu"
                         style={{
-                          fontSize: "12px",
-                          color: "#fff",
-                          fontWeight: "bolder",
+                          backgroundColor: "rgb(153, 46, 98)",
                         }}
                       >
-                        Enroll Patient
-                      </span>
-                    </Button>
-                  </ButtonGroup>
-                </Link>
-              </>
+                        {isOnHts ? <MdDashboard /> : <TiArrowForward />}
+                      </Button>
+                      <Button
+                        style={{
+                          backgroundColor: "rgb(153, 46, 98)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: "#fff",
+                            fontWeight: "bolder",
+                          }}
+                        >
+                          {isOnHts ? "Patient Dashboard" : "Enroll Patient"}
+                        </span>
+                      </Button>
+                    </ButtonGroup>
+                  </Link>
+                }
             </div>
-          ),
-        }))}
-        options={{
-          search: true,
-          headerStyle: {
-            backgroundColor: "#014d88",
-            color: "#fff",
-          },
-          searchFieldStyle: {
-            width: "200%",
-            margingLeft: "250px",
-          },
-          filtering: false,
-          exportButton: false,
-          searchFieldAlignment: "left",
-          pageSizeOptions: [10, 20, 100],
-          pageSize: 10,
-          debounceInterval: 400,
-        }}
+          );
+        },
+      },
+    ],
+    [showPPI, permissions.canSeeEnrollButton]
+  );
+
+  const playSound = (soundKey) => {
+    if (JSON.parse(localStorage.getItem("enableAppSound"))) {
+      const audio = audioRefs.current[soundKey];
+      if (audio) {
+        audio.play().catch((err) => {
+          console.warn('Audio playback failed:', err);
+        });
+      }
+    }
+  };
+
+  // Check for patients exceeding the alert threshold
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const storedPatients = JSON.parse(localStorage.getItem("patientsQueue")) || {};
+      const now = new Date();
+      const exceedingPatients = Object.values(storedPatients).filter((patient) => {
+        const timestamp = new Date(patient.timestamp);
+        const minutesInQueue = (now - timestamp) / (1000 * 60);
+        return minutesInQueue > alertThresholdMinutes;
+      });
+      setNumberOfExceedingPatients(exceedingPatients.length)
+      if (exceedingPatients.length > 0) {
+        setShowCustomAlert(true)
+
+        if (JSON.parse(localStorage.getItem("enableAppSound"))) {
+          playSound("waiting")
+        }
+      }
+    }, 60000); // Check every 60 seconds
+
+    return () => {
+      clearInterval(interval)
+      localStorage.removeItem("patientsQueue")
+    };
+  }, []);
+
+  useEffect(() => {
+
+    // Simulate a user interaction by programmatically clicking the hidden button
+    if (hiddenButtonRef.current) {
+      hiddenButtonRef.current.click();
+    }
+
+    // Preload sounds when enabled
+    if (JSON.parse(localStorage.getItem("enableAppSound"))) {
+      Object.values(audioRefs.current).forEach((audio) => {
+        audio.load();
+      });
+    }
+  }, []);
+
+
+
+
+  const onMessageReceived = (msg) => {
+    if (msg && msg?.toLowerCase()?.includes("check") && msg?.toLowerCase()?.includes("hts")) {
+      setTableRefreshTrigger((prev) => prev + 1);
+    }
+  };
+
+  return (
+    <div>
+      <SockJsClient
+        url={wsUrl}
+        topics={["/topic/checking-in-out-process"]}
+        onMessage={onMessageReceived}
+        debug={true}
       />
+      <Card>
+        <CardBody>
+          <CustomTable
+            key={tableRefreshTrigger}
+            title="HTS Checked In Patients"
+            columns={columns}
+            data={getData}
+            icons={tableIcons}
+            showPPI={showPPI}
+            onPPIChange={handleCheckBox}
+          />
+        </CardBody>
+      </Card>
+
+      <Slide
+        in={showCustomAlert}
+        direction="up"
+        mountOnEnter
+        unmountOnExit
+        timeout={{ enter: 500, exit: 400 }} // Adjust animation duration
+      >
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 20,
+            left: '40%',
+            transform: 'translateX(-50%)',
+            zIndex: 1500,
+          }}
+        >
+          <FloatingAlert
+            message={`${numberOfExceedingPatients} patient${numberOfExceedingPatients > 1 ? "s" : ""} have been waiting longer than expected in the queue.`}
+            type="info" // Can be 'info', 'success', 'warning', 'error'
+            onClose={() => setShowCustomAlert(false)}
+          />
+        </Box>
+      </Slide>
+
+
+      <button
+        ref={hiddenButtonRef}
+        style={{ display: 'none' }}
+        onClick={() => playSound("connected")}
+      >
+        Hidden Play Button
+      </button>
     </div>
   );
 };
 
-export default CheckedInPatients;
+export default memo(CheckedInPatients);

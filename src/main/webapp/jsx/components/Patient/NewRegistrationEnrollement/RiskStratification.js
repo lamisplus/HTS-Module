@@ -25,6 +25,7 @@ import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
 import {validateVisitDateWithDOB} from "../../utils";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -110,6 +111,7 @@ const RiskStratification = (props) => {
   let riskCountQuestion = [];
   const [kP, setKP] = useState([]);
   const [errors, setErrors] = useState({});
+  const [codesets, setCodesets] = useState({});
   const [saving, setSaving] = useState(false);
   let temp = { ...errors };
   const [open, setOpen] = React.useState(false);
@@ -187,63 +189,29 @@ const RiskStratification = (props) => {
     lastHivTestVaginalOral: "",
     lastHivTestBasedOnRequest: "",
   });
+
+  
   useEffect(() => {
     KP();
-    // EnrollmentSetting();
-    EntryPoint();
-    // HTS_ENTRY_POINT_COMMUNITY();
-    //
+    setEnrollSetting(codesets?.["FACILITY_HTS_TEST_SETTING"])
 
-    if (props.activePage.activeObject.riskStratificationResponseDto !== null) {
-      if (
-        props.activePage.activeObject.riskStratificationResponseDto
-          .entryPoint === "HTS_ENTRY_POINT_COMMUNITY"
-      ) {
-        HTS_ENTRY_POINT_COMMUNITY();
-      } else if (
-        props.activePage.activeObject.riskStratificationResponseDto
-          .entryPoint === "HTS_ENTRY_POINT_FACILITY"
-      ) {
-        HTS_ENTRY_POINT_FACILITY();
+    if (props?.patientObj?.riskStratificationResponseDto !== null) {
+      if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY") {
+        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+      } else if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_FACILITY") {
+        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
-      setObjValues(props.activePage.activeObject.riskStratificationResponseDto);
+      setObjValues(props?.patientObj?.riskStratificationResponseDto);
+      
 
-      SettingModality(
-        props.activePage.activeObject.riskStratificationResponseDto
-          .testingSetting
-      );
       setRiskAssessment(
-        props.activePage.activeObject.riskStratificationResponseDto &&
-          props.activePage.activeObject.riskStratificationResponseDto
-            .riskAssessment
+        props.patientObj.riskStratificationResponseDto &&
+        props.patientObj.riskStratificationResponseDto.riskAssessment
       );
     }
-  }, [props.patientObj]);
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEntryPoint(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
+  }, [props.patientObj, codesets]);
+  
+  
 
 
   const getSpokeFaclityByHubSite = () => {
@@ -262,84 +230,40 @@ const RiskStratification = (props) => {
 
   //Get list of KP
   const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        if (props.patientObject.gender) {
-          let kpList = [];
-          let gender = props.patientObject.gender.toLowerCase();
-          if (gender === "female") {
-            response.data.map((each, index) => {
-              if (each.code !== "TARGET_GROUP_MSM") {
-                kpList.push(each);
-              }
-            });
-          } else if (gender === "male") {
-            response.data.map((each, index) => {
-              if (each.code !== "TARGET_GROUP_FSW") {
-                kpList.push(each);
-              }
-            });
+   
+    if (props.patientObject.gender) {
+      let kpList = []
+      let gender = props.patientObject.gender.toLowerCase()
+      if (gender === "female") {
+        codesets?.["TARGET_GROUP"]?.map((each, index) => {
+          if (each.code !== "TARGET_GROUP_MSM") {
+            kpList.push(each)
           }
+        })
 
-          setKP(kpList);
-        } else {
-          setKP(response.data);
-        }
-      })
-      .catch((error) => {});
-  };
+      } else if (gender === "male") {
+        codesets?.["TARGET_GROUP"]?.map((each, index) => {
+          if (each.code !== "TARGET_GROUP_FSW") {
+            kpList.push(each)
+          }
+        })
+      }
+
+      setKP(kpList)
+
+    } else {
+      setKP(codesets?.["TARGET_GROUP"]);
+
+    }
+};
 
   //Set HTS menu registration
   const getMenuLogic = () => {
-    // first logic
-    // if (objValues.age !== "" && objValues.age <= 15) {
-    //   props.setHideOtherMenu(true);
-    // } else if (objValues.age !== "" && objValues.age > 15) {
-    //   props.setHideOtherMenu(true);
-    // } else {
-    //   props.setHideOtherMenu(true);
-    // }
-
-    // if (objValues.age !== "" && objValues.age >= 85) {
-    //   toggle();
-    // }
-
     //secound logic
     props.setHideOtherMenu(false);
   };
 
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
+  
 
   const checkPMTCTModality = (modality) => {
     if (
@@ -378,36 +302,37 @@ const RiskStratification = (props) => {
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
 
-  if( props?.patientObject?.gender === "Male" ) {
     if (e.target.name === "targetGroup") {
       const isRestrictedSetting =
-          objValues.testingSetting &&
-          RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+        objValues.testingSetting &&
+        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
       if (e.target.value === "TARGET_GROUP_MSM" && isRestrictedSetting) {
         toast.error(
-            "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-            {
-              position: toast.POSITION.BOTTOM_CENTER,
-            }
+          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+          {
+            position: toast.POSITION.BOTTOM_CENTER,
+          }
         );
         return;
       }
     }
-  }
 
     setErrors({ ...temp, [e.target.name]: "" });
 
     if (e.target.name === "testingSetting" && e.target.value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
       let ans = checkPMTCTModality(e.target.value);
-
+      displayRiskAssessment(
+        riskAssessment.lastHivTestBasedOnRequest,
+        objValues.age,
+        ans
+      );
       if (
         e.target.value ===
-          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
@@ -417,17 +342,11 @@ const RiskStratification = (props) => {
         setShowHealthFacility(false);
       }
 
-      displayRiskAssessment(
-        riskAssessment.lastHivTestBasedOnRequest,
-        objValues.age,
-        ans
-      );
-
       //get spoke sites
       if (
         e.target.value === "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" ||
         e.target.value ===
-          "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
+        "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX" ||
         e.target.value === "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW"
@@ -459,9 +378,11 @@ const RiskStratification = (props) => {
 
     if (e.target.name === "entryPoint") {
       if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
-        HTS_ENTRY_POINT_COMMUNITY();
+        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
       } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
-        HTS_ENTRY_POINT_FACILITY();
+        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+      } else {
+        setEntryPointSetting([]);
       }
     }
 
@@ -513,23 +434,8 @@ const RiskStratification = (props) => {
     }
   };
 
-  //Date of Birth and Age handle
-  //Get list of DSD Model Type
-  function SettingModality(settingId) {
-    const setting = settingId;
-    axios
-      .get(`${baseUrl}application-codesets/v2/${setting}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  }
-  //End of Date of Birth and Age handling
-  /*****  Validation  */
+
+  
   const validate = () => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
@@ -623,6 +529,7 @@ const RiskStratification = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+  
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
@@ -770,6 +677,25 @@ const RiskStratification = (props) => {
       }
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setEnrollSetting(data["TEST_SETTING"])
+    setEntryPoint(data["HTS_ENTRY_POINT"])
+    setEntryPointSetting(data["FACILITY_HTS_TEST_SETTING"])
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["COMMUNITY_HTS_TEST_SETTING",
+      "TARGET_GROUP",
+      "HTS_ENTRY_POINT",
+      "FACILITY_HTS_TEST_SETTING",
+      "TEST_SETTING",
+    ],
+    patientId: props.personInfo?.personId,
+    onSuccess: loadCodesets
+  })
 
 
   return (

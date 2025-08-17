@@ -22,6 +22,8 @@ import "react-phone-input-2/lib/style.css";
 import { Button } from "semantic-ui-react";
 import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -100,6 +102,7 @@ const BasicInfo = (props) => {
   const [enrollSetting, setEnrollSetting] = useState([]);
   let riskCountQuestion = [];
   const [kP, setKP] = useState([]);
+  const [codesets, setCodesets] =useState({})
   const [errors, setErrors] = useState({});
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -108,6 +111,7 @@ const BasicInfo = (props) => {
   const toggle = () => setOpen(!open);
   const [setting, setSetting] = useState([]);
   const [riskCount, setRiskCount] = useState(0);
+
   const [objValues, setObjValues] = useState({
     age: "",
     dob: "",
@@ -124,6 +128,7 @@ const BasicInfo = (props) => {
     riskAssessment: {},
     entryPoint: "",
   });
+
   const [riskAssessment, setRiskAssessment] = useState({
     lastHivTestForceToHaveSex: "",
     lastHivTestHadAnal: "",
@@ -136,41 +141,18 @@ const BasicInfo = (props) => {
     lastHivTestVaginalOral: "",
     lastHivTestBasedOnRequest: "",
   });
+
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    //objValues.dateVisit=moment(new Date()).format("YYYY-MM-DD")
+    
+    
     if (objValues.age !== "") {
       props.setPatientObjAge(objValues.age);
     }
   }, [objValues.age]);
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
+
+  
+ 
+
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "testingSetting" && e.target.value !== "") {
@@ -178,7 +160,6 @@ const BasicInfo = (props) => {
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
     }
     if (e.target.name === "modality" && e.target.value !== "") {
-      //SettingModality(e.target.value)
       if (e.target.value === "TEST_SETTING_STANDALONE_HTS_PMTCT_(ANC1_ONLY)") {
         setRiskCount(1);
         setObjValues({ ...objValues, [e.target.name]: e.target.value });
@@ -261,6 +242,7 @@ const BasicInfo = (props) => {
       toggle();
     }
   };
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value == "Actual") {
       objValues.isDateOfBirthEstimated = false;
@@ -270,6 +252,7 @@ const BasicInfo = (props) => {
       setAgeDisabled(false);
     }
   };
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       if (e.target.value !== "" && e.target.value >= 85) {
@@ -292,6 +275,9 @@ const BasicInfo = (props) => {
     }
     setObjValues({ ...objValues, age: e.target.value });
   };
+
+  
+
   //Get list of DSD Model Type
   function SettingModality(settingId) {
     const setting = settingId;
@@ -306,6 +292,8 @@ const BasicInfo = (props) => {
         //console.log(error);
       });
   }
+
+
   //End of Date of Birth and Age handling
   /*****  Validation  */
   const validate = () => {
@@ -317,6 +305,8 @@ const BasicInfo = (props) => {
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
+
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -324,6 +314,7 @@ const BasicInfo = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
@@ -383,37 +374,7 @@ const BasicInfo = (props) => {
         });
       }
     }
-    // else {
-    //     if(validate()){
-
-    //         axios.post(`${baseUrl}risk-stratification`,objValues,
-    //         { headers: {"Authorization" : `Bearer ${token}`}},
-
-    //         )
-    //         .then(response => {
-    //             setSaving(false);
-    //             props.patientObj.riskStratificationResponseDto=response.data
-    //             toast.success("Risk stratification save succesfully!",  {position: toast.POSITION.BOTTOM_CENTER});
-    //             history.push({
-    //                 pathname: '/',
-
-    //             });
-    //             //
-    //         })
-    //         .catch(error => {
-    //             setSaving(false);
-    //             if(error.response && error.response.data){
-    //                 let errorMessage = error.response.data.apierror && error.response.data.apierror.message!=="" ? error.response.data.apierror.message :  "Something went wrong, please try again";
-    //                 toast.error(errorMessage,  {position: toast.POSITION.BOTTOM_CENTER});
-    //             }
-    //             else{
-    //                 toast.error("Something went wrong. Please try again...",  {position: toast.POSITION.BOTTOM_CENTER});
-    //             }
-    //         });
-    //     }else{
-    //         toast.error("All fields are required",  {position: toast.POSITION.BOTTOM_CENTER});
-    //     }
-    // }
+    
     if (objValues.age < 15) {
       if (validate()) {
         axios
@@ -490,6 +451,20 @@ const BasicInfo = (props) => {
     }
   };
 
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setKP(data["TARGET_GROUP"])
+    setEnrollSetting(data["TEST_SETTING"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+     "TARGET_GROUP",
+     "TEST_SETTING",
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
   return (
     <>
       <Card className={classes.root}>
@@ -556,16 +531,7 @@ const BasicInfo = (props) => {
                           {value.display}
                         </option>
                       ))}
-                      {/* <option value="TEST_SETTING_CT">CT</option>
-                                        <option value="TEST_SETTING_TB">TB</option>
-                                        <option value="TEST_SETTING_STI">STI</option>
-                                        <option value="TEST_SETTING_OPD">OPD</option>
-                                        <option value="TEST_SETTING_WARD">WARD</option>
-                                        <option value="TEST_SETTING_STANDALONE_HTS">STANDALONE HTS</option>
-                                        
-                                        <option value="TEST_SETTING_FP">FP</option>
-                                        <option value="TEST_SETTING_OUTREACH">OUTREACH</option>
-                                        <option value="TEST_SETTING_OTHERS">OTHERS</option> */}
+                      
                     </select>
                     {errors.testingSetting !== "" ? (
                       <span className={classes.error}>

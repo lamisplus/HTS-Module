@@ -31,6 +31,7 @@ import {
 import { calculate_age } from "../../utils";
 import { useHistory } from "react-router-dom";
 import DualListBox from "react-dual-listbox";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -134,6 +135,7 @@ const RefferralUnit = (props) => {
   const [selectedReceivingFacility, setSelectedReceivingFacility] = useState(
     {}
   );
+  const [codesets, setCodesets] = useState({})
   const [selectedReceivingLga, setSelectedReceivingLga] = useState({});
   const history = useHistory();
   const [serviceNeeded, setServiceNeeded] = useState([]);
@@ -163,8 +165,8 @@ const RefferralUnit = (props) => {
     hivStatus: props?.patientObj?.hivTestResult2
       ? props?.patientObj?.hivTestResult2
       : props?.patientObj?.hivTestResult
-      ? props?.patientObj?.hivTestResult
-      : "",
+        ? props?.patientObj?.hivTestResult
+        : "",
     referredFromFacility: "",
     nameOfPersonReferringClient: "",
     nameOfReferringFacility: Cookies.get("facilityName"),
@@ -183,13 +185,7 @@ const RefferralUnit = (props) => {
     htsClientId: props && props.patientObj ? props.patientObj?.id : "",
     htsClientUuid: props && props.patientObj ? props.patientObj?.uuid : "",
   });
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
+  
 
   const getProvincesWithId = (id) => {
     getAllProvinces(id)
@@ -205,13 +201,12 @@ const RefferralUnit = (props) => {
           ...payload,
           province: ans[0].id,
         });
-        
+
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   useEffect(() => {
-    loadGenders();
     getCountry();
     getStateByCountryId();
 
@@ -222,55 +217,16 @@ const RefferralUnit = (props) => {
     }
   }, []);
 
-  const getSex = async () => {
-    try {
-      const response = await axios.get(
-        `${baseUrl}application-codesets/v2/GENDER`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      return response.data;
-    } catch (e) {}
-  };
+
   //Get list of State
   const getStateByCountryId = () => {
     getAllStateByCountryId()
       .then((res) => {
         setStates(res);
       })
-      .catch(() => {});
+      .catch(() => { });
   };
-  const checkPhoneNumberBasic = (e, inputName) => {
-    if (e) {
-      setErrors({ ...errors, phoneNumber: "" });
-    }
-    const limit = 10;
-
-    if (inputName === "phoneNumber") {
-      setPayload({ ...payload, phoneNumber: e.slice(0, limit) });
-    } else if (inputName === "phoneNoOfReferringFacility") {
-      setPayload({
-        ...payload,
-        phoneNoOfReferringFacility: e.slice(0, limit),
-      });
-    } else if (inputName === "phoneNoOfReceivingFacility") {
-      setPayload({ ...payload, phoneNoOfReceivingFacility: e.slice(0, limit) });
-    }
-  };
-
-  // handle Facility Name to slect drop down
-  const handleInputChangeObject = (e) => {
-    setPayload({
-      ...payload,
-      nameOfReceivingFacility: e.name,
-      addressOfReceivingFacility: e.parentParentOrganisationUnitName,
-      // lgaTransferTo: e.parentOrganisationUnitName,
-    });
-    setErrors({ ...errors, nameOfReceivingFacility: "" });
-    // setSelectedState(e.parentParentOrganisationUnitName);
-    // setSelectedLga(e.parentOrganisationUnitName);
-  };
+ 
 
   //fetch province
   const getProvinces = (e) => {
@@ -283,14 +239,14 @@ const RefferralUnit = (props) => {
       .then((res) => {
         setProvinces(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
   const getCountry = () => {
     getAllCountry()
       .then((res) => {
         setCountries(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   const checkNumberLimit = (e) => {
@@ -313,7 +269,6 @@ const RefferralUnit = (props) => {
     }
   };
 
-  // ########################################################################
   const loadStates = () => {
     axios
       .get(`${baseUrl}organisation-units/parent-organisation-units/1`, {
@@ -326,7 +281,7 @@ const RefferralUnit = (props) => {
           setStateOfTheReceivingFacility(response.data);
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   const loadLGA = (id) => {
@@ -341,7 +296,7 @@ const RefferralUnit = (props) => {
           setLgasOfTheReceivingFacility(response.data);
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   const loadFacilities = (id) => {
@@ -356,36 +311,13 @@ const RefferralUnit = (props) => {
           setReceivingFacilities(response.data);
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
-  const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          // create array of objects from the response
-          const serviceNeeded = response.data.map((service) => {
-            return {
-              value: service.display,
-              label: service.display,
-            };
-          });
-          setServiceNeeded(serviceNeeded);
-        }
-      })
-      .catch((e) => {
-        // handle error
-      });
-  };
+ 
 
   useEffect(() => {
     loadStates();
-    SERVICE_NEEDED();
   }, []);
 
   // ###########################################################################
@@ -478,6 +410,7 @@ const RefferralUnit = (props) => {
       toggle();
     }
   };
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value == "Actual") {
       payload.isDateOfBirthEstimated = false;
@@ -521,6 +454,7 @@ const RefferralUnit = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
   const validate = () => {
     //HTS FORM VALIDATION
 
@@ -608,6 +542,25 @@ const RefferralUnit = (props) => {
     }
   };
 
+  const loadCodesets = (data) => {
+    setCodesets(data)
+
+    const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+      return {
+        value: service.display,
+        label: service.display
+      }
+    });
+    setServiceNeeded(serviceNeeded);
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
+
   return (
     <>
       <Card className={classes.root}>
@@ -642,7 +595,7 @@ const RefferralUnit = (props) => {
                       Date <span style={{ color: "red" }}> *</span>{" "}
                     </Label>
                     <Input
-                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                      type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                       name="dateVisit"
                       id="dateVisit"
@@ -654,7 +607,7 @@ const RefferralUnit = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errors.dateVisit !== "" ? (
                       <span className={classes.error}>{errors.dateVisit}</span>
@@ -765,9 +718,7 @@ const RefferralUnit = (props) => {
                     ) : (
                       ""
                     )}
-                    {/* {hospitalNumStatus2===true ? (
-                                                        <span className={classes.success}>{"Hospital number is OK."}</span>
-                                                    ) :""} */}
+
                   </FormGroup>
                 </div>
 
@@ -787,7 +738,7 @@ const RefferralUnit = (props) => {
                       }}
                       value={payload.countryId}
                       disabled
-                      //onChange={getStates}
+                    //onChange={getStates}
                     >
                       <option value={""}>Select</option>
                       {countries.map((value, index) => (
@@ -909,40 +860,7 @@ const RefferralUnit = (props) => {
                   </FormGroup>
                 </div>
 
-                {/*          <div className="form-group  col-md-4">*/}
-                {/*              <FormGroup>*/}
-                {/*                  <Label>*/}
-                {/*                      Phone Number <span style={{color: "red"}}> *</span>*/}
-                {/*                  </Label>*/}
-                {/*                  <PhoneInput*/}
-                {/*                      disabled={true}*/}
-                {/*                      containerStyle={{*/}
-                {/*                          width: "100%",*/}
-                {/*                          border: "1px solid #014D88",*/}
-                {/*                      }}*/}
-                {/*                      inputStyle={{width: "100%", borderRadius: "0px"}}*/}
-                {/*                      country={"ng"}*/}
-                {/*                      placeholder="(234)7099999999"*/}
-                {/*                      maxLength={5}*/}
-                {/*                      name="phoneNumber"*/}
-                {/*                      id="phoneNumber"*/}
-                {/*                      masks={{ng: "...-...-....", at: "(....) ...-...."}}*/}
-                {/*                      value={payload.phoneNumber}*/}
-                {/*                      onChange={(e) => {*/}
-                {/*                          checkPhoneNumberBasic(e, "phoneNumber");*/}
-                {/*                      }}*/}
-                {/*                      //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}*/}
-                {/*                  />*/}
 
-                {/*                  {errors.phoneNumber !== "" ? (*/}
-                {/*                      <span className={classes.error}>*/}
-                {/*  {errors.phoneNumber}*/}
-                {/*</span>*/}
-                {/*                  ) : (*/}
-                {/*                      ""*/}
-                {/*                  )}*/}
-                {/*              </FormGroup>*/}
-                {/*          </div>*/}
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>
@@ -961,7 +879,7 @@ const RefferralUnit = (props) => {
                         borderRadius: "0.2rem",
                       }}
                       disabled
-                      // required
+                    // required
                     />
                     {errors.phoneNumber !== "" ? (
                       <span className={classes.error}>
@@ -1005,7 +923,7 @@ const RefferralUnit = (props) => {
                     </Label>
                     <input
                       className="form-control"
-                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                      type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                       name="dob"
                       id="dob"
@@ -1193,7 +1111,7 @@ const RefferralUnit = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errors.addressOfReferringFacility !== "" ? (
                       <span className={classes.error}>
@@ -1635,8 +1553,8 @@ const RefferralUnit = (props) => {
                           serviceNeeded: serviceNeededObject,
                         });
                       }}
-                      // disabled={props.row.action === "view" ? true : false}
-                      // disabled
+                    // disabled={props.row.action === "view" ? true : false}
+                    // disabled
                     />
                   </FormGroup>
                 </div>

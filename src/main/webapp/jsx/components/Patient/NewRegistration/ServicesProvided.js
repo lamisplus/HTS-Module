@@ -20,6 +20,7 @@ import PhoneInput from "react-phone-input-2";
 import { getAllGenders, alphabetOnly } from "../../../../utility";
 import {useHistory} from "react-router-dom";
 import DualListBox from "react-dual-listbox";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -100,6 +101,7 @@ const ServicesProvided = (props) => {
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [saving, setSaving] = useState(false);
   let temp = { ...errors };
+  const [codesets, setCodesets] = useState({})
   const [open, setOpen] = React.useState(false);
   const toggle = () => setOpen(!open);
   const [genders, setGenders] = useState([]);
@@ -153,31 +155,6 @@ const ServicesProvided = (props) => {
 
   // ##############################################
 
-    const SERVICE_NEEDED = () => {
-        axios
-            .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((response) => {
-                if (response.data) {
-                    // create array of objects from the response
-                    const serviceNeeded = response.data.map((service) => {
-                        return {
-                            value: service.display,
-                            label: service.display
-                        }
-                    });
-                    setServiceNeeded(serviceNeeded);
-                    // console.log("serviceNeeded", serviceNeeded)
-                }
-            })
-            .catch((e) => {
-                // handle error
-            });
-    };
-
     useEffect(() => {
         // Fetch the saved serviceNeeded from the backend
         axios.get(`${baseUrl}hts-client-referral/${props.row.row.id}`, {
@@ -214,88 +191,9 @@ const ServicesProvided = (props) => {
 
 
 
-  const loadLGA1 = (id) => {
-    axios.get(`${baseUrl}organisation-units/parent-organisation-units/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-        .then((response) => {
-          if (response.data) {
-            setLGAs1(response.data);
-            // const selectedLga = response.data.find(lga => lga.id === id);
-            // setPayload(prevPayload => ({ ...prevPayload, lgaTransferTo: selectedLga ? selectedLga.name : "" }));
-          }
-
-        })
-        .catch((e) => {
-          // console.log("Fetch LGA error" + e);
-        });
-  };
-
-  const loadFacilities1 = (id) => {
-    axios.get(`${baseUrl}organisation-units/parent-organisation-units/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-        .then((response) => {
-          if (response.data) {
-            setFacilities1(response.data);
-
-          }
-        })
-        .catch((e) => {
-          // console.log("Fetch Facilities error" + e);
-        });
-  };
-
-  const handleInputChangeLocation = (e) => {
-    setErrors({ ...temp, [e.target.name]: "" });
-    if(e.target.name === 'stateTransferTo'){
-      let filteredState = states1.filter((each)=>{
-        return each.name.toLowerCase()  === e.target.value.toLowerCase()
-      })
-      setPayload({ ...payload, receivingFacilityStateName : e.target.value });
-
-      loadLGA1(filteredState[0].id);
-    }
-    if(e.target.name === 'lgaTransferTo'){
-      let filteredState = lgas1.filter((each)=>{
-        return each.name.toLowerCase()  === e.target.value.toLowerCase()
-      })
-      setPayload({ ...payload, [e.target.name]: e.target.value });
-      loadFacilities1(filteredState[0].id);
-
-    }
-
-  };
-  // ################################################
-  const getGenders = () => {
-    getAllGenders()
-      .then((res) => {
-        setGenders(res);
-      })
-      .catch((e) => {
-        // console.log("error", e);
-      });
-    // ;
-  };
-
-
   useEffect(() => {
-    getGenders();
     loadStates1()
-    SERVICE_NEEDED()
   }, []);
-
-  const checkPhoneNumberBasic = (e, inputName) => {
-    if (e) {
-      setErrors({ ...errors, phoneNumber: "" });
-    }
-    const limit = 10;
-    setPayload({ ...payload, phoneNumber: e.slice(0, limit) });
-  };
 
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -384,6 +282,24 @@ const ServicesProvided = (props) => {
       }
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+      return {
+        value: service.display,
+        label: service.display
+      }
+    });
+    setServiceNeeded(serviceNeeded);
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    patientId: props?.patientObj?.id,
+    onSuccess: loadCodesets
+  }) 
 
   return (
     <>

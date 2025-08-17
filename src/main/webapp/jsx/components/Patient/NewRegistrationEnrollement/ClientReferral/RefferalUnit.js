@@ -33,6 +33,7 @@ import {
 import { calculate_age } from "../../../utils";
 import { useHistory } from "react-router-dom";
 import DualListBox from "react-dual-listbox";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -188,15 +189,7 @@ const RefferralUnit = (props) => {
     htsClientUuid: props && props.patientObj ? props.patientObj?.uuid : "",
   });
 
-  // console.log("PAYLOAD", payload);
-  // console.log("props.formInfo", props.formInfo);
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
+  
   const getReceivinglga = (id) => {
     getAllProvinces(id)
       .then((res) => {
@@ -213,7 +206,6 @@ const RefferralUnit = (props) => {
       .catch((e) => {});
   };
   useEffect(() => {
-    loadGenders();
     getCountry();
     getStateByCountryId();
 
@@ -361,30 +353,7 @@ const RefferralUnit = (props) => {
       });
   };
 
-  const SERVICE_NEEDED = () => {
-    axios
-        .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          if (response.data) {
-            // create array of objects from the response
-            const serviceNeeded = response.data.map((service) => {
-              return {
-                value: service.display,
-                label: service.display
-              }
-            });
-            setServiceNeeded(serviceNeeded);
-            // console.log("serviceNeeded", serviceNeeded)
-          }
-        })
-        .catch((e) => {
-          // handle error
-        });
-  };
+  
 
 
   useEffect(() => {
@@ -405,7 +374,6 @@ const RefferralUnit = (props) => {
 
   useEffect(() => {
     loadStates();
-    SERVICE_NEEDED();
 
     loadLGA();
   }, []);
@@ -651,6 +619,23 @@ const RefferralUnit = (props) => {
       }
     }
   };
+
+  const [codesets, setCodesets] = useState({})
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setServiceNeeded(data["SERVICE_PROVIDED"])
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "SERVICE_PROVIDED",
+      "SEX"
+    ],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>

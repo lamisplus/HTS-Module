@@ -37,6 +37,7 @@ import {
 
 import { calculate_age } from "../../utils/index.js";
 import { LiveHelp } from "@material-ui/icons";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -114,6 +115,7 @@ const FamilyIndexTestingForm = (props) => {
   let history = useHistory();
   let VL = "";
   const [errors, setErrors] = useState({});
+  const [codesets, setCodesets] = useState({})
   const [ageDisabled2, setAgeDisabled2] = useState(true);
   const [saving, setSaving] = useState(false);
   let temp = { ...errors };
@@ -418,6 +420,7 @@ const FamilyIndexTestingForm = (props) => {
       return "";
     }
   };
+
   const TargetGroupSetup = () => {
     axios
       .get(`${baseUrl}account`, {
@@ -430,153 +433,10 @@ const FamilyIndexTestingForm = (props) => {
         //console.log(error);
       });
   };
-  const loadFamilyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
+  
 
-  const getMaritalStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {});
-  };
 
-  const getFamilyRelationship = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_RELATIONSHIP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyRelationship(response.data);
-      })
-      .catch((error) => {});
-  };
 
-  // get family index hiv status
-  const FAMILY_INDEX_HIV_STATUS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX_HIV_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndexHivStatus(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // get family index
-
-  const FAMILY_INDEX = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndex(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const FOLLOW_UP_APPOINTMENT_LOCATION = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FOLLOW UP_APPOINTMENT_LOCATION`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFollowUpAppointmentLocation(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const GET_CHILD_NUMBER = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CHILD_NUMBER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setChildNumber(response.data);
-
-        let ans = response.data.filter((each) => {
-          return each.code === "CHILD_NUMBER_OTHERS";
-        });
-
-        setRetrieveFromIdToCode(ans[0]?.id);
-      })
-      .catch((error) => {});
-  };
-
-  // GET
-  const INDEX_VISIT_ATTEMPTS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_VISIT_ATTEMPTS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexVisitAttempt(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // generate index client Id using the HTS client code/family index client unique ART number
-  const generateIndexClientId = () => {
-    const indexClientId = Math.floor(1000 + Math.random() * 9000);
-  };
-
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const getSettings = () => {
-    if (props.patientObj.testingSetting.includes("FACILITY")) {
-      HTS_ENTRY_POINT_FACILITY();
-    } else if (props.patientObj.testingSetting.includes("COMMUNITY")) {
-      HTS_ENTRY_POINT_COMMUNITY();
-    }
-  };
 
   useEffect(() => {
     getContactId();
@@ -624,21 +484,13 @@ const FamilyIndexTestingForm = (props) => {
   };
 
   useEffect(() => {
-    loadGenders();
+
     loadStates();
-    // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
-    getMaritalStatus();
-    getFamilyRelationship();
-    FAMILY_INDEX_HIV_STATUS();
-    FAMILY_INDEX();
-    FOLLOW_UP_APPOINTMENT_LOCATION();
-    INDEX_VISIT_ATTEMPTS();
-    GET_CHILD_NUMBER();
     getVL();
     getCurrentTreatment();
-    getSettings();
+    
     if (
       props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId ||
       props?.patientObj?.personResponseDto?.address?.address[0]?.stateId
@@ -1407,6 +1259,48 @@ const FamilyIndexTestingForm = (props) => {
       setPayload({ ...payload, [inputName]: NumberValue });
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setFamilyRelationship(data["FAMILY_RELATIONSHIP"])
+    setFamilyIndexHivStatus(data["FAMILY_INDEX_HIV_STATUS"])
+    setFamilyIndex(data["FAMILY_INDEX"])
+    setFollowUpAppointmentLocation(data["FOLLOW_UP_APPOINTMENT_LOCATION"])
+    setChildNumber(data["CHILD_NUMBER"])
+
+    let ans = data?.["CHILD_NUMBER"]?.filter?.((each) => {
+      return each.code === "CHILD_NUMBER_OTHERS";
+    });
+    setRetrieveFromIdToCode(ans[0]?.id);
+
+    setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
+    setGenders(data["SEX"])
+
+    if (props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else if (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community") {
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
+
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["MARITAL_STATUS",
+      "FAMILY_RELATIONSHIP",
+      "FAMILY_INDEX_HIV_STATUS",
+      "FAMILY_INDEX",
+      "FOLLOW_UP_APPOINTMENT_LOCATION",
+      "CHILD_NUMBER",
+      "INDEX_VISIT_ATTEMPTS",
+      "SEX",
+      "FACILITY_HTS_TEST_SETTING",
+      "COMMUNITY_HTS_TEST_SETTING"
+    ],
+    patientId: props?.basicInfo?.personResponseDto?.address,
+    onSuccess: loadCodesets
+  })
+
 
   return (
     <>

@@ -14,6 +14,7 @@ import ViewEditHivst from "../Patient/HIVST/ViewEditHivst";
 import { calculate_age } from "../utils";
 import moment from "moment";
 
+
 const styles = (theme) => ({
   root: {
     width: "100%",
@@ -70,7 +71,7 @@ function PatientCard(props) {
       : "";
 
 
-      const [personInfo, setPersonInfo]=useState({})
+  const [personInfo, setPersonInfo]=useState({})
   const [activePage, setActivePage] = useState({
     activePage: "home",
     activeObject: {},

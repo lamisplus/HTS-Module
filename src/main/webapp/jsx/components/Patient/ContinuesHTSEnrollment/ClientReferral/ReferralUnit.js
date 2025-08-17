@@ -31,6 +31,7 @@ import { useHistory } from "react-router-dom";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { CardBody, FormGroup, Input, Label } from "reactstrap";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -121,6 +122,7 @@ const ReferralUnit = (props) => {
   const [genders, setGenders] = useState([]);
   const [hivStatus, setHivStatus] = useState([]);
   const [serviceNeeded, setServiceNeeded] = useState([]);
+  const [codesets, setCodesets] = useState({})
 
   const [facilityName, setFacilityName] = useState(Cookies.get("facilityName"));
   const [allFacilities, setAllFacilities] = useState([]);
@@ -163,8 +165,8 @@ const ReferralUnit = (props) => {
     hivStatus: props?.patientObj?.hivTestResult2
       ? props?.patientObj?.hivTestResult2
       : props?.patientObj?.hivTestResult
-      ? props?.patientObj?.hivTestResult
-      : "",
+        ? props?.patientObj?.hivTestResult
+        : "",
     referredFromFacility: "",
     nameOfPersonReferringClient: "",
     nameOfReferringFacility: Cookies.get("facilityName"),
@@ -190,19 +192,11 @@ const ReferralUnit = (props) => {
       .then((res) => {
         setProvinces(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
- 
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
+
 
   useEffect(() => {
-    loadGenders();
     getCountry();
     getStateByCountryId();
     if (props?.patientObj?.personResponseDto?.address?.address[0]?.stateId) {
@@ -211,46 +205,19 @@ const ReferralUnit = (props) => {
       );
     }
   }, []);
- 
+
   //Get list of State
   const getStateByCountryId = () => {
     getAllStateByCountryId()
       .then((res) => {
         setStates(res);
       })
-      .catch(() => {});
-  };
-  const checkPhoneNumberBasic = (e, inputName) => {
-    if (e) {
-      setErrors({ ...errors, phoneNumber: "" });
-    }
-    const limit = 10;
-
-    if (inputName === "phoneNumber") {
-      setPayload({ ...payload, phoneNumber: e.slice(0, limit) });
-    } else if (inputName === "phoneNoOfReferringFacility") {
-      setPayload({
-        ...payload,
-        phoneNoOfReferringFacility: e.slice(0, limit),
-      });
-    } else if (inputName === "phoneNoOfReceivingFacility") {
-      setPayload({ ...payload, phoneNoOfReceivingFacility: e.slice(0, limit) });
-    }
+      .catch(() => { });
   };
 
-  // handle Facility Name to slect drop down
-  const handleInputChangeObject = (e) => {
-   
-    setPayload({
-      ...payload,
-      nameOfReceivingFacility: e.name,
-      addressOfReceivingFacility: e.parentParentOrganisationUnitName,
-      // lgaTransferTo: e.parentOrganisationUnitName,
-    });
-    setErrors({ ...errors, nameOfReceivingFacility: "" });
-    // setSelectedState(e.parentParentOrganisationUnitName);
-    // setSelectedLga(e.parentOrganisationUnitName);
-  };
+
+ 
+  
 
   //fetch province
   const getProvinces = (e) => {
@@ -263,18 +230,17 @@ const ReferralUnit = (props) => {
       .then((res) => {
         setProvinces(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
+  
   const getCountry = () => {
     getAllCountry()
       .then((res) => {
         setCountries(res);
       })
       .catch((e) => {
-        // console.log(e);
-      });
 
-    // console.log(response);
+      });
   };
 
   const checkNumberLimit = (e) => {
@@ -282,6 +248,7 @@ const ReferralUnit = (props) => {
     const acceptedNumber = e.slice(0, limit);
     return acceptedNumber;
   };
+
   const handleInputChangePhoneNumber = (e, inputName) => {
     const limit = 11;
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
@@ -336,34 +303,15 @@ const ReferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch Facilities error" + e);
       });
   };
 
-  const SERVICE_NEEDED = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SERVICE_PROVIDED`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        if (response.data) {
-          setServiceNeeded(response.data);
-        }
-      })
-      .catch((e) => {
-        // console.log("Fetch Facilities error" + e);
-      });
-  };
 
   useEffect(() => {
     loadStates();
-    SERVICE_NEEDED();
   }, []);
 
-  // ###########################################################################
-  //Get list of HIV STATUS ENROLLMENT
+
 
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -452,6 +400,7 @@ const ReferralUnit = (props) => {
       toggle();
     }
   };
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value == "Actual") {
       payload.isDateOfBirthEstimated = false;
@@ -461,6 +410,7 @@ const ReferralUnit = (props) => {
       setAgeDisabled(false);
     }
   };
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       if (e.target.value !== "" && e.target.value >= 85) {
@@ -494,6 +444,8 @@ const ReferralUnit = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
+
   const validate = () => {
     //HTS FORM VALIDATION
 
@@ -502,22 +454,19 @@ const ReferralUnit = (props) => {
     temp.lastName = payload.lastName ? "" : "This field is required.";
     temp.stateId = payload.stateId ? "" : "This field is required.";
     temp.province = payload.province ? "" : "This field is required.";
-    // temp.address = payload.address ? "" : "This field is required.";
     temp.phoneNumber = payload.phoneNumber ? "" : "This field is required.";
     temp.sexId = payload.sexId ? "" : "This field is required.";
     temp.dob = payload.dob ? "" : "This field is required.";
-    // temp.age = payload.age ? "" : "This field is required.";
+
     temp.hivStatus = payload.hivStatus ? "" : "This field is required.";
-    // temp.stateTransferTo = payload.receivingStateFacility? "" : "This field is required.";
+
     temp.receivingFacilityLgaName = payload.receivingFacilityLgaName
       ? ""
       : "This field is required.";
     temp.receivingFacilityStateName = payload.receivingFacilityStateName
       ? ""
       : "This field is required.";
-    // temp.referredFromFacility = payload.referredFromFacility
-    //     ? ""
-    //     : "This field is required.";
+
     temp.nameOfPersonReferringClient = payload.nameOfPersonReferringClient
       ? ""
       : "This field is required.";
@@ -545,7 +494,7 @@ const ReferralUnit = (props) => {
       : "This field is required.";
     temp.serviceNeeded = payload.serviceNeeded ? "" : "This field is required.";
 
-    // temp.referredTo = payload.referredTo ? "" : "This field is required.";
+
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
@@ -575,6 +524,24 @@ const ReferralUnit = (props) => {
     }
   };
 
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    const serviceNeeded = data["SERVICE_PROVIDED"]?.map((service) => {
+      return {
+        value: service.display,
+        label: service.display
+      }
+    });
+    setServiceNeeded(serviceNeeded);
+    setGenders(data["SEX"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    patientId: patientObj?.id,
+    onSuccess: loadCodesets
+  })
+
   return (
     <>
       <Card className={classes.root}>
@@ -595,7 +562,7 @@ const ReferralUnit = (props) => {
               >
                 Referral Form For Referring Unit
               </div>
-            
+
               <p style={{ color: "black", marginBottom: "20px" }}>
                 <i>
                   Note: This form is to be filed by the organization making the
@@ -609,7 +576,7 @@ const ReferralUnit = (props) => {
                       Date <span style={{ color: "red" }}> *</span>{" "}
                     </Label>
                     <Input
-                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                      type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                       name="dateVisit"
                       id="dateVisit"
@@ -621,7 +588,7 @@ const ReferralUnit = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.25rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errors.dateVisit !== "" ? (
                       <span className={classes.error}>{errors.dateVisit}</span>
@@ -732,9 +699,7 @@ const ReferralUnit = (props) => {
                     ) : (
                       ""
                     )}
-                    {/* {hospitalNumStatus2===true ? (
-                                                        <span className={classes.success}>{"Hospital number is OK."}</span>
-                                                    ) :""} */}
+
                   </FormGroup>
                 </div>
 
@@ -754,7 +719,7 @@ const ReferralUnit = (props) => {
                       }}
                       value={payload.countryId}
                       disabled
-                      //onChange={getStates}
+                    //onChange={getStates}
                     >
                       <option value={""}>Select</option>
                       {countries.map((value, index) => (
@@ -876,40 +841,7 @@ const ReferralUnit = (props) => {
                   </FormGroup>
                 </div>
 
-                {/*          <div className="form-group  col-md-4">*/}
-                {/*              <FormGroup>*/}
-                {/*                  <Label>*/}
-                {/*                      Phone Number <span style={{color: "red"}}> *</span>*/}
-                {/*                  </Label>*/}
-                {/*                  <PhoneInput*/}
-                {/*                      disabled={true}*/}
-                {/*                      containerStyle={{*/}
-                {/*                          width: "100%",*/}
-                {/*                          border: "1px solid #014D88",*/}
-                {/*                      }}*/}
-                {/*                      inputStyle={{width: "100%", borderRadius: "0px"}}*/}
-                {/*                      country={"ng"}*/}
-                {/*                      placeholder="(234)7099999999"*/}
-                {/*                      maxLength={5}*/}
-                {/*                      name="phoneNumber"*/}
-                {/*                      id="phoneNumber"*/}
-                {/*                      masks={{ng: "...-...-....", at: "(....) ...-...."}}*/}
-                {/*                      value={payload.phoneNumber}*/}
-                {/*                      onChange={(e) => {*/}
-                {/*                          checkPhoneNumberBasic(e, "phoneNumber");*/}
-                {/*                      }}*/}
-                {/*                      //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}*/}
-                {/*                  />*/}
 
-                {/*                  {errors.phoneNumber !== "" ? (*/}
-                {/*                      <span className={classes.error}>*/}
-                {/*  {errors.phoneNumber}*/}
-                {/*</span>*/}
-                {/*                  ) : (*/}
-                {/*                      ""*/}
-                {/*                  )}*/}
-                {/*              </FormGroup>*/}
-                {/*          </div>*/}
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>
@@ -928,7 +860,7 @@ const ReferralUnit = (props) => {
                         borderRadius: "0.2rem",
                       }}
                       disabled
-                      // required
+                    // required
                     />
                     {errors.phoneNumber !== "" ? (
                       <span className={classes.error}>
@@ -980,7 +912,7 @@ const ReferralUnit = (props) => {
                     </Label>
                     <input
                       className="form-control"
-                      type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                      type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                       name="dob"
                       id="dob"
@@ -1168,7 +1100,7 @@ const ReferralUnit = (props) => {
                         border: "1px solid #014D88",
                         borderRadius: "0.2rem",
                       }}
-                      // disabled
+                    // disabled
                     />
                     {errors.addressOfReferringFacility !== "" ? (
                       <span className={classes.error}>
@@ -1179,40 +1111,7 @@ const ReferralUnit = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/*          <div className="form-group mb-3 col-md-4">*/}
-                {/*              <FormGroup>*/}
-                {/*                  <Label for="firstName">*/}
-                {/*                      Phone Number of Referring Facility*/}
-                {/*                      /!* <span style={{ color: "red" }}> *</span> *!/*/}
-                {/*                  </Label>*/}
-                {/*                  <PhoneInput*/}
-                {/*                      containerStyle={{*/}
-                {/*                          width: "100%",*/}
-                {/*                          border: "1px solid #014D88",*/}
-                {/*                      }}*/}
-                {/*                      inputStyle={{width: "100%", borderRadius: "0px"}}*/}
-                {/*                      country={"ng"}*/}
-                {/*                      placeholder="(234)7099999999"*/}
-                {/*                      maxLength={5}*/}
-                {/*                      name="phoneNoOfReferringFacility"*/}
-                {/*                      id="phoneNoOfReferringFacility"*/}
-                {/*                      masks={{ng: "...-...-....", at: "(....) ...-...."}}*/}
-                {/*                      value={payload.phoneNoOfReferringFacility}*/}
-                {/*                      onChange={(e) => {*/}
-                {/*                          checkPhoneNumberBasic(e, "phoneNoOfReferringFacility");*/}
-                {/*                      }}*/}
-                {/*                      //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}*/}
-                {/*                  />*/}
 
-                {/*                  {errors.phoneNoOfReferringFacility !== "" ? (*/}
-                {/*                      <span className={classes.error}>*/}
-                {/*  {errors.phoneNoOfReferringFacility}*/}
-                {/*</span>*/}
-                {/*                  ) : (*/}
-                {/*                      ""*/}
-                {/*                  )}*/}
-                {/*              </FormGroup>*/}
-                {/*          </div>*/}
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>
