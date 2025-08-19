@@ -430,7 +430,7 @@ const ViewEditHivst = (props) => {
                 });
                 setObjValues({ ...objValues, hasConductedHIVST: "No" });
             } else {
-                // console.log("Cannot add more user information as it exceeds the number of HIVST kits received.");
+                
             }
 
         } else {
@@ -1524,29 +1524,7 @@ const ViewEditHivst = (props) => {
                                 )
                             }
 
-                            {/*Checkbox to select if the User has conducted the HIVST – if checked, display the*/}
-                            {/*following questions, else the user should be able to save the form.*/}
-                            {/*<div className="row mb-7">*/}
-                            {/*    <div className="form-group mb-3 col-md-4">*/}
-                            {/*        <FormGroup>*/}
-                            {/*            <label>*/}
-                            {/*                <input*/}
-                            {/*                    type="checkbox"*/}
-                            {/*                    checked={objValues.hasConductedHIVST}*/}
-                            {/*                    onChange={() => {*/}
-                            {/*                        setObjValues(prevState => ({*/}
-                            {/*                            ...prevState,*/}
-                            {/*                            hasConductedHIVST: !prevState.hasConductedHIVST*/}
-                            {/*                        }));*/}
-                            {/*                        // // console.log("Has Conducted HIVST", !objValues.hasConductedHIVST);*/}
-                            {/*                    }}*/}
-                            {/*                    style={{marginRight: "10px"}}*/}
-                            {/*                />*/}
-                            {/*                Have you conducted the HIVST ?*/}
-                            {/*            </label>*/}
-                            {/*        </FormGroup>*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
+                            
                             {objValues?.otherTestKitUserInfoAvailable === "No" &&
                                 <div className="row mb-7">
                                     <div className="form-group mb-3 col-md-6">

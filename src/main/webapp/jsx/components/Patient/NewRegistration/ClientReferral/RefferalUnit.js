@@ -222,10 +222,10 @@ const RefferralUnit = (props) => {
                 setCountries(res);
             })
             .catch((e) => {
-                // console.log(e);
+                
             });
 
-        // console.log(response);
+       
     };
 
     const checkNumberLimit = (e) => {
@@ -252,7 +252,6 @@ const RefferralUnit = (props) => {
                 }
             })
             .catch((e) => {
-                // console.log("Fetch states error" + e);
             });
     };
 
@@ -268,7 +267,6 @@ const RefferralUnit = (props) => {
                 }
             })
             .catch((e) => {
-                // console.log("Fetch LGA error" + e);
             });
     };
 
@@ -284,7 +282,6 @@ const RefferralUnit = (props) => {
                 }
             })
             .catch((e) => {
-                // console.log("Fetch Facilities error" + e);
             });
     };
 
@@ -457,7 +454,6 @@ const RefferralUnit = (props) => {
             : "This field is required.";
         temp.serviceNeeded = payload.serviceNeeded ? "" : "This field is required.";
 
-        // console.log("temp", temp)
         // temp.referredTo = payload.referredTo ? "" : "This field is required.";
         setErrors({ ...temp });
         return Object.values(temp).every((x) => x == "");
@@ -477,7 +473,7 @@ const RefferralUnit = (props) => {
                 props.handleItemClick("refferal-history");
                 // history.push("/")
             } catch (error) {
-                console.log("error", error)
+            
                 setSaving(false);
                 const errorMessage = error.response?.data?.apierror?.message || "Something went wrong, please try again";
                 toast.error(errorMessage, { position: toast.POSITION.BOTTOM_CENTER });

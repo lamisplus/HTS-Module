@@ -396,7 +396,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -422,7 +421,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -443,7 +441,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -487,7 +484,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -512,7 +508,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -535,7 +530,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -832,7 +826,6 @@ const ViewFamilyIndexTestingForm = (props) => {
       } else {
         let deductedValue = getIntPosition(e.target.value);
         //set position to child number
-        console.log("deductedValue", deductedValue);
         setFamilyTestingTrackerRequestDTO({
           ...familyTestingTrackerRequestDTO,
           positionOfChildEnumerated: deductedValue,
@@ -918,7 +911,6 @@ const ViewFamilyIndexTestingForm = (props) => {
     let result = familyIndex.filter((each, index) => {
       return each.code === relationship;
     });
-    console.log(result);
     // filter family relationship
     let result2 = familyRelationship.filter((each, index) => {
       if (
@@ -966,10 +958,9 @@ const ViewFamilyIndexTestingForm = (props) => {
         setCountries(res);
       })
       .catch((e) => {
-        console.log(e);
+      
       });
 
-    // console.log(response);
   };
 
   const handleFamilyRelationshipChange = (e) => {
@@ -1363,7 +1354,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         postPayload(submissionPayload);
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       toast.error("Something went wrong. Please try again.");
     }
   };

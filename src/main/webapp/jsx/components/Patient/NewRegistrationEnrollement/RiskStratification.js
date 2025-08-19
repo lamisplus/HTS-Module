@@ -24,7 +24,7 @@ import { Modal } from "react-bootstrap";
 import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
-import {validateVisitDateWithDOB} from "../../utils";
+import { validateVisitDateWithDOB } from "../../utils";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
@@ -190,7 +190,7 @@ const RiskStratification = (props) => {
     lastHivTestBasedOnRequest: "",
   });
 
-  
+
   useEffect(() => {
     KP();
     setEnrollSetting(codesets?.["FACILITY_HTS_TEST_SETTING"])
@@ -202,7 +202,7 @@ const RiskStratification = (props) => {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
-      
+
 
       setRiskAssessment(
         props.patientObj.riskStratificationResponseDto &&
@@ -210,8 +210,8 @@ const RiskStratification = (props) => {
       );
     }
   }, [props.patientObj, codesets]);
-  
-  
+
+
 
 
   const getSpokeFaclityByHubSite = () => {
@@ -224,13 +224,13 @@ const RiskStratification = (props) => {
         setSpokeFacList(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
   //Get list of KP
   const KP = () => {
-   
+
     if (props.patientObject.gender) {
       let kpList = []
       let gender = props.patientObject.gender.toLowerCase()
@@ -255,7 +255,7 @@ const RiskStratification = (props) => {
       setKP(codesets?.["TARGET_GROUP"]);
 
     }
-};
+  };
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -263,7 +263,7 @@ const RiskStratification = (props) => {
     props.setHideOtherMenu(false);
   };
 
-  
+
 
   const checkPMTCTModality = (modality) => {
     if (
@@ -435,7 +435,7 @@ const RiskStratification = (props) => {
   };
 
 
-  
+
   const validate = () => {
     //HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
@@ -529,7 +529,7 @@ const RiskStratification = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-  
+
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
   riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
@@ -552,35 +552,35 @@ const RiskStratification = (props) => {
 
     // Rule 1: Female patients shouldn't select MSM under restricted settings
     const isRestrictedSetting =
-        objValues.testingSetting &&
-        RESTRICTED_SETTINGS.includes(objValues.testingSetting);
+      objValues.testingSetting &&
+      RESTRICTED_SETTINGS.includes(objValues.testingSetting);
 
     const isMSMSelected =
-        objValues.targetGroup === "TARGET_GROUP_MSM";
+      objValues.targetGroup === "TARGET_GROUP_MSM";
 
     const isFemale =
-        patientGender === "Female" || patientGender === "F";
+      patientGender === "Female" || patientGender === "F";
 
     if (isFemale && isRestrictedSetting && isMSMSelected) {
       toast.error(
-          "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
-          {
-            position: toast.POSITION.BOTTOM_CENTER,
-          }
+        "MSM cannot be selected when ANC, L&D, or Postnatal Ward/Breastfeeding is chosen.",
+        {
+          position: toast.POSITION.BOTTOM_CENTER,
+        }
       );
       return;
     }
 
     // Rule 2: Male patients shouldn't select female-only settings
     const isMale =
-        patientGender === "Male" || patientGender === "M";
+      patientGender === "Male" || patientGender === "M";
 
     if (isMale && isRestrictedSetting) {
       toast.error(
-          "This setting is only applicable for female patients.",
-          {
-            position: toast.POSITION.BOTTOM_CENTER,
-          }
+        "This setting is only applicable for female patients.",
+        {
+          position: toast.POSITION.BOTTOM_CENTER,
+        }
       );
       return;
     }
@@ -596,10 +596,10 @@ const RiskStratification = (props) => {
     getMenuLogic(objValues);
     let newModality = isPMTCTModality ? "skip" : "fill";
     let latestForm = getNextForm(
-        "Risk_Stratification",
-        objValues.age,
-        newModality,
-        "unknown"
+      "Risk_Stratification",
+      objValues.age,
+      newModality,
+      "unknown"
     );
 
     props.patientObj.targetGroup = objValues.targetGroup;
@@ -611,8 +611,8 @@ const RiskStratification = (props) => {
 
     // Save logic
     if (
-        props.patientObj.riskStratificationResponseDto &&
-        props.patientObj.riskStratificationResponseDto.id
+      props.patientObj.riskStratificationResponseDto &&
+      props.patientObj.riskStratificationResponseDto.id
     ) {
       if (validate()) {
         setSaving(true);
@@ -620,56 +620,56 @@ const RiskStratification = (props) => {
         props.setHideOtherMenu(false);
 
         axios
-            .put(
-                `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
-                objValues,
-                { headers: { Authorization: `Bearer ${token}` } }
-            )
-            .then((response) => {
-              setSaving(false);
-              props.patientObj.riskStratificationResponseDto = response.data;
-              objValues.code = response.data.code;
-              props.setExtra(objValues);
-              toast.success("Risk stratification saved successfully!");
-            })
-            .catch((error) => {
-              setSaving(false);
-              const errorMessage =
-                  error.response?.data?.apierror?.message ||
-                  "Something went wrong. Please try again.";
-              toast.error(errorMessage, {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
+          .put(
+            `${baseUrl}risk-stratification/${props.patientObj.riskStratificationResponseDto.id}`,
+            objValues,
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+          .then((response) => {
+            setSaving(false);
+            props.patientObj.riskStratificationResponseDto = response.data;
+            objValues.code = response.data.code;
+            props.setExtra(objValues);
+            toast.success("Risk stratification saved successfully!");
+          })
+          .catch((error) => {
+            setSaving(false);
+            const errorMessage =
+              error.response?.data?.apierror?.message ||
+              "Something went wrong. Please try again.";
+            toast.error(errorMessage, {
+              position: toast.POSITION.BOTTOM_CENTER,
             });
+          });
       }
     } else {
       if (validate()) {
         setSaving(true);
         objValues.dob = props.patientObj.dateOfBirth
-            ? props.patientObj.dateOfBirth
-            : props?.personInfopersonResponseDto?.dateOfBirth;
+          ? props.patientObj.dateOfBirth
+          : props?.personInfopersonResponseDto?.dateOfBirth;
 
         axios
-            .post(`${baseUrl}risk-stratification`, objValues, {
-              headers: { Authorization: `Bearer ${token}` },
-            })
-            .then((response) => {
-              setSaving(false);
-              objValues.code = response.data.code;
-              props.setExtra(objValues);
-              handleItemClick(latestForm[0], latestForm[1]);
-              props.setHideOtherMenu(false);
-              toast.success("Risk stratification saved successfully!");
-            })
-            .catch((error) => {
-              setSaving(false);
-              const errorMessage =
-                  error.response?.data?.apierror?.message ||
-                  "Something went wrong. Please try again.";
-              toast.error(errorMessage, {
-                position: toast.POSITION.BOTTOM_CENTER,
-              });
+          .post(`${baseUrl}risk-stratification`, objValues, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          .then((response) => {
+            setSaving(false);
+            objValues.code = response.data.code;
+            props.setExtra(objValues);
+            handleItemClick(latestForm[0], latestForm[1]);
+            props.setHideOtherMenu(false);
+            toast.success("Risk stratification saved successfully!");
+          })
+          .catch((error) => {
+            setSaving(false);
+            const errorMessage =
+              error.response?.data?.apierror?.message ||
+              "Something went wrong. Please try again.";
+            toast.error(errorMessage, {
+              position: toast.POSITION.BOTTOM_CENTER,
             });
+          });
       } else {
         toast.error("Please correct all errors before submitting.", {
           position: toast.POSITION.BOTTOM_CENTER,
@@ -896,61 +896,61 @@ const RiskStratification = (props) => {
 
                 {objValues.testingSetting ===
                   "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
-                  <div className="form-group  col-md-6">
-                    <FormGroup>
-                      <Label>
-                        Spoke Health Facility{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
+                    <div className="form-group  col-md-6">
+                      <FormGroup>
+                        <Label>
+                          Spoke Health Facility{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
 
-                      {spokeFacList.length > 0 ? (
-                        <>
-                          {" "}
-                          <select
-                            className="form-control"
+                        {spokeFacList.length > 0 ? (
+                          <>
+                            {" "}
+                            <select
+                              className="form-control"
+                              name="spokeFacility"
+                              id="spokeFacility"
+                              value={objValues.spokeFacility}
+                              onChange={handleInputChange}
+                              style={{
+                                border: "1px solid #014D88",
+                                borderRadius: "0.2rem",
+                                textTransform: "capitalize  !important",
+                              }}
+                            >
+                              <option value={""}>Select</option>
+                              {spokeFacList.map((value) => (
+                                <option key={value.id} value={value.spokeSite}>
+                                  {value.spokeSite}
+                                </option>
+                              ))}
+                            </select>
+                          </>
+                        ) : (
+                          <Input
+                            type="text"
                             name="spokeFacility"
                             id="spokeFacility"
                             value={objValues.spokeFacility}
+                            //value={Math.floor(Math.random() * 1093328)}
+                            // onBlur={checkClientCode}
                             onChange={handleInputChange}
                             style={{
                               border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                              textTransform: "capitalize  !important",
+                              borderRadius: "0.25rem",
                             }}
-                          >
-                            <option value={""}>Select</option>
-                            {spokeFacList.map((value) => (
-                              <option key={value.id} value={value.spokeSite}>
-                                {value.spokeSite}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      ) : (
-                        <Input
-                          type="text"
-                          name="spokeFacility"
-                          id="spokeFacility"
-                          value={objValues.spokeFacility}
-                          //value={Math.floor(Math.random() * 1093328)}
-                          // onBlur={checkClientCode}
-                          onChange={handleInputChange}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        />
-                      )}
-                      {errors.spokeFacility !== "" ? (
-                        <span className={classes.error}>
-                          {errors.spokeFacility}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
-                )}
+                          />
+                        )}
+                        {errors.spokeFacility !== "" ? (
+                          <span className={classes.error}>
+                            {errors.spokeFacility}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+                  )}
 
                 {showHealthFacility && (
                   <div className="form-group  col-md-6">

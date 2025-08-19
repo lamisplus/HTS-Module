@@ -269,7 +269,7 @@ const ReferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch states error" + e);
+        
       });
   };
 
@@ -286,7 +286,7 @@ const ReferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch LGA error" + e);
+       
       });
   };
 

@@ -265,7 +265,7 @@ const ViewPNSForm = (props) => {
         setFacilityInfo(response.data.currentOrganisationUnitName);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -302,9 +302,9 @@ const ViewPNSForm = (props) => {
     }
   }, [props.patientObj]);
 
- 
 
-  // console.log(props.basicInfo);
+
+ 
   const handleHTSClientInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
 
@@ -327,7 +327,7 @@ const ViewPNSForm = (props) => {
     }
   };
 
-  
+
 
 
   function getStateByCountryId(getCountryId) {
@@ -340,7 +340,7 @@ const ViewPNSForm = (props) => {
         setStates(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -354,7 +354,7 @@ const ViewPNSForm = (props) => {
         setProvinces(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -375,7 +375,7 @@ const ViewPNSForm = (props) => {
         );
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -387,8 +387,8 @@ const ViewPNSForm = (props) => {
 
 
 
-  
-  
+
+
   const viewPnIsnfo = () => {
     axios
       .get(`${baseUrl}hts-personal-notification-service/${props.row.row.id}`, {
@@ -400,12 +400,12 @@ const ViewPNSForm = (props) => {
         setContactTracing(response.data.contactTracing);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
   ///CONSENT	Yes		en	CONSENT
-  
- 
+
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -546,13 +546,7 @@ const ViewPNSForm = (props) => {
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   objValues.htsClientInformation = htsClientInformation;
-  //   objValues.contactTracing = contactTracing;
-
-  //   console.log(objValues);
-  // };
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
     objValues.htsClientInformation = htsClientInformation;

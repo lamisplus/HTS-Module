@@ -262,17 +262,15 @@ const PnsForm = (props) => {
       .then((response) => {
         setMaritalStatus(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
   const getPartnerId = (id) => {
     axios
       .get(
-        `${baseUrl}hts-personal-notification-service/get-partner-id?htsClientId=${
-          props.patientObj.id ? props.patientObj.id : props.basicInfo.id
-        }&clientCode=${
-          props?.patientObj?.clientCode
-            ? props?.patientObj?.clientCode
-            : props?.basicInfo?.clientCode
+        `${baseUrl}hts-personal-notification-service/get-partner-id?htsClientId=${props.patientObj.id ? props.patientObj.id : props.basicInfo.id
+        }&clientCode=${props?.patientObj?.clientCode
+          ? props?.patientObj?.clientCode
+          : props?.basicInfo?.clientCode
         }`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -281,7 +279,7 @@ const PnsForm = (props) => {
       .then((response) => {
         setPartnerId(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const TargetGroupSetup = () => {
@@ -293,12 +291,12 @@ const PnsForm = (props) => {
         setFacilityInfo(response.data.currentOrganisationUnitName);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
   useEffect(() => {
-    
+
     getStates();
     getPartnerId();
     if (props.patientObj) {
@@ -344,7 +342,7 @@ const PnsForm = (props) => {
     }
   }, [props.patientObj]);
 
-  
+
 
   const handleHTSClientInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -367,7 +365,7 @@ const PnsForm = (props) => {
       });
     }
   };
- 
+
   function getStateByCountryId(getCountryId) {
     axios
       .get(
@@ -378,7 +376,7 @@ const PnsForm = (props) => {
         setStates(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -392,7 +390,7 @@ const PnsForm = (props) => {
         setProvinces(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -413,7 +411,7 @@ const PnsForm = (props) => {
         );
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -426,8 +424,8 @@ const PnsForm = (props) => {
     toggle();
     history.push("/");
   };
-  
-  
+
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -435,7 +433,7 @@ const PnsForm = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-  
+
   const handleInputContactChanges = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
 
@@ -507,7 +505,7 @@ const PnsForm = (props) => {
     setObjValues({ ...objValues, dob: e.target.value });
   };
 
- 
+
   const handleAgeChange = (e) => {
     if (!ageDisabled && e.target.value) {
       const currentDate = new Date();
@@ -569,11 +567,11 @@ const PnsForm = (props) => {
         : "This field is required.";
       temp.otherReasonForDecline =
         objValues.reasonForDecline === "others" &&
-        objValues.otherReasonForDecline
+          objValues.otherReasonForDecline
           ? ""
           : "This field is required.";
     }
-   
+
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
@@ -598,7 +596,7 @@ const PnsForm = (props) => {
 
     // if (validate()) {
     if (validate()) {
-      console.log("save pns clicked 5");
+    
       setSaving(true);
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;
@@ -636,7 +634,7 @@ const PnsForm = (props) => {
           if (error.response && error.response.data) {
             let errorMessage =
               error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
+                error.response.data.apierror.message !== ""
                 ? error.response.data.apierror.message
                 : "Something went wrong, please try again";
             toast.error(errorMessage, {
@@ -654,12 +652,12 @@ const PnsForm = (props) => {
   const loadCodesets = (data) => {
     setCodesets(data)
     if ((props?.patientObj?.testingSetting.toLowerCase() === "community" || "hts_entry_point_community")
-    || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
-    ){
+      || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
+    ) {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
     else if ((props?.patientObj?.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility")
-    || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
+      || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
       setSetting(data["FACILITY_HTS_TEST_SETTING"])
     }
 
@@ -674,14 +672,14 @@ const PnsForm = (props) => {
 
   useGetCodesets({
     codesetsKeys: [
-     "COMMUNITY_HTS_TEST_SETTING",
-     "FACILITY_HTS_TEST_SETTING",
-     "MARITAL_STATUS",
-     "PROVIDER_ROLE",
-     "SEX",
-     "INDEX_TESTING",
-     "CONSENT",
-     "NOTIFICATION_CONTACT"
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "MARITAL_STATUS",
+      "PROVIDER_ROLE",
+      "SEX",
+      "INDEX_TESTING",
+      "CONSENT",
+      "NOTIFICATION_CONTACT"
     ],
     patientId: props.patientObj?.id || props.basicInfo.id,
     onSuccess: loadCodesets
@@ -1041,7 +1039,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.2rem",
                           }}
-                          // disabled={props.activePage.actionType === "view"}
+                        // disabled={props.activePage.actionType === "view"}
                         >
                           <option value={""}></option>
                           {roleProvider.map((value) => (
@@ -1250,7 +1248,7 @@ const PnsForm = (props) => {
                             props?.basicInfo?.personResponseDto?.dateOfBirth
                               ? props?.basicInfo?.personResponseDto?.dateOfBirth
                               : props?.patientObj?.personResponseDto
-                                  ?.dateOfBirth
+                                ?.dateOfBirth
                           )}
                           // disabled={ageDisabled}
                           disabled
@@ -1278,7 +1276,7 @@ const PnsForm = (props) => {
                             borderRadius: "0.2rem",
                           }}
                           disabled
-                          // disabled={props.activePage.actionType === "view"}
+                        // disabled={props.activePage.actionType === "view"}
                         >
                           <option value={""}></option>
                           {maritalStatus.map((value) => (
@@ -1494,7 +1492,7 @@ const PnsForm = (props) => {
                                 border: "1px solid #014D88",
                                 borderRadius: "0.25rem",
                               }}
-                              //   disabledg
+                            //   disabledg
                             />
                             {/* {errors.treatmentDateI !== "" ? (
                                           <span className={classes.error}>
@@ -1544,7 +1542,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // disabled
+                        // disabled
                         />
                       </FormGroup>
                     </div>
@@ -1610,7 +1608,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // disabled
+                        // disabled
                         />
                       </FormGroup>
                     </div>
@@ -1916,7 +1914,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // disabled
+                        // disabled
                         />
                       </FormGroup>
                     </div>
@@ -2071,30 +2069,30 @@ const PnsForm = (props) => {
 
                     {/* {objValues.hivTestResult !== "" &&
                       objValues.hivTestResult === "positive" && ( */}
-                        <div className="form-group mb-3 col-md-4">
-                          <FormGroup>
-                            <Label for="">
-                              Date Partner Tested?{" "}
-                              <span style={{ color: "red" }}> *</span>
-                            </Label>
-                            <Input
-                              type="date"
-                              onKeyPress={(e) => {
-                                e.preventDefault();
-                              }}
-                              name="datePartnerTested"
-                              id="datePartnerTested"
-                              value={objValues.datePartnerTested}
-                              onChange={handleInputChange}
-                              max={moment(new Date()).format("YYYY-MM-DD")}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.25rem",
-                              }}
-                            />
-                          </FormGroup>
-                        </div>
-                      {/* )} */}
+                    <div className="form-group mb-3 col-md-4">
+                      <FormGroup>
+                        <Label for="">
+                          Date Partner Tested?{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <Input
+                          type="date"
+                          onKeyPress={(e) => {
+                            e.preventDefault();
+                          }}
+                          name="datePartnerTested"
+                          id="datePartnerTested"
+                          value={objValues.datePartnerTested}
+                          onChange={handleInputChange}
+                          max={moment(new Date()).format("YYYY-MM-DD")}
+                          style={{
+                            border: "1px solid #014D88",
+                            borderRadius: "0.25rem",
+                          }}
+                        />
+                      </FormGroup>
+                    </div>
+                    {/* )} */}
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
                         <Label for="">Date Enrolled On ART</Label>
@@ -2113,7 +2111,7 @@ const PnsForm = (props) => {
                             border: "1px solid #014D88",
                             borderRadius: "0.25rem",
                           }}
-                          // disabled
+                        // disabled
                         />
                         {errors.referralDate !== "" ? (
                           <span className={classes.error}>

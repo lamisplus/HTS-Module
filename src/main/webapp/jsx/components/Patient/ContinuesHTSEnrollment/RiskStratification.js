@@ -183,7 +183,7 @@ const RiskStratification = (props) => {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
-      
+
 
       setRiskAssessment(
         props.patientObj.riskStratificationResponseDto &&
@@ -198,7 +198,7 @@ const RiskStratification = (props) => {
   }, [entryPointSetting, entryPoint, props.newHTSType]);
 
 
-  
+
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");
@@ -210,7 +210,7 @@ const RiskStratification = (props) => {
         setSpokeFacList(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+      
       });
   };
 
@@ -241,7 +241,6 @@ const RiskStratification = (props) => {
       setKP(kpList)
     } else {
       setKP(codesets["TARGET_GROUP"]);
-
     }
   };
 
@@ -417,7 +416,7 @@ const RiskStratification = (props) => {
     }
   };
 
-  
+
 
   //End of Date of Birth and Age handling
   /*****  Validation  */
@@ -516,6 +515,7 @@ const RiskStratification = (props) => {
   };
 
   const handleItemClick = (page, completedMenu) => {
+
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
     } else {
@@ -584,7 +584,19 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
+  const handleSubmit2 = (e) => {
+    e.preventDefault()
 
+    const newModality = isPMTCTModality ? "skip" : "fill";
+
+    const latestForm = getNextForm(
+      "Risk_Stratification",
+      objValues.age,
+      newModality,
+      "unknown"
+    );
+   
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -628,9 +640,9 @@ const RiskStratification = (props) => {
     }
 
     getMenuLogic();
-    let newModality = isPMTCTModality ? "skip" : "fill";
+    const newModality = isPMTCTModality ? "skip" : "fill";
 
-    let latestForm = getNextForm(
+    const latestForm = getNextForm(
       "Risk_Stratification",
       objValues.age,
       newModality,
@@ -675,6 +687,8 @@ const RiskStratification = (props) => {
       objValues.code = response.data.code;
       props.setExtra(objValues);
       props.setHideOtherMenu(false);
+
+     
       handleItemClick(latestForm[0], latestForm[1]);
       toast.success("Risk stratification saved successfully!");
     } catch (error) {
@@ -770,41 +784,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* {objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" && (
-                  <div className="form-group  col-md-6">
-                    <FormGroup>
-                      <Label>
-                        Community Entry Point{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <select
-                        className="form-control"
-                        name="communityEntryPoint"
-                        id="communityEntryPoint"
-                        value={objValues.communityEntryPoint}
-                        onChange={handleInputChange}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.2rem",
-                        }}
-                      >
-                        <option value={""}>Select</option>
-                        {entryPointCommunity.map((value) => (
-                          <option key={value.id} value={value.code}>
-                            {value.display}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.communityEntryPoint !== "" ? (
-                        <span className={classes.error}>
-                          {errors.communityEntryPoint}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
-                )} */}
+                
                 <div className="form-group mb-3 col-md-6">
                   <FormGroup>
                     <Label for="">
@@ -1023,7 +1003,7 @@ const RiskStratification = (props) => {
                     >
                       <option value={""}>Select</option>
                       {kP
-                        .filter((value) => {
+                        ?.filter((value) => {
                           if (
                             props.patientAge > 14 &&
                             (value.id === 961 || value.id === 475)

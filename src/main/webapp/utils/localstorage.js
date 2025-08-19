@@ -19,7 +19,6 @@ export const getStorageValues = (keys) => {
     }, {});
     return keyArray.length === 1 ? values[keys] : values;
   } catch (error) {
-    console.error("Error accessing localStorage:", error);
     return Array.isArray(keys) ? {} : null;
   }
 };
@@ -56,7 +55,6 @@ export const fetchAndStoreAccountData = async () => {
       currentUser_Permission: lowerCaseArrayPermissions,
     };
   } catch (error) {
-    console.error("Error fetching account data:", error);
     return null;
   }
 };
@@ -77,7 +75,6 @@ export const getPermissions = async () => {
     }
     return Array.isArray(permissions) ? permissions : [];
   } catch (error) {
-    console.error("Error getting permissions:", error);
     return [];
   }
 };

@@ -231,7 +231,6 @@ const PatientVisits = (props) => {
                 }
             }
 
-            console.error("Check-in error details:", error.response?.data);
         }
     };
 

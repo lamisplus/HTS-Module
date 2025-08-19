@@ -139,7 +139,7 @@ const AddIndexContact = (props) => {
     currentHivStatus: "",
   });
 
-  useEffect(() => { 
+  useEffect(() => {
     getStates();
     if (props.patientObj) {
       if (props.patientObj.dateVisit && props.patientObj.dateVisit !== "") {
@@ -160,7 +160,7 @@ const AddIndexContact = (props) => {
         setStates(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -174,7 +174,7 @@ const AddIndexContact = (props) => {
         setProvinces(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -194,7 +194,7 @@ const AddIndexContact = (props) => {
         );
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -205,9 +205,9 @@ const AddIndexContact = (props) => {
 
 
 
-  
 
-  
+
+
   const handleItemClickPage = (page) => {
     props.handleIClickPage(page);
   };

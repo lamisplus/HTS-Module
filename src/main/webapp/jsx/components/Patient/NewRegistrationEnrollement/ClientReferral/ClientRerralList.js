@@ -114,7 +114,6 @@ const ClientRerralList = (props) => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        // console.log(response.data);
         setIndexClientList(response.data);
       })
       .catch((error) => {});

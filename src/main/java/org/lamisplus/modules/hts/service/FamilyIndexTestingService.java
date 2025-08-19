@@ -575,8 +575,8 @@ public class FamilyIndexTestingService {
 
     }
 
-    public UuidProjection getHTSClientUUID(String personUuid) {
-        return familyIndexRepository.getHTSClientUUID(personUuid);
+    public UuidProjection getHTSClientUUID(String clientCode) {
+        return familyIndexRepository.getHTSClientUUID(clientCode);
     }
 
 

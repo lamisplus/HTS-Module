@@ -4,9 +4,10 @@
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global['fontawesome-free-conflict-detection'] = {})));
-}(this, (function (exports) { 'use strict';
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+      (factory((global['fontawesome-free-conflict-detection'] = {})));
+}(this, (function (exports) {
+  'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -62,11 +63,11 @@
   try {
     if (typeof window !== 'undefined') _WINDOW = window;
     if (typeof document !== 'undefined') _DOCUMENT = document;
-  } catch (e) {}
+  } catch (e) { }
 
   var _ref = _WINDOW.navigator || {},
-      _ref$userAgent = _ref.userAgent,
-      userAgent = _ref$userAgent === void 0 ? '' : _ref$userAgent;
+    _ref$userAgent = _ref.userAgent,
+    userAgent = _ref$userAgent === void 0 ? '' : _ref$userAgent;
 
   var WINDOW = _WINDOW;
   var DOCUMENT = _DOCUMENT;
@@ -91,14 +92,14 @@
     if (!loaded) DOCUMENT.addEventListener('DOMContentLoaded', listener);
   }
 
-  function domready (fn) {
+  function domready(fn) {
     if (!IS_DOM) return;
     loaded ? setTimeout(fn, 0) : functions.push(fn);
   }
 
-  function report (_ref) {
+  function report(_ref) {
     var nodesTested = _ref.nodesTested,
-        nodesFound = _ref.nodesFound;
+      nodesFound = _ref.nodesFound;
     var timedOutTests = {};
 
     for (var key in nodesFound) {
@@ -110,7 +111,7 @@
     var conflictsCount = Object.keys(nodesTested.conflict).length;
 
     if (conflictsCount > 0) {
-      console.info("%cConflict".concat(conflictsCount > 1 ? 's' : '', " found:"), 'color: darkred; font-size: large');
+      
       var data = {};
 
       for (var _key in nodesTested.conflict) {
@@ -122,13 +123,13 @@
         };
       }
 
-      console.table(data);
+    
     }
 
     var noConflictsCount = Object.keys(nodesTested.noConflict).length;
 
     if (noConflictsCount > 0) {
-      console.info("%cNo conflict".concat(noConflictsCount > 1 ? 's' : '', " found with ").concat(noConflictsCount == 1 ? 'this' : 'these', ":"), 'color: green; font-size: large');
+     
       var _data = {};
 
       for (var _key2 in nodesTested.noConflict) {
@@ -140,13 +141,11 @@
         };
       }
 
-      console.table(_data);
     }
 
     var timeOutCount = Object.keys(timedOutTests).length;
 
     if (timeOutCount > 0) {
-      console.info("%cLeftovers--we timed out before collecting test results for ".concat(timeOutCount == 1 ? 'this' : 'these', ":"), 'color: blue; font-size: large');
       var _data2 = {};
 
       for (var _key3 in timedOutTests) {
@@ -158,14 +157,13 @@
         };
       }
 
-      console.table(_data2);
     }
   }
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
   function createCommonjsModule(fn, module) {
-  	return module = { exports: {} }, fn(module, module.exports), module.exports;
+    return module = { exports: {} }, fn(module, module.exports), module.exports;
   }
 
   var md5 = createCommonjsModule(function (module) {
@@ -604,16 +602,16 @@
 
   function pollUntil(_ref) {
     var _ref$fn = _ref.fn,
-        fn = _ref$fn === void 0 ? function () {
-      return true;
-    } : _ref$fn,
-        _ref$initialDuration = _ref.initialDuration,
-        initialDuration = _ref$initialDuration === void 0 ? 1 : _ref$initialDuration,
-        _ref$maxDuration = _ref.maxDuration,
-        maxDuration = _ref$maxDuration === void 0 ? WINDOW.FontAwesomeDetection.timeout : _ref$maxDuration,
-        _ref$showProgress = _ref.showProgress,
-        showProgress = _ref$showProgress === void 0 ? false : _ref$showProgress,
-        progressIndicator = _ref.progressIndicator;
+      fn = _ref$fn === void 0 ? function () {
+        return true;
+      } : _ref$fn,
+      _ref$initialDuration = _ref.initialDuration,
+      initialDuration = _ref$initialDuration === void 0 ? 1 : _ref$initialDuration,
+      _ref$maxDuration = _ref.maxDuration,
+      maxDuration = _ref$maxDuration === void 0 ? WINDOW.FontAwesomeDetection.timeout : _ref$maxDuration,
+      _ref$showProgress = _ref.showProgress,
+      showProgress = _ref$showProgress === void 0 ? false : _ref$showProgress,
+      progressIndicator = _ref.progressIndicator;
     return new Promise(function (resolve, reject) {
       // eslint-disable-line compat/compat
       function poll(duration, cumulativeDuration) {
@@ -621,7 +619,6 @@
           var result = fn();
 
           if (showProgress) {
-            console.info(progressIndicator);
           }
 
           if (!!result) {
@@ -717,7 +714,7 @@
               md5: md5
             }, parentOrigin);
           } else {
-            console.error(e);
+            ;
           }
         });
       };
@@ -817,7 +814,7 @@
               md5: md5
             }, parentOrigin);
           } else {
-            console.error(e);
+            ;
           }
         });
       };
@@ -843,7 +840,7 @@
 
   function setDoneResults(_ref2) {
     var nodesTested = _ref2.nodesTested,
-        nodesFound = _ref2.nodesFound;
+      nodesFound = _ref2.nodesFound;
     WINDOW.FontAwesomeDetection = WINDOW.FontAwesomeDetection || {};
     WINDOW.FontAwesomeDetection.nodesTested = nodesTested;
     WINDOW.FontAwesomeDetection.nodesFound = nodesFound;
@@ -851,7 +848,7 @@
   }
 
   function conflictDetection() {
-    var report$$1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function () {};
+    var report$$1 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : function () { };
     var nodesTested = {
       conflict: {},
       noConflict: {}
@@ -882,17 +879,9 @@
     // these two timeout-related settings.
 
     var masterTimeout = WINDOW.FontAwesomeDetection.timeout + WINDOW.FontAwesomeDetection.resultsCollectionMaxWait;
-    console.group('Font Awesome Detector');
 
     if (testCount === 0) {
-      console.info('%cAll Good!', 'color: green; font-size: large');
-      console.info('We didn\'t find anything that needs testing for conflicts. Ergo, no conflicts.');
     } else {
-      console.info("Testing ".concat(testCount, " possible conflicts."));
-      console.info("We'll wait about ".concat(Math.round(WINDOW.FontAwesomeDetection.timeout / 10) / 100, " seconds while testing these and\n") + "then up to another ".concat(Math.round(WINDOW.FontAwesomeDetection.resultsCollectionMaxWait / 10) / 100, " to allow the browser time\n") + "to accumulate the results. But we'll probably be outta here way before then.\n\n");
-      console.info("You can adjust those durations by assigning values to these attributes on the <script> element that loads this detection:");
-      console.info("\t%c".concat(timeoutAttr, "%c: milliseconds to wait for each test before deciding whether it's a conflict."), 'font-weight: bold;', 'font-size: normal;');
-      console.info("\t%c".concat(resultsCollectionMaxWaitAttr, "%c: milliseconds to wait for the browser to accumulate test results before giving up."), 'font-weight: bold;', 'font-size: normal;');
       pollUntil({
         // Give this overall timer a little extra cushion
         maxDuration: masterTimeout,
@@ -902,7 +891,6 @@
           return Object.keys(nodesTested.conflict).length + Object.keys(nodesTested.noConflict).length >= testCount;
         }
       }).then(function () {
-        console.info('DONE!');
         setDoneResults({
           nodesTested: nodesTested,
           nodesFound: nodesFound
@@ -911,10 +899,8 @@
           nodesTested: nodesTested,
           nodesFound: nodesFound
         });
-        console.groupEnd();
       }).catch(function (e) {
         if (e === 'timeout') {
-          console.info('TIME OUT! We waited until we got tired. Here\'s what we found:');
           setDoneResults({
             nodesTested: nodesTested,
             nodesFound: nodesFound
@@ -924,8 +910,6 @@
             nodesFound: nodesFound
           });
         } else {
-          console.info('Whoops! We hit an error:', e);
-          console.info('Here\'s what we\'d found up until that error:');
           setDoneResults({
             nodesTested: nodesTested,
             nodesFound: nodesFound
@@ -936,7 +920,6 @@
           });
         }
 
-        console.groupEnd();
       });
     }
   } // Allow clients to access, and in some cases, override some properties

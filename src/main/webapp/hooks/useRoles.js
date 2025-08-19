@@ -12,7 +12,7 @@ export const useRoles = () => {
         const rolesData = await getRoles();
         setRoles(new Set(Array.isArray(rolesData) ? rolesData : []));
       } catch (error) {
-        console.error("Error loading roles:", error);
+      
         setRoles(new Set());
       } finally {
         setLoading(false);

@@ -102,7 +102,7 @@ const BasicInfo = (props) => {
   const [enrollSetting, setEnrollSetting] = useState([]);
   let riskCountQuestion = [];
   const [kP, setKP] = useState([]);
-  const [codesets, setCodesets] =useState({})
+  const [codesets, setCodesets] = useState({})
   const [errors, setErrors] = useState({});
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -143,15 +143,15 @@ const BasicInfo = (props) => {
   });
 
   useEffect(() => {
-    
-    
+
+
     if (objValues.age !== "") {
       props.setPatientObjAge(objValues.age);
     }
   }, [objValues.age]);
 
-  
- 
+
+
 
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -276,7 +276,7 @@ const BasicInfo = (props) => {
     setObjValues({ ...objValues, age: e.target.value });
   };
 
-  
+
 
   //Get list of DSD Model Type
   function SettingModality(settingId) {
@@ -289,7 +289,7 @@ const BasicInfo = (props) => {
         setSetting(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
@@ -356,7 +356,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -374,7 +374,7 @@ const BasicInfo = (props) => {
         });
       }
     }
-    
+
     if (objValues.age < 15) {
       if (validate()) {
         axios
@@ -394,7 +394,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -431,7 +431,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -459,8 +459,8 @@ const BasicInfo = (props) => {
 
   useGetCodesets({
     codesetsKeys: [
-     "TARGET_GROUP",
-     "TEST_SETTING",
+      "TARGET_GROUP",
+      "TEST_SETTING",
     ],
     patientId: props?.patientObj?.id || props?.basicInfo.id,
     onSuccess: loadCodesets
@@ -531,7 +531,7 @@ const BasicInfo = (props) => {
                           {value.display}
                         </option>
                       ))}
-                      
+
                     </select>
                     {errors.testingSetting !== "" ? (
                       <span className={classes.error}>

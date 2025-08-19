@@ -190,7 +190,7 @@ const BasicInfo = (props) => {
         setFacilityCode(response.data);
       })
       .catch((error) => {
-        console.log(error);
+     
       });
 
     let visitDate = new Date(props.patientObj.dateVisit);
@@ -270,30 +270,21 @@ const BasicInfo = (props) => {
     }
   };
 
-  const getSettingList=()=>{
-
-    if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
-      setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-    }else if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase()  === "facility"|| "hts_entry_point_facility"){
-
-      
-      setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
-    }else{
-      setEnrollSetting([]);
-
-    }
-
+  
+  const getSettingList = () => {
     setModality(
       getCheckModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       )
     );
+
+    
   }
 
   useEffect(() => {
     CreateClientCode();
     getSettingList();
-  }, [props.patientObj, facilityCode]);
+  }, []);
 
   const handleSubmitCheckOut = () => {
     if (
@@ -307,10 +298,10 @@ const BasicInfo = (props) => {
           { headers: { Authorization: `Bearer ${token}` } }
         )
         .then((response) => {
-          console.log(response.data);
+       
         })
         .catch((error) => {
-          console.log(error);
+       
         });
     }
   };
@@ -385,7 +376,7 @@ const BasicInfo = (props) => {
 
   /*****  Validation  */
   const validate = () => {
-    
+
     temp.clientCode = objValues.clientCode ? "" : "This field is required.";
     temp.typeCounseling = objValues.typeCounseling
       ? ""
@@ -429,7 +420,7 @@ const BasicInfo = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-  
+
   const checkClientCode = (e) => {
     let code = "";
 
@@ -530,11 +521,11 @@ const BasicInfo = (props) => {
           })
           .catch((error) => {
             setSaving(false);
-            console.log(error);
+          
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -571,7 +562,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -614,17 +605,15 @@ const BasicInfo = (props) => {
     setCounselingType(data["COUNSELING_TYPE"])
     setSourceReferral(data["SOURCE_REFERRAL"])
     setGender(data["GENDER"])
-    setEnrollSetting(["TEST_SETTING"])
 
     if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    } else if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
-    
-      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } else {
-      setEnrollSetting([]);
+    } 
 
-    }
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } 
+    
 
   }
 
@@ -638,7 +627,7 @@ const BasicInfo = (props) => {
       "COUNSELING_TYPE",
       "SOURCE_REFERRAL",
       "GENDER",
-      "TEST_SETTING", 
+      "TEST_SETTING",
 
     ],
     patientId: props.patientObj?.id,
@@ -764,7 +753,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {sourceReferral.map((value) => (
+                    {sourceReferral?.map?.((value) => (
                       <option key={value.id} value={value.id}>
                         {value.display}
                       </option>
@@ -794,7 +783,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {enrollSetting.map((value) => (
+                    {enrollSetting?.map?.((value) => (
                       <option key={value.id} value={value.code}>
                         {value.display}
                       </option>
@@ -1018,7 +1007,7 @@ const BasicInfo = (props) => {
                           }}
                           disabled={
                             testingSetting ===
-                              "FACILITY_HTS_TEST_SETTING_ANC" ||
+                            "FACILITY_HTS_TEST_SETTING_ANC" ||
                             testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
                           }
                         >

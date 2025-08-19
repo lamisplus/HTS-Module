@@ -95,10 +95,8 @@ const useStyles = makeStyles((theme) => ({
 const BasicInfo = (props) => {
   const classes = useStyles();
   const history = useHistory();
-  //console.log("enr", props.activePage.activeObject);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
-  //const [hideNumChild, setHideNumChild] = useState(false);
   const [kP, setKP] = useState([]);
   const [enrollSetting, setEnrollSetting] = useState([]);
 
@@ -348,10 +346,9 @@ const BasicInfo = (props) => {
 
     if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    } else if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    } 
+     if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } else {
-      setEnrollSetting([]);
     }
 
   }

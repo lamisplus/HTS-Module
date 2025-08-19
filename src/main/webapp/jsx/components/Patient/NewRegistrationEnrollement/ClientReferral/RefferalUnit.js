@@ -107,7 +107,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const RefferralUnit = (props) => {
-  // console.log("props.patientObj", props.patientObj);
   const patientObj = props.patientObj;
   const classes = useStyles();
   const [errors, setErrors] = useState({});
@@ -128,7 +127,6 @@ const RefferralUnit = (props) => {
 
   const [facilityName, setFacilityName] = useState(Cookies.get("facilityName"));
   const [allFacilities, setAllFacilities] = useState([]);
-  // console.log(Cookies.get("facilityName"));
   const [statesOfTheReceivingFacility, setStateOfTheReceivingFacility] =
     useState([]);
   const [lgasOfTheReceivingFacility, setLgasOfTheReceivingFacility] = useState(
@@ -253,7 +251,7 @@ const RefferralUnit = (props) => {
 
   // handle Facility Name to slect drop down
   const handleInputChangeObject = (e) => {
-    // console.log(e);
+    
     setPayload({
       ...payload,
       nameOfReceivingFacility: e.name,
@@ -284,10 +282,8 @@ const RefferralUnit = (props) => {
         setCountries(res);
       })
       .catch((e) => {
-        // console.log(e);
+      
       });
-
-    // console.log(response);
   };
 
   const checkNumberLimit = (e) => {
@@ -315,7 +311,6 @@ const RefferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch states error" + e);
       });
   };
 
@@ -332,7 +327,6 @@ const RefferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch LGA error" + e);
       });
   };
 
@@ -349,7 +343,6 @@ const RefferralUnit = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch Facilities error" + e);
       });
   };
 
@@ -555,7 +548,6 @@ const RefferralUnit = (props) => {
       ? ""
       : "This field is required.";
     temp.serviceNeeded = payload.serviceNeeded ? "" : "This field is required.";
-    // console.log("temp", temp);
     temp.referredTo = payload.referredTo ? "" : "This field is required.";
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
@@ -611,7 +603,6 @@ const RefferralUnit = (props) => {
         // history.push("/")
       } catch (error) {
         setSaving(false);
-        // console.log("error", error);
         const errorMessage =
           error.response?.data?.apierror?.message ||
           "Something went wrong, please try again";
@@ -1376,10 +1367,7 @@ const RefferralUnit = (props) => {
                           }}
                           value={payload.receivingFacilityStateName}
                       >
-                        {/*{console.log(*/}
-                        {/*    "receivng",*/}
-                        {/*    payload.receivingFacilityStateName*/}
-                        {/*)}*/}
+                       
                         <option>Select State</option>
                         {states.map((state) => (
                             <option key={state?.id} value={state?.name}>
@@ -1431,7 +1419,7 @@ const RefferralUnit = (props) => {
                             }
                           }}
                       >
-                        {/*{console.log("receivng", payload.receivingFacilityLgaName)}*/}
+                       
                         <option>Select LGA</option>
                         {lgasOfTheReceivingFacility.map((lga) => (
                             <option key={lga.id} value={lga.name}>

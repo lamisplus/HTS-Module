@@ -475,7 +475,7 @@ const HIVSTPatientRegistration = (props) => {
                 });
                 setObjValues({...objValues, hasConductedHIVST: "No"});
             } else {
-                // console.log("Cannot add more user information as it exceeds the number of HIVST kits received.");
+                
             }
         } else{
             toast.error("Please fill all the required fields");
@@ -680,6 +680,7 @@ const HIVSTPatientRegistration = (props) => {
         }
     };
 
+   
     const loadCodesets = (data) => {
         setCodesets(data)
         
@@ -700,7 +701,7 @@ const HIVSTPatientRegistration = (props) => {
          "MARITAL_STATUS",
          "SERVICE_PROVIDED"
         ],
-        patientId: props?.patientObj?.id || props?.basicInfo.id,
+        patientId: props?.patientObj?.id || props?.basicInfo?.id,
         onSuccess: loadCodesets
       })
     
@@ -1546,30 +1547,6 @@ const HIVSTPatientRegistration = (props) => {
 
                                 </>
                             )}
-
-                            {/*Checkbox to select if the User has conducted the HIVST – if checked, display the*/}
-                            {/*following questions, else the user should be able to save the form.*/}
-                            {/*<div className="row mb-7">*/}
-                            {/*    <div className="form-group mb-3 col-md-4">*/}
-                            {/*        <FormGroup>*/}
-                            {/*            <label>*/}
-                            {/*                <input*/}
-                            {/*                    type="checkbox"*/}
-                            {/*                    checked={objValues.hasConductedHIVST}*/}
-                            {/*                    onChange={() => {*/}
-                            {/*                        setObjValues(prevState => ({*/}
-                            {/*                            ...prevState,*/}
-                            {/*                            hasConductedHIVST: !prevState.hasConductedHIVST*/}
-                            {/*                        }));*/}
-                            {/*                        // console.log("Has Conducted HIVST", !objValues.hasConductedHIVST);*/}
-                            {/*                    }}*/}
-                            {/*                    style={{marginRight: "10px"}}*/}
-                            {/*                />*/}
-                            {/*                Have you conducted the HIVST ?*/}
-                            {/*            </label>*/}
-                            {/*        </FormGroup>*/}
-                            {/*    </div>*/}
-                            {/*</div>*/}
 
 
                             {objValues && objValues.otherTestKitUserInfoAvailable === "Yes" &&

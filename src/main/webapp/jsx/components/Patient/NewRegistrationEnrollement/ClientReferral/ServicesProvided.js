@@ -147,7 +147,7 @@ const ServicesProvided = (props) => {
 
         })
         .catch((e) => {
-          // console.log("Fetch states error" + e);
+         
         });
   };
 
@@ -167,7 +167,6 @@ const ServicesProvided = (props) => {
 
         })
         .catch((e) => {
-          // console.log("Fetch LGA error" + e);
         });
   };
 
@@ -294,7 +293,6 @@ const ServicesProvided = (props) => {
     e.preventDefault();
     
     if (validate()) {
-      // console.log(payload);
       //   postPayload(payload);
     }
   };

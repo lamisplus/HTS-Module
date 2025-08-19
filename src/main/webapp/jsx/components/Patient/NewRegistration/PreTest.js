@@ -139,7 +139,7 @@ const BasicInfo = (props) => {
   const [modalityCheck, setModalityCheck] = useState("");
 
   let dataObj = props.patientObj;
-  //console.log("data", dataObj);
+  
   const [permissions, setPermission] = useState(
     localStorage.getItem("stringifiedPermmision")?.split(",")
   );
@@ -227,7 +227,7 @@ const BasicInfo = (props) => {
 
       if (props?.patientObj?.pregnant) {
         checkPregnantPatient(props.patientObj.pregnant).then((res) => {
-          console.log("my result", res);
+         
           setKnowledgeAssessment({
             ...knowledgeAsses,
             clientPregnant: res ? "true" : "false",
@@ -595,7 +595,7 @@ const BasicInfo = (props) => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((resp) => {
-          console.log("ML", resp);
+        
           let predictions = Object.values(resp.data.result.predictions);
           setPredictionValue(predictions);
           let statusVal = "";
@@ -628,7 +628,6 @@ const BasicInfo = (props) => {
           setSavingRsult(false);
         })
         .catch((err) => {
-          console.error("ML_err", err);
         });
     }
   };

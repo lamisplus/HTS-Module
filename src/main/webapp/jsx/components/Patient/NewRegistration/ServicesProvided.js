@@ -185,7 +185,7 @@ const ServicesProvided = (props) => {
           }
         })
         .catch((e) => {
-          // console.log("Fetch states error" + e);
+          
         });
   };
 
@@ -254,7 +254,6 @@ const ServicesProvided = (props) => {
     temp.categoryOfService = payload.categoryOfService
       ? ""
       : "This field is required.";
-     // console.log("temp", temp);
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };

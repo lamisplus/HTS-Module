@@ -103,13 +103,11 @@ const Home = (props) => {
         // Set LMP data
         setLMP(response.data);
       } catch (error) {
-        console.error("Error fetching ANC LMP data:", error);
+     
       }
     } else {
       setLastVisitModalityAndCheckedIn(true)
-      console.log(
-        "Patient either has no record, no HIV result, or result isn't negative. Keeping type as NEW HTS"
-      );
+    
     }
 
     setNewHTSType(htsType);
@@ -140,7 +138,6 @@ const Home = (props) => {
       );
       setPatientList(response.data.htsClientDtoList);
     } catch (error) {
-      console.error("Error fetching patient list:", error);
     } finally {
       setLoading(false);
     }
@@ -190,7 +187,6 @@ const Home = (props) => {
       setLastHTS(response.data);
 
     } catch (error) {
-      console.error("Error fetching current HTS:", error);
     } finally {
       setLoading(false);
     }

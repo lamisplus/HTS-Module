@@ -194,12 +194,12 @@ const BasicInfo = (props) => {
         : "",
     age:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.dateOfBirth
+        props.patientObj.personResponseDto.dateOfBirth
         ? props.patientObj?.riskStratificationResponseDto?.age
         : "",
     dob:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.dateOfBirth
+        props.patientObj.personResponseDto.dateOfBirth
         ? props.patientObj.personResponseDto.dateOfBirth
         : "",
     breastFeeding:
@@ -225,11 +225,11 @@ const BasicInfo = (props) => {
         ? props.patientObj.pregnant
         : props.patientObj.riskStratificationResponseDto.testingSetting ===
           "FACILITY_HTS_TEST_SETTING_ANC"
-        ? localStorage.getItem("pregnancyCode")
-        : "",
+          ? localStorage.getItem("pregnancyCode")
+          : "",
     dateOfBirth:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.dateOfBirth
+        props.patientObj.personResponseDto.dateOfBirth
         ? props.patientObj.personResponseDto.dateOfBirth
         : "",
     dateOfRegistration:
@@ -240,12 +240,12 @@ const BasicInfo = (props) => {
     deceasedDateTime: "",
     educationId:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.educationId
+        props.patientObj.personResponseDto.educationId
         ? props.patientObj.personResponseDto.educationId
         : "",
     employmentStatusId:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.employmentStatusId
+        props.patientObj.personResponseDto.employmentStatusId
         ? props.patientObj.personResponseDto.employmentStatusId
         : "",
     facilityId: "",
@@ -255,52 +255,52 @@ const BasicInfo = (props) => {
         : "",
     genderId:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.genderId
+        props.patientObj.personResponseDto.genderId
         ? props.patientObj.personResponseDto.genderId
         : "",
     address:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.address
+        props.patientObj.personResponseDto.address
         ? getAddress(props.patientObj.personResponseDto.address)
         : "",
     phoneNumber:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.contactPoint
+        props.patientObj.personResponseDto.contactPoint
         ? getPhoneNumber(props.patientObj.personResponseDto.contactPoint)
         : "",
     isDateOfBirthEstimated:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.isDateOfBirthEstimated
+        props.patientObj.personResponseDto.isDateOfBirthEstimated
         ? props.patientObj.personResponseDto.isDateOfBirthEstimated
         : "",
     maritalStatusId:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.maritalStatus
+        props.patientObj.personResponseDto.maritalStatus
         ? props.patientObj.personResponseDto.maritalStatus.id
         : "",
     organizationId:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.genderId
+        props.patientObj.personResponseDto.genderId
         ? props.patientObj.personResponseDto.genderId
         : "",
     otherName:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.otherName
+        props.patientObj.personResponseDto.otherName
         ? props.patientObj.personResponseDto.otherName
         : "",
     sex:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.sex
+        props.patientObj.personResponseDto.sex
         ? props.patientObj.personResponseDto.sex
         : pmtctSetting.includes(
-            props.patientObj.riskStratificationResponseDto.testingSetting
-          )
-        ? "Female"
-        : props.patientObj.targetGroup === "TARGET_GROUP_FSW"
-        ? "Female"
-        : props.patientObj.targetGroup === "TARGET_GROUP_MSM"
-        ? "Male"
-        : "",
+          props.patientObj.riskStratificationResponseDto.testingSetting
+        )
+          ? "Female"
+          : props.patientObj.targetGroup === "TARGET_GROUP_FSW"
+            ? "Female"
+            : props.patientObj.targetGroup === "TARGET_GROUP_MSM"
+              ? "Male"
+              : "",
     stateId: country && country.stateId ? country.stateId : "",
     riskAssessment:
       props.extra && props.extra.riskAssessment
@@ -311,7 +311,7 @@ const BasicInfo = (props) => {
     lga: country && country.district ? country.district : "",
     surname:
       props.patientObj.personResponseDto &&
-      props.patientObj.personResponseDto.surname
+        props.patientObj.personResponseDto.surname
         ? props.patientObj.personResponseDto.surname
         : "",
     previouslyTested: props.patientObj ? props.patientObj.previouslyTested : "",
@@ -431,6 +431,7 @@ const BasicInfo = (props) => {
   useEffect(() => {
     determinSex();
     CreateClientCode();
+    getStates()
 
     let checkEnrollIndex = JSON.parse(localStorage.getItem("index"));
     if (
@@ -481,27 +482,26 @@ const BasicInfo = (props) => {
 
   }, [objValues.age, props.patientObj, props.extra.age, facilityCode]);
 
-  
-  
+
+
 
   //Get list of Genders from
-  
+
 
   const loadCodesets = (data) => {
     setCodesets(data)
-    
+
     setKP(data["TARGET_GROUP"])
     setIndexTesting(data["INDEX_TESTING"])
     setPregnancyStatus(data["PREGNANCY_STATUS"])
-    // determinPregnancy(data["PREGNANCY_STATUS"])
     setCounselingType(data["COUNSELING_TYPE"]);
 
-    if(props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community"){
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    }else if(props.patientObj.riskStratificationResponseDto.entryPoint === "facility" || "hts_entry_point_facility"){
+    }
+
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
-    }else{
-      setEnrollSetting([]);
     }
 
     setMaritalStatus(data["MARITAL_STATUS"])
@@ -533,6 +533,7 @@ const BasicInfo = (props) => {
     setStateByCountryId("1");
     setObjValues({ ...objValues, countryId: 1 });
   };
+
   //Get list of State
   function setStateByCountryId(getCountryId) {
     axios
@@ -544,7 +545,7 @@ const BasicInfo = (props) => {
         setStates(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
   function getProvincesId(getStateId) {
@@ -557,7 +558,7 @@ const BasicInfo = (props) => {
         setProvinces(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
   //fetch province
@@ -577,7 +578,7 @@ const BasicInfo = (props) => {
         );
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -723,33 +724,15 @@ const BasicInfo = (props) => {
     }
   };
 
-  // const determinPregnancy = (pregList) => {
-  //   // get  the value of pregnancy being used
-  //   let pregnancyUsed = "";
-  //   if (pregList.length > 0) {
-  //     pregList.map((each, index) => {
-  //       if (each.code === "PREGANACY_STATUS_PREGNANT") {
-  //         pregnancyUsed = each.id;
-  //       }
-  //     });
-  //   }
-
-  //   if (
-  //     props.patientObj.riskStratificationResponseDto.testingSetting ===
-  //     "FACILITY_HTS_TEST_SETTING_ANC"
-  //   ) {
-  //     setObjValues({ ...objValues, pregnant: pregnancyUsed });
-  //   }
-  // };
-
+ 
   const determinSex = () => {
     if (
       props.patientObj.riskStratificationResponseDto.testingSetting ===
-        "FACILITY_HTS_TEST_SETTING_ANC" ||
+      "FACILITY_HTS_TEST_SETTING_ANC" ||
       props.patientObj.riskStratificationResponseDto.testingSetting ===
-        "FACILITY_HTS_TEST_SETTING_L&D" ||
+      "FACILITY_HTS_TEST_SETTING_L&D" ||
       props.patientObj.riskStratificationResponseDto.testingSetting ===
-        "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
+      "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING"
     ) {
       setShowPregnancy(true);
       setdisableSex(true);
@@ -980,11 +963,11 @@ const BasicInfo = (props) => {
           })
           .catch((error) => {
             setSaving(false);
-            console.log(error);
+          
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -1018,11 +1001,10 @@ const BasicInfo = (props) => {
           })
           .catch((error) => {
             setSaving(false);
-            console.log(error);
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -1042,7 +1024,7 @@ const BasicInfo = (props) => {
     }
   };
 
-  
+
 
   const testingSetting =
     props.patientObj.riskStratificationResponseDto.testingSetting;
@@ -1430,7 +1412,7 @@ const BasicInfo = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled
+                  // disabled
                   />
                   {errors.phoneNumber !== "" ? (
                     <span className={classes.error}>{errors.phoneNumber}</span>

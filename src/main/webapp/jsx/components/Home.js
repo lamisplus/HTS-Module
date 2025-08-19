@@ -6,6 +6,13 @@ import { getListOfPermission } from "../../utility";
 import { useRoles } from "../../hooks/useRoles";
 import { usePermissions } from "../../hooks/usePermissions";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import Button from "@material-ui/core/Button";
+import { FaUserPlus } from "react-icons/fa";
+import axios from "axios";
+import { url as baseUrl } from "./../../api";
+import { token as token } from "./../../api";
+import { getAcount } from "../../utility";
 
 const Dashboard = lazy(() => import("./Patient/PatientList"));
 const HTSList = lazy(() => import("./Patient/HTSList"));
@@ -40,6 +47,68 @@ const Home = () => {
   }, [])
 
 
+  const getPermissions = async () => {
+    await axios
+      .get(`${baseUrl}account`, {
+
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+
+        let staticPermission = [
+          "admin_read",
+          "admin_delete",
+          "all_permission",
+          "admin_write"
+        ]
+
+        localStorage.setItem("permissions", staticPermission);
+        localStorage.setItem("FacId", response.data.currentOrganisationUnitId);
+
+        let generatedPermission = getListOfPermission(
+          staticPermission
+        );
+
+        localStorage.setItem(
+          "generatedPermission",
+          JSON.stringify(generatedPermission)
+        );
+        let stringifiedPermmision = generatedPermission.map((each, index) => {
+          return each.name;
+        });
+
+        localStorage.setItem(
+          "stringifiedPermmision",
+          JSON.stringify(stringifiedPermmision)
+        );
+      })
+      .catch((error) => { });
+  };
+
+
+  const getFacilityAccount = () => {
+    getAcount()
+      .then((response) => {
+      })
+      .catch(() => { });
+  };
+
+
+  useEffect(() => {
+    getPermissions();
+    getFacilityAccount()
+    const permissions = localStorage.getItem("permissions")?.split(",");
+    let obj = {
+      uuid: "",
+      type: "",
+      clientCode: "",
+    };
+    localStorage.setItem("index", JSON.stringify(obj));
+  }, []);
+
+
+
+
   useEffect(() => {
     if (!rolesLoading) {
       const defaultTab = isRDE ? "patients" : "checkedin";
@@ -47,6 +116,7 @@ const Home = () => {
       setActiveTab(defaultTab);
     }
   }, [rolesLoading, isRDE]);
+  
 
   const permissions = useMemo(
     () => ({
@@ -72,7 +142,19 @@ const Home = () => {
           </li>
         </ol>
       </div>
-
+      {permissions.canSeeFindPatients && (
+        <Link to={"register-patient"}>
+          <Button
+            variant="contained"
+            color="primary"
+            className="mt-2 mr-3 mb-0 float-end"
+            startIcon={<FaUserPlus size="10" />}
+            style={{ backgroundColor: "#014d88" }}
+          >
+            <span style={{ textTransform: "capitalize" }}>New Patient</span>
+          </Button>
+        </Link>
+      )}
       <br />
       <br /> <br />
       <Row>
@@ -102,17 +184,19 @@ const Home = () => {
                     </Tab>
                   )}
 
-                  <Tab eventKey="hts" title="HTS Patients">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "hts" && <HTSList />}
-                    </Suspense>
-                  </Tab>
+                  {permissions.canSeeFindPatients && (
+                    <Tab eventKey="hts" title="HTS Patients">
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {key === "hts" && <HTSList />}
+                      </Suspense>
+                    </Tab>)}
 
-                  <Tab eventKey="hivst" title="HIVST Patients">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "hivst" && <HIVSTPatient />}
-                    </Suspense>
-                  </Tab>
+                  {permissions.canSeeFindPatients && (
+                    <Tab eventKey="hivst" title="HIVST Patients">
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {key === "hivst" && <HIVSTPatient />}
+                      </Suspense>
+                    </Tab>)}
                 </Tabs>
               </div>
             </Card.Body>

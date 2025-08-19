@@ -316,7 +316,6 @@ const CheckedInPatients = (props) => {
       const audio = audioRefs.current[soundKey];
       if (audio) {
         audio.play().catch((err) => {
-          console.warn('Audio playback failed:', err);
         });
       }
     }
