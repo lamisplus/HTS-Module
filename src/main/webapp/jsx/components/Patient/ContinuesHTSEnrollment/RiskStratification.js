@@ -210,7 +210,7 @@ const RiskStratification = (props) => {
         setSpokeFacList(response.data);
       })
       .catch((error) => {
-      
+
       });
   };
 
@@ -516,6 +516,8 @@ const RiskStratification = (props) => {
 
   const handleItemClick = (page, completedMenu) => {
 
+
+
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
     } else {
@@ -584,19 +586,7 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
-  const handleSubmit2 = (e) => {
-    e.preventDefault()
 
-    const newModality = isPMTCTModality ? "skip" : "fill";
-
-    const latestForm = getNextForm(
-      "Risk_Stratification",
-      objValues.age,
-      newModality,
-      "unknown"
-    );
-   
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -640,9 +630,9 @@ const RiskStratification = (props) => {
     }
 
     getMenuLogic();
-    const newModality = isPMTCTModality ? "skip" : "fill";
+    let newModality = isPMTCTModality ? "skip" : "fill";
 
-    const latestForm = getNextForm(
+    let latestForm = getNextForm(
       "Risk_Stratification",
       objValues.age,
       newModality,
@@ -687,9 +677,10 @@ const RiskStratification = (props) => {
       objValues.code = response.data.code;
       props.setExtra(objValues);
       props.setHideOtherMenu(false);
+      const latestFormFIltered = latestForm.filter(item => item !== "pre-test-counsel");
 
-     
       handleItemClick(latestForm[0], latestForm[1]);
+
       toast.success("Risk stratification saved successfully!");
     } catch (error) {
       setSaving(false);
@@ -709,6 +700,7 @@ const RiskStratification = (props) => {
       }
     }
   };
+
 
 
   const loadCodesets = (data) => {
@@ -784,7 +776,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                
+
                 <div className="form-group mb-3 col-md-6">
                   <FormGroup>
                     <Label for="">

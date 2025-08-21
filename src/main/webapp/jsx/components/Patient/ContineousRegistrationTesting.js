@@ -616,10 +616,10 @@ const UserRegistration = (props) => {
                            
                             <span style={{ color: "#fff" }}>
                               Pre Test Counseling
-                              {/* {completed?.includes("pre-test-counsel") && (
+                              {completed?.includes("pre-test-counsel") && (
                                 <Icon name="check" color="green" />
-                              )} */}
-                              <Icon name="check" color="green" />
+                              )}
+                              
                             </span>
                           </Menu.Item>
                         )}

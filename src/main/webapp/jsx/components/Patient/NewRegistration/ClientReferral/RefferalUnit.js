@@ -490,11 +490,11 @@ const RefferralUnit = (props) => {
             }
         });
         setServiceNeeded(serviceNeeded);
-        setGenders(data["SEX"])
+        setGenders(data["GENDER"])
     }
 
     useGetCodesets({
-        codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+        codesetsKeys: ["SERVICE_PROVIDED", "SEX", "GENDER"],
         patientId: patientObj?.id,
         onSuccess: loadCodesets
     })

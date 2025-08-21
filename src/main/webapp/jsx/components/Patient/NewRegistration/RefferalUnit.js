@@ -552,11 +552,11 @@ const RefferralUnit = (props) => {
       }
     });
     setServiceNeeded(serviceNeeded);
-    setGenders(data["SEX"])
+    setGenders([...data["GENDER"], ...data["SEX"]])
   }
 
   useGetCodesets({
-    codesetsKeys: ["SERVICE_PROVIDED", "SEX"],
+    codesetsKeys: ["SERVICE_PROVIDED", "SEX", "GENDER"],
     patientId: patientObj?.id,
     onSuccess: loadCodesets
   })
@@ -565,7 +565,7 @@ const RefferralUnit = (props) => {
     <>
       <Card className={classes.root}>
         <CardBody>
-          <h2 style={{ color: "#000" }}>Client Referral Form </h2>
+          <h2 style={{ color: "#000" }}>Client Referral Form</h2>
           <br />
           <form>
             <div className="row">

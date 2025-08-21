@@ -53,6 +53,8 @@ const Home = (props) => {
   const [lastVistAndModality, setLastVistAndModality] = useState(false);
   const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] = useState(false);
 
+  
+
   const { hasRole } = useRoles();
   const isRDE = hasRole("RDE");
 
@@ -64,8 +66,6 @@ const Home = (props) => {
       new Date(moment(new Date()).format("YYYY-MM-DD"))
     ).diff(new Date(visitDate), "months", true);
 
-
-
     return monthDifference;
   };
 
@@ -75,15 +75,10 @@ const Home = (props) => {
 
     let htsType = "NEW HTS";
 
-
     let hivResult = lastRecord?.hivTestResult || lastRecord?.hivTestResult2;
 
-
     if (lastRecord?.id && hivResult && hivResult.toLowerCase() === "negative") {
-
-
       try {
-
         const response = await axios.get(
           `${baseUrl}hts/get-anc-lmp?personUuid=${props.patientObj.personUuid}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -103,11 +98,10 @@ const Home = (props) => {
         // Set LMP data
         setLMP(response.data);
       } catch (error) {
-     
+
       }
     } else {
       setLastVisitModalityAndCheckedIn(true)
-    
     }
 
     setNewHTSType(htsType);
@@ -160,7 +154,10 @@ const Home = (props) => {
 
       // Calculate visit metrics
       const visitCount = Math.round(calculateLastVisitDate(response.data.dateVisit));
+
       setLastVisitCount(visitCount);
+
+      console.log(visitCount);
 
 
       // Check modality
@@ -168,6 +165,8 @@ const Home = (props) => {
         response.data.riskStratificationResponseDto?.testingSetting
       );
       setCheckModality(modality);
+
+      console.log(modality);
 
 
 
@@ -181,6 +180,8 @@ const Home = (props) => {
 
       const finalCondition = condition || props.checkedInPatient;
       setLastVisitModalityAndCheckedIn(finalCondition);
+
+      console.log(props.checkedInPatient)
 
       await determineRetestingStatus(response.data);
 

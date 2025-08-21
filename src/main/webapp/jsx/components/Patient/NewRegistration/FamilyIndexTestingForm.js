@@ -1289,6 +1289,7 @@ const FamilyIndexTestingForm = (props) => {
       "CHILD_NUMBER",
       "INDEX_VISIT_ATTEMPTS",
       "SEX",
+      "GENDER",
       "FACILITY_HTS_TEST_SETTING",
       "COMMUNITY_HTS_TEST_SETTING"
     ],
@@ -1685,7 +1686,7 @@ const FamilyIndexTestingForm = (props) => {
                 <div className="form-group  col-md-4">
                   <FormGroup>
                     <Label>
-                      Sex <span style={{ color: "red" }}> *</span>
+                      Sex<span style={{ color: "red" }}> *</span>
                     </Label>
                     <select
                       className="form-control"

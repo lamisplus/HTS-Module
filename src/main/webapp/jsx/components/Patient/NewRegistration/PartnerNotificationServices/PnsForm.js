@@ -530,6 +530,7 @@ const PnsForm = (props) => {
     const acceptedNumber = e.slice(0, limit);
     return acceptedNumber;
   };
+
   const handleInputChangePhoneNumber = (e, inputName) => {
     const limit = 11;
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
@@ -544,6 +545,7 @@ const PnsForm = (props) => {
       setObjValues({ ...objValues, [inputName]: NumberValue });
     }
   };
+
   const alphabetOnly = (value) => {
     const result = value.replace(/[^a-z]/gi, "");
     return result;
@@ -551,15 +553,19 @@ const PnsForm = (props) => {
   const validate = () => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
-    temp.partnerName = objValues.htsClientInformation.partnerName
+
+    objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" &&  ( temp.partnerName = objValues.htsClientInformation.partnerName
       ? ""
-      : "This field is required.";
-    temp.partnerAge = objValues.htsClientInformation.partnerAge
+      : "This field is required.");
+
+    
+      objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" && (temp.partnerAge = objValues.htsClientInformation.partnerAge
       ? ""
-      : "This field is required.";
-    temp.partnerSex = objValues.htsClientInformation.partnerSex
+      : "This field is required.")
+
+   objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" && (temp.partnerSex = objValues.htsClientInformation.partnerSex
       ? ""
-      : "This field is required.";
+      : "This field is required.")
 
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
@@ -573,11 +579,14 @@ const PnsForm = (props) => {
     }
 
     setErrors({ ...temp });
+
+    console.log(errors);
     return Object.values(temp).every((x) => x == "");
   };
 
 
   const handleSubmit = (e) => {
+    console.log("handle submit clicked");
     e.preventDefault();
     let age = calculate_age(
       props?.basicInfo?.personResponseDto?.dateOfBirth
@@ -594,9 +603,9 @@ const PnsForm = (props) => {
     objValues.contactTracing = contactTracing;
     objValues.partnerId = partnerId;
 
-    // if (validate()) {
+
     if (validate()) {
-    
+      console.log("PNS form saving reached after validation");
       setSaving(true);
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;
@@ -614,8 +623,6 @@ const PnsForm = (props) => {
             handleItemClick("pns-history", "pns");
           } else {
             if (latestForm[0] === latestForm[1]) {
-              // loadNextForm();
-
               setShowSaveButton(false);
             } else {
               loadOtherForm();
@@ -649,17 +656,24 @@ const PnsForm = (props) => {
     }
   };
 
+
   const loadCodesets = (data) => {
     setCodesets(data)
-    if ((props?.patientObj?.testingSetting.toLowerCase() === "community" || "hts_entry_point_community")
+
+
+    if ((props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility" || "facility_hts_test_setting_prep_testing")
+      || (props?.patientObj?.testingSetting.includes("FACILITY")
+      )
+    ) {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    } else if (
+      (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community" || "community_hts_test_setting_prep_testing")
       || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
     ) {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
-    else if ((props?.patientObj?.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility")
-      || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
-      setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    }
+
+    // setSetting(data["FACILITY_HTS_TEST_SETTING"])
 
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])
@@ -1162,58 +1176,7 @@ const PnsForm = (props) => {
                         </select>
                       </FormGroup>
                     </div>
-                    {/*<div className="form-group mb-3 col-md-4">*/}
-                    {/*    <FormGroup>*/}
-                    {/*        <Label for="">Last Name</Label>*/}
-                    {/*        <Input*/}
-                    {/*            type="text"*/}
-                    {/*            name="lastName"*/}
-                    {/*            id="lastName"*/}
-                    {/*            value={objValues.lastName}*/}
-                    {/*            onChange={handleInputChange}*/}
-                    {/*            style={{*/}
-                    {/*                border: "1px solid #014D88",*/}
-                    {/*                borderRadius: "0.25rem",*/}
-                    {/*            }}*/}
-                    {/*        />*/}
-                    {/*    </FormGroup>*/}
-                    {/*</div>*/}
-                    {/* <div className="form-group mb-2 col-md-4">
-                      <FormGroup>
-                        <Label>Date Of Birth</Label>
-                        <div className="radio">
-                          <label>
-                            <input
-                              type="radio"
-                              value="Actual"
-                              name="dateOfBirth"
-                              defaultChecked
-                              onChange={(e) => handleDateOfBirthChange(e)}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.2rem",
-                              }}
-                            />{" "}
-                            Actual
-                          </label>
-                        </div>
-                        <div className="radio">
-                          <label>
-                            <input
-                              type="radio"
-                              value="Estimated"
-                              name="dateOfBirth"
-                              onChange={(e) => handleDateOfBirthChange(e)}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.2rem",
-                              }}
-                            />{" "}
-                            Estimated
-                          </label>
-                        </div>
-                      </FormGroup>
-                    </div> */}
+
                     <div className="form-group mb-2 col-md-4">
                       <FormGroup>
                         <Label>Date Of Birth</Label>
@@ -1294,38 +1257,6 @@ const PnsForm = (props) => {
                                         )} */}
                       </FormGroup>
                     </div>
-                    {/*<div className="form-group mb-3 col-md-4">*/}
-                    {/*  <FormGroup>*/}
-                    {/*    <Label for="">Phone Number</Label>*/}
-
-                    {/*    <PhoneInput*/}
-                    {/*        containerStyle={{*/}
-                    {/*          width: "100%",*/}
-                    {/*          border: "1px solid #014D88",*/}
-                    {/*        }}*/}
-                    {/*        inputStyle={{width: "100%", borderRadius: "0px"}}*/}
-                    {/*        country={"ng"}*/}
-                    {/*        placeholder="(234)7099999999"*/}
-                    {/*        minLength={10}*/}
-                    {/*        name="phoneNumber"*/}
-                    {/*        disabled*/}
-                    {/*        id="phoneNumber"*/}
-                    {/*        masks={{ng: "...-...-....", at: "(....) ...-...."}}*/}
-                    {/*        value={objValues.phoneNumber}*/}
-                    {/*        onChange={(e) => {*/}
-                    {/*          checkPhoneNumberBasic(e, "phoneNumber");*/}
-                    {/*        }}*/}
-                    {/*        //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}*/}
-                    {/*    />*/}
-                    {/*    {errors.phoneNumber !== "" ? (*/}
-                    {/*        <span className={classes.error}>*/}
-                    {/*    {errors.phoneNumber}*/}
-                    {/*  </span>*/}
-                    {/*    ) : (*/}
-                    {/*        ""*/}
-                    {/*    )}*/}
-                    {/*  </FormGroup>*/}
-                    {/*</div>*/}
 
                     <div className="form-group  col-md-4">
                       <FormGroup>
@@ -1350,29 +1281,7 @@ const PnsForm = (props) => {
                       </FormGroup>
                     </div>
 
-                    {/*<div className="form-group mb-3 col-md-4">*/}
-                    {/*  <FormGroup>*/}
-                    {/*    <Label for="">Alternative Phone Number</Label>*/}
-                    {/*    <PhoneInput*/}
-                    {/*        containerStyle={{*/}
-                    {/*          width: "100%",*/}
-                    {/*          border: "1px solid #014D88",*/}
-                    {/*        }}*/}
-                    {/*        inputStyle={{width: "100%", borderRadius: "0px"}}*/}
-                    {/*        country={"ng"}*/}
-                    {/*        placeholder="(234)7099999999"*/}
-                    {/*        minLength={10}*/}
-                    {/*        name="alternatePhoneNumber"*/}
-                    {/*        id="altPhoneNumber"*/}
-                    {/*        masks={{ng: "...-...-....", at: "(....) ...-...."}}*/}
-                    {/*        value={objValues.alternatePhoneNumber}*/}
-                    {/*        onChange={(e) => {*/}
-                    {/*          checkPhoneNumberBasic(e, "alternatePhoneNumber");*/}
-                    {/*        }}*/}
-                    {/*        //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}*/}
-                    {/*    />*/}
-                    {/*  </FormGroup>*/}
-                    {/*</div>*/}
+
                     <div className="form-group  col-md-4">
                       <FormGroup>
                         <Label>
@@ -1494,13 +1403,7 @@ const PnsForm = (props) => {
                               }}
                             //   disabledg
                             />
-                            {/* {errors.treatmentDateI !== "" ? (
-                                          <span className={classes.error}>
-                                            {errors.referralDate}
-                                          </span>
-                                        ) : (
-                                          ""
-                                        )} */}
+
                           </FormGroup>
                         </div>
                       )}

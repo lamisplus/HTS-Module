@@ -616,13 +616,14 @@ const RefferralUnit = (props) => {
   const loadCodesets = (data) => {
     setCodesets(data)
     setServiceNeeded(data["SERVICE_PROVIDED"])
-    setGenders(data["SEX"])
+    setGenders(data["GENDER"])
   }
 
   useGetCodesets({
     codesetsKeys: [
       "SERVICE_PROVIDED",
-      "SEX"
+      "SEX",
+      "GENDER"
     ],
     patientId: patientObj?.id,
     onSuccess: loadCodesets

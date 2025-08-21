@@ -634,15 +634,17 @@ const ViewPNSForm = (props) => {
 
   const loadCodesets = (data) => {
     setCodesets(data)
-    if ((props?.patientObj?.testingSetting.toLowerCase() === "community" || "hts_entry_point_community")
-      || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
-    ) {
-      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    }
-    else if ((props?.patientObj?.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility")
-      || (props?.patientObj?.testingSetting.includes("FACILITY"))) {
-      setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    }
+    if ((props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility" || "facility_hts_test_setting_prep_testing")
+    || (props?.patientObj?.testingSetting.includes("FACILITY")
+    )
+  ) {
+    setSetting(data["FACILITY_HTS_TEST_SETTING"])
+  } else if (
+    (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community" || "community_hts_test_setting_prep_testing")
+    || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
+  ) {
+    setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+  }
 
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])
@@ -674,18 +676,6 @@ const ViewPNSForm = (props) => {
         <CardBody>
           <h2 style={{ color: "#000" }}>
             Partner Notification Services
-            {/*<Button*/}
-            {/*    variant="contained"*/}
-            {/*    color="primary"*/}
-            {/*    className=" float-end  mr-2 mt-2"*/}
-            {/*    onClick={() => handleItemClickPage("list")}*/}
-            {/*//startIcon={<FaUserPlus size="10"/>}*/}
-            {/*>*/}
-            {/*    <span style={{ textTransform: "capitalize" }}>*/}
-            {/*        {" "}*/}
-            {/*        Back To Client List*/}
-            {/*    </span>*/}
-            {/*</Button>*/}
           </h2>
 
           <br />
