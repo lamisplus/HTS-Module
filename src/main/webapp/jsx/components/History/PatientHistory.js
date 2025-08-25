@@ -53,7 +53,7 @@ const Home = (props) => {
   const [lastVistAndModality, setLastVistAndModality] = useState(false);
   const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] = useState(false);
 
-  
+
 
   const { hasRole } = useRoles();
   const isRDE = hasRole("RDE");
@@ -119,7 +119,7 @@ const Home = (props) => {
     if (props.activePage.activePage === "NEW HTS") {
       setKey("new");
     }
-  }, [props.patientObj, props.activePage]);
+  }, []);
 
   // Get list of patients
   async function patients() {
@@ -157,16 +157,13 @@ const Home = (props) => {
 
       setLastVisitCount(visitCount);
 
-      console.log(visitCount);
-
-
       // Check modality
       const modality = getCheckModalityForHTS(
         response.data.riskStratificationResponseDto?.testingSetting
       );
       setCheckModality(modality);
 
-      console.log(modality);
+      
 
 
 
@@ -178,10 +175,11 @@ const Home = (props) => {
 
       setLastVistAndModality(condition);
 
-      const finalCondition = condition || props.checkedInPatient;
+      const finalCondition = condition || Boolean(props?.checkedInPatient);
+
       setLastVisitModalityAndCheckedIn(finalCondition);
 
-      console.log(props.checkedInPatient)
+      
 
       await determineRetestingStatus(response.data);
 

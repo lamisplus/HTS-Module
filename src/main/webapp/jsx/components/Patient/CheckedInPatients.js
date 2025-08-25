@@ -133,7 +133,7 @@ const CheckedInPatients = (props) => {
   const getData = async (query) => {
     try {
       const data = await fetchPatients(query);
-      const reversedData = [...(data || [])].reverse();
+      const reversedData = [...(data || [])];
 
       // Sync localStorage with API response
       const now = new Date();

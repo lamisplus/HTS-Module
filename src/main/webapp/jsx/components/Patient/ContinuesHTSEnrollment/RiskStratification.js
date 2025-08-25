@@ -527,7 +527,7 @@ const RiskStratification = (props) => {
 
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
-  riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
+  riskCountQuestion = actualRiskCountTrue?.filter?.((x) => x === "true");
 
   const handleInputChangeRiskAssessment = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -677,7 +677,7 @@ const RiskStratification = (props) => {
       objValues.code = response.data.code;
       props.setExtra(objValues);
       props.setHideOtherMenu(false);
-      const latestFormFIltered = latestForm.filter(item => item !== "pre-test-counsel");
+      const latestFormFIltered = latestForm?.filter?.(item => item !== "pre-test-counsel");
 
       handleItemClick(latestForm[0], latestForm[1]);
 
@@ -840,7 +840,7 @@ const RiskStratification = (props) => {
                       <option value="">Select</option>
                       {entryPointSetting &&
                         entryPointSetting
-                          .filter((setting) => {
+                          ?.filter?.((setting) => {
                             // Only filter if gender is Male
                             if (
                               props.personInfo?.personResponseDto?.sex ===
@@ -995,7 +995,7 @@ const RiskStratification = (props) => {
                     >
                       <option value={""}>Select</option>
                       {kP
-                        ?.filter((value) => {
+                        ?.filter?.((value) => {
                           if (
                             props.patientAge > 14 &&
                             (value.id === 961 || value.id === 475)

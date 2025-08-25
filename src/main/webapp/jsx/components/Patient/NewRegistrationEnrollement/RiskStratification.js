@@ -532,7 +532,7 @@ const RiskStratification = (props) => {
 
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
-  riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
+  riskCountQuestion = actualRiskCountTrue?.filter((x) => x === "true");
 
   const handleInputChangeRiskAssessment = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -1022,7 +1022,7 @@ const RiskStratification = (props) => {
                     >
                       <option value={""}>Select</option>
                       {kP
-                        .filter((value) => {
+                        ?.filter?.((value) => {
                           if (
                             props.patientAge > 14 &&
                             (value.id === 961 || value.id === 475)

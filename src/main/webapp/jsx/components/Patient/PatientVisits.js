@@ -108,6 +108,53 @@ const PatientVisits = (props) => {
 
 
 
+    // const fetchServices = useCallback(async () => {
+    //     setIsLoading(true);
+    //     try {
+    //         const response = await axios.get(`${baseUrl}patient/post-service`, {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+
+    //         const allServices = response.data;
+    //         setAllServices(allServices); // still store all, if needed
+
+    //         // Determine the relevant service based on patient status
+    //         const patientStatus = props.patientInfo?.hivTestResult?.toLowerCase();
+
+
+    //         let matchedService = [];
+
+    //         if (patientStatus === "negative" && props.patientInfo?.pregnant === ("PREGANACY_STATUS_PREGNANT" || pregnancyStatusPregnant || "Pregnant")) {
+    //             matchedService = allServices.filter(item =>
+    //                 item.moduleServiceName.toLowerCase().includes("pmtct")
+    //             );
+    //         }
+    //         if (patientStatus === "positive") {
+    //             matchedService = allServices.filter(item =>
+    //                 item.moduleServiceName.toLowerCase().includes("hiv")
+    //             );
+    //         }
+    //         if (patientStatus === "negative") {
+    //             matchedService = allServices.filter(item =>
+    //                 item.moduleServiceName.toLowerCase().includes("prep")
+    //             );
+    //         }
+
+
+    //         setServices(
+    //             matchedService.map((service) => ({
+    //                 label: service.moduleServiceName,
+    //                 value: service.moduleServiceCode,
+    //             }))
+    //         );
+
+    //     } catch (error) {
+    //         toast.error("Failed to fetch services");
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // }, [baseUrl, token, props?.patientInfo?.hivTestResult]);
+
     const fetchServices = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -116,29 +163,41 @@ const PatientVisits = (props) => {
             });
 
             const allServices = response.data;
-            setAllServices(allServices); // still store all, if needed
+            setAllServices(allServices);
 
-            // Determine the relevant service based on patient status
             const patientStatus = props.patientInfo?.hivTestResult?.toLowerCase();
-
+            const isFemale = patientObj.sex?.toLowerCase() === 'female';
+            const isAbove5 = patientObj.age > 5;
 
             let matchedService = [];
 
-            if (patientStatus === "negative" && props.patientInfo?.pregnant === ("PREGANACY_STATUS_PREGNANT" || pregnancyStatusPregnant || "Pregnant")) {
-                matchedService = allServices.filter(item =>
+            if (patientStatus === "negative" &&
+                (props.patientInfo?.pregnant === "PREGANACY_STATUS_PREGNANT" ||
+                    props.patientInfo?.pregnant === pregnancyStatusPregnant ||
+                    props.patientInfo?.pregnant === "Pregnant")) {
+
+                // Filter for PMTCT services first
+                let pmtctServices = allServices.filter(item =>
                     item.moduleServiceName.toLowerCase().includes("pmtct")
                 );
-            } else if (patientStatus === "positive") {
+
+                // Remove PMTCT if patient is not female or not above 5
+                if (!isFemale || !isAbove5) {
+                    pmtctServices = [];
+                }
+
+                matchedService = pmtctServices;
+            }
+            if (patientStatus === "positive") {
                 matchedService = allServices.filter(item =>
                     item.moduleServiceName.toLowerCase().includes("hiv")
                 );
             }
-            else if (patientStatus === "negative") {
+            if (patientStatus === "negative") {
                 matchedService = allServices.filter(item =>
                     item.moduleServiceName.toLowerCase().includes("prep")
                 );
             }
-
 
             setServices(
                 matchedService.map((service) => ({
@@ -152,7 +211,7 @@ const PatientVisits = (props) => {
         } finally {
             setIsLoading(false);
         }
-    }, [baseUrl, token, props?.patientInfo?.hivTestResult]);
+    }, [baseUrl, token, props?.patientInfo?.hivTestResult, patientObj.sex, patientObj.age]);
 
 
     const fetchPatientVisits = useCallback(async () => {
@@ -174,6 +233,8 @@ const PatientVisits = (props) => {
             toast.error("Failed to fetch patient visits");
         }
     }, [patientObj.id]);
+
+    console.log(patientObj)
 
     useEffect(() => {
         fetchServices();
