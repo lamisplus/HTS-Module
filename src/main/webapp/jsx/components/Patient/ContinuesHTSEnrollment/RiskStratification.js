@@ -372,10 +372,11 @@ const RiskStratification = (props) => {
 
     if (e.target.name === "entryPoint") {
 
-      console.log(e.target.name, e.target.value)
       setObjValues(prev => ({
         ...prev,
-        testingSetting: ""
+        testingSetting: "",
+        spokeFacility: "",
+        healthFacility: "",
       }));
 
       if (e.target.value?.toLowerCase() === "hts_entry_point_community"

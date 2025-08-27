@@ -348,7 +348,9 @@ const BasicInfo = (props) => {
       // clear settings anytime entryPoint is changed so user can reselect settings
       setObjValues(prev => ({
         ...prev,
-        testingSetting: ""
+        testingSetting: "",
+        spokeFacility: "",
+        healthFacility: "",
       }));
 
 

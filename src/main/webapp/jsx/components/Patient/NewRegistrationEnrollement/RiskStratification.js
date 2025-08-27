@@ -379,7 +379,9 @@ const RiskStratification = (props) => {
     if (e.target.name === "entryPoint") {
       setObjValues(prev => ({
         ...prev,
-        testingSetting: ""
+        testingSetting: "",
+        spokeFacility: "",
+        healthFacility: "",
       }));
 
       if (e.target.value?.toLowerCase() === "hts_entry_point_community"
@@ -764,42 +766,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* {objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" && (
-                  <div className="form-group  col-md-6">
-                    <FormGroup>
-                      <Label>
-                        Community Entry Point{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <select
-                        className="form-control"
-                        name="communityEntryPoint"
-                        id="communityEntryPoint"
-                        value={objValues.communityEntryPoint}
-                        onChange={handleInputChange}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.2rem",
-                        }}
-                        disabled={props.activePage.actionType === "view"}
-                      >
-                        <option value={""}>Select</option>
-                        {entryPointCommunity.map((value) => (
-                          <option key={value.id} value={value.code}>
-                            {value.display}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.communityEntryPoint !== "" ? (
-                        <span className={classes.error}>
-                          {errors.communityEntryPoint}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
-                )} */}
+                
                 <div className="form-group mb-3 col-md-6">
                   <FormGroup>
                     <Label for="">
@@ -831,6 +798,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
+
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
@@ -876,37 +844,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* <div className="form-group  col-md-6">
-                  <FormGroup>
-                    <Label>
-                      Modality <span style={{ color: "red" }}> *</span>
-                    </Label>
-                    <select
-                      className="form-control"
-                      name="modality"
-                      id="modality"
-                      value={objValues.modality}
-                      onChange={handleInputChange}
-                      style={{
-                        border: "1px solid #014D88",
-                        borderRadius: "0.2rem",
-                      }}
-                      disabled={props.activePage.actionType === "view"}
-                    >
-                      <option value={""}>Select</option>
-                      {setting.map((value) => (
-                        <option key={value.id} value={value.code}>
-                          {value.display}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.modality !== "" ? (
-                      <span className={classes.error}>{errors.modality}</span>
-                    ) : (
-                      ""
-                    )}
-                  </FormGroup>
-                </div> */}
+
 
                 {objValues.testingSetting ===
                   "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
