@@ -371,6 +371,8 @@ const RiskStratification = (props) => {
     }
 
     if (e.target.name === "entryPoint") {
+
+      console.log(e.target.name, e.target.value)
       setObjValues(prev => ({
         ...prev,
         testingSetting: ""
@@ -380,14 +382,15 @@ const RiskStratification = (props) => {
         ||
         e.target.value?.toLowerCase() === "community"
       ) {
-        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+
       } else if (e.target.value?.toLowerCase() === "hts_entry_point_facility"
         ||
         e.target.value.toLowerCase() === "facility"
       ) {
-        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       } else {
-        setEnrollSetting([]);
+        setEntryPointSetting([]);
       }
     }
 
@@ -732,7 +735,7 @@ const RiskStratification = (props) => {
     setCodsets(data)
     setEnrollSetting(data["TEST_SETTING"])
     setEntryPoint(data["HTS_ENTRY_POINT"])
-    setEntryPointSetting(data["FACILITY_HTS_TEST_SETTING"])
+    // setEntryPointSetting(data["FACILITY_HTS_TEST_SETTING"])
 
   }
 
@@ -836,6 +839,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
+
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
@@ -868,8 +872,8 @@ const RiskStratification = (props) => {
                           ?.filter?.((setting) => {
                             // Only filter if gender is Male
                             if (
-                              props.personInfo?.personResponseDto?.sex ===
-                              "Male"
+                              props.personInfo?.personResponseDto?.sex?.toLowerCase() ===
+                              "male"
                             ) {
                               return !RESTRICTED_SETTINGS.includes(
                                 setting.code

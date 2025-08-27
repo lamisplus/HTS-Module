@@ -193,13 +193,13 @@ const RiskStratification = (props) => {
 
   useEffect(() => {
     KP();
-    setEnrollSetting(codesets?.["FACILITY_HTS_TEST_SETTING"])
+    setEntryPointSetting(codesets?.["FACILITY_HTS_TEST_SETTING"])
 
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
       if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY") {
-        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
       } else if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_FACILITY") {
-        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
 
@@ -386,12 +386,12 @@ const RiskStratification = (props) => {
         ||
         e.target.value?.toLowerCase() === "community"
       ) {
-        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
       } else if (e.target.value?.toLowerCase() === "hts_entry_point_facility"
         ||
         e.target.value?.toLowerCase() === "facility"
       ) {
-        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       } else {
         setEntryPointSetting([]);
       }
