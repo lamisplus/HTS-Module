@@ -304,7 +304,7 @@ const ViewPNSForm = (props) => {
 
 
 
- 
+
   const handleHTSClientInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
 
@@ -546,7 +546,7 @@ const ViewPNSForm = (props) => {
     setErrors({ ...temp });
     return Object.values(temp).every((x) => x == "");
   };
- 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     objValues.htsClientInformation = htsClientInformation;
@@ -634,17 +634,30 @@ const ViewPNSForm = (props) => {
 
   const loadCodesets = (data) => {
     setCodesets(data)
-    if ((props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility" || "facility_hts_test_setting_prep_testing")
-    || (props?.patientObj?.testingSetting.includes("FACILITY")
-    )
-  ) {
-    setSetting(data["FACILITY_HTS_TEST_SETTING"])
-  } else if (
-    (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community" || "community_hts_test_setting_prep_testing")
-    || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
-  ) {
-    setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-  }
+    if (
+      props?.patientObj?.testingSetting?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "facility_hts_test_setting_prep_testing"
+      ||
+      (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("FACILITY")
+      )
+    ) {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    }
+    if (
+      props?.patientObj?.testingSetting?.toLowerCase() === "community"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "community_hts_test_setting_prep_testing"
+      ||
+      (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("COMMUNITY")
+      )
+    ) {
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
 
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])

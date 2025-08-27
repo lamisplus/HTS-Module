@@ -1272,9 +1272,14 @@ const FamilyIndexTestingForm = (props) => {
     setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
     setGenders(data["SEX"])
 
-    if (props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    if (props?.patientObj?.testingSetting?.toLowerCase() === "facility" 
+    || 
+    props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility") {
       setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } else if (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community") {
+    } 
+    if (props.patientObj.testingSetting.toLowerCase() === "community" 
+    || 
+    props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community") {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
 

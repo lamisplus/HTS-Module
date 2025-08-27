@@ -193,10 +193,10 @@ const BasicInfo = (props) => {
   useEffect(() => {
     TargetGroupSetup();
   }, []);
- 
 
-  
- 
+
+
+
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");
@@ -207,7 +207,7 @@ const BasicInfo = (props) => {
       .then((response) => {
         setSpokeFacList(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
 
@@ -221,10 +221,10 @@ const BasicInfo = (props) => {
 
         props.setOrganizationInfo(response.data);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
-  
+
 
   //Set HTS menu registration
   const getMenuLogic = () => {
@@ -287,7 +287,7 @@ const BasicInfo = (props) => {
     if (name === "testingSetting" && value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      
+
       setObjValues({ ...objValues, [name]: value });
       let ans = checkPMTCTModality(value);
 
@@ -344,19 +344,30 @@ const BasicInfo = (props) => {
     }
 
     if (name === "entryPoint") {
-      if (value.toLowerCase() === "community" || "hts_entry_point_community") {
+
+      // clear settings anytime entryPoint is changed so user can reselect settings
+      setObjValues(prev => ({
+        ...prev,
+        testingSetting: ""
+      }));
+
+
+      if (value.toLowerCase() === "community" || value.toLowerCase() === "hts_entry_point_community") {
         setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-      } else if (value.toLowerCase() === "facility" || "hts_entry_point_facility") {
+      } else if (value.toLowerCase() === "facility" || value.toLowerCase() === "hts_entry_point_facility") {
         setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       } else {
         setEntryPointSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [name]: value });
+    setObjValues(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  
+
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {
     let SecAge = age !== "" ? age : 0;
     let ans;
@@ -398,7 +409,7 @@ const BasicInfo = (props) => {
       ans = false;
     }
   };
-  
+
 
   const validateAgeRestriction = (formData) => {
     // Check if we have a restricted target group with age > 14
@@ -553,10 +564,10 @@ const BasicInfo = (props) => {
     }
   };
 
-  
+
   const isAgeValid = validateAgeRestriction(objValues);
-  
-  
+
+
   const validate = () => {
     //HTS FORM VALIDATION
     let temp = { ...errors };
@@ -783,7 +794,7 @@ const BasicInfo = (props) => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -825,7 +836,7 @@ const BasicInfo = (props) => {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -862,7 +873,7 @@ const BasicInfo = (props) => {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -901,7 +912,7 @@ const BasicInfo = (props) => {
               if (error.response && error.response.data) {
                 let errorMessage =
                   error.response.data.apierror &&
-                  error.response.data.apierror.message !== ""
+                    error.response.data.apierror.message !== ""
                     ? error.response.data.apierror.message
                     : "Something went wrong, please try again";
                 toast.error(errorMessage, {
@@ -927,24 +938,28 @@ const BasicInfo = (props) => {
     setKP(data["TARGET_GROUP"])
     setEntryPoint(data["HTS_ENTRY_POINT"]);
 
-    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community" ||
+    
+    props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community") {
+
       setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-    } else if (props?.patientObj?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    } 
+    
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility" ||
+    props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility") {
       setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
-    } else {
-      setEntryPointSetting([]);
     }
 
     const pregnantStatus = data["PREGNANCY_STATUS"]
     let pregnancyUsed = "";
-        if (pregnantStatus.length > 0) {
-          pregnantStatus.map((each, index) => {
-            if (each.code === "PREGANACY_STATUS_PREGNANT") {
-              pregnancyUsed = each.id;
-            }
-          });
+    if (pregnantStatus.length > 0) {
+      pregnantStatus.map((each, index) => {
+        if (each.code === "PREGANACY_STATUS_PREGNANT") {
+          pregnancyUsed = each.id;
         }
-      localStorage.setItem("pregnancyCode", pregnancyUsed);
+      });
+    }
+    localStorage.setItem("pregnancyCode", pregnancyUsed);
   }
 
   useGetCodesets({
@@ -1042,6 +1057,7 @@ const BasicInfo = (props) => {
                     )}
                   </FormGroup>
                 </div>
+
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
@@ -1082,61 +1098,61 @@ const BasicInfo = (props) => {
 
                 {objValues.testingSetting ===
                   "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY" && (
-                  <div className="form-group  col-md-6">
-                    <FormGroup>
-                      <Label>
-                        Spoke Health Facility{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
+                    <div className="form-group  col-md-6">
+                      <FormGroup>
+                        <Label>
+                          Spoke Health Facility{" "}
+                          <span style={{ color: "red" }}> *</span>
+                        </Label>
 
-                      {spokeFacList.length > 0 ? (
-                        <>
-                          {" "}
-                          <select
-                            className="form-control"
+                        {spokeFacList.length > 0 ? (
+                          <>
+                            {" "}
+                            <select
+                              className="form-control"
+                              name="spokeFacility"
+                              id="spokeFacility"
+                              value={objValues.spokeFacility}
+                              onChange={handleInputChange}
+                              style={{
+                                border: "1px solid #014D88",
+                                borderRadius: "0.2rem",
+                                textTransform: "capitalize  !important",
+                              }}
+                            >
+                              <option value={""}>Select</option>
+                              {spokeFacList.map((value) => (
+                                <option key={value.id} value={value.spokeSite}>
+                                  {value.spokeSite}
+                                </option>
+                              ))}
+                            </select>
+                          </>
+                        ) : (
+                          <Input
+                            type="text"
                             name="spokeFacility"
                             id="spokeFacility"
                             value={objValues.spokeFacility}
+                            //value={Math.floor(Math.random() * 1093328)}
+                            // onBlur={checkClientCode}
                             onChange={handleInputChange}
                             style={{
                               border: "1px solid #014D88",
-                              borderRadius: "0.2rem",
-                              textTransform: "capitalize  !important",
+                              borderRadius: "0.25rem",
                             }}
-                          >
-                            <option value={""}>Select</option>
-                            {spokeFacList.map((value) => (
-                              <option key={value.id} value={value.spokeSite}>
-                                {value.spokeSite}
-                              </option>
-                            ))}
-                          </select>
-                        </>
-                      ) : (
-                        <Input
-                          type="text"
-                          name="spokeFacility"
-                          id="spokeFacility"
-                          value={objValues.spokeFacility}
-                          //value={Math.floor(Math.random() * 1093328)}
-                          // onBlur={checkClientCode}
-                          onChange={handleInputChange}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.25rem",
-                          }}
-                        />
-                      )}
-                      {errors.spokeFacility !== "" ? (
-                        <span className={classes.error}>
-                          {errors.spokeFacility}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
-                )}
+                          />
+                        )}
+                        {errors.spokeFacility !== "" ? (
+                          <span className={classes.error}>
+                            {errors.spokeFacility}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </FormGroup>
+                    </div>
+                  )}
 
                 {showHealthFacility && (
                   <div className="form-group  col-md-6">
@@ -1332,7 +1348,7 @@ const BasicInfo = (props) => {
                     // Add max attribute based on target group
                     max={
                       objValues.targetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-                      objValues.targetGroup === "TARGET_GROUP_PD"
+                        objValues.targetGroup === "TARGET_GROUP_PD"
                         ? 14
                         : undefined
                     }

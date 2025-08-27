@@ -377,16 +377,30 @@ const RiskStratification = (props) => {
     }
 
     if (e.target.name === "entryPoint") {
-      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+      setObjValues(prev => ({
+        ...prev,
+        testingSetting: ""
+      }));
+
+      if (e.target.value?.toLowerCase() === "hts_entry_point_community"
+        ||
+        e.target.value?.toLowerCase() === "community"
+      ) {
         setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
+      } else if (e.target.value?.toLowerCase() === "hts_entry_point_facility"
+        ||
+        e.target.value?.toLowerCase() === "facility"
+      ) {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       } else {
         setEntryPointSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
+    setObjValues(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {

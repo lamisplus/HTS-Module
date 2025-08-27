@@ -190,7 +190,7 @@ const BasicInfo = (props) => {
         setFacilityCode(response.data);
       })
       .catch((error) => {
-     
+
       });
 
     let visitDate = new Date(props.patientObj.dateVisit);
@@ -270,7 +270,7 @@ const BasicInfo = (props) => {
     }
   };
 
-  
+
   const getSettingList = () => {
     setModality(
       getCheckModality(
@@ -278,7 +278,7 @@ const BasicInfo = (props) => {
       )
     );
 
-    
+
   }
 
   useEffect(() => {
@@ -298,10 +298,10 @@ const BasicInfo = (props) => {
           { headers: { Authorization: `Bearer ${token}` } }
         )
         .then((response) => {
-       
+
         })
         .catch((error) => {
-       
+
         });
     }
   };
@@ -521,7 +521,7 @@ const BasicInfo = (props) => {
           })
           .catch((error) => {
             setSaving(false);
-          
+
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
@@ -606,14 +606,18 @@ const BasicInfo = (props) => {
     setSourceReferral(data["SOURCE_REFERRAL"])
     setGender(data["GENDER"])
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community"
+      ||
+      props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    } 
+    }
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility"
+      ||
+      props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "hts_entry_point_facility") {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } 
-    
+    }
+
 
   }
 

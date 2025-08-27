@@ -496,11 +496,15 @@ const BasicInfo = (props) => {
     setPregnancyStatus(data["PREGNANCY_STATUS"])
     setCounselingType(data["COUNSELING_TYPE"]);
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community"
+      ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility") {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
     }
 
@@ -724,7 +728,7 @@ const BasicInfo = (props) => {
     }
   };
 
- 
+
   const determinSex = () => {
     if (
       props.patientObj.riskStratificationResponseDto.testingSetting ===
@@ -963,7 +967,7 @@ const BasicInfo = (props) => {
           })
           .catch((error) => {
             setSaving(false);
-          
+
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&

@@ -177,11 +177,21 @@ const RiskStratification = (props) => {
     setEnrollSetting(codesets?.["FACILITY_HTS_TEST_SETTING"])
 
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
-      if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY") {
+
+      if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community"
+        ||
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community"
+      ) {
         setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-      } else if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint === "HTS_ENTRY_POINT_FACILITY") {
+      }
+
+      if (props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "hts_entry_point_facility"
+        ||
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() === "facility"
+      ) {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       }
+
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
 
 
@@ -307,6 +317,7 @@ const RiskStratification = (props) => {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
+
       let ans = checkPMTCTModality(e.target.value);
       displayRiskAssessment(
         riskAssessment.lastHivTestBasedOnRequest,
@@ -360,16 +371,30 @@ const RiskStratification = (props) => {
     }
 
     if (e.target.name === "entryPoint") {
-      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
+      setObjValues(prev => ({
+        ...prev,
+        testingSetting: ""
+      }));
+
+      if (e.target.value?.toLowerCase() === "hts_entry_point_community"
+        ||
+        e.target.value?.toLowerCase() === "community"
+      ) {
         setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
+      } else if (e.target.value?.toLowerCase() === "hts_entry_point_facility"
+        ||
+        e.target.value.toLowerCase() === "facility"
+      ) {
         setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"])
       } else {
-        setEntryPointSetting([]);
+        setEnrollSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
+    setObjValues(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
   };
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {

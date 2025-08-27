@@ -14,7 +14,7 @@ import { url as baseUrl } from "./../../api";
 import { token as token } from "./../../api";
 import { getAcount } from "../../utility";
 
-const Dashboard = lazy(() => import("./Patient/PatientList"));
+const PatientList = lazy(() => import("./Patient/PatientList"));
 const HTSList = lazy(() => import("./Patient/HTSList"));
 const HIVSTPatient = lazy(() => import("./Patient/HIVST/HIVSTPatient"));
 const CheckedInPatients = lazy(() => import("./Patient/CheckedInPatients"));
@@ -142,7 +142,7 @@ const Home = () => {
           </li>
         </ol>
       </div>
-      {permissions.canSeeFindPatients && (
+      {/* {permissions.canSeeFindPatients && ( */}
         <Link to={"register-patient"}>
           <Button
             variant="contained"
@@ -154,7 +154,7 @@ const Home = () => {
             <span style={{ textTransform: "capitalize" }}>New Patient</span>
           </Button>
         </Link>
-      )}
+      {/* )} */}
       <br />
       <br /> <br />
       <Row>
@@ -171,10 +171,10 @@ const Home = () => {
                   {permissions.canSeeFindPatients && (
                     <Tab eventKey="patients" title="Patients">
                       <Suspense fallback={<LoadingSpinner />}>
-                        {key === "patients" && <Dashboard />}
+                        {key === "patients" && <PatientList />}
                       </Suspense>
                     </Tab>
-                  )}
+                   )}
 
                   {permissions.canSeeCheckedInPatients && (
                     <Tab eventKey="checkedin" title="Checked-In Patients">
@@ -184,19 +184,21 @@ const Home = () => {
                     </Tab>
                   )}
 
-                  {permissions.canSeeFindPatients && (
+                  {/* {permissions.canSeeFindPatients && ( */}
                     <Tab eventKey="hts" title="HTS Patients">
                       <Suspense fallback={<LoadingSpinner />}>
                         {key === "hts" && <HTSList />}
                       </Suspense>
-                    </Tab>)}
+                    </Tab>
+                    {/* )} */}
 
-                  {permissions.canSeeFindPatients && (
+                  {/* {permissions.canSeeFindPatients && ( */}
                     <Tab eventKey="hivst" title="HIVST Patients">
                       <Suspense fallback={<LoadingSpinner />}>
                         {key === "hivst" && <HIVSTPatient />}
                       </Suspense>
-                    </Tab>)}
+                    </Tab>
+                    {/* )} */}
                 </Tabs>
               </div>
             </Card.Body>

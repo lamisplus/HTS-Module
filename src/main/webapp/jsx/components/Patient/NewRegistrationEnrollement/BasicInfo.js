@@ -106,7 +106,7 @@ const BasicInfo = (props) => {
   const [pregnancyStatus, setPregnancyStatus] = useState([]);
   const [indexTesting, setIndexTesting] = useState([]);
   let temp = { ...errors };
-  
+
   const [, setCodsets] = useState({})
   const [modalityCheck, setModalityCheck] = useState("");
   const [objValues, setObjValues] = useState({
@@ -344,10 +344,14 @@ const BasicInfo = (props) => {
     setSourceReferral(data["SOURCE_REFERRAL"])
     setGender(data["GENDER"])
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community" || "hts_entry_point_community") {
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community"
+      ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community") {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
-    } 
-     if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility" || "hts_entry_point_facility") {
+    }
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility") {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
     }
 
