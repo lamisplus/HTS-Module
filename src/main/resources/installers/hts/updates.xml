@@ -138,8 +138,6 @@
             ALTER COLUMN attempt TYPE character varying;
         </sql>
     </changeSet>
-
-
     <changeSet failOnError="true" author="Gamaliel-Emmanuel" id="2025-09-01-change-datatype">
         <preConditions onFail="MARK_RAN">
             <columnExists tableName="hts_family_index_testing_tracker" columnName="attempts"/>
@@ -154,7 +152,7 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-                ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
+            ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
         </sql>
     </changeSet>
     <changeSet failOnError="true" author="Gamaliel-Emmanuel" id="2025-09-01-rename-column">
@@ -163,9 +161,8 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-                RENAME COLUMN attempts TO attempt;
+            RENAME COLUMN attempts TO attempt;
         </sql>
     </changeSet>
-
 
 </databaseChangeLog>
