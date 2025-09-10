@@ -63,8 +63,6 @@ const tableIcons = {
 const PatientVisits = (props) => {
     const { patientObj } = props;
     let history = useHistory();
-
-
     const { hasAnyPermission } = usePermissions();
     const [, setCheckinStatus] = useState(false);
     const [isCheckinModalOpen, setIsCheckinModalOpen] = useState(false);
@@ -78,7 +76,7 @@ const PatientVisits = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showPPI, setShowPPI] = useState(true);
     const [pregnancyStatusPregnant, setPregnancyStatusPregnant] = useState(null);
-
+    const [currentPatientHts, setCurrentPatientHts] = useState(null)
 
     // Check if there is any visit not completed
     const hasIncompleteVisit = patientVisits.some(visit => visit.status?.toLowerCase() !== 'pending');
@@ -107,54 +105,6 @@ const PatientVisits = (props) => {
     })
 
 
-
-    // const fetchServices = useCallback(async () => {
-    //     setIsLoading(true);
-    //     try {
-    //         const response = await axios.get(`${baseUrl}patient/post-service`, {
-    //             headers: { Authorization: `Bearer ${token}` },
-    //         });
-
-    //         const allServices = response.data;
-    //         setAllServices(allServices); // still store all, if needed
-
-    //         // Determine the relevant service based on patient status
-    //         const patientStatus = props.patientInfo?.hivTestResult?.toLowerCase();
-
-
-    //         let matchedService = [];
-
-    //         if (patientStatus === "negative" && props.patientInfo?.pregnant === ("PREGANACY_STATUS_PREGNANT" || pregnancyStatusPregnant || "Pregnant")) {
-    //             matchedService = allServices.filter(item =>
-    //                 item.moduleServiceName.toLowerCase().includes("pmtct")
-    //             );
-    //         }
-    //         if (patientStatus === "positive") {
-    //             matchedService = allServices.filter(item =>
-    //                 item.moduleServiceName.toLowerCase().includes("hiv")
-    //             );
-    //         }
-    //         if (patientStatus === "negative") {
-    //             matchedService = allServices.filter(item =>
-    //                 item.moduleServiceName.toLowerCase().includes("prep")
-    //             );
-    //         }
-
-
-    //         setServices(
-    //             matchedService.map((service) => ({
-    //                 label: service.moduleServiceName,
-    //                 value: service.moduleServiceCode,
-    //             }))
-    //         );
-
-    //     } catch (error) {
-    //         toast.error("Failed to fetch services");
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // }, [baseUrl, token, props?.patientInfo?.hivTestResult]);
-
     const fetchServices = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -168,6 +118,7 @@ const PatientVisits = (props) => {
             const patientStatus = props.patientInfo?.hivTestResult?.toLowerCase();
             const isFemale = patientObj.sex?.toLowerCase() === 'female';
             const isAbove5 = patientObj.age > 5;
+            const isBelow8 = patientObj.age < 8;
 
             let matchedService = [];
 
@@ -188,11 +139,31 @@ const PatientVisits = (props) => {
 
                 matchedService = pmtctServices;
             }
+
+            if (
+                (isFemale && isBelow8) ||
+                [
+                    "facility_hts_test_setting_anc",
+                    "facility_hts_test_setting_post_natal_ward_breastfeeding",
+                    "community_hts_test_setting_congregational_setting",
+                    "community_hts_test_setting_tba_orthodox",
+                    "community_hts_test_setting_tba_rt-hcw",
+                    "community_hts_test_setting_delivery_homes"
+                ].includes(currentPatientHts?.testingSetting?.toLowerCase())) {
+
+                matchedService = allServices.filter(item =>
+                    item.moduleServiceName.toLowerCase().includes("pmtct")
+                );
+
+            }
+
+
             if (patientStatus === "positive") {
                 matchedService = allServices.filter(item =>
                     item.moduleServiceName.toLowerCase().includes("hiv")
                 );
             }
+
             if (patientStatus === "negative") {
                 matchedService = allServices.filter(item =>
                     item.moduleServiceName.toLowerCase().includes("prep")
@@ -234,11 +205,11 @@ const PatientVisits = (props) => {
         }
     }, [patientObj.id]);
 
-    console.log(patientObj)
 
     useEffect(() => {
         fetchServices();
         fetchPatientVisits();
+        patientsCurrentHts()
     }, [fetchServices, fetchPatientVisits]);
 
     const handleCheckin = async (e) => {
@@ -264,7 +235,7 @@ const PatientVisits = (props) => {
                 {
                     serviceIds,
                     visitDto: {
-                        personId: patientObj.id,
+                        personId: patientObj?.id || patientObj?.personId,
                         checkInDate: moment(checkinDate).format("YYYY-MM-DD HH:mm"),
                     },
                 },
@@ -300,13 +271,13 @@ const PatientVisits = (props) => {
             (visit) => visit.status === "PENDING" && visit.service === "HTS_code"
         );
         if (!activeVisit) {
-            toast.error("No pending HTS visit found");
+            // toast.error("No pending HTS visit found");
             return;
         }
-        if (activeVisit.service !== "HTS_code") {
-            toast.error("Can only checkout HTS services");
-            return;
-        }
+        // if (activeVisit.service !== "HTS_code") {
+        //     toast.error("Can only checkout HTS services");
+        //     return;
+        // }
         try {
             await axios.put(
                 `${baseUrl}patient/visit/checkout/${activeVisit.id}`,
@@ -344,6 +315,25 @@ const PatientVisits = (props) => {
         []
     );
 
+    async function patientsCurrentHts() {
+        try {
+            const response = await axios.get(
+                `${baseUrl}hts/persons/${patientObj?.personId}/current-hts`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            setCurrentPatientHts(response.data)
+
+
+        } catch (error) {
+        } finally {
+        }
+    }
+
+
+
+
+
     return (
         <div>
             <div className="d-flex justify-content-end mb-3">
@@ -351,6 +341,30 @@ const PatientVisits = (props) => {
                 {patientVisits.some(
                     (visit) => visit.service === "HTS_code" && visit.status === "PENDING" && props?.patientInfo?.hivTestResult !== null
                 ) &&
+                    <>
+                        {
+                            permissions.view_patient && (
+                                <ButtonMui
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={() => setIsCheckinModalOpen(true)}
+                                >
+                                    Post Patient
+                                </ButtonMui>)
+                        }
+                    </>
+                }
+
+                {!patientVisits.some(
+                    (visit) => visit.service === "HTS_code" && visit.status === "PENDING" && props?.patientInfo?.hivTestResult !== null
+                ) && [
+                    "facility_hts_test_setting_anc",
+                    "facility_hts_test_setting_post_natal_ward_breastfeeding",
+                    "community_hts_test_setting_congregational_setting",
+                    "community_hts_test_setting_tba_orthodox",
+                    "community_hts_test_setting_tba_rt-hcw",
+                    "community_hts_test_setting_delivery_homes"
+                ].includes(currentPatientHts?.testingSetting?.toLowerCase()) &&
                     <>
                         {
                             permissions.view_patient && (

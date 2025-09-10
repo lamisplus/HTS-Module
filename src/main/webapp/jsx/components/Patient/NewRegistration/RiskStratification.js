@@ -941,14 +941,30 @@ const BasicInfo = (props) => {
     setEntryPoint(data["HTS_ENTRY_POINT"]);
 
     if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community" ||
-    
-    props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community") {
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase().includes("community")
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community_hts_test_setting_retesting"
+    ) {
 
       setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"])
-    } 
-    
+    }
+
     if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility" ||
-    props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility") {
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase().includes("facility")
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility_hts_test_setting_retesting"
+      
+      ) {
       setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"])
     }
 

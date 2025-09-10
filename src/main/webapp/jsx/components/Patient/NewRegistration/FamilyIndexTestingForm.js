@@ -1254,7 +1254,7 @@ const FamilyIndexTestingForm = (props) => {
       setPayload({ ...payload, [inputName]: NumberValue });
     }
   };
-
+  
   const loadCodesets = (data) => {
     setCodesets(data)
     setMaritalStatus(data["MARITAL_STATUS"])
@@ -1270,17 +1270,33 @@ const FamilyIndexTestingForm = (props) => {
     setRetrieveFromIdToCode(ans[0]?.id);
 
     setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
-    setGenders(data["SEX"])
+    setGenders([...data["SEX"], ...data["GENDER"]])
 
-    if (props?.patientObj?.testingSetting?.toLowerCase() === "facility" 
-    || 
-    props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility") {
+    if (props?.patientObj?.testingSetting?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility"
+      ||
+
+      props?.patientObj?.testingSetting?.toLowerCase().includes("facility")
+
+      || props?.patientObj?.testingSetting?.toLowerCase() === "facility_hts_test_setting_retesting"
+
+    ) {
       setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } 
-    if (props.patientObj.testingSetting.toLowerCase() === "community" 
-    || 
-    props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community") {
+    }
+    else if (props.patientObj.testingSetting.toLowerCase() === "community"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community"
+      ||
+
+      props?.patientObj?.testingSetting?.toLowerCase().includes("community")
+
+      || props?.patientObj?.testingSetting?.toLowerCase() === "community_hts_test_setting_retesting"
+
+    ) {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else {
+      setSetting([...data["COMMUNITY_HTS_TEST_SETTING"], ...data["FACILITY_HTS_TEST_SETTING"]])
     }
 
   }

@@ -606,15 +606,31 @@ const BasicInfo = (props) => {
     setSourceReferral(data["SOURCE_REFERRAL"])
     setGender(data["GENDER"])
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "community"
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community"
       ||
-      props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "hts_entry_point_community") {
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community_hts_test_setting_retesting"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase().includes("community")
+
+    ) {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
 
-    if (props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "facility"
+    if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility"
       ||
-      props.patientObj.riskStratificationResponseDto.entryPoint.toLowerCase() === "hts_entry_point_facility") {
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility_hts_test_setting_retesting"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase()?.includes("facility")
+
+    ) {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
     }
 

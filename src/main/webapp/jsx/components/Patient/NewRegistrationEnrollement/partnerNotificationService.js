@@ -142,7 +142,7 @@ const PartnerNotificationService = (props) => {
       informConsentHivTest: "",
     }
   )
-  const [, setCodsets] = useState({});
+  const [, setCodesets] = useState({});
   const [riskAssessment, setRiskAssessment] = useState(
     {
       everHadSexualIntercourse: "",
@@ -333,7 +333,7 @@ const PartnerNotificationService = (props) => {
   }
 
   const loadCodesets = (data) => {
-    setCodsets(data)
+    setCodesets(data)
     setSetting(data["TEST_SETTING"])
 
   }

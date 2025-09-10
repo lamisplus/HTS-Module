@@ -554,16 +554,16 @@ const PnsForm = (props) => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
 
-    objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" &&  ( temp.partnerName = objValues.htsClientInformation.partnerName
+    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerName = objValues.htsClientInformation.partnerName
       ? ""
       : "This field is required.");
 
-    
-      objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" && (temp.partnerAge = objValues.htsClientInformation.partnerAge
+
+    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerAge = objValues.htsClientInformation.partnerAge
       ? ""
       : "This field is required.")
 
-   objValues.offeredPns.toLowerCase ()=== "yes" &&    objValues.acceptedPns.toLowerCase()=== "yes" && (temp.partnerSex = objValues.htsClientInformation.partnerSex
+    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerSex = objValues.htsClientInformation.partnerSex
       ? ""
       : "This field is required.")
 
@@ -661,19 +661,33 @@ const PnsForm = (props) => {
     setCodesets(data)
 
 
-    if ((props.patientObj.testingSetting.toLowerCase() === "facility" || "hts_entry_point_facility" || "facility_hts_test_setting_prep_testing")
-      || (props?.patientObj?.testingSetting.includes("FACILITY")
-      )
+    if (props?.patientObj?.testingSetting?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility"
+      ||
+
+      props?.patientObj?.testingSetting?.toLowerCase().includes("facility")
+
+      || props?.patientObj?.testingSetting?.toLowerCase() === "facility_hts_test_setting_retesting"
+
     ) {
       setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    } else if (
-      (props.patientObj.testingSetting.toLowerCase() === "community" || "hts_entry_point_community" || "community_hts_test_setting_prep_testing")
-      || (props?.patientObj?.testingSetting.includes("COMMUNITY"))
+    }
+    else if (props.patientObj.testingSetting.toLowerCase() === "community"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community"
+      ||
+
+      props?.patientObj?.testingSetting?.toLowerCase().includes("community")
+
+      || props?.patientObj?.testingSetting?.toLowerCase() === "community_hts_test_setting_retesting"
+
     ) {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else {
+      setSetting([...data["COMMUNITY_HTS_TEST_SETTING"], ...data["FACILITY_HTS_TEST_SETTING"]])
     }
 
-    // setSetting(data["FACILITY_HTS_TEST_SETTING"])
 
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])

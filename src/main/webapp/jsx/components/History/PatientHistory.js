@@ -314,8 +314,6 @@ const Home = (props) => {
                       </Suspense>
                     </Tab>
                   )}
-
-
                 </Tabs>
               </div>
             </Card.Body>

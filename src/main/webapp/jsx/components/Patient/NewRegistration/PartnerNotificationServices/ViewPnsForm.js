@@ -641,22 +641,27 @@ const ViewPNSForm = (props) => {
       ||
       props?.patientObj?.testingSetting?.toLowerCase() === "facility_hts_test_setting_prep_testing"
       ||
+      props?.patientObj?.testingSetting?.toLowerCase().includes("facility")
+      ||
       (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("FACILITY")
       )
     ) {
       setSetting(data["FACILITY_HTS_TEST_SETTING"])
-    }
-    if (
+    } else if (
       props?.patientObj?.testingSetting?.toLowerCase() === "community"
       ||
       props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_community"
       ||
       props?.patientObj?.testingSetting?.toLowerCase() === "community_hts_test_setting_prep_testing"
       ||
+      props?.patientObj?.testingSetting?.toLowerCase().includes("community")
+      ||
       (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("COMMUNITY")
       )
     ) {
       setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    } else {
+      setSetting([...data["COMMUNITY_HTS_TEST_SETTING"], ...data["FACILITY_HTS_TEST_SETTING"]])
     }
 
     setMaritalStatus(data["MARITAL_STATUS"])

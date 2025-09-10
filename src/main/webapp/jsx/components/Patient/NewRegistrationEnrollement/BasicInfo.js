@@ -346,12 +346,19 @@ const BasicInfo = (props) => {
 
     if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "community"
       ||
-      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community") {
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_community"
+      ||
+
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase().includes("community")
+    ) {
       setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"])
     }
     if (props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "facility"
       ||
-      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility") {
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() === "hts_entry_point_facility"
+      ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase().includes("facility")
+    ) {
       setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"])
     }
 
