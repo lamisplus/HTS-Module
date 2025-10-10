@@ -23,8 +23,8 @@ public interface FamilyIndexRepository extends JpaRepository<FamilyIndex, Long> 
     @Query(value = "SELECT visit_date FROM public.hiv_art_clinical where person_uuid = ?1 and  is_commencement = true and archived = 0", nativeQuery = true)
     String getCurrentHIVByPersonUuid (@Param("personUuid") String personUuid);
 
-    @Query(value = "SELECT uuid AS uuid FROM hts_client WHERE person_uuid = ?1 AND archived = 0", nativeQuery = true)
-    UuidProjection getHTSClientUUID(@Param("personUuid") String personUuid);
+    @Query(value = "SELECT uuid AS uuid FROM hts_client WHERE client_code = ?1 AND archived = 0", nativeQuery = true)
+    UuidProjection getHTSClientUUID(@Param("clientCode") String clientCode);
 
 //    select result_reported from laboratory_result where patient_uuid ='58f1c17b-f79a-4866-a9e7-60c7959c312d' and date_result_reported is not null ORDER BY date_result_received DESC LIMIT 1
     @Query(value = "SELECT result_reported FROM public.laboratory_result where patient_uuid = ?1 and date_result_reported is not null ORDER BY date_result_received DESC LIMIT 1", nativeQuery = true)

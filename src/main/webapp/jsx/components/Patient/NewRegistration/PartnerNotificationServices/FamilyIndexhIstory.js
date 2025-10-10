@@ -124,7 +124,6 @@ const FamilyIndexHistory = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch Facilities error" + e);
       });
   };
 
@@ -159,11 +158,10 @@ const FamilyIndexHistory = (props) => {
         }
       })
       .catch((e) => {
-        // console.log("Fetch Facilities error" + e);
       });
   };
   const enrollEllicitedPatient = (row, actionType) => {
-    console.log(row);
+    
     let obj = {
       uuid: row.uuid,
       type: "family",
@@ -191,8 +189,7 @@ const FamilyIndexHistory = (props) => {
   }, [props.patientObj]);
 
   const LoadViewPage = (row, actionType) => {
-    console.log(row);
-    console.log(props);
+   
 
     props.handleItemClick("view-fit");
     props.setSelectedRow(row);
@@ -240,7 +237,7 @@ const FamilyIndexHistory = (props) => {
     <>
       <div>
         <div className="form-group mb-3 col-md-12">
-          {console.log(familyIndexList)}
+         
           {
             <Button
               content="Add New form"

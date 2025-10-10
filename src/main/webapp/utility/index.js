@@ -90,7 +90,7 @@ export const checkPregnantPatient =  async(id) => {
      });
      //compare the object id with  parameter
 
-    //  console.log(result[0].id, id, Number(result[0].id) === Number(id));
+    
 
     //  return result[0].id;
      if (Number(result[0].id) === Number(id)) {
@@ -369,7 +369,7 @@ export const getDoubleSkipForm = (code) => {
 
     let nextForm = authorizedForm[nextPage];
 
-    // console.log([nextForm.code, authorizedForm[IndexOfForm].code]);
+    
 
     return [nextForm.code, authorizedForm[IndexOfForm].code];
   } else {
@@ -423,7 +423,7 @@ let authorizedForm = JSON.parse(localStorage.getItem("generatedPermission"));
      return each !== undefined;
    });
 
-  //  console.log("total condition seen", confirmedFormType);
+ 
    // check if any condition is true
    let answer = confirmedFormType.some((each) => {
      return each === true;
@@ -467,7 +467,7 @@ let nextFormIndex =
     );
 
     if (theNextPage.includes("recall")) {
-      // console.log(authorizedForm[i]);
+      
     } else {
       return theNextPage;
     }
@@ -484,7 +484,7 @@ export const loopThroughFormBackward = (
   hivStatus
 ) => {
   let authorizedForm = JSON.parse(localStorage.getItem("generatedPermission"));
-  // console.log("length of the authorized form ", authorizedForm.length);
+
   let nextFormIndex =
   IndexOfForm - 1 >= 0 ? IndexOfForm - 1 : IndexOfForm;
 
@@ -501,7 +501,6 @@ export const loopThroughFormBackward = (
     );
 
     if (theNextPage.includes("recall")) {
-      // console.log(authorizedForm[i]);
     } else {
       return theNextPage;
     }
@@ -610,5 +609,3 @@ export const getCurentForm=(activeItem)=>{
         return "";    }
 
   }
-
-

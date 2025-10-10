@@ -137,8 +137,8 @@ public class HtsFamilyIndexTestingController {
 
 
     @GetMapping("/hts-client-uuid")
-    public ResponseEntity<UuidProjection> getHTSClientUUID(@RequestParam String uuid) {
-        UuidProjection result = this.familyIndexTestingService.getHTSClientUUID(uuid);
+    public ResponseEntity<UuidProjection> getHTSClientUUID(@RequestParam String clientCode) {
+        UuidProjection result = this.familyIndexTestingService.getHTSClientUUID(clientCode);
         return ResponseEntity.ok(result);
     }
 

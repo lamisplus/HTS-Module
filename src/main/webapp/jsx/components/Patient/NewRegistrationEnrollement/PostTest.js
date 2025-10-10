@@ -87,7 +87,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PostTest = (props) => {
-  console.log("post", props);
+
   const classes = useStyles();
   const history = useHistory();
   const patientID =
@@ -171,7 +171,7 @@ const PostTest = (props) => {
     }
   };
   useEffect(() => {
-    //console.log(props.patientObj.postTestCounselingKnowledgeAssessment)
+    
     setPostTest({
       ...postTest,
       ...props.patientObj.postTestCounselingKnowledgeAssessment,

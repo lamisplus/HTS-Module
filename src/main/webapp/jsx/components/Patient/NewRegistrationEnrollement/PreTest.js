@@ -172,11 +172,9 @@ const BasicInfo = (props) => {
             setRiskAssessmentPartner(props.patientObj.sexPartnerRiskAssessment && props.patientObj.sexPartnerRiskAssessment!==null ? props.patientObj.sexPartnerRiskAssessment : {})
             setStiScreening(props.patientObj.stiScreening  && props.patientObj.stiScreening!==null? props.patientObj.stiScreening : {})
             setTbScreening(props.patientObj.tbScreening  && props.patientObj.tbScreening!==null? props.patientObj.tbScreening : {})
-            //patientAge=calculate_age(moment(props.patientObj.personResponseDto.dateOfBirth).format("DD-MM-YYYY"))
-            //console.log(props.patientObj.riskStratificationResponseDto.riskAssessment)
              if (props?.patientObj?.pregnant) {
                checkPregnantPatient(props.patientObj.pregnant).then((res) => {
-                 console.log("my result", res);
+                
                  setKnowledgeAssessment({
                    ...knowledgeAssessment,
                    clientPregnant: res ? "true" : "false",
@@ -244,8 +242,6 @@ const BasicInfo = (props) => {
         }
         if(e.target.value==='false') {
             const newcount = tbCount -1
-            //settbCount(newcount)
-            //console.log(newcount)
             if(newcount <=0 ){
 
                 settbCount(0)
@@ -357,7 +353,6 @@ const BasicInfo = (props) => {
 
         }
     }
-    //console.log(riskAssessmentPartner)
 
     return (
       <>

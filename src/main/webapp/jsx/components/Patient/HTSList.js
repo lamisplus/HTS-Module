@@ -80,6 +80,20 @@ const HTSList = (props) => {
 
   return (
     <div>
+      <div style={{ marginBottom: "10px", textAlign: "right" }}>
+        <Link to="/hts-duplicate-patients">
+          <Button
+            variant="contained"
+            style={{
+              backgroundColor: "#992E62",
+              color: "#fff",
+              marginRight: "10px",
+            }}
+          >
+            View HTS Patient Duplicates 
+          </Button>
+        </Link>
+      </div>
       <MaterialTable
         icons={tableIcons}
         title="Find HTS Patient "

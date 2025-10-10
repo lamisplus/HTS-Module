@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 import { FormGroup, Label, CardBody, Spinner, Input, Form } from "reactstrap";
@@ -41,6 +41,7 @@ import {
 
 import { calculate_age } from "../../../utils/index.js";
 import { LiveHelp } from "@material-ui/icons";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook.js";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -201,6 +202,8 @@ const ViewFamilyIndexTestingForm = (props) => {
   ] = useState([]);
   const [errorFamilyIndexDTO, setErrorFamilyIndexDTO] = useState({});
   const [errorFamilyIndexTracker, setErrorFamilyIndexDTOTracker] = useState({});
+  const [codesets, setCodesets] = useState({})
+
 
   const [addIndexTracker, setaAddIndexTracker] = useState(false);
   const [addIndexTracker2, setaAddIndexTracker2] = useState(false);
@@ -333,7 +336,7 @@ const ViewFamilyIndexTestingForm = (props) => {
           setStates(response.data);
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
 
   const loadOtherForm = (row) => {
@@ -355,7 +358,7 @@ const ViewFamilyIndexTestingForm = (props) => {
           // setPayload(prevPayload => ({ ...prevPayload, lgaTransferTo: selectedLga ? selectedLga.name : "" }));
         }
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
   const handleItemClick = (next, present) => {
     props.handleItemClick(next);
@@ -393,7 +396,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -419,7 +421,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -440,7 +441,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -484,7 +484,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -509,7 +508,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -532,7 +530,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        console.error("Fetch Facilities error" + e);
       });
   };
 
@@ -556,7 +553,7 @@ const ViewFamilyIndexTestingForm = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage, {
@@ -591,7 +588,7 @@ const ViewFamilyIndexTestingForm = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage);
@@ -629,9 +626,6 @@ const ViewFamilyIndexTestingForm = (props) => {
       if (age_now <= 0 && m < 0 && today.getDate() < birthDate.getDate()) {
         age_now--;
       }
-      // if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      //   age_now--;
-      // }
       familyIndexRequestDto.age = age_now;
       familyTestingTrackerRequestDTO.trackerAge = age_now;
       //setBasicInfo({...basicInfo, age: age_now});
@@ -642,10 +636,6 @@ const ViewFamilyIndexTestingForm = (props) => {
       ...familyIndexRequestDto,
       dateOfBirth: e.target.value,
     });
-
-    // if (familyIndexRequestDto.age !== "" && familyIndexRequestDto.age >= 85) {
-    //   toggle();
-    // }
   };
 
   const loadFacilities = (id) => {
@@ -661,7 +651,7 @@ const ViewFamilyIndexTestingForm = (props) => {
         }
       })
       .catch((e) => {
-        // console.error("Fetch Facilities error" + e);
+
       });
   };
 
@@ -674,182 +664,41 @@ const ViewFamilyIndexTestingForm = (props) => {
         setFacilityInfo(response.data);
       })
       .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const loadFamilyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
 
-  const getMaritalStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/MARITAL_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setMaritalStatus(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const getFamilyRelationship = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_RELATIONSHIP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyRelationship(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // get family index hiv status
-  const FAMILY_INDEX_HIV_STATUS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX_HIV_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndexHivStatus(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // get family index
-  const GET_CHILD_NUMBER = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CHILD_NUMBER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setChildNumber(response.data);
-
-        let ans = response.data.filter((each) => {
-          return each.code === "CHILD_NUMBER_OTHERS";
-        });
-
-        setRetrieveFromIdToCode(ans[0]?.id);
-      })
-      .catch((error) => {});
-  };
-  const FAMILY_INDEX = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FAMILY_INDEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFamilyIndex(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const FOLLOW_UP_APPOINTMENT_LOCATION = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FOLLOW UP_APPOINTMENT_LOCATION`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setFollowUpAppointmentLocation(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // GET
-  const INDEX_VISIT_ATTEMPTS = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_VISIT_ATTEMPTS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexVisitAttempt(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  // generate index client Id using the HTS client code/family index client unique ART number
-  const generateIndexClientId = () => {
-    const indexClientId = Math.floor(1000 + Math.random() * 9000);
-  };
-
-  // show reason for not selecting hiv confirm date, if the hiv confirm date is not selected and hide it when it is selected
-  // const showReasonForNotSelectingHivConfirmDate = () => {
-  //        if(payload.dateIndexClientConfirmedHiv === ""){
-  //            setIndexClientConfirmedHivPositive(true);
-  //        }else{
-  //            setIndexClientConfirmedHivPositive(false);
-  //        }
-  // }
-
-  const loadGenders = useCallback(async () => {
-    getAllGenders()
-      .then((response) => {
-        setGenders(response);
-      })
-      .catch(() => {});
-  }, []);
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
       });
   };
 
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const getSettings = () => {
-    if (props.patientObj.testingSetting.includes("FACILITY")) {
-      HTS_ENTRY_POINT_FACILITY();
-    } else if (props.patientObj.testingSetting.includes("COMMUNITY")) {
-      HTS_ENTRY_POINT_COMMUNITY();
-    }
-  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   useEffect(() => {
-    GET_CHILD_NUMBER();
-    loadGenders();
+
     loadStates();
-    // loadFamilyIndexSetting();
     getCountry();
     getStateByCountryId();
-    getMaritalStatus();
-    getFamilyRelationship();
-    FAMILY_INDEX_HIV_STATUS();
-    FAMILY_INDEX();
-    FOLLOW_UP_APPOINTMENT_LOCATION();
-    INDEX_VISIT_ATTEMPTS();
     getListoFFamilyIndexInfo();
     getFamilyIndexRequestList();
     getListOfFamilyTracker();
     setFamilyIndexRequestDto(props.selectedRow);
-    getSettings();
 
     if (
       props?.basicInfo?.personResponseDto?.address?.address[0]?.stateId ||
@@ -896,11 +745,7 @@ const ViewFamilyIndexTestingForm = (props) => {
     // let newArray = [...arrayFamilyTestingTrackerRequestDTO];
     familyTestingTrackerRequestDTO.facilityId = localStorage.getItem("FacId");
 
-    // newArray.push(familyTestingTrackerRequestDTO);
 
-    // setArrayFamilyTestingTrackerRequestDTO(newArray);
-
-    //  update the family index
     AddNewByUpdateTracker(familyTestingTrackerRequestDTO);
   };
   const convertIdToCode = (id) => {
@@ -955,40 +800,11 @@ const ViewFamilyIndexTestingForm = (props) => {
       .then((res) => {
         setStates(res);
       })
-      .catch(() => {});
-  };
-  const checkPhoneNumberBasic = (e, inputName) => {
-    if (e) {
-      setErrors({ ...errors, phoneNumber: "" });
-    }
-    const limit = 10;
-
-    if (inputName === "phoneNumber") {
-      setPayload({ ...payload, phoneNumber: e.slice(0, limit) });
-    } else if (inputName === "alternatePhoneNumber") {
-      setPayload({ ...payload, alternatePhoneNumber: e.slice(0, limit) });
-    } else if (inputName === "phoneNoOfReferrringFacility") {
-      setPayload({
-        ...payload,
-        phoneNoOfReferrringFacility: e.slice(0, limit),
-      });
-    } else if (inputName === "phoneNoOfRecievingFacility") {
-      setPayload({ ...payload, phoneNoOfRecievingFacility: e.slice(0, limit) });
-    }
+      .catch(() => { });
   };
 
-  // handle Facility Name to slect drop down
-  const handleInputChangeObject = (e) => {
-    setPayload({
-      ...payload,
-      nameOfRecievingFacility: e.name,
-      addressOfRecievingFacility: e.parentParentOrganisationUnitName,
-      // lgaTransferTo: e.parentOrganisationUnitName,
-    });
-    setErrors({ ...errors, nameOfRecievingFacility: "" });
-    // setSelectedState(e.parentParentOrganisationUnitName);
-    // setSelectedLga(e.parentOrganisationUnitName);
-  };
+
+
 
   // handlefamilyIndexRequestDto
   const handlefamilyIndexRequestDto = (e) => {
@@ -1010,7 +826,6 @@ const ViewFamilyIndexTestingForm = (props) => {
       } else {
         let deductedValue = getIntPosition(e.target.value);
         //set position to child number
-        console.log("deductedValue", deductedValue);
         setFamilyTestingTrackerRequestDTO({
           ...familyTestingTrackerRequestDTO,
           positionOfChildEnumerated: deductedValue,
@@ -1034,10 +849,15 @@ const ViewFamilyIndexTestingForm = (props) => {
       if (
         e.target.value === "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" ||
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_NEGATIVE" ||
-        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE"
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_EXPOSED_INFANT" ||
+        e.target.value ===
+        "FAMILY_INDEX_HIV_STATUS_REFERRED_ESCORTED_FOR_ART_INITIATION"
       ) {
+      
         setShowHTSDate(true);
       } else {
+ 
         setShowHTSDate(false);
       }
     } else {
@@ -1047,7 +867,7 @@ const ViewFamilyIndexTestingForm = (props) => {
       });
     }
 
-    // clearf the error with e.target.name
+    // clear the error with e.target.name
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
@@ -1096,7 +916,6 @@ const ViewFamilyIndexTestingForm = (props) => {
     let result = familyIndex.filter((each, index) => {
       return each.code === relationship;
     });
-    console.log(result);
     // filter family relationship
     let result2 = familyRelationship.filter((each, index) => {
       if (
@@ -1136,7 +955,7 @@ const ViewFamilyIndexTestingForm = (props) => {
       .then((res) => {
         setProvinces(res);
       })
-      .catch((e) => {});
+      .catch((e) => { });
   };
   const getCountry = () => {
     getAllCountry()
@@ -1144,10 +963,9 @@ const ViewFamilyIndexTestingForm = (props) => {
         setCountries(res);
       })
       .catch((e) => {
-        console.log(e);
+
       });
 
-    // console.log(response);
   };
 
   const handleFamilyRelationshipChange = (e) => {
@@ -1172,76 +990,30 @@ const ViewFamilyIndexTestingForm = (props) => {
       // Reset uan when family relationship changes
       uan:
         value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_SIBLINGS"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_MOTHER" ||
+          value === "FAMILY_RELATIONSHIP_SIBLINGS"
           ? ""
           : prevPayload.uan,
       // Reset motherDead when family relationship changes
       motherDead:
         value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
           ? ""
           : prevPayload.motherDead,
       // Reset yearMotherDied when family relationship changes
       yearMotherDied:
         value === "FAMILY_RELATIONSHIP_MOTHER" ||
-        value === "FAMILY_RELATIONSHIP_FATHER" ||
-        value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
+          value === "FAMILY_RELATIONSHIP_FATHER" ||
+          value === "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD"
           ? ""
           : prevPayload.yearMotherDied,
     }));
   };
 
-  //Get list of HIV STATUS ENROLLMENT
 
-  const convertCodeToDisplay = (type, value) => {
-    let data = "";
-    if (type === "familyRelationship") {
-      data = familyRelationship.filter((each) => {
-        if (each.code === value) {
-          return each;
-        }
-      });
 
-      return data[0].display;
-    }
-    if (type === "statusOfContact") {
-      data = statusOfContact.filter((each) => {
-        if (each.code === value) {
-          return each;
-        }
-      });
-
-      return data[0].display;
-    }
-    if (type === "statusOfContact") {
-      data = statusOfContact.filter((each) => {
-        if (each.code === value) {
-          return each;
-        }
-      });
-
-      return data[0].display;
-    }
-  };
-
-  // const removeFamilyIndexRow = (index) => {
-  //   arrayFamilyIndexRequestDto.splice(index, 1);
-  //   setArrayFamilyIndexRequestDto([...arrayFamilyIndexRequestDto]);
-  // };
-  const hideFamilyIndex = () => {
-    setShowSelectedFamilyIndex(false);
-  };
-
-  const selectAMember = (each, index, id) => {
-    setShowSelectedFamilyIndex(!showSelectedFamilyIndex);
-
-    setSelectedFamilyIndex(each);
-    //  setFamilyTestingTrackerRequestDTO(response.data.familyIndexList)
-    setFamilyIndexRequestDto(each);
-  };
 
   const handleInputChange = (e) => {
     setErrors({ ...temp, [e.target.name]: "" });
@@ -1355,8 +1127,8 @@ const ViewFamilyIndexTestingForm = (props) => {
           e.target.value === "FAMILY_INDEX_MOTHER"
             ? "SEX_FEMALE"
             : e.target.value === "FAMILY_INDEX_FATHER"
-            ? "SEX_MALE"
-            : "",
+              ? "SEX_MALE"
+              : "",
       });
       // Add new validation logic
       // Define relationship mapping between Family Index and Family Relationship
@@ -1430,6 +1202,7 @@ const ViewFamilyIndexTestingForm = (props) => {
     //   toggle();
     // }
   };
+
   const handleDateOfBirthChange = (e) => {
     if (e.target.value == "Actual") {
       familyIndexRequestDto.isDateOfBirthEstimated = false;
@@ -1439,6 +1212,7 @@ const ViewFamilyIndexTestingForm = (props) => {
       setAgeDisabled2(false);
     }
   };
+
   const handleAgeChange = (e) => {
     e.preventDefault();
     if (!ageDisabled) {
@@ -1533,7 +1307,7 @@ const ViewFamilyIndexTestingForm = (props) => {
         if (error.response && error.response.data) {
           let errorMessage =
             error.response.data.apierror &&
-            error.response.data.apierror.message !== ""
+              error.response.data.apierror.message !== ""
               ? error.response.data.apierror.message
               : "Something went wrong, please try again";
           toast.error(errorMessage, {
@@ -1585,7 +1359,6 @@ const ViewFamilyIndexTestingForm = (props) => {
         postPayload(submissionPayload);
       }
     } catch (error) {
-      console.error("Error in handleSubmit:", error);
       toast.error("Something went wrong. Please try again.");
     }
   };
@@ -1599,9 +1372,9 @@ const ViewFamilyIndexTestingForm = (props) => {
   const getAttemptDisplay = (attempt) => {
     if (attempt) {
       let ans = indexVisitAttempt.filter((each, index) => {
-        return each.code === attempt;
+        return each?.code === attempt;
       });
-      if (ans[0].display) {
+      if (ans.length > 0 && ans[0]?.display) {
         return ans[0].display;
       } else {
         return attempt;
@@ -1610,12 +1383,13 @@ const ViewFamilyIndexTestingForm = (props) => {
       return "";
     }
   };
+
   const FollowUpDisplay = (followUp) => {
     if (followUp) {
       let ans = followUpAppointmentLocation.filter((each, index) => {
-        return each.code === followUp;
+        return each?.code === followUp;
       });
-      if (ans[0].display) {
+      if (ans.length > 0 && ans[0]?.display) {
         return ans[0].display;
       } else {
         return followUp;
@@ -1624,6 +1398,7 @@ const ViewFamilyIndexTestingForm = (props) => {
       return "";
     }
   };
+
   const handleInputChangePhoneNumber = (e, inputName) => {
     const limit = 11;
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
@@ -1636,6 +1411,60 @@ const ViewFamilyIndexTestingForm = (props) => {
     }
   };
 
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setMaritalStatus(data["MARITAL_STATUS"])
+    setFamilyRelationship(data["FAMILY_RELATIONSHIP"])
+    setFamilyIndexHivStatus(data["FAMILY_INDEX_HIV_STATUS"])
+
+    setChildNumber(data["CHILD_NUMBER"])
+    let ans = data["CHILD_NUMBER"].filter((each) => {
+      return each.code === "CHILD_NUMBER_OTHERS";
+    });
+    setRetrieveFromIdToCode(ans[0]?.id);
+
+    setFamilyIndex(data["FAMILY_INDEX"])
+    setFollowUpAppointmentLocation(data["FOLLOW_UP_APPOINTMENT_LOCATION"])
+    setIndexVisitAttempt(data["INDEX_VISIT_ATTEMPTS"])
+    setGenders(data["GENDER"])
+
+    if (
+      props?.patientObj?.testingSetting?.toLowerCase() === "community"
+      || props?.patientObj?.testingSetting.toLowerCase() === "hts_entry_point_community"
+      || (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("COMMUNITY"))
+
+    ) {
+      setSetting(data["COMMUNITY_HTS_TEST_SETTING"])
+    }
+
+    if (
+      props?.patientObj?.testingSetting?.toLowerCase() === "facility"
+      ||
+      props?.patientObj?.testingSetting?.toLowerCase() === "hts_entry_point_facility"
+      || (Array.isArray(props?.patientObj?.testingSetting) && props?.patientObj?.testingSetting.includes("FACILITY"))
+    ) {
+      setSetting(data["FACILITY_HTS_TEST_SETTING"])
+    }
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "MARITAL_STATUS",
+      "FAMILY_RELATIONSHIP",
+      "FAMILY_INDEX_HIV_STATUS",
+      "CHILD_NUMBER",
+      "FAMILY_INDEX",
+      "FOLLOW_UP_APPOINTMENT_LOCATION",
+      "INDEX_VISIT_ATTEMPTS",
+      "GENDER",
+      "FACILITY_HTS_TEST_SETTING",
+      "COMMUNITY_HTS_TEST_SETTING"
+
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo?.id,
+    onSuccess: loadCodesets
+  })
   return (
     <>
       <Card className={classes.root}>
@@ -1888,7 +1717,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                       onChange={handleInputChange}
                       value={
                         props?.patientObj?.testingSetting ===
-                        "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
+                          "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
                           ? "FAMILY_INDEX_CHILD"
                           : payload.familyIndexClient
                       }
@@ -1899,7 +1728,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                       disabled={
                         props?.action === "view" ||
                         props?.patientObj?.testingSetting ===
-                          "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
+                        "FACILITY_HTS_TEST_SETTING_PEDIATRIC"
                       }
                     >
                       <option value={""}>Select</option>
@@ -2128,7 +1957,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                         borderRadius: "0.2rem",
                       }}
                       disabled
-                      // disabled={props.activePage.actionType === "view"}
+                    // disabled={props.activePage.actionType === "view"}
                     >
                       <option value={""}></option>
                       {maritalStatus.map((value) => (
@@ -2246,7 +2075,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                       disabled
                     />
                     {errors.dateIndexClientConfirmedHivPositiveTestResult !==
-                    "" ? (
+                      "" ? (
                       <span className={classes.error}>
                         {errors.referralDate}
                       </span>
@@ -2283,7 +2112,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                         <option value="NA">NA</option>
                       </select>
                       {errors.reasonForIndexClientDateHivConfirmedNotSelected !==
-                      "" ? (
+                        "" ? (
                         <span className={classes.error}>
                           {
                             errors.reasonForIndexClientDateHivConfirmedNotSelected
@@ -2633,34 +2462,34 @@ const ViewFamilyIndexTestingForm = (props) => {
 
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="childNumber">Child Number</Label>
-                    <select
-                      className="form-control"
-                      id="childNumber"
-                      name="childNumber"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.childNumber}
-                      disabled={props.action === "view" ? true : false}
-                    >
-                      <option value="">Select</option>
-                      {childNumber.map((each) => (
-                        <option key={each.id} value={each.id}>
-                          {each.display}
-                        </option>
-                      ))}
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="childNumber">Child Number</Label>
+                      <select
+                        className="form-control"
+                        id="childNumber"
+                        name="childNumber"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.childNumber}
+                        disabled={props.action === "view" ? true : false}
+                      >
+                        <option value="">Select</option>
+                        {childNumber.map((each) => (
+                          <option key={each.id} value={each.id}>
+                            {each.display}
+                          </option>
+                        ))}
 
-                      {/* <option value="others">Others</option> */}
-                    </select>
-                    {errorFamilyIndexDTO.childNumber && (
-                      <span className={classes.error}>
-                        {errorFamilyIndexDTO.childNumber}
-                      </span>
-                    )}
-                  </FormGroup>
-                </div>
-              )}
+                        {/* <option value="others">Others</option> */}
+                      </select>
+                      {errorFamilyIndexDTO.childNumber && (
+                        <span className={classes.error}>
+                          {errorFamilyIndexDTO.childNumber}
+                        </span>
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
 
               {showOther && (
                 <div className="form-group  col-md-4">
@@ -2692,29 +2521,29 @@ const ViewFamilyIndexTestingForm = (props) => {
               )}
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="childNumber">Child Dead</Label>
-                    <select
-                      className="form-control"
-                      id="childDead"
-                      name="childDead"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.childDead}
-                      disabled={props.action === "view" ? true : false}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
-                    {/* {errorFamilyIndexDTO.childNumber && (
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="childNumber">Child Dead</Label>
+                      <select
+                        className="form-control"
+                        id="childDead"
+                        name="childDead"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.childDead}
+                        disabled={props.action === "view" ? true : false}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                      {/* {errorFamilyIndexDTO.childNumber && (
                       <span className={classes.error}>
                         {errorFamilyIndexDTO.childNumber}
                       </span>
                     )} */}
-                  </FormGroup>
-                </div>
-              )}
+                    </FormGroup>
+                  </div>
+                )}
               {/* <div className="form-group col-md-4">
                 <FormGroup>
                   <Label for="DateofHTS">Other Child Number </Label>
@@ -2742,24 +2571,24 @@ const ViewFamilyIndexTestingForm = (props) => {
               </div> */}
               {familyIndexRequestDto.familyRelationship ===
                 "FAMILY_RELATIONSHIP_BIOLOGICAL_CHILD" && (
-                <div className="form-group col-md-4">
-                  <FormGroup>
-                    <Label for="liveWithParent">Live with Parent</Label>
-                    <select
-                      className="form-control"
-                      id="liveWithParent"
-                      name="liveWithParent"
-                      onChange={handlefamilyIndexRequestDto}
-                      value={familyIndexRequestDto.liveWithParent}
-                      disabled={props.action === "view" ? true : false}
-                    >
-                      <option value="">Select</option>
-                      <option value="yes">Yes</option>
-                      <option value="no">No</option>
-                    </select>
-                  </FormGroup>
-                </div>
-              )}
+                  <div className="form-group col-md-4">
+                    <FormGroup>
+                      <Label for="liveWithParent">Live with Parent</Label>
+                      <select
+                        className="form-control"
+                        id="liveWithParent"
+                        name="liveWithParent"
+                        onChange={handlefamilyIndexRequestDto}
+                        value={familyIndexRequestDto.liveWithParent}
+                        disabled={props.action === "view" ? true : false}
+                      >
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                      </select>
+                    </FormGroup>
+                  </div>
+                )}
 
               <div className="form-group mb-3 col-md-4">
                 <FormGroup>
@@ -2847,7 +2676,7 @@ const ViewFamilyIndexTestingForm = (props) => {
 
               {familyIndexRequestDto.statusOfContact &&
                 familyIndexRequestDto.statusOfContact ===
-                  "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" && (
+                "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" && (
                   <div className="form-group col-md-4">
                     <FormGroup>
                       <Label for="uan">Unique Art No (UAN)</Label>
@@ -2872,7 +2701,7 @@ const ViewFamilyIndexTestingForm = (props) => {
 
               {familyIndexRequestDto.familyRelationship &&
                 familyIndexRequestDto.familyRelationship !==
-                  "FAMILY_RELATIONSHIP_MOTHER" && (
+                "FAMILY_RELATIONSHIP_MOTHER" && (
                   <div className="form-group col-md-4">
                     <FormGroup>
                       <Label for="motherDead">Mother Dead?</Label>
@@ -3260,7 +3089,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                     </div>
                     {familyTestingTrackerRequestDTO.knownHivPositive &&
                       familyTestingTrackerRequestDTO.knownHivPositive ===
-                        "Yes" && (
+                      "Yes" && (
                         <div className="form-group mb-3 col-md-4">
                           <FormGroup>
                             <Label for="">Date Tested</Label>
@@ -3296,7 +3125,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                       )}
                     {familyTestingTrackerRequestDTO?.knownHivPositive &&
                       familyTestingTrackerRequestDTO?.knownHivPositive ===
-                        "Yes" && (
+                      "Yes" && (
                         <div className="form-group col-md-4 ">
                           <Label>HIV Test Result </Label>
                           <FormGroup>
@@ -3328,7 +3157,7 @@ const ViewFamilyIndexTestingForm = (props) => {
                     {familyTestingTrackerRequestDTO?.knownHivPositive ===
                       "Yes" &&
                       familyTestingTrackerRequestDTO.hiveTestResult ===
-                        "Positive" && (
+                      "Positive" && (
                         <div className="form-group mb-3 col-md-4">
                           <FormGroup>
                             <Label for="">Date Enrolled On ART</Label>

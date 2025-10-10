@@ -63,10 +63,9 @@ const UserRegistration = (props) => {
   const [indexInfo, setIndexInfo] = useState(
     JSON.parse(localStorage.getItem("index"))
   );
+  
   const handleItemClick = (activeItem) => {
     setactiveItem(activeItem);
-
-    //setCompleted({...completed, ...completedMenu})
   };  
   
   const [action, setAction] = useState("");

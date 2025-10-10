@@ -20,6 +20,7 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import Badge from "@mui/material/Badge";
 import PersonIcon from "@mui/icons-material/Person";
+import { useGetCodesets } from "../../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -148,10 +149,6 @@ const AddIndexContact = (props) => {
   });
   useEffect(() => {
     getStates();
-    Sex();
-    NotificationContact();
-    IndexTesting();
-    Consent();
   }, []);
 
   function getStateByCountryId(getCountryId) {
@@ -164,23 +161,11 @@ const AddIndexContact = (props) => {
         setStates(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   }
 
-  function getProvincesId(getStateId) {
-    axios
-      .get(
-        `${baseUrl}organisation-units/parent-organisation-units/${getStateId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-      .then((response) => {
-        setProvinces(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  }
+
 
   const getProvinces = (e) => {
     const stateId = e.target.value;
@@ -198,7 +183,7 @@ const AddIndexContact = (props) => {
         );
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
 
@@ -207,59 +192,9 @@ const AddIndexContact = (props) => {
     setObjValues({ ...objValues, countryId: 1 });
   };
 
-  //Get list of Genders from
-  const Sex = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SEX`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setSexs(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  ///CONSENT	Yes		en	CONSENT
-  const Consent = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/CONSENT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setConsent(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const NotificationContact = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/NOTIFICATION_CONTACT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setNotificationContact(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
+
+
+
   const handleInputChange = (e) => {
     //setErrors({...temp, [e.target.name]:""})
     if (e.target.name === "firstName" && e.target.value !== "") {
@@ -346,7 +281,7 @@ const AddIndexContact = (props) => {
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;
 
-      //console.log("obj", objValues);
+      
       axios
         .post(`${baseUrl}index-elicitation`, objValues, {
           headers: { Authorization: `Bearer ${token}` },
@@ -399,7 +334,7 @@ const AddIndexContact = (props) => {
           if (error.response && error.response.data) {
             let errorMessage =
               error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
+                error.response.data.apierror.message !== ""
                 ? error.response.data.apierror.message
                 : "Something went wrong, please try again";
             toast.error(errorMessage);
@@ -409,6 +344,26 @@ const AddIndexContact = (props) => {
         });
     }
   };
+  const [codesets, setCodesets] = useState({})
+  const loadCodesets = (data) => {
+    setCodesets(data)
+
+    setSexs(data["SEX"])
+    setIndexTesting(data["INDEX_TESTING"])
+    setConsent(data["CONSENT"])
+    setNotificationContact(data["NOTIFICATION_CONTACT"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "SEX",
+      "INDEX_TESTING",
+      "CONSENT",
+      "NOTIFICATION_CONTACT"
+    ],
+    patientId: props?.patientObj?.id || props?.basicInfo.id,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>
@@ -421,7 +376,7 @@ const AddIndexContact = (props) => {
               color="primary"
               className=" float-end  mr-2 mt-2"
               onClick={() => handleItemClickPage("list")}
-              //startIcon={<FaUserPlus size="10"/>}
+            //startIcon={<FaUserPlus size="10"/>}
             >
               <span style={{ textTransform: "capitalize" }}>
                 {" "}
@@ -620,7 +575,7 @@ const AddIndexContact = (props) => {
                       <Label>Date</Label>
                       <input
                         className="form-control"
-                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                        type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                         name="dob"
                         id="dob"
@@ -672,7 +627,7 @@ const AddIndexContact = (props) => {
                         onChange={(e) => {
                           checkPhoneNumberBasic(e, "phoneNumber");
                         }}
-                        //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
+                      //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
                       />
                       {errors.phoneNumber !== "" ? (
                         <span className={classes.error}>
@@ -703,7 +658,7 @@ const AddIndexContact = (props) => {
                         onChange={(e) => {
                           checkPhoneNumberBasic(e, "altPhoneNumber");
                         }}
-                        //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
+                      //onChange={(e)=>{handleInputChangeBasic(e,'phoneNumber')}}
                       />
                     </FormGroup>
                   </div>
@@ -1017,7 +972,7 @@ const AddIndexContact = (props) => {
                         If contract by which date will partner come for testing?
                       </Label>
                       <Input
-                        type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                        type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                         name="datePartnerCameForTesting"
                         id="datePartnerCameForTesting"
@@ -1072,7 +1027,7 @@ const AddIndexContact = (props) => {
                             <span style={{ color: "red" }}> *</span>
                           </Label>
                           <Input
-                            type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                            type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                             name="dateTested"
                             id="dateTested"
