@@ -604,15 +604,20 @@ const FamilyIndexTestingForm = (props) => {
         [e.target.name]: e.target.value,
       });
 
+
       if (
         e.target.value === "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" ||
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_NEGATIVE" ||
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
-        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
-        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_EXPOSED_INFANT" ||
         e.target.value ===
         "FAMILY_INDEX_HIV_STATUS_REFERRED_ESCORTED_FOR_ART_INITIATION"
       ) {
+      
         setShowHTSDate(true);
+      } else {
+ 
+        setShowHTSDate(false);
       }
     } else {
       setFamilyIndexRequestDto({

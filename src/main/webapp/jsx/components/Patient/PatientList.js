@@ -29,6 +29,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { MdDashboard } from "react-icons/md";
 import "@reach/menu-button/styles.css";
 import { Label } from "semantic-ui-react";
+import { useHistory } from "react-router-dom";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
 //import moment from "moment";
@@ -65,6 +66,7 @@ const Patients = (props) => {
   //const [patientList, setPatientList] = useState([])
   //const [loading, setLoading] = useState(false)
   const [showPPI, setShowPPI] = useState(true);
+  const history = useHistory();
   //const baseUrl2 = "http://localhost:8282/api/v2/"
   useEffect(() => {
     //patients()

@@ -9,6 +9,7 @@ import Home from "./main/webapp/jsx/components/Home";
 import RegisterPatient from "./main/webapp/jsx/components/Patient/RegisterPatient";
 import PatientDetail from "./main/webapp/jsx/components/Patient/PatientDetail";
 import HIVSTPatient from "./main/webapp/jsx/components/Patient/HIVST/HIVSTPatient";
+import DuplicateHTSPatientList from "./main/webapp/jsx/components/Patient/DuplicateHTSPatientList";
 import CheckedInPatientsAlert from "./main/webapp/jsx/components/Globals/CheckinPatientsAlert";
 import { QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
@@ -43,6 +44,9 @@ export default function App() {
           </Route>
           <Route path="/register-hivst-patient">
             <HIVSTPatient />
+          </Route>
+          <Route path="/hts-duplicate-patients">
+            <DuplicateHTSPatientList />
           </Route>
           <Route path="/">
             <Home />

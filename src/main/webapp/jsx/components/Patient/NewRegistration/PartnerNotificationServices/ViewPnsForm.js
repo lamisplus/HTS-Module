@@ -270,15 +270,28 @@ const ViewPNSForm = (props) => {
   };
 
   const getPartnerId = (id) => {
+    if (objValues.acceptedPns === "No" && objValues.offeredPns === "Yes") {
+      setPartnerId("");
+      return;
+    }
+
     axios
       .get(
-        `${baseUrl}hts-personal-notification-service/get-partner-id?htsClientId=${props.patientObj?.id}&clientCode=${props?.patientObj?.clientCode}`,
+        `${baseUrl}hts-personal-notification-service/get-partner-id?htsClientId=${props.patientObj.id ? props.patientObj.id : props.basicInfo.id
+        }&clientCode=${props?.patientObj?.clientCode
+          ? props?.patientObj?.clientCode
+          : props?.basicInfo?.clientCode
+        }`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       )
       .then((response) => {
         setPartnerId(response.data);
+        setObjValues(prevValues => ({
+          ...prevValues,
+          partnerId: response.data
+        }));
       })
       .catch((error) => { });
   };
@@ -398,6 +411,7 @@ const ViewPNSForm = (props) => {
         setObjValues(response.data);
         sethtsClientInformation(response.data.htsClientInformation);
         setContactTracing(response.data.contactTracing);
+        setPartnerId(response.data.partnerId || "");
       })
       .catch((error) => {
 
@@ -524,6 +538,7 @@ const ViewPNSForm = (props) => {
       temp.testingSetting = htsClientInformation.testingSetting
         ? ""
         : "This field is required.";
+      temp.dateOfElicitation = objValues.dateOfElicitation ? "" : "This field is required.";
       temp.providerRoleCompletingForm =
         htsClientInformation.providerRoleCompletingForm
           ? ""
@@ -667,7 +682,7 @@ const ViewPNSForm = (props) => {
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])
     setSexs(data["SEX"])
-    setIndexTesting(data["INDEX_TESTING"])
+    setIndexTesting(data["RELATIONSHIP_CONTACT"])
     setConsent(data["CONSENT"])
     setNotificationContact(data["NOTIFICATION_CONTACT"])
 
@@ -680,7 +695,7 @@ const ViewPNSForm = (props) => {
       "MARITAL_STATUS",
       "PROVIDER_ROLE",
       "SEX",
-      "INDEX_TESTING",
+      "RELATIONSHIP_CONTACT",
       "CONSENT",
       "NOTIFICATION_CONTACT"
     ],
@@ -1668,7 +1683,7 @@ const ViewPNSForm = (props) => {
 
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label for="">Date of Elicitation</Label>
+                        <Label for="">Date of Elicitation <span style={{ color: "red" }}> *</span></Label>
                         <Input
                           type="date"
                           onKeyPress={(e) => {

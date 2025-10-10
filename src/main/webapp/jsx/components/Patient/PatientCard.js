@@ -105,6 +105,7 @@ function PatientCard(props) {
       .catch((error) => {});
   }
 
+
   const getHospitalNumber = (identifier) => {
     const identifiers = identifier;
     const hospitalNumber = identifiers?.identifier?.find(
@@ -247,13 +248,13 @@ function PatientCard(props) {
                       <Col md={12}>
                         <div>
                           <Typography variant="caption">
-                            {htscount < 1 ? (
+                            {htscount < 1 || (!htsResult && !htsResult2) ? (
                               <Label color="blue" size={"mini"}>
                                 STATUS : Not Tested
                               </Label>
                             ) : patientObj &&
                               (htsResult === "Positive" ||
-                                htsResult === "Positive") ? (
+                                htsResult2 === "Positive") ? (
                               <Label color={"red"} size={"mini"}>
                                 STATUS : Positive
                               </Label>

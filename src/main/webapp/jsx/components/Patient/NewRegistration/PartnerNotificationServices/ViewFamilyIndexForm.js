@@ -849,10 +849,15 @@ const ViewFamilyIndexTestingForm = (props) => {
       if (
         e.target.value === "FAMILY_INDEX_HIV_STATUS_CURRENT_ON_ART" ||
         e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_NEGATIVE" ||
-        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE"
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_POSITIVE" ||
+        e.target.value === "FAMILY_INDEX_HIV_STATUS_HIV_EXPOSED_INFANT" ||
+        e.target.value ===
+        "FAMILY_INDEX_HIV_STATUS_REFERRED_ESCORTED_FOR_ART_INITIATION"
       ) {
+      
         setShowHTSDate(true);
       } else {
+ 
         setShowHTSDate(false);
       }
     } else {
@@ -862,7 +867,7 @@ const ViewFamilyIndexTestingForm = (props) => {
       });
     }
 
-    // clearf the error with e.target.name
+    // clear the error with e.target.name
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
@@ -1367,9 +1372,9 @@ const ViewFamilyIndexTestingForm = (props) => {
   const getAttemptDisplay = (attempt) => {
     if (attempt) {
       let ans = indexVisitAttempt.filter((each, index) => {
-        return each.code === attempt;
+        return each?.code === attempt;
       });
-      if (ans[0].display) {
+      if (ans.length > 0 && ans[0]?.display) {
         return ans[0].display;
       } else {
         return attempt;
@@ -1382,9 +1387,9 @@ const ViewFamilyIndexTestingForm = (props) => {
   const FollowUpDisplay = (followUp) => {
     if (followUp) {
       let ans = followUpAppointmentLocation.filter((each, index) => {
-        return each.code === followUp;
+        return each?.code === followUp;
       });
-      if (ans[0].display) {
+      if (ans.length > 0 && ans[0]?.display) {
         return ans[0].display;
       } else {
         return followUp;

@@ -265,6 +265,11 @@ const PnsForm = (props) => {
       .catch((error) => { });
   };
   const getPartnerId = (id) => {
+    // if (objValues.acceptedPns === "No" && objValues.offeredPns === "Yes") {
+    //   setPartnerId("");
+    //   return;
+    // }
+
     axios
       .get(
         `${baseUrl}hts-personal-notification-service/get-partner-id?htsClientId=${props.patientObj.id ? props.patientObj.id : props.basicInfo.id
@@ -554,18 +559,22 @@ const PnsForm = (props) => {
     // HTS FORM VALIDATION
     temp.offeredPns = objValues.offeredPns ? "" : "This field is required.";
 
-    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerName = objValues.htsClientInformation.partnerName
-      ? ""
-      : "This field is required.");
+    // If PNS is offered, it must be accepted - cannot save if declined
+    if (objValues.offeredPns === "Yes") {
+      temp.acceptedPns = objValues.acceptedPns ? "" : "This field is required.";
 
+      if (objValues.acceptedPns && objValues.acceptedPns !== "Yes") {
+        temp.acceptedPns = "Cannot save when PNS is not accepted";
+      }
 
-    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerAge = objValues.htsClientInformation.partnerAge
-      ? ""
-      : "This field is required.")
-
-    objValues.offeredPns.toLowerCase() === "yes" && objValues.acceptedPns.toLowerCase() === "yes" && (temp.partnerSex = objValues.htsClientInformation.partnerSex
-      ? ""
-      : "This field is required.")
+      // Require partner fields when PNS is offered and accepted
+      if (objValues.acceptedPns === "Yes") {
+        temp.dateOfElicitation = objValues.dateOfElicitation ? "" : "This field is required.";
+        temp.partnerName = objValues.htsClientInformation.partnerName ? "" : "This field is required.";
+        temp.partnerAge = objValues.htsClientInformation.partnerAge ? "" : "This field is required.";
+        temp.partnerSex = objValues.htsClientInformation.partnerSex ? "" : "This field is required.";
+      }
+    }
 
     if (objValues.offeredPns === "No") {
       temp.reasonForDecline = objValues.reasonForDecline
@@ -601,7 +610,13 @@ const PnsForm = (props) => {
 
     objValues.htsClientInformation = htsClientInformation;
     objValues.contactTracing = contactTracing;
-    objValues.partnerId = partnerId;
+
+    // Only set partnerId if both offered and accepted PNS
+    if (objValues.acceptedPns === "No" && objValues.offeredPns === "Yes") {
+      objValues.partnerId = "";
+    } else {
+      objValues.partnerId = partnerId;
+    }
 
 
     if (validate()) {
@@ -692,7 +707,7 @@ const PnsForm = (props) => {
     setMaritalStatus(data["MARITAL_STATUS"])
     setRoleProvider(data["PROVIDER_ROLE"])
     setSexs(data["SEX"])
-    setIndexTesting(data["INDEX_TESTING"])
+    setIndexTesting(data["RELATIONSHIP_CONTACT"])
     setConsent(data["CONSENT"])
     setNotificationContact(data["NOTIFICATION_CONTACT"])
 
@@ -705,7 +720,7 @@ const PnsForm = (props) => {
       "MARITAL_STATUS",
       "PROVIDER_ROLE",
       "SEX",
-      "INDEX_TESTING",
+      "RELATIONSHIP_CONTACT",
       "CONSENT",
       "NOTIFICATION_CONTACT"
     ],
@@ -780,6 +795,11 @@ const PnsForm = (props) => {
                         </option>
                       ))}
                     </select>
+                    {/* {errors.acceptedPns !== "" ? (
+                      <span className={classes.error}>{errors.acceptedPns}</span>
+                    ) : (
+                      ""
+                    )} */}
                   </FormGroup>
                 </div>
               )}
@@ -1554,7 +1574,9 @@ const PnsForm = (props) => {
 
                     <div className="form-group mb-3 col-md-4">
                       <FormGroup>
-                        <Label for="">Date of Elicitation</Label>
+                        <Label for="">Date of Elicitation
+                        <span style={{ color: "red" }}> *</span>
+                        </Label>
                         <Input
                           type="date"
                           onKeyPress={(e) => {
