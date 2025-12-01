@@ -155,7 +155,7 @@ const BasicInfo = (props) => {
   });
 
   useEffect(() => {
-    setObjValues({ ...props.activePage.activeObject, testingSetting: props.activePage.activeObject.riskStratificationResponseDto.testingSetting });
+    setObjValues({ ...props.activePage.activeObject, testingSetting: props.activePage.activeObject?.riskStratificationResponseDto?.testingSetting });
     setModalityCheck(
       getCheckModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
@@ -732,8 +732,7 @@ const BasicInfo = (props) => {
                             borderRadius: "0.2rem",
                           }}
                           disabled={
-                            props.patientObj.riskStratificationResponseDto
-                              .testingSetting ===
+                            props?.patientObj?.riskStratificationResponseDto?.testingSetting ===
                               "FACILITY_HTS_TEST_SETTING_ANC"
                               ? true
                               : props.activePage.actionType === "view"
@@ -742,9 +741,8 @@ const BasicInfo = (props) => {
                           }
                         >
                           <option value={""}></option>
-                          {pregnancyStatus.map((value) =>
-                            props.patientObj.riskStratificationResponseDto
-                              .testingSetting ===
+                          {pregnancyStatus?.map((value) =>
+                            props?.patientObj?.riskStratificationResponseDto?.testingSetting ===
                               "FACILITY_HTS_TEST_SETTING_ANC" &&
                               value.code === "PREGANACY_STATUS_NOT_PREGNANT" ? (
                               <></>

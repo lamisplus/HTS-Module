@@ -131,21 +131,19 @@ const RiskStratification = (props) => {
   const [showHealthFacility, setShowHealthFacility] = useState(
     communitySpokeList.includes(
       props?.activePage?.activeObject?.riskStratificationResponseDto
-        .testingSetting
+        ?.testingSetting
     )
       ? true
       : false
   );
 
+  
+
   const [objValues, setObjValues] = useState({
     age: props.patientAge,
-    dob: props.patientObj.dateOfBirth
-      ? props.patientObj.dateOfBirth
-      : props?.personInfopersonResponseDto?.dateOfBirth,
-    visitDate: "",
-    dateOfBirth: props.patientObj.dateOfBirth
-      ? props.patientObj.dateOfBirth
-      : props?.personInfopersonResponseDto?.dateOfBirth,
+    dob: props.patientObj?.dateOfBirth || props.patientObj?.personResponseDto?.dateOfBirth || props?.personInfopersonResponseDto?.dateOfBirth,
+    visitDate: props.patientObj?.dateVisit || "",
+    dateOfBirth: props.patientObj?.dateOfBirth || props.patientObj?.personResponseDto?.dateOfBirth || props?.personInfopersonResponseDto?.dateOfBirth,
     dateOfRegistration: "", //props.patientObj.dateOfRegistration,
     isDateOfBirthEstimated: "", //props.patientObj.personResponseDto.isDateOfBirthEstimated
     targetGroup: "",
@@ -161,6 +159,8 @@ const RiskStratification = (props) => {
     spokeFacility: "",
     healthFacility: "",
   });
+
+  console.log("visit-date", objValues.visitDate)
   const [riskAssessment, setRiskAssessment] = useState({
     // everHadSexualIntercourse:"",
     // bloodtransInlastThreeMonths:"",
