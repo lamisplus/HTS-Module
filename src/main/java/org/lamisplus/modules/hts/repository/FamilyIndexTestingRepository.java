@@ -19,4 +19,6 @@ public interface FamilyIndexTestingRepository  extends JpaRepository<FamilyIndex
             "WHERE c.id = :id AND fit.archived = :archived", nativeQuery = true)
     FamilyIndexTesting findAllFamilyIndexTestingByHtsClientId(@Param("id") Long id, @Param("archived") int archived);
 
+    boolean existsByContactId(String contactId);
+
 }

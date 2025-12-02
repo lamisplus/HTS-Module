@@ -16,6 +16,7 @@ public interface PersonalNotificationServiceRepository extends JpaRepository<Per
 
     List<PersonalNotificationService> findAllByHtsClient(HtsClient htsClient);
 
+    boolean existsByPartnerId(Long partnerId);
 
     Optional<String> findLastPartnerIdByHtsClientId(@Param("htsClientId") Long htsClientId);
 }

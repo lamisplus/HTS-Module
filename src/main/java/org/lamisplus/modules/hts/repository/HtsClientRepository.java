@@ -31,11 +31,7 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
     Optional<HtsClient> findTopByPersonUuidAndArchivedAndFacilityId(String personUuid, Integer archived, Long facilityId);
 
-
-
-
-
-
+    Optional<HtsClient> findFirstByRiskStratificationCode(String riskStratificationCode);
 
 
     @Query(value =  "SELECT p.hospital_number AS hospitalNumber,  p.id AS personId, p.uuid as personUuid, p.first_name AS firstName, p.surname AS surname,  p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  " +
