@@ -15,6 +15,12 @@ public interface HtsClientReferralRepository extends JpaRepository<HtsClientRefe
             "WHERE hc.id = :id AND hcr.archived = :archived")
     List<HtsClientReferral> findHtsClientReferralByHtsClientId(@Param("id") Long id, @Param("archived") int archived);
 
-    boolean existsByHtsClientAndNameOfPersonReferringClientAndNameOfContactPerson(String uuid, String nameOfPersonReferringClient, String NameOfContactPerson);
+//    boolean existsByHtsClientAndNameOfPersonReferringClientAndNameOfContactPerson(String uuid, String nameOfPersonReferringClient, String NameOfContactPerson);
+
+    boolean existsByHtsClient_UuidAndNameOfPersonReferringClientAndNameOfContactPerson(
+            String uuid,
+            String nameOfPersonReferringClient,
+            String nameOfContactPerson);
+
 
 }

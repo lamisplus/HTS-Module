@@ -256,4 +256,8 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
     @Query(value = "SELECT lmp FROM pmtct_anc WHERE person_uuid=?1", nativeQuery = true)
     Optional<String> getLmpDate(String personUuid);
+
+    Optional<HtsClient> findByClientCodeAndRiskStratificationCode(String clientCode, String riskStratificationCode);
+
+    Optional<HtsClient> findClientById(Long clientId);
 }

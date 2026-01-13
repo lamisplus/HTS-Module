@@ -749,4 +749,10 @@ public class HtsClientService {
 
         return response;
     }
+
+   public HtsClientDto getClientById(Long clientId) {
+       return htsClientRepository.findClientById(clientId)
+               .map(this::htsClientToHtsClientDto)
+               .orElse(null);
+   }
 }

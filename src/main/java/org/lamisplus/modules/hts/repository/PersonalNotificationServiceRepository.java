@@ -1,5 +1,6 @@
 package org.lamisplus.modules.hts.repository;
 
+import org.apache.kafka.common.protocol.types.Field;
 import org.lamisplus.modules.hts.domain.entity.HtsClient;
 import org.lamisplus.modules.hts.domain.entity.IndexElicitation;
 import org.lamisplus.modules.hts.domain.entity.PersonalNotificationService;
@@ -16,7 +17,7 @@ public interface PersonalNotificationServiceRepository extends JpaRepository<Per
 
     List<PersonalNotificationService> findAllByHtsClient(HtsClient htsClient);
 
-    boolean existsByPartnerId(Long partnerId);
+     boolean existsByPartnerId(String partner);
 
     Optional<String> findLastPartnerIdByHtsClientId(@Param("htsClientId") Long htsClientId);
 }
