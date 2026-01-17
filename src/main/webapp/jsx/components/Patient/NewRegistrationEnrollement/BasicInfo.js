@@ -227,10 +227,9 @@ const BasicInfo = props => {
     temp.previouslyTested =
       objValues.previouslyTested !== "" ? "" : "This field is required.";
 
-    // Only validate indexClient field when testingSetting is NOT INDEX setting and not in update mode
-    // Index fields are hidden when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX
-    const shouldShowIndexFields =
-      isIndexTestingSetting() && props.activePage.actionType !== "update";
+    // Only validate indexClient field when testingSetting is INDEX setting
+    // Index fields are shown when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX
+    const shouldShowIndexFields = isIndexTestingSetting();
     if (shouldShowIndexFields) {
       temp.indexClient =
         objValues.indexClient !== "" ? "" : "This field is required.";
@@ -245,16 +244,16 @@ const BasicInfo = props => {
       (temp.pregnant =
         objValues.pregnant !== "" ? "" : "This field is required.");
 
-    // Only validate index client related fields when NOT INDEX setting and not in update mode
+    // Only validate index client related fields when INDEX setting and indexClient is true
     shouldShowIndexFields &&
-      objValues.indexClient === "true" &&
+      (objValues.indexClient === "true" || objValues.indexClient === true) &&
       (temp.relationWithIndexClient =
         objValues.relationWithIndexClient !== ""
           ? ""
           : "This field is required.");
 
     shouldShowIndexFields &&
-      objValues.indexClient === "true" &&
+      (objValues.indexClient === "true" || objValues.indexClient === true) &&
       (temp.indexClientCode =
         objValues.indexClientCode !== "" ? "" : "This field is required.");
     setErrors({ ...temp });
@@ -660,102 +659,102 @@ const BasicInfo = props => {
                 </div>
               )}
 
-              {/* Hide Index Testing fields when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX */}
-              {isIndexTestingSetting() &&
-                props.activePage.actionType !== "update" && (
-                  <>
-                    <div className="form-group  col-md-4">
-                      <FormGroup>
-                        <Label>Index Testing</Label>
-                        <select
-                          className="form-control"
-                          name="indexClient"
-                          id="indexClient"
-                          value={objValues.indexClient}
-                          onChange={handleInputChange}
-                          style={{
-                            border: "1px solid #014D88",
-                            borderRadius: "0.2rem",
-                          }}
-                          disabled={props.activePage.actionType === "view"}
-                        >
-                          <option value={""}></option>
-                          <option value="true">YES</option>
-                          <option value="false">NO</option>
-                        </select>
-                        {errors.indexClient !== "" ? (
-                          <span className={classes.error}>
-                            {errors.indexClient}
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </FormGroup>
-                    </div>
-                    {objValues.indexClient === "true" && (
-                      <>
-                        <div className="form-group  col-md-4">
-                          <FormGroup>
-                            <Label>Relationship of the index client</Label>
-                            <select
-                              className="form-control"
-                              name="relationWithIndexClient"
-                              id="relationWithIndexClient"
-                              value={objValues.relationWithIndexClient}
-                              onChange={handleInputChange}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.2rem",
-                              }}
-                              disabled={props.activePage.actionType === "view"}
-                            >
-                              <option value={""}></option>
-                              {indexTesting.map(value => (
-                                <option key={value.id} value={value.id}>
-                                  {value.display}
-                                </option>
-                              ))}
-                            </select>
-                            {errors.relationWithIndexClient !== "" ? (
-                              <span className={classes.error}>
-                                {errors.relationWithIndexClient}
-                              </span>
-                            ) : (
-                              ""
-                            )}
-                          </FormGroup>
-                        </div>
-                        <div className="form-group  col-md-4">
-                          <FormGroup>
-                            <Label>
-                              Index Client Code/ID
-                              <span style={{ color: "red" }}> *</span>
-                            </Label>
-                            <Input
-                              type="text"
-                              name="indexClientCode"
-                              id="indexClientCode"
-                              value={objValues.indexClientCode}
-                              onChange={handleInputChange}
-                              style={{
-                                border: "1px solid #014D88",
-                                borderRadius: "0.25rem",
-                              }}
-                              readOnly={props.activePage.actionType === "view"}
-                            />
-                          </FormGroup>
-                          {errors.indexClientCode !== "" ? (
+              {/* Show Index Testing fields when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX */}
+              {isIndexTestingSetting() && (
+                <>
+                  <div className="form-group  col-md-4">
+                    <FormGroup>
+                      <Label>Index Testing</Label>
+                      <select
+                        className="form-control"
+                        name="indexClient"
+                        id="indexClient"
+                        value={objValues.indexClient}
+                        onChange={handleInputChange}
+                        style={{
+                          border: "1px solid #014D88",
+                          borderRadius: "0.2rem",
+                        }}
+                        disabled={props.activePage.actionType === "view"}
+                      >
+                        <option value={""}></option>
+                        <option value="true">YES</option>
+                        <option value="false">NO</option>
+                      </select>
+                      {errors.indexClient !== "" ? (
+                        <span className={classes.error}>
+                          {errors.indexClient}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </FormGroup>
+                  </div>
+                  {(objValues.indexClient === "true" ||
+                    objValues.indexClient === true) && (
+                    <>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>Relationship of the index client</Label>
+                          <select
+                            className="form-control"
+                            name="relationWithIndexClient"
+                            id="relationWithIndexClient"
+                            value={objValues.relationWithIndexClient}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                            }}
+                            disabled={props.activePage.actionType === "view"}
+                          >
+                            <option value={""}></option>
+                            {indexTesting.map(value => (
+                              <option key={value.id} value={value.id}>
+                                {value.display}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.relationWithIndexClient !== "" ? (
                             <span className={classes.error}>
-                              {errors.indexClientCode}
+                              {errors.relationWithIndexClient}
                             </span>
                           ) : (
                             ""
                           )}
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
+                        </FormGroup>
+                      </div>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>
+                            Index Client Code/ID
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
+                          <Input
+                            type="text"
+                            name="indexClientCode"
+                            id="indexClientCode"
+                            value={objValues.indexClientCode}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                            readOnly={props.activePage.actionType === "view"}
+                          />
+                        </FormGroup>
+                        {errors.indexClientCode !== "" ? (
+                          <span className={classes.error}>
+                            {errors.indexClientCode}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
               {props.patientObj.personResponseDto.sex &&
                 props.patientObj.personResponseDto.sex.toLowerCase() ===
                   "female" && (
