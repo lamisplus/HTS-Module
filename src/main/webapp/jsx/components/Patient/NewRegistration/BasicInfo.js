@@ -911,7 +911,7 @@ const BasicInfo = props => {
         dateVisit: objValues.dateVisit,
         extra: {},
         firstTimeVisit: objValues.firstTimeVisit,
-        indexClient: objValues.indexClient,
+        indexClient: objValues.indexClient ?? false,
         numChildren: objValues.numChildren,
         numWives: objValues.numWives,
         personDto: {
