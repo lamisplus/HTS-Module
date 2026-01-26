@@ -30,4 +30,6 @@ public interface FamilyIndexRepository extends JpaRepository<FamilyIndex, Long> 
     @Query(value = "SELECT result_reported FROM public.laboratory_result where patient_uuid = ?1 and date_result_reported is not null ORDER BY date_result_received DESC LIMIT 1", nativeQuery = true)
     String getVirallySuppressedByPersonUuid (@Param("personUuid") String personUuid);
 
+    boolean existsByContactId(String contactId);
+
 }

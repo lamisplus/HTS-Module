@@ -165,4 +165,130 @@
         </sql>
     </changeSet>
 
+    <changeSet failOnError="true" author="Joshua" id="2025-10-13-update-entry-points-on-rst-facility">
+
+        <sql>
+            UPDATE hts_risk_stratification
+            SET entry_point = 'HTS_ENTRY_POINT_FACILITY'
+                where entry_point = 'Facility';
+            UPDATE hts_risk_stratification
+            SET entry_point = 'HTS_ENTRY_POINT_COMMUNITY'
+            where entry_point = 'Community';
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-risk-stratification">
+
+        <sql>
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING' WHERE testing_setting = 'TEST_SETTING_CPMTCT';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_PEDIATRIC' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_PEDIATRIC';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_STI';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OTHERS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OTHERS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_EMERGENCY' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_EMERGENCY';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' WHERE testing_setting = 'TEST_SETTING_WARD';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_OTHERS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_PNS_PNS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'TEST_SETTING_TB';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'TEST_SETTING_STI';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_INDEX';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_FP';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_CT';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'POINT_ENTRY_OUTREACH';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'SOURCE_REFERRAL_FP';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'POINT_ENTRY_OTHERS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_L&amp;D' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_L&amp;D';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_SNT_SNT';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'TEST_SETTING_FP';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_OPD';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_ANC' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_ANC';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION' WHERE testing_setting = 'TEST_SETTING_MALNUTRITION_CLINIC';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_PNS';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'SOURCE_REFERRAL_TB';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_SNT';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'SOURCE_REFERRAL_STI';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'TEST_SETTING_OUTREACH';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_TB';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_SELF_TESTING';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_INDEX';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW';
+            UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_SNS';
+            UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OVC';
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-client">
+
+        <sql>
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING' WHERE testing_setting = 'TEST_SETTING_CPMTCT';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_PEDIATRIC' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_PEDIATRIC';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_STI';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OTHERS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OTHERS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_EMERGENCY' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_EMERGENCY';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' WHERE testing_setting = 'TEST_SETTING_WARD';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_OTHERS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_PNS_PNS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'TEST_SETTING_TB';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_WARD_INPATIENT';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'TEST_SETTING_STI';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_INDEX';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_FP';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_CT';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'POINT_ENTRY_OUTREACH';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_BLOOD_BANK';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'SOURCE_REFERRAL_FP';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'POINT_ENTRY_OTHERS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_L&amp;D' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_L&amp;D';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_CT';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_SNT_SNT';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_FP' WHERE testing_setting = 'TEST_SETTING_FP';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_OPD';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_ANC' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_ANC';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_MALNUTRITION' WHERE testing_setting = 'TEST_SETTING_MALNUTRITION_CLINIC';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_PNS';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'SOURCE_REFERRAL_TB';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_SNT';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_STI' WHERE testing_setting = 'SOURCE_REFERRAL_STI';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'TEST_SETTING_OUTREACH';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_TB' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_TB';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_OTHERS_(SPECIFY)' WHERE testing_setting = 'TEST_SETTING_SELF_TESTING';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'TEST_SETTING_INDEX';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX' WHERE testing_setting = 'FACILITY_HTS_TEST_SETTING_INDEX';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW';
+            UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_SNS';
+            UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OVC';
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

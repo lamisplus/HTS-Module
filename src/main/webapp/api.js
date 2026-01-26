@@ -3,11 +3,11 @@ export const url =
     ? "http://localhost:8789/api/v1/"
     : "/api/v1/";
 export const token =
-  process.env.NODE_ENV === "development" ?
-    "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJndWVzdEBsYW1pc3BsdXMub3JnIiwiYXV0aCI6IlN1cGVyIEFkbWluLFVzZXIsUkRFIiwibmFtZSI6Ikd1ZXN0IEd1ZXN0IiwiZXhwIjoxNzYwMTAzNjM5fQ.-ezD5c4_P3FaDoAoYf7KqymaKBKH4zXom7tS4jFKPD2s0LJzxjaGKGTLxSq6ZDzowiSKPKvKRW0lt3A1mw2XBg"
+  process.env.NODE_ENV === "development"
+    ? "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJndWVzdEBsYW1pc3BsdXMub3JnIiwiYXV0aCI6IlN1cGVyIEFkbWluLFJERSIsIm5hbWUiOiJHdWVzdCBHdWVzdCIsImV4cCI6MTc2ODk1MTA4MH0.eC5KsVNltjoAMCriWRIsDK_tJR-o9DhesuaCjq292KD5tS-T03J4EmmwE_bee-EJvZdY3czrmzJo2NQvyE2-aA"
     : new URLSearchParams(window.location.search).get("jwt");
 
-export const wsUrl = process.env.NODE_ENV === "development"
-  ? "http://localhost:8789/websocket"
-  : "/websocket";
-
+export const wsUrl =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:8789/websocket"
+    : "/websocket";
