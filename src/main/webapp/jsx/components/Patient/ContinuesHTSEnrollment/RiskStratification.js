@@ -26,6 +26,7 @@ import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
 import { validateVisitDateWithDOB } from "../../utils";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { getSourceByRole } from "../../../../utils/localstorage";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -142,6 +143,7 @@ const RiskStratification = props => {
     communityEntryPoint: "",
     spokeFacility: "",
     healthFacility: "",
+    source: "",
   });
 
   const [codesets, setCodsets] = useState({});
@@ -207,6 +209,17 @@ const RiskStratification = props => {
   useEffect(() => {
     retestingInfo();
   }, [entryPointSetting, entryPoint, props.newHTSType]);
+
+  // Set source to POC if user is not RDE or Super Admin on component mount
+  useEffect(() => {
+    const source = getSourceByRole();
+    if (source) {
+      setObjValues(prev => ({
+        ...prev,
+        source: source,
+      }));
+    }
+  }, []);
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");

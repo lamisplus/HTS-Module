@@ -27,6 +27,7 @@ import { getDoubleSkipForm } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { getSourceByRole } from "../../../../utils/localstorage";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -333,6 +334,7 @@ const BasicInfo = props => {
     comment: props?.patientObj?.comment,
     partnerNotificationService: "",
     familyIndex: "",
+    source: "",
   });
 
   const convertFromIdToDisplay = code => {
@@ -974,6 +976,8 @@ const BasicInfo = props => {
         comment: objValues.comment,
         partnerNotificationService: objValues.partnerNotificationService,
         familyIndex: objValues.familyIndex,
+        source: objValues.source
+
       };
 
       props.setPatientObj({ ...props.patientObj, ...objValues });
@@ -1079,6 +1083,17 @@ const BasicInfo = props => {
       }));
     }
   }, [testingSetting]);
+
+  // Set source to POC if user is not RDE or Super Admin on component mount
+  useEffect(() => {
+    const source = getSourceByRole();
+    if (source) {
+      setObjValues(prev => ({
+        ...prev,
+        source: source,
+      }));
+    }
+  }, []);
 
   return (
     <>

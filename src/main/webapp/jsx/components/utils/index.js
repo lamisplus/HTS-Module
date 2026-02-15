@@ -42,7 +42,7 @@ export const generateDobFromAge = (age) => {
 export const validateVisitDateWithDOB = (dob, visitDate) => {
   // const dob = obj.dob;
   // const visitDate = obj.visitDate;
-
+x
   if (!dob || !visitDate) {
     return "Please provide both Date of Birth and Visit Date.";
   }

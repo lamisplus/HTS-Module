@@ -5,6 +5,7 @@ import * as moment from "moment";
 import { makeStyles } from "@material-ui/core/styles";
 import { Card } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
+import { getSourceByRole } from "../../../../utils/localstorage";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -150,6 +151,7 @@ const BasicInfo = props => {
     communityEntryPoint: "",
     spokeFacility: "",
     healthFacility: "",
+    source: ""
   });
 
   const [riskAssessment, setRiskAssessment] = useState({
@@ -998,6 +1000,18 @@ const BasicInfo = props => {
     patientId: props.patientObj?.id,
     onSuccess: loadCodesets,
   });
+
+  useEffect(() => {
+    const source = getSourceByRole();
+    if (source) {
+      setObjValues(prevValues => ({
+        ...prevValues,
+        source: source
+      }));
+    }
+  }, []);
+
+  console.log("objectvlaues in Riskstartification", objValues.source)
 
   return (
     <>

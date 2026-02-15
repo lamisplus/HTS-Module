@@ -55,8 +55,6 @@ public class HtsClientService {
 
 
     public HtsClientDto save(HtsClientRequestDto htsClientRequestDto){
-        System.out.println("i am inside the save method");
-
         if(htsClientRequestDto.getSource().equalsIgnoreCase(Source.Mobile.toString())){
             Optional<HtsClient> htsClientExists = htsClientRepository.findByUuid(htsClientRequestDto.getUuid());
             if (htsClientExists.isPresent()) {
@@ -89,7 +87,13 @@ public class HtsClientService {
             familyIndexTestingService.updateIndexClientStatus(htsClientRequestDto.getFamilyIndex());
         }
         htsClient.setFacilityId(currentUserOrganizationService.getCurrentUserOrganization());
-        String sourceSupport = (htsClientRequestDto.getSource() != null && !htsClientRequestDto.getSource().trim().isEmpty()) ? htsClientRequestDto.getSource()  : "Web";
+        String sourceSupport;
+        if ("POC".equals(htsClientRequestDto.getSource())) {
+            sourceSupport = "POC";
+        } else {
+            sourceSupport = (htsClientRequestDto.getSource() != null && !htsClientRequestDto.getSource().trim().isEmpty()) ? htsClientRequestDto.getSource()  : "Web";
+        }
+
         htsClient.setSource(sourceSupport);
         if(sourceSupport.equals("Mobile")) {
             htsClient.setLatitude(htsClientRequestDto.getLatitude());

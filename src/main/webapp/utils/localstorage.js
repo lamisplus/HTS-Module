@@ -87,3 +87,26 @@ export const getRoles = async () => {
   }
   return roles;
 };
+
+export const getSourceByRole = () => {
+  try {
+    const roles = getStorageValues("currentUser_Roles");
+
+    if (!roles || !Array.isArray(roles)) {
+      console.log('No roles found or roles is not an array');
+      return null;
+    }
+
+    // Define admin roles that should NOT use POC source
+    const adminRoles = ['RDE', 'Super Admin'];
+    const hasAdminRole = adminRoles.some(role => roles.includes(role));
+    if (hasAdminRole) {
+      return null;
+    }
+    console.log("Has no admin related role, it a POC faclity")
+    return 'POC';
+  } catch (error) {
+    console.error('Error getting source by role:', error);
+    return null;
+  }
+};

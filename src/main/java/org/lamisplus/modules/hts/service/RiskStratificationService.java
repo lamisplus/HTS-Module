@@ -48,6 +48,9 @@ public class RiskStratificationService {
         }
         RiskStratification riskStratification = toRiskStratification(riskStratificationDTO, personUuid);
         riskStratification.setFacilityId(currentFacility.getCurrentUserOrganization());
+        String source = riskStratificationDTO.getSource();
+        String sourceSupport = (source == null || source.isEmpty()) ? "Web" : "POC";
+        riskStratification.setSource(sourceSupport);
         return this.toRiskStratificationResponseDTO(stratificationRepository.save(riskStratification));
     }
 

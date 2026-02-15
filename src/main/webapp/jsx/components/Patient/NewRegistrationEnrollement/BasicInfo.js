@@ -26,6 +26,7 @@ import { Modal } from "react-bootstrap";
 import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { getSourceByRole } from "../../../../utils/localstorage";
 const useStyles = makeStyles(theme => ({
   card: {
     margin: theme.spacing(20),
@@ -156,6 +157,7 @@ const BasicInfo = props => {
     comment: "",
     partnerNotificationService: "",
     familyIndex: "",
+    source: "",
   });
 
   useEffect(() => {
@@ -172,6 +174,17 @@ const BasicInfo = props => {
       )
     );
   }, [props.patientObj]);
+
+  // Set source to POC if user is not RDE or Super Admin on component mount
+  useEffect(() => {
+    const source = getSourceByRole();
+    if (source) {
+      setObjValues(prev => ({
+        ...prev,
+        source: source,
+      }));
+    }
+  }, []);
 
   const handleInputChange = e => {
     if (e.target.name === "numChildren") {
@@ -332,6 +345,7 @@ const BasicInfo = props => {
         comment: objValues.comment,
         partnerNotificationService: objValues.partnerNotificationService,
         familyIndex: objValues.familyIndex,
+        source: objValues.source,
       };
 
       if (validate()) {
