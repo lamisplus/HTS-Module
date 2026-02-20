@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import {
   HIV_TEST_RESULT_OPTIONS,
@@ -8,9 +8,12 @@ import {
   HIV_EARLY_DETECT_OPTIONS,
   YES_NO_OPTIONS,
 } from "../constants";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
+  const [codesets, setCodesets] = useState(null);
+
 
   const fp = (name) => ({
     name,
@@ -40,6 +43,35 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const showRecency = values.initialHivTest === "Positive";
   const showSuspectedAcute = values.initialHivTest === "Negative";
 
+  const transformOptions = (items) => {
+    if (!Array.isArray(items)) return [];
+    return items.map(item => ({
+      id: item.id,
+      label: item.display,
+      value: item.display
+    }));
+  };
+
+
+  const loadCodesets = (data) => {
+    setCodesets(data);
+  };
+
+  useGetCodesets({
+    codesetsKeys: [
+      "YES_NO",
+      "RECENT_HIV_TEST",
+      "HIV_TEST_RESULT",
+      "TEST_RESULT_COMMON",
+      "STI_HIV_RESULT",
+      "PARTNER_SYPHILIS_STATUS",
+      "RECENCY_TESTING"
+    ],
+    patientId: "diagnosticTesting",
+    onSuccess: loadCodesets,
+  });
+
+
   return (
     <div style={{ width: "100%" }}>
       <SectionSubheading>HIV Testing</SectionSubheading>
@@ -47,13 +79,13 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="HIV Early Detect Test Result"
-            {...sp("hivEarlyDetectResult", HIV_EARLY_DETECT_OPTIONS)}
+            {...sp("hivEarlyDetectResult", transformOptions(codesets?.["TEST_RESULT_COMMON"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Initial HIV Test"
-            {...sp("initialHivTest", HIV_TEST_RESULT_OPTIONS)}
+            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
             onChange={readOnly ? undefined : handleInitialTestChange}
             required
           />
@@ -62,7 +94,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="Suspected Acute HIV Infection?"
-              {...sp("suspectedAcuteInfection", YES_NO_OPTIONS)}
+              {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
             />
           </div>
         )}
@@ -70,7 +102,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="Confirmatory HIV Test"
-              {...sp("confirmatoryHivTest", CONFIRMATORY_TEST_OPTIONS)}
+              {...sp("confirmatoryHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
             />
           </div>
         )}
@@ -81,14 +113,14 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Syphilis Test Result"
-            {...sp("syphilisTestResult", SYPHILIS_TEST_OPTIONS)}
+            {...sp("syphilisTestResult", transformOptions(codesets?.["PARTNER_SYPHILIS_STATUS"]))}
           />
         </div>
         {showRecency && (
           <div className="col-md-6">
             <FormSelect
               label="Recency Test (for positive clients only)"
-              {...sp("recencyTest", RECENCY_TEST_OPTIONS)}
+              {...sp("recencyTest", transformOptions(codesets?.["RECENCY_TESTING"]))}
             />
           </div>
         )}

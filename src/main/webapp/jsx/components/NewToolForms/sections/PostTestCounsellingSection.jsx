@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import {
-  YES_NO_OPTIONS,
   PREVIOUSLY_TESTED_OPTIONS,
   CATEGORY_OF_CLIENTS_OPTIONS,
 } from "../constants";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const COMPLETED_BY_OPTIONS = [
   { label: "Counsellor", value: "Counsellor" },
@@ -22,6 +22,7 @@ const DESIGNATION_OPTIONS = [
 
 const PostTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur } = formik;
+  const [codesets, setCodesets] = useState(null);
 
   const fp = (name) => ({
     name,
@@ -34,6 +35,30 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
   });
 
   const sp = (name, options) => ({ ...fp(name), options });
+
+  const transformOptions = (items) => {
+    if (!Array.isArray(items)) return [];
+    return items.map(item => ({
+      id: item.id,
+      label: item.display,
+      value: item.display
+    }));
+  };
+
+
+  const loadCodesets = (data) => {
+    setCodesets(data);
+  };
+
+  useGetCodesets({
+    codesetsKeys: [
+      "YES_NO",
+      "TARGET_GROUP"
+    ],
+    patientId: "PostTestCounselling",
+    onSuccess: loadCodesets,
+  });
+
 
   return (
     <div style={{ width: "100%" }}>
@@ -48,62 +73,62 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Client Received Test Result?"
-            {...sp("clientReceivedTestResult", YES_NO_OPTIONS)}
+            {...sp("clientReceivedTestResult", transformOptions(codesets?.["YES_NO"]))}
             required
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="HIV Test Kits Provided to Client"
-            {...sp("hivTestKitsProvided", YES_NO_OPTIONS)}
+            {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Category of Clients"
-            {...sp("categoryOfClients", CATEGORY_OF_CLIENTS_OPTIONS)}
+            {...sp("categoryOfClients", transformOptions(codesets?.["TARGET_GROUP"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Accepted Index Testing"
-            {...sp("acceptedIndexTesting", YES_NO_OPTIONS)}
+            {...sp("acceptedIndexTesting", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Provided with Information on FP and Dual Contraception"
-            {...sp("providedFpInfo", YES_NO_OPTIONS)}
+            {...sp("providedFpInfo", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Client/Partner Use FP Methods (Other Than Condom)"
-            {...sp("clientPartnerUseFpMethods", YES_NO_OPTIONS)}
+            {...sp("clientPartnerUseFpMethods", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Client/Partner Use Condoms as (one) FP Method"
-            {...sp("clientPartnerUseCondoms", YES_NO_OPTIONS)}
+            {...sp("clientPartnerUseCondoms", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Correct Condom Use Demonstrated"
-            {...sp("correctCondomUseDemonstrated", YES_NO_OPTIONS)}
+            {...sp("correctCondomUseDemonstrated", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Condoms Provided to Client"
-            {...sp("condomsProvided", YES_NO_OPTIONS)}
+            {...sp("condomsProvided", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Client Referred to Other Services"
-            {...sp("clientReferredToOtherServices", YES_NO_OPTIONS)}
+            {...sp("clientReferredToOtherServices", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
       </div>

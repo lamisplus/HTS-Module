@@ -11,17 +11,9 @@ import {
 } from "./FormFields";
 import {
   MODALITY_OPTIONS,
-  FACILITY_SETTING_OPTIONS,
-  COMMUNITY_ENTRY_POINT_OPTIONS,
-  SEX_OPTIONS,
-  MARITAL_STATUS_OPTIONS,
-  PREGNANCY_STATUS_OPTIONS,
   BREASTFEEDING_DURATION_OPTIONS,
-  TYPE_OF_SESSION_OPTIONS,
   INDEX_RELATIONSHIP_OPTIONS,
-  YES_NO_OPTIONS,
-  DUMMY_STATES,
-  DUMMY_LGAS,
+
 } from "../constants";
 import axios from "axios";
 import { url, token } from "../../../../api";
@@ -65,8 +57,14 @@ const disabledInputStyle = {
 const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
 
-  const [accountDetail, setAccountDetail] = useState(null)
-  const [codesets, setCodesets] = useState(null)
+  const [accountDetail, setAccountDetail] = useState(null);
+  const [codesets, setCodesets] = useState(null);
+
+  // State and LGA data from API
+  const [statesList, setStatesList] = useState([]);
+  const [lgasList, setLgasList] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingLgas, setLoadingLgas] = useState(false);
 
   const fp = (name) => ({
     name,
@@ -84,10 +82,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     disabled: readOnly || extraDisabled,
   });
 
-
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
-
     return items.map(item => ({
       id: item.id,
       label: item.display,
@@ -95,8 +91,58 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }));
   };
 
+  // ─── API calls ─────────────────────────────────────────────────────────
+
+  const fetchStates = async (countryId) => {
+    setLoadingStates(true);
+    try {
+      const response = await axios.get(
+        `${url}organisation-units/parent-organisation-units/${countryId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Sort alphabetically by name for better UX
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setStatesList(sorted);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      // Optionally show a user-friendly message
+    } finally {
+      setLoadingStates(false);
+    }
+  };
+
+  const fetchLgas = async (stateId) => {
+    setLoadingLgas(true);
+    try {
+      const response = await axios.get(
+        `${url}organisation-units/parent-organisation-units/${stateId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setLgasList(sorted);
+    } catch (error) {
+      console.error("Error fetching LGAs:", error);
+    } finally {
+      setLoadingLgas(false);
+    }
+  };
 
 
+  useEffect(() => {
+    fetchStates(1);
+  }, []);
+
+  // If an existing patient already has a state, fetch its LGAs once statesList is loaded
+  useEffect(() => {
+    if (!readOnly && statesList.length > 0 && values.clientState) {
+      const selectedState = statesList.find(s => s.name === values.clientState);
+      if (selectedState) {
+        fetchLgas(selectedState.id);
+      }
+    }
+  }, [statesList, values.clientState, readOnly]);
+
+  // Fetch account details (existing code)
   const handleFetchFacilityName = async () => {
     try {
       const response = await axios.get(`${url}account`, {
@@ -105,8 +151,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           "Content-Type": "application/json",
         },
       });
-      setAccountDetail(response.data)
-      setFieldValue("facilityName", response.data?.currentOrganisationUnitName)
+      setAccountDetail(response.data);
+      setFieldValue("facilityName", response.data?.currentOrganisationUnitName);
       return response.data;
     } catch (error) {
       console.error("Error fetching account:", error.response?.data || error.message);
@@ -114,15 +160,36 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-
   useEffect(() => {
-    handleFetchFacilityName()
+    handleFetchFacilityName();
+  }, []);
 
+  // Load codesets (existing code)
+  const loadCodesets = (data) => {
+    console.log(data);
+    setCodesets(data);
+  };
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COUNSELING_TYPE",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "HTS_ENTRY_POINT",
+      "TEST_SETTING",
+      "MARITAL_STATUS",
+      "SOURCE_REFERRAL",
+      "GENDER",
+      "SEX",
+      "YES_NO"
+    ],
+    patientId: accountDetail?.currentOrganisationUnitName,
+    onSuccess: loadCodesets,
+  });
 
-  }, [])
-
-
-
+  // ─── Event handlers (modified to work with dynamic data) ───────────────
 
   const handleSettingChange = (e) => {
     setFieldValue("setting", e.target.value);
@@ -163,33 +230,40 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleCoWives = (e) => {
     const cowives = e.target.value;
     if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault()
+      e.preventDefault();
     }
     setFieldValue("numberOfCoWives", cowives);
-
   };
 
   const handleNoOfWives = (e) => {
     const wives = e.target.value;
     if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault()
+      e.preventDefault();
     }
     setFieldValue("numberOfWives", wives);
-
   };
 
   const handleNoOfBiologicalChildren = (e) => {
     const children = e.target.value;
     if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault()
+      e.preventDefault();
     }
     setFieldValue("numberOfBiologicalChildren", children);
-
   };
 
+  // Updated state change handler – uses state name, but fetches LGAs using ID
   const handleStateChange = (e) => {
-    setFieldValue("clientState", e.target.value);
-    setFieldValue("clientLga", "");
+    const stateName = e.target.value;
+    setFieldValue("clientState", stateName);
+    setFieldValue("clientLga", ""); // Clear LGA when state changes
+    setLgasList([]); // Clear current LGAs
+
+    if (stateName) {
+      const selectedState = statesList.find(s => s.name === stateName);
+      if (selectedState) {
+        fetchLgas(selectedState.id);
+      }
+    }
   };
 
   const handleTypeOfSessionChange = (e) => {
@@ -205,16 +279,12 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleIndexTestingChange = (e) => {
     const val = e.target.value;
     setFieldValue("indexTesting", val);
-    if (val !== "Yes") {
+    if (val.toLowerCase() !== "yes") {
       setFieldValue("indexRelationship", "");
       setFieldValue("indexClientCode", "");
     }
   };
 
-  /**
-   * Switching dobType clears the field that becomes disabled so stale
-   * values don't sit in formik state and confuse validation.
-   */
   const handleDobTypeChange = (e) => {
     const type = e.target.value;
     setFieldValue("dobType", type);
@@ -225,10 +295,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-  /**
-   * When the user picks a real date (Actual mode), auto-calculate and
-   * populate age read-only next to the date field for convenience.
-   */
   const handleDateOfBirthChange = (e) => {
     const val = e.target.value;
     setFieldValue("dateOfBirth", val);
@@ -244,16 +310,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-  /**
-   * When the user types an age in Estimated mode:
-   *  - Enforce whole numbers only (strip decimals on input)
-   *  - Back-calculate a DOB by subtracting years from today
-   *    (mid-year: 15 June of the birth year, matching the BasicInfo.jsx pattern)
-   *  - Populate dateOfBirth so the disabled date field shows a value
-   */
   const handleAgeChange = (e) => {
     const raw = e.target.value;
-    // Strip any decimal portion — only whole numbers allowed
     const wholeOnly = raw.includes(".")
       ? raw.slice(0, raw.indexOf("."))
       : raw;
@@ -261,9 +319,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
     const n = parseInt(wholeOnly, 10);
     if (!isNaN(n) && n >= 0 && n <= 130) {
-      // Use 15 June as a neutral mid-year estimate (same convention as BasicInfo.jsx)
       const estimated = new Date();
-      estimated.setMonth(5);   // June (0-indexed)
+      estimated.setMonth(5);
       estimated.setDate(15);
       estimated.setFullYear(estimated.getFullYear() - n);
       const yyyy = estimated.getFullYear();
@@ -275,54 +332,26 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-  // ── derived visibility flags — mirror validationSchema.js exactly ──────────
+  // ─── Visibility flags ───────────────────────────────────────────────────
 
   const showFacilitySetting = values.setting === "Facility";
   const showCommunityEntry = values.setting === "Community";
 
   const showIndexFields = values.typeOfSession === "Index Testing";
-  const showIndexDetails = showIndexFields && values.indexTesting === "Yes";
+  const showIndexDetails = showIndexFields && values.indexTesting.toLowerCase() === "yes";
 
-  // Pregnancy visible only for Female
   const showPregnancy = values.sex === "Female";
-  // Breastfeeding duration visible only when pregnancyStatus=Breastfeeding
   const showBreastfeedingDuration = values.pregnancyStatus === "Breastfeeding";
-  // numberOfWives visible only for Male + Married
   const showNumberOfWives = values.sex === "Male" && values.maritalStatus === "Married";
-  // numberOfCoWives visible only for Female + Married
   const showNumberOfCoWives = values.sex === "Female" && values.maritalStatus === "Married";
 
-  // dobType drives which DOB field is active
   const dobIsActual = values.dobType === "Actual" || !values.dobType;
 
-  const lgaOptions = values.clientState ? (DUMMY_LGAS[values.clientState] || []) : [];
-
-  const loadCodesets = (data) => {
-    console.log(data)
-    setCodesets(data)
-  }
-  useGetCodesets({
-    codesetsKeys: [
-      "TARGET_GROUP",
-      "INDEX_TESTING",
-      "PREGNANCY_STATUS",
-      "COUNSELING_TYPE",
-      "COMMUNITY_HTS_TEST_SETTING",
-      "FACILITY_HTS_TEST_SETTING",
-      "HTS_ENTRY_POINT",
-      "TEST_SETTING",
-      "MARITAL_STATUS",
-      "SOURCE_REFERRAL",
-      "GENDER",
-      "SEX",
-    ],
-    patientId: accountDetail?.currentOrganisationUnitName,
-    onSuccess: loadCodesets,
-  });
+  // Prepare options for LGA select using fetched data
+  const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.name }));
 
   return (
     <div style={{ width: "100%" }}>
-
       {/* ── Visit / Setting row ── */}
       <div className="row">
         <div className="col-md-6">
@@ -335,7 +364,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               readOnly
               required
               style={{ ...inputStyle, background: "#f6f8fa", color: "#57606a" }}
-
             />
           </FormGroup>
         </div>
@@ -398,7 +426,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Type of Session"
-            {...sp("typeOfSession", TYPE_OF_SESSION_OPTIONS)}
+            {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
             onChange={readOnly ? undefined : handleTypeOfSessionChange}
             required
           />
@@ -408,7 +436,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="Index Testing"
-              {...sp("indexTesting", YES_NO_OPTIONS)}
+              {...sp("indexTesting", transformOptions(codesets?.["YES_NO"]))}
               onChange={readOnly ? undefined : handleIndexTestingChange}
               required
             />
@@ -420,7 +448,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <div className="col-md-6">
               <FormSelect
                 label="Relationship of Index Client"
-                {...sp("indexRelationship", INDEX_RELATIONSHIP_OPTIONS)}
+                {...sp("indexRelationship", transformOptions(codesets?.["INDEX_TESTING"]))}
                 required
               />
             </div>
@@ -432,7 +460,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
           </>
-        )}
+         )} 
       </div>
 
       <SectionSubheading>Client Demographics</SectionSubheading>
@@ -479,14 +507,12 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               <FormTextField label="Middle Name" {...fp("middleName")} />
             </div>
 
-            {/* ── DOB radio + conditional date / age ── */}
+            {/* DOB radio + conditional date / age */}
             <div className="col-md-12">
               <FormGroup style={{ marginBottom: "16px" }}>
                 <Label style={labelStyle}>
                   Date of Birth <span style={{ color: "red" }}> *</span>
                 </Label>
-
-                {/* Radio row */}
                 <div style={radioGroupStyle}>
                   <label style={radioLabelStyle}>
                     <input
@@ -511,14 +537,12 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                     Estimated
                   </label>
                 </div>
-
                 {touched.dobType && errors.dobType && (
                   <span style={errorStyle}>{errors.dobType}</span>
                 )}
               </FormGroup>
             </div>
 
-            {/* Date field — enabled when Actual */}
             <div className="col-md-4">
               <FormGroup style={{ marginBottom: "16px" }}>
                 <Label style={labelStyle}>
@@ -541,7 +565,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               </FormGroup>
             </div>
 
-            {/* Age field — enabled when Estimated; auto-populated (read-only display) when Actual */}
             <div className="col-md-4">
               <FormGroup style={{ marginBottom: "16px" }}>
                 <Label style={labelStyle}>
@@ -560,7 +583,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                   style={readOnly || dobIsActual ? disabledInputStyle : inputStyle}
                   placeholder={dobIsActual ? "Auto-calculated" : "Enter age"}
                   onKeyDown={(e) => {
-                    // Block the decimal point key so users cannot type floats
                     if (e.key === "." || e.key === ",") e.preventDefault();
                   }}
                 />
@@ -570,7 +592,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               </FormGroup>
             </div>
 
-            {/* Sex */}
             <div className="col-md-4">
               <FormSelect
                 label="Sex"
@@ -580,13 +601,11 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
 
-
             <div className="col-md-6">
               <FormTextField
                 label="Phone Number"
                 {...fp("phoneNumber")}
                 required
-                
               />
             </div>
 
@@ -601,12 +620,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </>
         )}
 
-        {/* ── Marital sub-fields — conditional on sex + marital status ── */}
+        {/* Marital sub-fields */}
         {showNumberOfWives && (
           <div className="col-md-6">
-            <Label style={labelStyle}>
-              No. of Wives
-            </Label>
+            <Label style={labelStyle}>No. of Wives</Label>
             <Input
               type="number"
               name="numberOfWives"
@@ -618,7 +635,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
               onKeyDown={(e) => {
-                // Block the decimal point key so users cannot type floats
                 if (e.key === "." || e.key === ",") e.preventDefault();
               }}
             />
@@ -630,9 +646,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {showNumberOfCoWives && (
           <div className="col-md-6">
-            <Label style={labelStyle}>
-              No. of Co-wives
-            </Label>
+            <Label style={labelStyle}>No. of Co-wives</Label>
             <Input
               type="number"
               name="numberOfCoWives"
@@ -644,21 +658,17 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
               onKeyDown={(e) => {
-                // Block the decimal point key so users cannot type floats
                 if (e.key === "." || e.key === ",") e.preventDefault();
               }}
             />
             {touched.numberOfCoWives && errors.numberOfCoWives && (
               <span style={errorStyle}>{errors.numberOfCoWives}</span>
             )}
-
           </div>
         )}
 
         <div className="col-md-6">
-          <Label style={labelStyle}>
-            {"No. of Biological Children < 15 years"}
-          </Label>
+          <Label style={labelStyle}>{"No. of Biological Children < 15 years"}</Label>
           <Input
             type="number"
             name="numberOfBiologicalChildren"
@@ -670,18 +680,15 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             disabled={readOnly}
             style={readOnly ? disabledInputStyle : inputStyle}
             onKeyDown={(e) => {
-              // Block the decimal point key so users cannot type floats
               if (e.key === "." || e.key === ",") e.preventDefault();
             }}
           />
           {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
             <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
           )}
-
         </div>
 
-
-        {/* ── Pregnancy — Female only ── */}
+        {/* Pregnancy */}
         {showPregnancy && (
           <div className={`col-md-6 ${formik.values.maritalStatus === "Married" ? "mt-4" : ""}`}>
             <FormSelect
@@ -693,9 +700,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        {/* ── Breastfeeding duration — only when pregnancyStatus=Breastfeeding ── */}
         {showBreastfeedingDuration && (
-          <div className="col-md-6">
+          <div className={`col-md-6 ${formik.values.pregnancyStatus === "Breastfeeding" ? "mt-4" : ""}`}>
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", BREASTFEEDING_DURATION_OPTIONS)}
@@ -719,13 +725,15 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               value={values.clientState || ""}
               onChange={readOnly ? undefined : handleStateChange}
               onBlur={handleBlur}
-              disabled={readOnly}
+              disabled={readOnly || loadingStates}
               style={selectStyle}
             >
-              <option value="">Select option</option>
-              {DUMMY_STATES.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
+              <option value="">
+                {loadingStates ? "Loading states..." : "Select option"}
+              </option>
+              {statesList.map((state) => (
+                <option key={state.id} value={state.name}>
+                  {state.name}
                 </option>
               ))}
             </select>
@@ -738,9 +746,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="LGA of Residence"
-            {...sp("clientLga", lgaOptions, !values.clientState)}
+            {...sp("clientLga", lgaOptions, !values.clientState || loadingLgas)}
             required
           />
+          {loadingLgas && (
+            <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
+              Loading LGAs...
+            </small>
+          )}
         </div>
 
         <div className="col-md-12">
