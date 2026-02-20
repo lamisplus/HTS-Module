@@ -57,7 +57,10 @@ const NewPatientHtsForm = () => {
   const classes = useStyles();
   const history = useHistory();
 
-  const onSubmit = () => {};
+  const onSubmit = (values) => {
+    console.log(values)
+
+  };
 
   const { formik } = useNewPatientFormik(onSubmit);
 
