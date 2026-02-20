@@ -733,11 +733,12 @@ const RiskStratification = props => {
     // setEntryPointSetting(data["FACILITY_HTS_TEST_SETTING"])
   };
 
+  
   useGetCodesets({
     codesetsKeys: [
-      "COMMUNITY_HTS_TEST_SETTING",
       "TARGET_GROUP",
       "HTS_ENTRY_POINT",
+      "COMMUNITY_HTS_TEST_SETTING",
       "FACILITY_HTS_TEST_SETTING",
       "TEST_SETTING",
     ],

@@ -16,6 +16,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { queryClient } from "./main/webapp/utils/queryClient";
 import { useRoles } from "./main/webapp/hooks/useRoles";
 import { useMemo } from "react";
+import NewPatientHtsForm from "./main/webapp/jsx/components/NewToolForms/NewPatientHtsForm";
 
 export default function App() {
   const { hasRole } = useRoles();
@@ -40,7 +41,8 @@ export default function App() {
             <PatientDetail />
           </Route>
           <Route path="/register-patient">
-            <RegisterPatient />
+            {/* <RegisterPatient /> */}
+            <NewPatientHtsForm/>
           </Route>
           <Route path="/register-hivst-patient">
             <HIVSTPatient />
