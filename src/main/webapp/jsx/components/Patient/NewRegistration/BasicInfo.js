@@ -852,7 +852,6 @@ const BasicInfo = props => {
     return acceptedNumber;
   };
   const handleInputChangePhoneNumber = (e, inputName) => {
-    const limit = 11;
     const NumberValue = checkNumberLimit(e.target.value.replace(/\D/g, ""));
     setObjValues({ ...objValues, [inputName]: NumberValue });
   };

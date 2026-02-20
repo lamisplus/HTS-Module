@@ -192,7 +192,7 @@ const BasicInfo = props => {
       .then(response => {
         setFacilityCode(response.data);
       })
-      .catch(error => {});
+      .catch(error => { });
 
     let visitDate = new Date(props.patientObj.dateVisit);
 
@@ -295,8 +295,8 @@ const BasicInfo = props => {
           props.patientObject.visitId,
           { headers: { Authorization: `Bearer ${token}` } }
         )
-        .then(response => {})
-        .catch(error => {});
+        .then(response => { })
+        .catch(error => { });
     }
   };
 
@@ -544,7 +544,7 @@ const BasicInfo = props => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -581,7 +581,7 @@ const BasicInfo = props => {
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -627,11 +627,11 @@ const BasicInfo = props => {
 
     if (
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "community" ||
+      "community" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "hts_entry_point_community" ||
+      "hts_entry_point_community" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "community_hts_test_setting_retesting" ||
+      "community_hts_test_setting_retesting" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint
         ?.toLowerCase()
         .includes("community")
@@ -641,11 +641,11 @@ const BasicInfo = props => {
 
     if (
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "facility" ||
+      "facility" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "hts_entry_point_facility" ||
+      "hts_entry_point_facility" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
-        "facility_hts_test_setting_retesting" ||
+      "facility_hts_test_setting_retesting" ||
       props?.patientObj?.riskStratificationResponseDto?.entryPoint
         ?.toLowerCase()
         ?.includes("facility")
@@ -1050,7 +1050,7 @@ const BasicInfo = props => {
                           }}
                           disabled={
                             testingSetting ===
-                              "FACILITY_HTS_TEST_SETTING_ANC" ||
+                            "FACILITY_HTS_TEST_SETTING_ANC" ||
                             testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
                           }
                         >

@@ -574,24 +574,26 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <div className="col-md-4">
               <FormSelect
                 label="Sex"
-                {...sp("sex", SEX_OPTIONS)}
+                {...sp("sex", transformOptions(codesets?.["GENDER"]))}
                 onChange={readOnly ? undefined : handleSexChange}
                 required
               />
             </div>
 
-            {/* Phone + Marital Status */}
+
             <div className="col-md-6">
               <FormTextField
                 label="Phone Number"
                 {...fp("phoneNumber")}
                 required
+                
               />
             </div>
+
             <div className="col-md-6">
               <FormSelect
                 label="Marital Status"
-                {...sp("maritalStatus", MARITAL_STATUS_OPTIONS)}
+                {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
                 onChange={readOnly ? undefined : handleMaritalStatusChange}
                 required
               />
@@ -601,8 +603,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {/* ── Marital sub-fields — conditional on sex + marital status ── */}
         {showNumberOfWives && (
-
-
           <div className="col-md-6">
             <Label style={labelStyle}>
               No. of Wives
@@ -683,10 +683,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {/* ── Pregnancy — Female only ── */}
         {showPregnancy && (
-          <div className="col-md-6">
+          <div className={`col-md-6 ${formik.values.maritalStatus === "Married" ? "mt-4" : ""}`}>
             <FormSelect
               label="Pregnancy Status"
-              {...sp("pregnancyStatus", PREGNANCY_STATUS_OPTIONS)}
+              {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
               onChange={readOnly ? undefined : handlePregnancyStatusChange}
               required
             />

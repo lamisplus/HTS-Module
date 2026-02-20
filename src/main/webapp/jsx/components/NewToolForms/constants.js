@@ -81,6 +81,7 @@ export const TYPE_OF_SESSION_OPTIONS = [
   { label: "Individual", value: "Individual" },
   { label: "Couple", value: "Couple" },
   { label: "Group", value: "Group" },
+  { label: "Index Testing", value: "Index Testing" },
   { label: "Previously Self-Tested", value: "Previously Self-Tested" },
 ];
 
