@@ -39,6 +39,20 @@ const useStyles = makeStyles(() => ({
     fontSize: "1.05rem",
     fontWeight: 700,
   },
+  avatarWrapper: {
+    position: "relative",
+    flexShrink: 0,
+  },
+  errorDot: {
+    position: "absolute",
+    top: -3,
+    right: -3,
+    width: 11,
+    height: 11,
+    borderRadius: "50%",
+    backgroundColor: "#d32f2f",
+    border: "2px solid #fff",
+  },
   title: {
     fontWeight: 700,
     fontSize: "18px",
@@ -56,7 +70,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const FormAccordion = ({ step, title, subtitle, children, defaultExpanded }) => {
+const FormAccordion = ({ step, title, subtitle, children, defaultExpanded, hasError }) => {
   const classes = useStyles();
   return (
     <Accordion className={classes.accordion} defaultExpanded={!!defaultExpanded}>
@@ -65,7 +79,10 @@ const FormAccordion = ({ step, title, subtitle, children, defaultExpanded }) => 
         className={classes.summary}
         classes={{ content: classes.summaryContent }}
       >
-        <Avatar className={classes.avatar}>{step}</Avatar>
+        <div className={classes.avatarWrapper}>
+          <Avatar className={classes.avatar}>{step}</Avatar>
+          {hasError && <span className={classes.errorDot} />}
+        </div>
         <div>
           <Typography className={classes.title}>{title}</Typography>
           <Typography className={classes.subtitle}>{subtitle}</Typography>

@@ -86,6 +86,48 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
 
   const { formik } = useExistingPatientFormik(onSubmit, initialValues);
 
+  const { errors, submitCount } = formik;
+  const hasSubmitted = submitCount > 0;
+
+  const sectionHasError = (fields) =>
+    hasSubmitted && fields.some((f) => !!errors[f]);
+
+  const basicFields = [
+    "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
+    "modality", "typeOfSession", "indexRelationship", "indexClientCode",
+    "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
+    "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
+    "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
+    "clientState", "clientLga", "address",
+  ];
+
+  const preTestFields = [
+    "previouslyTestedNegative", "timeOfLastNegativeTest",
+    "clientInformedTransmissionRoutes", "clientInformedRiskFactors",
+    "clientInformedPreventionMethods", "clientInformedPossibleResults",
+    "informedConsentGiven", "everHadSexualIntercourse", "moreThanOneSexPartner",
+    "unprotectedVaginalSex", "unprotectedAnalSex", "bloodTransfusionLast3Months",
+    "sexUnderInfluence", "historyOfSTI", "currentCough", "weightLoss", "fever",
+    "nightSweats", "complaintsVaginalDischarge", "complaintsLowerAbdominalPain",
+    "complaintsUrethralDischarge", "complaintsScroralSwelling",
+    "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+    "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
+    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
+  ];
+
+  const diagnosticFields = [
+    "hivEarlyDetectResult", "initialHivTest", "suspectedAcuteInfection",
+    "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
+  ];
+
+  const postTestFields = [
+    "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
+    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo",
+    "clientPartnerUseFpMethods", "clientPartnerUseCondoms",
+    "correctCondomUseDemonstrated", "condomsProvided",
+    "clientReferredToOtherServices", "completedBy", "designation",
+  ];
+
   return (
     <div className={classes.root}>
       <div className={classes.topBar}>
@@ -118,6 +160,7 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
             title="Basic Information"
             subtitle="Enter basic information details below"
             defaultExpanded
+            hasError={sectionHasError(basicFields)}
           >
             <BasicInformationSection
               formik={formik}
@@ -130,6 +173,7 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
             step={2}
             title="Pre-Test Counselling / Risk Assessment"
             subtitle="Enter pre-test counselling details below"
+            hasError={sectionHasError(preTestFields)}
           >
             <PreTestCounsellingSection formik={formik} readOnly={readOnly} />
           </FormAccordion>
@@ -138,6 +182,7 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
             step={3}
             title="Diagnostic Testing"
             subtitle="Enter diagnostic testing details below"
+            hasError={sectionHasError(diagnosticFields)}
           >
             <DiagnosticTestingSection formik={formik} readOnly={readOnly} />
           </FormAccordion>
@@ -146,6 +191,7 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
             step={4}
             title="Post Test Counselling"
             subtitle="Enter post test counselling details below"
+            hasError={sectionHasError(postTestFields)}
           >
             <PostTestCounsellingSection formik={formik} readOnly={readOnly} />
           </FormAccordion>
