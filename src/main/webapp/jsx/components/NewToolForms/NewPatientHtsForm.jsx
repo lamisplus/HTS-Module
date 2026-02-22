@@ -9,6 +9,8 @@ import PreTestCounsellingSection from "./sections/PreTestCounsellingSection";
 import DiagnosticTestingSection from "./sections/DiagnosticTestingSection";
 import PostTestCounsellingSection from "./sections/PostTestCounsellingSection";
 import { COLORS } from "./constants";
+import { createEncounter } from "../../services/createHtsEncounter.service";
+import { arrayToObject, buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -57,8 +59,10 @@ const NewPatientHtsForm = () => {
   const classes = useStyles();
   const history = useHistory();
 
+
   const onSubmit = (values) => {
-    console.log(values)
+    const payload = buildHtsEncounterPayload(values, true);
+    createEncounter(payload)
 
   };
 

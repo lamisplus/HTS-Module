@@ -111,7 +111,7 @@ const HTSList = (props) => {
 
           //{ title: "ART Number", field: "v_status", filtering: false },
           { title: "HTS Count", field: "count", filtering: false },
-          { title: "Actions", field: "actions", filtering: false },
+          // { title: "Actions", field: "actions", filtering: false },
         ]}
         data={(query) =>
           new Promise((resolve, reject) =>
@@ -142,62 +142,62 @@ const HTSList = (props) => {
                             {row.htsCount}
                           </Label>
                         ),
-                        actions: (
-                          <div>
-                            {row.htsCount >= 0 && (
-                              <>
-                                <Link
-                                  to={{
-                                    pathname: "/patient-history",
-                                    state: {
-                                      patientObject: row,
-                                      patientObj: row,
-                                      clientCode: row.clientCode,
-                                    },
-                                  }}
-                                >
-                                  <ButtonGroup
-                                    variant="contained"
-                                    aria-label="split button"
-                                    style={{
-                                      backgroundColor: "rgb(153, 46, 98)",
-                                      height: "30px",
-                                      width: "215px",
-                                    }}
-                                    size="large"
-                                  >
-                                    <Button
-                                      color="primary"
-                                      size="small"
-                                      aria-label="select merge strategy"
-                                      aria-haspopup="menu"
-                                      style={{
-                                        backgroundColor: "rgb(153, 46, 98)",
-                                      }}
-                                    >
-                                      <MdDashboard />
-                                    </Button>
-                                    <Button
-                                      style={{
-                                        backgroundColor: "rgb(153, 46, 98)",
-                                      }}
-                                    >
-                                      <span
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#fff",
-                                          fontWeight: "bolder",
-                                        }}
-                                      >
-                                        Patient Dashboard
-                                      </span>
-                                    </Button>
-                                  </ButtonGroup>
-                                </Link>
-                              </>
-                            )}
-                          </div>
-                        ),
+                        // actions: (
+                        //   <div>
+                        //     {row.htsCount >= 0 && (
+                        //       <>
+                        //         <Link
+                        //           to={{
+                        //             pathname: "/patient-history",
+                        //             state: {
+                        //               patientObject: row,
+                        //               patientObj: row,
+                        //               clientCode: row.clientCode,
+                        //             },
+                        //           }}
+                        //         >
+                        //           <ButtonGroup
+                        //             variant="contained"
+                        //             aria-label="split button"
+                        //             style={{
+                        //               backgroundColor: "rgb(153, 46, 98)",
+                        //               height: "30px",
+                        //               width: "215px",
+                        //             }}
+                        //             size="large"
+                        //           >
+                        //             <Button
+                        //               color="primary"
+                        //               size="small"
+                        //               aria-label="select merge strategy"
+                        //               aria-haspopup="menu"
+                        //               style={{
+                        //                 backgroundColor: "rgb(153, 46, 98)",
+                        //               }}
+                        //             >
+                        //               <MdDashboard />
+                        //             </Button>
+                        //             <Button
+                        //               style={{
+                        //                 backgroundColor: "rgb(153, 46, 98)",
+                        //               }}
+                        //             >
+                        //               <span
+                        //                 style={{
+                        //                   fontSize: "12px",
+                        //                   color: "#fff",
+                        //                   fontWeight: "bolder",
+                        //                 }}
+                        //               >
+                        //                 Patient Dashboard
+                        //               </span>
+                        //             </Button>
+                        //           </ButtonGroup>
+                        //         </Link>
+                        //       </>
+                        //     )}
+                        //   </div>
+                        // ),
                       })),
                   page: query.page,
                   totalCount: result.data.totalRecords,

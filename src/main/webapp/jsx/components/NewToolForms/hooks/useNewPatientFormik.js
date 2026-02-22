@@ -78,6 +78,9 @@ const initialValues = {
   clientReferredToOtherServices: "",
   completedBy: "",
   designation: "",
+  sexCode: "",
+  maritalStatusCode:"",
+  currentOrganisationUnitId: ""
 };
 
 export const useNewPatientFormik = (onSubmit) => {

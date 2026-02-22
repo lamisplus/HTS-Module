@@ -77,6 +77,9 @@ const defaultValues = {
   clientReferredToOtherServices: "",
   completedBy: "",
   designation: "",
+  sexCode: "",
+  maritalStatusCode: "",
+  currentOrganisationUnitId: ""
 };
 
 /**

@@ -115,8 +115,8 @@ const Patients = (props) => {
               .then((result) => {
                 resolve({
                   data: result.data.records
-                    .filter((a) => {
-                      return a.personId !== null;
+                    ?.filter?.((a) => {
+                      return a?.personId !== null;
                     })
                     .map((row) => ({
                       name: row.firstName + " " + row.surname,

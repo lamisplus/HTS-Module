@@ -14,6 +14,7 @@ import { url as baseUrl } from "./../../api";
 import { token as token } from "./../../api";
 import { getAcount } from "../../utility";
 
+const HTSEncounterList = lazy(() => import("./Patient/HtsEncounterList"));
 const PatientList = lazy(() => import("./Patient/PatientList"));
 const HTSList = lazy(() => import("./Patient/HTSList"));
 const HIVSTPatient = lazy(() => import("./Patient/HIVST/HIVSTPatient"));
@@ -116,7 +117,7 @@ const Home = () => {
       setActiveTab(defaultTab);
     }
   }, [rolesLoading, isRDE]);
-  
+
 
   const permissions = useMemo(
     () => ({
@@ -143,17 +144,17 @@ const Home = () => {
         </ol>
       </div>
       {/* {permissions.canSeeFindPatients && ( */}
-        <Link to={"register-patient"}>
-          <Button
-            variant="contained"
-            color="primary"
-            className="mt-2 mr-3 mb-0 float-end"
-            startIcon={<FaUserPlus size="10" />}
-            style={{ backgroundColor: "#014d88" }}
-          >
-            <span style={{ textTransform: "capitalize" }}>New Patient</span>
-          </Button>
-        </Link>
+      <Link to={"register-patient"}>
+        <Button
+          variant="contained"
+          color="primary"
+          className="mt-2 mr-3 mb-0 float-end"
+          startIcon={<FaUserPlus size="10" />}
+          style={{ backgroundColor: "#014d88" }}
+        >
+          <span style={{ textTransform: "capitalize" }}>New Patient</span>
+        </Button>
+      </Link>
       {/* )} */}
       <br />
       <br /> <br />
@@ -174,7 +175,7 @@ const Home = () => {
                         {key === "patients" && <PatientList />}
                       </Suspense>
                     </Tab>
-                   )}
+                  )}
 
                   {permissions.canSeeCheckedInPatients && (
                     <Tab eventKey="checkedin" title="Checked-In Patients">
@@ -184,21 +185,30 @@ const Home = () => {
                     </Tab>
                   )}
 
-                  {/* {permissions.canSeeFindPatients && ( */}
-                    <Tab eventKey="hts" title="HTS Patients">
-                      <Suspense fallback={<LoadingSpinner />}>
-                        {key === "hts" && <HTSList />}
-                      </Suspense>
-                    </Tab>
-                    {/* )} */}
+                  <Tab eventKey="hts-encounter" title="HTS Patients">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hts-encounter" && <HTSEncounterList />}
+                    </Suspense>
+                  </Tab>
+
 
                   {/* {permissions.canSeeFindPatients && ( */}
-                    <Tab eventKey="hivst" title="HIVST Patients">
-                      <Suspense fallback={<LoadingSpinner />}>
-                        {key === "hivst" && <HIVSTPatient />}
-                      </Suspense>
-                    </Tab>
-                    {/* )} */}
+                  <Tab eventKey="hts" title="HTS Patients Archived">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hts" && <HTSList />}
+                    </Suspense>
+                  </Tab>
+                  {/* )} */}
+
+
+
+                  {/* {permissions.canSeeFindPatients && ( */}
+                  <Tab eventKey="hivst" title="HIVST Patients">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hivst" && <HIVSTPatient />}
+                    </Suspense>
+                  </Tab>
+                  {/* )} */}
                 </Tabs>
               </div>
             </Card.Body>

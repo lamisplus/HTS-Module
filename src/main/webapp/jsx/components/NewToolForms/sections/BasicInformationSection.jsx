@@ -18,6 +18,8 @@ import {
 import axios from "axios";
 import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { arrayToObject } from "../utils/htsEncounterPayload";
+import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -130,12 +132,13 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   useEffect(() => {
     fetchStates(1);
+    getAllHtsEncounter()
   }, []);
 
   // If an existing patient already has a state, fetch its LGAs once statesList is loaded
   useEffect(() => {
     if (!readOnly && statesList.length > 0 && values.clientState) {
-      const selectedState = statesList.find(s => s.name === values.clientState);
+      const selectedState = statesList.find(s => String(s.id) === String(values.clientState));
       if (selectedState) {
         fetchLgas(selectedState.id);
       }
@@ -153,6 +156,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       });
       setAccountDetail(response.data);
       setFieldValue("facilityName", response.data?.currentOrganisationUnitName);
+      setFieldValue("currentOrganisationUnitId", response.data?.currentOrganisationUnitId);
       return response.data;
     } catch (error) {
       console.error("Error fetching account:", error.response?.data || error.message);
@@ -181,7 +185,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       "TEST_SETTING",
       "MARITAL_STATUS",
       "SOURCE_REFERRAL",
-      "GENDER",
       "SEX",
       "YES_NO"
     ],
@@ -197,9 +200,13 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     setFieldValue("communityEntryPoint", "");
   };
 
+
+
   const handleSexChange = (e) => {
     const sex = e.target.value;
     setFieldValue("sex", sex);
+    const map = arrayToObject(codesets?.["SEX"])
+    setFieldValue("sexCode", String(map[sex]))
     if (sex === "Male") {
       setFieldValue("pregnancyStatus", "");
       setFieldValue("breastfeedingDuration", "");
@@ -213,6 +220,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleMaritalStatusChange = (e) => {
     const status = e.target.value;
     setFieldValue("maritalStatus", status);
+    const map = arrayToObject(codesets?.["MARITAL_STATUS"])
+    setFieldValue("maritalStatusCode", String(map[status]));
     if (status !== "Married") {
       setFieldValue("numberOfWives", "");
       setFieldValue("numberOfCoWives", "");
@@ -348,7 +357,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const dobIsActual = values.dobType === "Actual" || !values.dobType;
 
   // Prepare options for LGA select using fetched data
-  const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.name }));
+  const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.id }));
 
   return (
     <div style={{ width: "100%" }}>
@@ -595,7 +604,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <div className="col-md-4">
               <FormSelect
                 label="Sex"
-                {...sp("sex", transformOptions(codesets?.["GENDER"]))}
+                {...sp("sex", transformOptions(codesets?.["SEX"]))}
                 onChange={readOnly ? undefined : handleSexChange}
                 required
               />
@@ -732,7 +741,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                 {loadingStates ? "Loading states..." : "Select option"}
               </option>
               {statesList.map((state) => (
-                <option key={state.id} value={state.name}>
+                <option key={state.id} value={state.id}>
                   {state.name}
                 </option>
               ))}
