@@ -1,6 +1,6 @@
 import React, { useState, Suspense, Fragment, useEffect, useMemo, lazy } from "react";
 import axios from "axios";
-import { url as baseUrl } from "./../../../api";
+import { url as baseUrl, url } from "./../../../api";
 import { token as token } from "./../../../api";
 import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
 import * as moment from "moment";
@@ -10,6 +10,8 @@ import { usePermissions } from "../../../hooks/usePermissions";
 import { useRoles } from "../../../hooks/useRoles";
 
 
+const ExistingPatientHtsForm = lazy(() => import("../NewToolForms/ExistingPatientHtsForm"));
+const HTSEncounterHistory = lazy(() => import("./HTSEncounterHistory"));
 const PatientVisits = lazy(() => import("../Patient/PatientVisits"));
 const ContineousRegistrationTesting = lazy(() => import("./../Patient/ContineousRegistrationTesting"));
 const History = lazy(() => import("./History"));
@@ -28,6 +30,7 @@ const Home = (props) => {
 
   // State definitions
   const [patientList, setPatientList] = useState([]);
+  const [patientEncounterList, setPatientEncounterList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newHTSType, setNewHTSType] = useState("NEW HTS");
   const [LMP, setLMP] = useState("");
@@ -109,9 +112,12 @@ const Home = (props) => {
     return htsType;
   };
 
+
+
   useEffect(() => {
     patients();
     patientsCurrentHts();
+
 
     if (props.activePage.activePage === "home") {
       setKey("home");
@@ -120,6 +126,7 @@ const Home = (props) => {
       setKey("new");
     }
   }, []);
+
 
   // Get list of patients
   async function patients() {
@@ -163,7 +170,7 @@ const Home = (props) => {
       );
       setCheckModality(modality);
 
-      
+
 
 
 
@@ -179,7 +186,7 @@ const Home = (props) => {
 
       setLastVisitModalityAndCheckedIn(finalCondition);
 
-      
+
 
       await determineRetestingStatus(response.data);
 
@@ -197,6 +204,7 @@ const Home = (props) => {
     }),
     [hasAnyPermission, props?.patientObj]
   );
+
 
 
 
@@ -219,21 +227,38 @@ const Home = (props) => {
                 >
                   <Tab eventKey="home" title="HTS HISTORY">
                     <Suspense fallback={<LoadingSpinner />}>
-                      {key === "home" && <History
-                        patientObj={props.patientObj}
-                        setPatientObj={props.setPatientObj}
-                        activePage={props.activePage}
-                        setActivePage={props.setActivePage}
-                        clientCode={props.clientCode}
-                        patientAge={props.patientAge}
-                        patients={patients}
-                        patientList={patientList}
-                        loading={loading}
-                      />}
+                      {key === "home" &&
+                        // <History
+                        // patientObj={props.patientObj}
+                        // setPatientObj={props.setPatientObj}
+                        
+                        // clientCode={props.clientCode}
+                        // patientAge={props.patientAge}
+                        // patients={patients}
+                        // patientList={patientList}
+                        // loading={loading}
+                        // />
+                        <HTSEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                          clientCode={props.clientCode}
+                          patientAge={props.patientAge}
+                        />
+
+                      }
                     </Suspense>
                   </Tab>
 
-                  {lastVisitModalityAndCheckedIn && (
+                  {/* <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "new-hts-encounter-existing-patient" &&
+                        <ExistingPatientHtsForm />
+                      }
+                    </Suspense>
+                  </Tab> */}
+
+                  {/* {lastVisitModalityAndCheckedIn && (
                     <Tab
                       eventKey="new"
                       title={newHTSType}
@@ -258,9 +283,9 @@ const Home = (props) => {
 
                       </Suspense>
                     </Tab>
-                  )}
+                  )} */}
 
-                  <Tab eventKey="hivst-history" title="HIVST HISTORY">
+                  {/* <Tab eventKey="hivst-history" title="HIVST HISTORY">
                     <Suspense fallback={<LoadingSpinner />}>
                       {
                         key === "hivst-history" && (
@@ -279,9 +304,9 @@ const Home = (props) => {
                       }
                     </Suspense>
 
-                  </Tab>
+                  </Tab> */}
 
-                  <Tab eventKey="new-hivst" title="NEW HIVST">
+                  {/* <Tab eventKey="new-hivst" title="NEW HIVST">
                     <Suspense fallback={<LoadingSpinner />}>
                       {
                         key === "new-hivst" && (
@@ -297,9 +322,9 @@ const Home = (props) => {
                       }
                     </Suspense>
 
-                  </Tab>
+                  </Tab> */}
 
-                  {permissions.canSeePatientVisit && (
+                  {/* {permissions.canSeePatientVisit && (
                     <Tab eventKey="patient-visits" title="PATIENT VISITS">
 
                       <Suspense fallback={<LoadingSpinner />}>
@@ -313,7 +338,7 @@ const Home = (props) => {
                         }
                       </Suspense>
                     </Tab>
-                  )}
+                  )} */}
                 </Tabs>
               </div>
             </Card.Body>

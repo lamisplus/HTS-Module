@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
@@ -11,6 +11,7 @@ import PostTestCounsellingSection from "./sections/PostTestCounsellingSection";
 import { COLORS } from "./constants";
 import { createEncounter } from "../../services/createHtsEncounter.service";
 import { arrayToObject, buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -58,14 +59,28 @@ const useStyles = makeStyles(() => ({
 const NewPatientHtsForm = () => {
   const classes = useStyles();
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState(false)
 
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     const payload = buildHtsEncounterPayload(values, true);
-    createEncounter(payload)
 
+    try {
+      setIsLoading(true)
+      const response = await createEncounter(payload);
+      setIsLoading(false)
+      toast.success("Encounter created successfully")
+      history.push("/")
+
+    } catch (error) {
+      console.error("Failed to create encounter:", error.response?.data || error.message);
+      toast.error("Failed to create encounter")
+    }
+    finally {
+      setIsLoading(false)
+
+    }
   };
-
   const { formik } = useNewPatientFormik(onSubmit);
 
   const { errors, submitCount } = formik;
@@ -171,10 +186,11 @@ const NewPatientHtsForm = () => {
 
           <div className={classes.footer}>
             <Button
-              content="Save Record"
+              content={isLoading ? "Submitting..." : "Save Record"}
               icon="save"
               labelPosition="right"
               type="submit"
+              disabled={isLoading}
               style={{ backgroundColor: COLORS.primary, color: "#fff" }}
             />
           </div>

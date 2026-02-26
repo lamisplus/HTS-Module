@@ -5,6 +5,7 @@ import org.lamisplus.modules.base.domain.dto.PageDTO;
 import org.lamisplus.modules.base.util.PaginationUtil;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequest;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
+import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
 import org.lamisplus.modules.hts.service.HtsEncounterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/hts-encounter")
@@ -56,6 +58,21 @@ public class HtsEncounterController {
             @RequestParam(required = false, defaultValue = "*") String search,
             @PageableDefault(sort = "dateOfVisit", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<HtsEncounterResponse> page = service.search(search, pageable);
+        return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
+    }
+
+    @GetMapping("/patient/{personId}")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
+    public ResponseEntity<List<HtsEncounterResponse>> getEncountersByPersonId(@PathVariable Long personId) {
+        return ResponseEntity.ok(service.getEncountersByPersonId(personId));
+    }
+
+    @GetMapping("/patients")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
+    public ResponseEntity<PageDTO> getPatientSummaries(
+            @RequestParam(required = false, defaultValue = "*") String search,
+            @PageableDefault(sort = "surname", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<PatientHtsSummaryDto> page = service.getPatientSummaries(search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
     }
 }

@@ -9,6 +9,8 @@ import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequest;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
+import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
+import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryProjection;
 import org.lamisplus.modules.hts.domain.entity.HtsEncounter;
 import org.lamisplus.modules.hts.repository.HtsEncounterRepository;
 import org.lamisplus.modules.patient.domain.dto.PersonResponseDto;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.lamisplus.modules.base.util.Constants.ArchiveStatus.UN_ARCHIVED;
 
@@ -112,6 +116,29 @@ public class HtsEncounterService {
                 .orElseThrow(() -> new EntityNotFoundException(HtsEncounter.class, "id", id.toString()));
         encounter.setArchived(1);
         repository.save(encounter);
+    }
+
+    public List<HtsEncounterResponse> getEncountersByPersonId(Long personId) {
+        // Verify person exists
+        personRepository.findById(personId)
+                .orElseThrow(() -> new EntityNotFoundException(Person.class, "id", personId.toString()));
+
+        List<HtsEncounter> encounters = repository.findByPerson_IdAndArchivedOrderByDateOfVisitDesc(personId, UN_ARCHIVED);
+        return encounters.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
+    public Page<PatientHtsSummaryDto> getPatientSummaries(String search, Pageable pageable) {
+        Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
+        String searchParam = (search == null || search.equals("*")) ? null : "%" + search + "%";
+        Page<PatientHtsSummaryProjection> page = repository.findPatientSummaries(facilityId, searchParam, pageable);
+        return page.map(proj -> new PatientHtsSummaryDto(
+                proj.getPersonId(),
+                proj.getFirstName(),
+                proj.getSurname(),
+                proj.getOtherName(),
+                proj.getHospitalNumber(),
+                proj.getEncounterCount()
+        ));
     }
 
     private HtsEncounterResponse toResponse(HtsEncounter entity) {

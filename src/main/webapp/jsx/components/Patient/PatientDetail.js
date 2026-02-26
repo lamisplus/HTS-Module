@@ -13,6 +13,7 @@ import PatientHtsEnrollment from "./PatientHtsEnrollment";
 import ViewEditHivst from "../Patient/HIVST/ViewEditHivst";
 import { calculate_age } from "../utils";
 import moment from "moment";
+import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
 
 
 const styles = (theme) => ({
@@ -64,20 +65,31 @@ function PatientCard(props) {
       ? history.location.state.patientObj
       : {};
 
-   
+
   const clientCode =
     history.location && history.location.state
       ? history.location.state.clientCode
       : "";
 
 
-  const [personInfo, setPersonInfo]=useState({})
+  const [personInfo, setPersonInfo] = useState({})
+
   const [activePage, setActivePage] = useState({
     activePage: "home",
     activeObject: {},
     actionType: "",
   });
-  useEffect(() => {}, [activePage]);
+
+  const handleMoveToHome = () => {
+    setActivePage({
+      activePage: "home",
+      activeObject: {},
+      actionType: "",
+    })
+  }
+
+
+  useEffect(() => { }, [activePage]);
   const patientAge = calculate_age(
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
@@ -120,19 +132,30 @@ function PatientCard(props) {
               }
               setActivePage={setActivePage}
               clientCode={clientCode}
-              patientAge={patientObj.age}
-              patientObject={patientObject}
-              personInfo={personInfo}
+              patientAge={patientObj?.data?.age}
             />
           )}
+
+
           {activePage.activePage === "view" && (
-            <PatientHtsEnrollment
-              patientObj={patientObj}
-              activePage={activePage}
-              setActivePage={setActivePage}
-              clientCode={clientCode}
-              patientAge={patientObj.age}
-              patientObject={patientObject}
+            <ExistingPatientHtsForm
+              readOnly
+              initialValues={patientObj?.data}
+              fullRecord={patientObj}
+              backButtonAction={handleMoveToHome}
+              
+
+            />
+          )}
+
+
+          {activePage.activePage === "update" && (
+            <ExistingPatientHtsForm
+              readOnly={false}
+              initialValues={patientObj?.data}
+              backButtonAction={handleMoveToHome}
+              fullRecord={patientObj}
+
             />
           )}
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
@@ -9,6 +9,9 @@ import PreTestCounsellingSection from "./sections/PreTestCounsellingSection";
 import DiagnosticTestingSection from "./sections/DiagnosticTestingSection";
 import PostTestCounsellingSection from "./sections/PostTestCounsellingSection";
 import { COLORS } from "./constants";
+import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
+import { updateHtsEncounter } from "../../services/updateHtsEncounter";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -76,13 +79,31 @@ const modeBadgeStyle = (readOnly) => ({
  *   readOnly       — true  → VIEW mode: all fields disabled, no save button
  *                    false → EDIT mode: clinical fields editable, demographics read-only
  */
-const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
+const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
   const classes = useStyles();
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState(false)
 
-  const onSubmit = (values) => {
-    console.log(values)
+
+  const onSubmit = async (values) => {
+    const payload = buildHtsEncounterPayload(values, true);
+
+    try {
+      setIsLoading(true)
+      const response = await updateHtsEncounter(fullRecord?.id, payload);
+      setIsLoading(false)
+      toast.success("Encounter updated successfully")
+      backButtonAction()
+
+    } catch (error) {
+      console.error("Failed to update encounter:", error.response?.data || error.message);
+      toast.error("Failed to update encounter")
+    }
+    finally {
+      setIsLoading(false)
+    }
   };
+
 
   const { formik } = useExistingPatientFormik(onSubmit, initialValues);
 
@@ -149,7 +170,8 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
           icon="left arrow"
           labelPosition="left"
           style={{ backgroundColor: COLORS.primary, color: "#fff" }}
-          onClick={() => history.push("/")}
+          // onClick={() => history.push("/")}
+          onClick={() => backButtonAction()}
         />
       </div>
 
@@ -199,9 +221,10 @@ const ExistingPatientHtsForm = ({ initialValues, readOnly = false }) => {
           {!readOnly && (
             <div className={classes.footer}>
               <Button
-                content="Update Record"
+                content={isLoading ? "Submitting..." : "Update Record"}
                 icon="save"
                 labelPosition="right"
+                disabled={isLoading}
                 type="submit"
                 style={{ backgroundColor: COLORS.primary, color: "#fff" }}
               />
