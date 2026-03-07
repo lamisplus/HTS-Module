@@ -11,6 +11,7 @@ import { useRoles } from "../../../hooks/useRoles";
 
 
 const ExistingPatientHtsForm = lazy(() => import("../NewToolForms/ExistingPatientHtsForm"));
+const NewEncounterHtsForm = lazy(() => import("../NewToolForms/NewEncounterHtsForm"));
 const HTSEncounterHistory = lazy(() => import("./HTSEncounterHistory"));
 const PatientVisits = lazy(() => import("../Patient/PatientVisits"));
 const ContineousRegistrationTesting = lazy(() => import("./../Patient/ContineousRegistrationTesting"));
@@ -231,7 +232,7 @@ const Home = (props) => {
                         // <History
                         // patientObj={props.patientObj}
                         // setPatientObj={props.setPatientObj}
-                        
+
                         // clientCode={props.clientCode}
                         // patientAge={props.patientAge}
                         // patients={patients}
@@ -249,14 +250,17 @@ const Home = (props) => {
                       }
                     </Suspense>
                   </Tab>
-
-                  {/* <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
+{/* {console.log(props?.patientObj)} */}
+                  <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
                     <Suspense fallback={<LoadingSpinner />}>
                       {key === "new-hts-encounter-existing-patient" &&
-                        <ExistingPatientHtsForm />
+                        <NewEncounterHtsForm
+                          person={props?.patientObj?.person}
+                          backButtonAction={() => setKey("home")}
+                        />
                       }
                     </Suspense>
-                  </Tab> */}
+                  </Tab>
 
                   {/* {lastVisitModalityAndCheckedIn && (
                     <Tab

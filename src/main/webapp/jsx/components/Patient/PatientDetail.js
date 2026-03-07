@@ -117,6 +117,8 @@ function PatientCard(props) {
             patientObject={patientObject}
             setPersonInfo={setPersonInfo}
           />
+
+
           {activePage.activePage === "home" && (
             <PatientHistory
               patientObj={patientObj}
@@ -143,8 +145,6 @@ function PatientCard(props) {
               initialValues={patientObj?.data}
               fullRecord={patientObj}
               backButtonAction={handleMoveToHome}
-              
-
             />
           )}
 
@@ -155,7 +155,6 @@ function PatientCard(props) {
               initialValues={patientObj?.data}
               backButtonAction={handleMoveToHome}
               fullRecord={patientObj}
-
             />
           )}
 

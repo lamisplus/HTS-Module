@@ -24,3 +24,5 @@ export const updateHtsEncounter = async (id, payload) => {
         throw error;
     }
 };
+
+

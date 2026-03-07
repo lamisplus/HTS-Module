@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
@@ -12,6 +12,7 @@ import { COLORS } from "./constants";
 import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { updateHtsEncounter } from "../../services/updateHtsEncounter";
 import { toast } from "react-toastify";
+import { getHtsEcounter } from "../../services/getHtsEncounter";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -80,9 +81,31 @@ const modeBadgeStyle = (readOnly) => ({
  *                    false → EDIT mode: clinical fields editable, demographics read-only
  */
 const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
+  const [formInitialValues, setFormInitialValues] = useState(initialValues)
+  const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false)
   const classes = useStyles();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(false)
+
+
+  const refreshEncounterData = async () => {
+    setIsRefreshingEncounter(true)
+    try {
+      const response = await getHtsEcounter(fullRecord?.id)
+      setFormInitialValues(response?.data)
+      setIsRefreshingEncounter(false)
+
+    }
+    catch {
+      setIsRefreshingEncounter(false)
+    }
+  }
+
+  useEffect(() => {
+    if (fullRecord?.id) {
+      refreshEncounterData()
+    }
+  }, [])
 
 
   const onSubmit = async (values) => {
@@ -105,7 +128,8 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   };
 
 
-  const { formik } = useExistingPatientFormik(onSubmit, initialValues);
+
+  const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
 
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
@@ -164,13 +188,20 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
               ? "Viewing existing HTS record — no changes can be made"
               : "Editing existing HTS record — update the required fields and save"}
           </p>
+          {
+            isRefreshingEncounter && (
+              <p className={classes.subtitle}>
+                Refreshing Record, Please wait...
+              </p>
+            )
+          }
+
         </div>
         <Button
           content="Back"
           icon="left arrow"
           labelPosition="left"
           style={{ backgroundColor: COLORS.primary, color: "#fff" }}
-          // onClick={() => history.push("/")}
           onClick={() => backButtonAction()}
         />
       </div>
@@ -187,7 +218,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             <BasicInformationSection
               formik={formik}
               isExistingPatient
-              readOnly={readOnly}
+              readOnly={readOnly || isRefreshingEncounter}
             />
           </FormAccordion>
 
@@ -197,7 +228,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             subtitle="Enter pre-test counselling details below"
             hasError={sectionHasError(preTestFields)}
           >
-            <PreTestCounsellingSection formik={formik} readOnly={readOnly} />
+            <PreTestCounsellingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
           <FormAccordion
@@ -206,7 +237,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             subtitle="Enter diagnostic testing details below"
             hasError={sectionHasError(diagnosticFields)}
           >
-            <DiagnosticTestingSection formik={formik} readOnly={readOnly} />
+            <DiagnosticTestingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
           <FormAccordion
@@ -215,7 +246,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             subtitle="Enter post test counselling details below"
             hasError={sectionHasError(postTestFields)}
           >
-            <PostTestCounsellingSection formik={formik} readOnly={readOnly} />
+            <PostTestCounsellingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
           {!readOnly && (
@@ -224,7 +255,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
                 content={isLoading ? "Submitting..." : "Update Record"}
                 icon="save"
                 labelPosition="right"
-                disabled={isLoading}
+                disabled={isLoading || isRefreshingEncounter}
                 type="submit"
                 style={{ backgroundColor: COLORS.primary, color: "#fff" }}
               />

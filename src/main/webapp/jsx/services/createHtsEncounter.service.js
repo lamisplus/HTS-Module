@@ -10,7 +10,6 @@ export const createEncounter = async (payload) => {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-    console.log('Created:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error creating encounter:', error.response?.data || error.message);

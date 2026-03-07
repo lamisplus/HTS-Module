@@ -137,7 +137,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   // If an existing patient already has a state, fetch its LGAs once statesList is loaded
   useEffect(() => {
-    if (!readOnly && statesList.length > 0 && values.clientState) {
+    if ( statesList.length > 0 && values.clientState) {
       const selectedState = statesList.find(s => String(s.id) === String(values.clientState));
       if (selectedState) {
         fetchLgas(selectedState.id);
