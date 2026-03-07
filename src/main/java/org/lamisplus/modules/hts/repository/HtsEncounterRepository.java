@@ -30,11 +30,11 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
     @Query(value = "SELECT p.id AS personId, p.first_name AS firstName, p.surname AS surname, p.other_name AS otherName, p.hospital_number AS hospitalNumber, COUNT(e.id) AS encounterCount " +
             "FROM patient_person p INNER JOIN hts_encounter e ON p.id = e.person_id " +
             "WHERE p.archived = 0 AND e.archived = 0 AND e.facility_id = :facilityId " +
-            "AND (:search IS NULL OR :search = '*' OR p.first_name ILIKE %:search% OR p.surname ILIKE %:search% OR p.other_name ILIKE %:search% OR e.client_code ILIKE %:search%) " +
+            "AND (:search IS NULL OR p.first_name ILIKE CAST(:search AS text) OR p.surname ILIKE CAST(:search AS text) OR p.other_name ILIKE CAST(:search AS text) OR e.client_code ILIKE CAST(:search AS text)) " +
             "GROUP BY p.id",
             countQuery = "SELECT COUNT(DISTINCT p.id) FROM patient_person p INNER JOIN hts_encounter e ON p.id = e.person_id " +
                     "WHERE p.archived = 0 AND e.archived = 0 AND e.facility_id = :facilityId " +
-                    "AND (:search IS NULL OR :search = '*' OR p.first_name ILIKE %:search% OR p.surname ILIKE %:search% OR p.other_name ILIKE %:search% OR e.client_code ILIKE %:search%)",
+                    "AND (:search IS NULL OR p.first_name ILIKE CAST(:search AS text) OR p.surname ILIKE CAST(:search AS text) OR p.other_name ILIKE CAST(:search AS text) OR e.client_code ILIKE CAST(:search AS text))",
             nativeQuery = true)
     Page<PatientHtsSummaryProjection> findPatientSummaries(@Param("facilityId") Long facilityId,
                                                            @Param("search") String search,

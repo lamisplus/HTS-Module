@@ -129,7 +129,12 @@ public class HtsEncounterService {
 
     public Page<PatientHtsSummaryDto> getPatientSummaries(String search, Pageable pageable) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
-        String searchParam = (search == null || search.equals("*")) ? null : "%" + search + "%";
+        String searchParam;
+        if (search == null || search.equals("*") || search.trim().isEmpty()) {
+            searchParam = null;
+        } else {
+            searchParam = "%" + search.trim() + "%";
+        }
         Page<PatientHtsSummaryProjection> page = repository.findPatientSummaries(facilityId, searchParam, pageable);
         return page.map(proj -> new PatientHtsSummaryDto(
                 proj.getPersonId(),
