@@ -13,6 +13,8 @@ import { COLORS } from "./constants";
 import { createEncounter } from "../../services/createHtsEncounter.service";
 import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { toast } from "react-toastify";
+import { token, url } from "../../../api";
+import axios from "axios";
 
 // ─── Styles (identical to the other HTS forms) ────────────────────────────────
 
@@ -117,17 +119,17 @@ const mapPersonToFormValues = (person) => {
   // person.sex is the display string  (e.g. "Female")
   // person.gender.id is the numeric code for the payload
   const sexDisplay = person?.sex ?? person?.gender?.display ?? "";
-  const sexCode    = person?.gender?.id != null ? String(person.gender.id) : "";
+  const sexCode = person?.gender?.id != null ? String(person.gender.id) : "";
 
   // ── Marital status ────────────────────────────────────────────────────────
   // person.maritalStatus is { id, display } — not a plain string
   const maritalDisplay = person?.maritalStatus?.display ?? "";
-  const maritalCode    = person?.maritalStatus?.id != null
+  const maritalCode = person?.maritalStatus?.id != null
     ? String(person.maritalStatus.id)
     : "";
 
   // ── DOB & age ─────────────────────────────────────────────────────────────
-  const dob         = person?.dateOfBirth ?? "";
+  const dob = person?.dateOfBirth ?? "";
   const isEstimated = !!person?.isDateOfBirthEstimated;
 
   let computedAge = "";
@@ -144,33 +146,33 @@ const mapPersonToFormValues = (person) => {
 
   return {
     // ── Identity ──────────────────────────────────────────────────────────
-    surname:    person?.surname    ?? "",
-    firstName:  person?.firstName  ?? "",
-    middleName: person?.otherName  ?? "",   // API field is otherName; formik uses middleName
+    surname: person?.surname ?? "",
+    firstName: person?.firstName ?? "",
+    middleName: person?.otherName ?? "",   // API field is otherName; formik uses middleName
 
     // ── DOB ───────────────────────────────────────────────────────────────
-    dobType:     isEstimated ? "Estimated" : "Actual",
+    dobType: isEstimated ? "Estimated" : "Actual",
     // dateOfBirth: isEstimated ? "" : dob,   // blank the picker when estimated
     dateOfBirth: dob,   // blank the picker when estimated
-    age:         computedAge,
+    age: computedAge,
 
     // ── Demographics ──────────────────────────────────────────────────────
-    sex:               sexDisplay,
-    sexCode:           sexCode,
-    maritalStatus:     maritalDisplay,
+    sex: sexDisplay,
+    sexCode: sexCode,
+    maritalStatus: maritalDisplay,
     maritalStatusCode: maritalCode,
-    phoneNumber:       phone,
+    phoneNumber: phone,
 
     // ── Address ───────────────────────────────────────────────────────────
-    clientState: addr?.stateId   != null ? String(addr.stateId) : "",
-    clientLga:   addr?.district  ?? "",
-    address:     addr?.city      ?? "",
+    clientState: addr?.stateId != null ? String(addr.stateId) : "",
+    clientLga: addr?.district ?? "",
+    address: addr?.city ?? "",
 
     // ── Identifiers ───────────────────────────────────────────────────────
     clientCode: hospitalNumber,
 
     // ── System linkage (passed to payload builder) ────────────────────────
-    personId:                  person?.id         != null ? String(person.id)         : "",
+    personId: person?.id != null ? String(person.id) : "",
     currentOrganisationUnitId: person?.facilityId != null ? String(person.facilityId) : "",
   };
 };
@@ -243,7 +245,7 @@ const blankClinicalValues = {
   designation: "",
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+
 
 /**
  * NewEncounterHtsForm
@@ -258,10 +260,13 @@ const blankClinicalValues = {
  * backButtonAction {Function} Called on Back button click and after successful submit.
  */
 const NewEncounterHtsForm = ({ person, backButtonAction }) => {
-  console.log(person)
+  console.log("person payload", person)
   const classes = useStyles();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
+  const [patientInfo, setPatientInfo] = useState(person)
+  const [isFetchingPatientInfo, setIsFetchingPatientInfo] = useState(false)
+
 
   // Build the merged initial values once on mount
   const demographicValues = mapPersonToFormValues(person);
@@ -296,13 +301,13 @@ const NewEncounterHtsForm = ({ person, backButtonAction }) => {
   // If the person prop updates (unlikely but safe), re-seed only the demographic
   // fields without touching any clinical fields the user may have started filling.
   useEffect(() => {
-    if (!person) return;
-    const demo = mapPersonToFormValues(person);
+    if (!patientInfo) return;
+    const demo = mapPersonToFormValues(patientInfo);
     Object.entries(demo).forEach(([key, val]) => {
       formik.setFieldValue(key, val, false); // false = skip revalidation on seed
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [person]);
+  }, [patientInfo]);
 
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
@@ -345,6 +350,35 @@ const NewEncounterHtsForm = ({ person, backButtonAction }) => {
     "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",
   ];
+
+
+  const fetchPatientCurrentBio = async () => {
+    setIsFetchingPatientInfo(true)
+    axios
+      .get(
+        `${url}patient/${person?.id || person?.personId
+        }`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((response) => {
+        console.log(response.data)
+        setPatientInfo(response.data)
+        setIsFetchingPatientInfo(false)
+      })
+      .catch((error) => {
+        console.log(error)
+        setIsFetchingPatientInfo(false)
+      });
+  }
+
+  useEffect(() => {
+    if (person?.id || person?.personId) {
+      fetchPatientCurrentBio()
+    }
+  }, [person])
+
 
   return (
     <div className={classes.root}>
@@ -403,7 +437,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction }) => {
             <BasicInformationSection
               formik={formik}
               isExistingPatient={true}
-              readOnly={false}
+              readOnly={isFetchingPatientInfo}
             />
           </FormAccordion>
 

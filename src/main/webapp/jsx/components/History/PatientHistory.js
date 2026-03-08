@@ -255,7 +255,7 @@ const Home = (props) => {
                     <Suspense fallback={<LoadingSpinner />}>
                       {key === "new-hts-encounter-existing-patient" &&
                         <NewEncounterHtsForm
-                          person={props?.patientObj?.person}
+                          person={props?.patientObj?.person || props?.patientObj}
                           backButtonAction={() => setKey("home")}
                         />
                       }

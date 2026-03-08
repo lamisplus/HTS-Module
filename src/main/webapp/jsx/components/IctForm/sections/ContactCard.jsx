@@ -1,14 +1,36 @@
 /**
  * ContactCard.jsx
  *
- * Renders one contact in Section B.
- * Receives the contact object, its index in the array, and handlers to
- * update or remove it from the parent formik contacts array.
+ * ROOT CAUSE ANALYSIS & FIXES:
  *
- * All skip-logic is handled locally using the contact's own field values.
+ * Bug 1 — setMany stale closure: the previous setMany() called onChange(index, field, value)
+ * in a forEach loop. Each call in IctSectionB.handleContactChange() maps over the contacts
+ * array from its OWN closure — the same snapshot every time. So only the LAST field in the
+ * loop survived; all earlier fields were overwritten back to their old value on the next
+ * render cycle. This is why checkboxes appeared to do nothing visually and didn't persist.
+ * FIX: onChange now accepts EITHER (index, field, value) for a single field OR
+ *      (index, patchObject) for an atomic multi-field update. IctSectionB is updated
+ *      to handle both signatures in one setFieldValue call.
+ *
+ * Bug 2 — FormSelect value fallback: FormSelect renders value={value || ""} which coerces
+ * any falsy value (including the number 0) to "". The knownHivPositive yesNoOptions
+ * built from codesets use value: item.display. As long as the stored field value exactly
+ * matches an option's value string this works — but the || "" guard can hide mismatches.
+ * FIX: value={value ?? ""} (nullish coalescing) to only coerce null/undefined, not 0 or "".
+ *      Since FormSelect is a shared component we replicate the select inline for
+ *      knownHivPositive to have full control.
+ *
+ * Additional fixes carried forward:
+ *  - YES_NO options from useGetCodesets("YES_NO")
+ *  - All Yes/No comparisons use .toLowerCase()
+ *  - Age group change clears OVC fields atomically
+ *  - OVC checkbox toggles correctly both ways
+ *  - Same-address checkbox visual state + uncheck clears phone & address
+ *  - Phone blocks non-numeric characters
+ *  - All conditional fields clear when parent condition changes
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import {
   FormSelect,
@@ -25,9 +47,9 @@ import {
   NOTIFICATION_METHOD_OPTIONS,
   FOLLOW_UP_LOCATION_OPTIONS,
   HIV_TEST_RESULT_OPTIONS,
-  YES_NO_OPTIONS,
 } from "../ictConstants";
 import { COLORS } from "../../NewToolForms/constants";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -40,6 +62,13 @@ const errorStyle = {
 
 const disabledInputStyle = {
   ...inputStyle,
+  background: "#f6f8fa",
+  color: "#8c959f",
+  cursor: "not-allowed",
+};
+
+const disabledSelectStyle = {
+  ...selectStyle,
   background: "#f6f8fa",
   color: "#8c959f",
   cursor: "not-allowed",
@@ -77,6 +106,16 @@ const contactBadgeStyle = {
   marginRight: 10,
 };
 
+const checkboxRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  fontSize: "14px",
+  color: "#24292f",
+  marginBottom: 12,
+  userSelect: "none",
+};
+
 const ContactCard = ({
   contact,
   index,
@@ -88,11 +127,44 @@ const ContactCard = ({
   errors = {},
   touched = {},
 }) => {
-  // ── Field helpers ─────────────────────────────────────────────────────────
+  // ── Codeset loader — YES_NO from API ─────────────────────────────────────
+  const [codesets, setCodesets] = useState(null);
+
+  useGetCodesets({
+    codesetsKeys: ["YES_NO"],
+    patientId: `contactCard_${index}`,
+    onSuccess: (data) => setCodesets(data),
+  });
+
+  const transformOptions = (items) => {
+    if (!Array.isArray(items)) return [];
+    return items.map((item) => ({
+      id: item.id,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
+      value: item.display,
+    }));
+  };
+
+  const yesNoOptions = transformOptions(codesets?.["YES_NO"]);
+
+  // ── Field value accessor ──────────────────────────────────────────────────
   const val = (name) => contact[name] ?? "";
 
+  // ── Atomic updaters ───────────────────────────────────────────────────────
+  // FIX Bug 1:
+  // set()     → single field update  → calls onChange(index, field, value)
+  // patch()   → multi-field atomic   → calls onChange(index, patchObject)
+  //
+  // IctSectionB.handleContactChange MUST handle both signatures:
+  //   (idx, field, value)   → { ...contact, [field]: value }
+  //   (idx, patchObject)    → { ...contact, ...patchObject }
+  //
+  // See IctSectionB fix note at bottom of this file.
   const set = (name, value) => onChange(index, name, value);
 
+  const patch = (patchObj) => onChange(index, patchObj);
+
+  // ── Field prop helpers ────────────────────────────────────────────────────
   const fp = (name) => ({
     name,
     value: val(name),
@@ -103,59 +175,123 @@ const ContactCard = ({
     disabled: readOnly,
   });
 
+  // sp — omits onChange so callers always pass it explicitly (never overridden)
   const sp = (name, options, extraDisabled = false) => ({
-    ...fp(name),
-    options,
+    name,
+    value: val(name),
+    onBlur: () => {},
+    error: touched[name] && !!errors[name],
+    helperText: touched[name] && errors[name],
     disabled: readOnly || extraDisabled,
+    options,
   });
 
   // ── Handlers ─────────────────────────────────────────────────────────────
+
   const handleSameAddress = (e) => {
+    if (readOnly) return;
     const checked = e.target.checked;
-    set("sameAddressAsIndex", checked);
     if (checked) {
-      set("contactAddress", indexAddress || "");
-      set("contactPhone", indexPhone || "");
+      // Single atomic patch — all three fields land in one setFieldValue call
+      patch({
+        sameAddressAsIndex: true,
+        contactAddress: indexAddress || "",
+        contactPhone: indexPhone || "",
+      });
     } else {
-      set("contactAddress", "");
-      set("contactPhone", "");
+      patch({
+        sameAddressAsIndex: false,
+        contactAddress: "",
+        contactPhone: "",
+      });
+    }
+  };
+
+  const handleAgeGroupChange = (e) => {
+    if (readOnly) return;
+    const v = e.target.value;
+    if (v !== "<15") {
+      // Clear OVC fields atomically alongside the age group change
+      patch({
+        contactAgeGroup: v,
+        enrolledInOvc: false,
+        dateEnrolledOvc: "",
+        ovcId: "",
+      });
+    } else {
+      set("contactAgeGroup", v);
     }
   };
 
   const handleKnownHivChange = (e) => {
+    if (readOnly) return;
     const v = e.target.value;
-    set("knownHivPositive", v);
-    // Reset downstream fields
-    set("dateTestedHiv", "");
-    set("hivTestResult", "");
-    set("dateEnrolledArt", "");
+    // Clear ALL downstream HIV fields in one atomic patch
+    patch({
+      knownHivPositive: v,
+      dateTestedHiv: "",
+      hivTestResult: "",
+      dateEnrolledArt: "",
+    });
   };
 
   const handleHivResultChange = (e) => {
+    if (readOnly) return;
     const v = e.target.value;
-    set("hivTestResult", v);
-    if (v !== "Positive") set("dateEnrolledArt", "");
-  };
-
-  const handleEnrolledOvcChange = (e) => {
-    const checked = e.target.checked;
-    set("enrolledInOvc", checked);
-    if (!checked) {
-      set("dateEnrolledOvc", "");
-      set("ovcId", "");
+    if (v.toLowerCase() !== "positive") {
+      patch({
+        hivTestResult: v,
+        dateEnrolledArt: "",
+      });
+    } else {
+      set("hivTestResult", v);
     }
   };
 
-  // ── Visibility flags ──────────────────────────────────────────────────────
-  const isKnownPositive = contact.knownHivPositive === "Yes";
-  const isKnownNegative = contact.knownHivPositive === "No";
-  const showNewTestResult = isKnownNegative;
+  const handleEnrolledOvcChange = (e) => {
+    if (readOnly) return;
+    const checked = e.target.checked;
+    if (checked) {
+      set("enrolledInOvc", true);
+    } else {
+      patch({
+        enrolledInOvc: false,
+        dateEnrolledOvc: "",
+        ovcId: "",
+      });
+    }
+  };
+
+  const handlePhoneKeyDown = (e) => {
+    const allowed = [
+      "Backspace", "Delete", "Tab", "Escape", "Enter",
+      "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+      "Home", "End",
+    ];
+    if (allowed.includes(e.key)) return;
+    if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
+  };
+
+  const handlePhonePaste = (e) => {
+    if (readOnly) return;
+    const pasted = e.clipboardData.getData("text");
+    const digitsOnly = pasted.replace(/\D/g, "");
+    e.preventDefault();
+    set("contactPhone", digitsOnly);
+  };
+
+  // ── Visibility flags (.toLowerCase() throughout) ──────────────────────────
+  const isKnownPositive = val("knownHivPositive").toLowerCase() === "yes";
+  const isKnownNegative = val("knownHivPositive").toLowerCase() === "no";
   const showArtEnrollDate =
-    isKnownPositive || contact.hivTestResult === "Positive";
-  const isUnder15 = contact.contactAgeGroup === "<15";
+    isKnownPositive || val("hivTestResult").toLowerCase() === "positive";
+  const isUnder15 = val("contactAgeGroup") === "<15";
 
   return (
     <div style={cardStyle}>
+
+      {/* ── Card header ── */}
       <div style={cardHeaderStyle}>
         <div style={{ display: "flex", alignItems: "center" }}>
           <span style={contactBadgeStyle}>{index + 1}</span>
@@ -207,6 +343,7 @@ const ContactCard = ({
           <FormSelect
             label="Relationship to Index Client"
             {...sp("relationshipToIndex", RELATIONSHIP_TO_INDEX_OPTIONS)}
+            onChange={(e) => !readOnly && set("relationshipToIndex", e.target.value)}
             required
           />
         </div>
@@ -214,6 +351,7 @@ const ContactCard = ({
           <FormSelect
             label="Sex"
             {...sp("contactSex", CONTACT_SEX_OPTIONS)}
+            onChange={(e) => !readOnly && set("contactSex", e.target.value)}
             required
           />
         </div>
@@ -221,40 +359,55 @@ const ContactCard = ({
           <FormSelect
             label="Age Group"
             {...sp("contactAgeGroup", CONTACT_AGE_GROUP_OPTIONS)}
+            onChange={handleAgeGroupChange}
             required
           />
         </div>
       </div>
 
-      {/* ── Address / Phone with "same as index" checkbox ── */}
+      {/* ── Address / Phone ── */}
       <div className="row">
-        <div className="col-md-12" style={{ marginBottom: 8 }}>
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontSize: "14px",
-              color: "#24292f",
-              cursor: readOnly ? "default" : "pointer",
-            }}
-          >
+        <div className="col-md-12">
+          {/* onChange always provided — React controlled checkbox, never uncontrolled */}
+          <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
             <input
               type="checkbox"
               checked={!!contact.sameAddressAsIndex}
-              onChange={readOnly ? undefined : handleSameAddress}
+              onChange={handleSameAddress}
               disabled={readOnly}
             />
             Contact lives at the same address as the index client
           </label>
         </div>
+
         <div className="col-md-4">
-          <FormTextField
-            label="Contact Phone Number"
-            {...fp("contactPhone")}
-            disabled={readOnly || !!contact.sameAddressAsIndex}
-          />
+          <FormGroup style={{ marginBottom: "16px" }}>
+            <Label style={labelStyle}>Contact Phone Number</Label>
+            <Input
+              type="text"
+              name="contactPhone"
+              value={val("contactPhone")}
+              onChange={(e) => {
+                const clean = e.target.value.replace(/\D/g, "");
+                set("contactPhone", clean);
+              }}
+              onKeyDown={handlePhoneKeyDown}
+              onPaste={handlePhonePaste}
+              maxLength={11}
+              disabled={readOnly || !!contact.sameAddressAsIndex}
+              style={
+                readOnly || !!contact.sameAddressAsIndex
+                  ? disabledInputStyle
+                  : inputStyle
+              }
+              placeholder="Numbers only"
+            />
+            {touched.contactPhone && errors.contactPhone && (
+              <span style={errorStyle}>{errors.contactPhone}</span>
+            )}
+          </FormGroup>
         </div>
+
         <div className="col-md-8">
           <FormTextField
             label="Home / Contact Address (include landmark)"
@@ -271,6 +424,7 @@ const ContactCard = ({
           <FormSelect
             label="Notification Method Selected"
             {...sp("notificationMethod", NOTIFICATION_METHOD_OPTIONS)}
+            onChange={(e) => !readOnly && set("notificationMethod", e.target.value)}
             required
           />
         </div>
@@ -278,6 +432,7 @@ const ContactCard = ({
           <FormSelect
             label="Follow-Up Appointment Location"
             {...sp("followUpLocation", FOLLOW_UP_LOCATION_OPTIONS)}
+            onChange={(e) => !readOnly && set("followUpLocation", e.target.value)}
             required
           />
         </div>
@@ -309,16 +464,41 @@ const ContactCard = ({
         </div>
       </div>
 
-      {/* ── HIV Status ── */}
-      <SectionSubheading>HIV Testing & Linkage</SectionSubheading>
+      {/* ── HIV Testing & Linkage ── */}
+      <SectionSubheading>HIV Testing &amp; Linkage</SectionSubheading>
       <div className="row">
+
+        {/*
+          Known HIV Positive — rendered as a raw <select> instead of FormSelect.
+          Reason: FormSelect uses value={value || ""} which coerces falsy values
+          and can mask mismatches between stored value and option values.
+          Using value={val("knownHivPositive") ?? ""} (nullish only) ensures the
+          selected option tracks correctly once the codeset loads and a value is set.
+        */}
         <div className="col-md-4">
-          <FormSelect
-            label="Known HIV Positive?"
-            {...sp("knownHivPositive", YES_NO_OPTIONS)}
-            onChange={readOnly ? undefined : (e) => handleKnownHivChange(e)}
-            required
-          />
+          <FormGroup style={{ marginBottom: "16px" }}>
+            <Label style={labelStyle}>
+              Known HIV Positive? <span style={{ color: "red" }}>*</span>
+            </Label>
+            <select
+              className="form-control"
+              name="knownHivPositive"
+              value={val("knownHivPositive") ?? ""}
+              onChange={handleKnownHivChange}
+              disabled={readOnly}
+              style={readOnly ? disabledSelectStyle : selectStyle}
+            >
+              <option value="">Select option</option>
+              {yesNoOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            {touched.knownHivPositive && errors.knownHivPositive && (
+              <span style={errorStyle}>{errors.knownHivPositive}</span>
+            )}
+          </FormGroup>
         </div>
 
         {/* Known Positive path */}
@@ -332,7 +512,7 @@ const ContactCard = ({
                 <Input
                   type="date"
                   value={val("dateTestedHiv")}
-                  onChange={readOnly ? undefined : (e) => set("dateTestedHiv", e.target.value)}
+                  onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
                   max={today}
                   onKeyPress={(e) => e.preventDefault()}
                   disabled={readOnly}
@@ -351,7 +531,7 @@ const ContactCard = ({
                 <Input
                   type="date"
                   value={val("dateEnrolledArt")}
-                  onChange={readOnly ? undefined : (e) => set("dateEnrolledArt", e.target.value)}
+                  onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
                   max={today}
                   onKeyPress={(e) => e.preventDefault()}
                   disabled={readOnly}
@@ -372,7 +552,7 @@ const ContactCard = ({
               <FormSelect
                 label="HIV Test Result"
                 {...sp("hivTestResult", HIV_TEST_RESULT_OPTIONS)}
-                onChange={readOnly ? undefined : (e) => handleHivResultChange(e)}
+                onChange={handleHivResultChange}
                 required
               />
             </div>
@@ -384,7 +564,7 @@ const ContactCard = ({
                 <Input
                   type="date"
                   value={val("dateTestedHiv")}
-                  onChange={readOnly ? undefined : (e) => set("dateTestedHiv", e.target.value)}
+                  onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
                   max={today}
                   onKeyPress={(e) => e.preventDefault()}
                   disabled={readOnly}
@@ -404,7 +584,7 @@ const ContactCard = ({
                   <Input
                     type="date"
                     value={val("dateEnrolledArt")}
-                    onChange={readOnly ? undefined : (e) => set("dateEnrolledArt", e.target.value)}
+                    onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
                     max={today}
                     onKeyPress={(e) => e.preventDefault()}
                     disabled={readOnly}
@@ -420,30 +600,22 @@ const ContactCard = ({
         )}
       </div>
 
-      {/* ── OVC — only for contacts < 15 years ── */}
+      {/* ── OVC — only when contactAgeGroup === "<15" ── */}
       {isUnder15 && (
         <div className="row" style={{ marginTop: 4 }}>
-          <div className="col-md-12" style={{ marginBottom: 8 }}>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: "14px",
-                color: "#24292f",
-                cursor: readOnly ? "default" : "pointer",
-              }}
-            >
+          <div className="col-md-12">
+            <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
               <input
                 type="checkbox"
                 checked={!!contact.enrolledInOvc}
-                onChange={readOnly ? undefined : handleEnrolledOvcChange}
+                onChange={handleEnrolledOvcChange}
                 disabled={readOnly}
               />
               Contact is enrolled in OVC program
             </label>
           </div>
-          {contact.enrolledInOvc && (
+
+          {!!contact.enrolledInOvc && (
             <>
               <div className="col-md-4">
                 <FormGroup style={{ marginBottom: "16px" }}>
@@ -453,7 +625,7 @@ const ContactCard = ({
                   <Input
                     type="date"
                     value={val("dateEnrolledOvc")}
-                    onChange={readOnly ? undefined : (e) => set("dateEnrolledOvc", e.target.value)}
+                    onChange={(e) => !readOnly && set("dateEnrolledOvc", e.target.value)}
                     max={today}
                     onKeyPress={(e) => e.preventDefault()}
                     disabled={readOnly}
@@ -471,6 +643,7 @@ const ContactCard = ({
           )}
         </div>
       )}
+
     </div>
   );
 };

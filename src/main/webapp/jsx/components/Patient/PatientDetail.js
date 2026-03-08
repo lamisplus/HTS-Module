@@ -60,11 +60,13 @@ function PatientCard(props) {
     history.location && history.location.state
       ? history.location.state.patientObject
       : {};
-  const patientObj =
-    history.location && history.location.state
+      
+      const patientObj =
+      history.location && history.location.state
       ? history.location.state.patientObj
       : {};
-
+      
+      console.log(patientObject, patientObj)
 
   const clientCode =
     history.location && history.location.state
@@ -117,7 +119,6 @@ function PatientCard(props) {
             patientObject={patientObject}
             setPersonInfo={setPersonInfo}
           />
-
 
           {activePage.activePage === "home" && (
             <PatientHistory

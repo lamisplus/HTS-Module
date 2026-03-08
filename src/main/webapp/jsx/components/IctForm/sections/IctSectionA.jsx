@@ -16,11 +16,9 @@ import {
   SectionSubheading,
   labelStyle,
   inputStyle,
-  selectStyle,
 } from "../../NewToolForms/sections/FormFields";
 import {
   CLIENT_CATEGORY_OPTIONS,
-  YES_NO_OPTIONS,
 } from "../ictConstants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import axios from "axios";
@@ -45,6 +43,66 @@ const disabledInputStyle = {
 const IctSectionA = ({ formik, readOnly = false }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
+  const [statesList, setStatesList] = useState([]);
+  const [lgasList, setLgasList] = useState([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingLgas, setLoadingLgas] = useState(false);
+
+
+
+  const fetchStates = async (countryId) => {
+    setLoadingStates(true);
+    try {
+      const response = await axios.get(
+        `${url}organisation-units/parent-organisation-units/${countryId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Sort alphabetically by name for better UX
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setStatesList(sorted);
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      // Optionally show a user-friendly message
+    } finally {
+      setLoadingStates(false);
+    }
+  };
+
+  const fetchLgas = async (stateId) => {
+    setLoadingLgas(true);
+    try {
+      const response = await axios.get(
+        `${url}organisation-units/parent-organisation-units/${stateId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
+      setLgasList(sorted);
+    } catch (error) {
+      console.error("Error fetching LGAs:", error);
+    } finally {
+      setLoadingLgas(false);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchStates(1);
+  }, []);
+
+  // When statesList is ready AND values.state has an ID, fetch the LGAs for that state.
+  // values.state is the numeric state ID coming from the HTS / person record.
+  useEffect(() => {
+    if (statesList?.length > 0 && values?.state) {
+      const matched = statesList.find((s) => String(s.id) === String(values.state));
+      if (matched) {
+        fetchLgas(matched.id);
+      }
+    }
+  }, [statesList, values?.state]);
+
+
+
+
 
   // ── Codeset loader ────────────────────────────────────────────────────────
   useGetCodesets({
@@ -62,7 +120,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     if (!Array.isArray(items)) return [];
     return items.map((item) => ({
       id: item.id,
-      label: item.display,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
       value: item.display,
     }));
   };
@@ -98,7 +156,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   const handleOfferedPnsChange = (e) => {
     setFieldValue("offeredPns", e.target.value);
-    if (e.target.value !== "Yes") setFieldValue("acceptedPns", "");
+    if (e.target.value.toLowerCase() !== "yes") setFieldValue("acceptedPns", "");
   };
 
   // ── Visibility flags ──────────────────────────────────────────────────────
@@ -106,7 +164,19 @@ const IctSectionA = ({ formik, readOnly = false }) => {
   const showCommunityEntry = values.setting === "Community";
   const showArtClinic = !!values.isOnArt;
   const showCategoryOther = values.clientCategory === "Other";
-  const showAcceptedPns = values.offeredPns === "Yes";
+  const showAcceptedPns = values.offeredPns.toLowerCase() === "yes";
+
+  // ── Resolve display names from fetched lists ──────────────────────────────
+  // values.state and values.lga hold numeric IDs (from HTS / person record).
+  // We look them up in the fetched lists to get human-readable names for display.
+  // The raw IDs stay in formik values unchanged so the payload is unaffected.
+  const stateDisplayName =
+    statesList.find((s) => String(s.id) === String(values.state))?.name ??
+    (loadingStates ? "Loading…" : values.state ?? "");
+
+  const lgaDisplayName =
+    lgasList.find((l) => String(l.id) === String(values.lga))?.name ??
+    (loadingLgas ? "Loading…" : values.lga ?? "");
 
   return (
     <div style={{ width: "100%" }}>
@@ -115,10 +185,10 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       <SectionSubheading>Facility Context</SectionSubheading>
       <div className="row">
         <div className="col-md-4">
-          <ReadOnlyField label="State" value={values.state} />
+          <ReadOnlyField label="State" value={stateDisplayName} />
         </div>
         <div className="col-md-4">
-          <ReadOnlyField label="LGA" value={values.lga} />
+          <ReadOnlyField label="LGA" value={lgaDisplayName} />
         </div>
         <div className="col-md-4">
           <ReadOnlyField label="Facility Name" value={values.facilityName} />
@@ -286,7 +356,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         <div className="col-md-4">
           <FormSelect
             label="Offered PNS?"
-            {...sp("offeredPns", YES_NO_OPTIONS)}
+            {...sp("offeredPns", transformOptions(codesets?.["YES_NO"]))}
             onChange={readOnly ? undefined : handleOfferedPnsChange}
             required
           />
@@ -296,7 +366,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
           <div className="col-md-4">
             <FormSelect
               label="Accepted PNS?"
-              {...sp("acceptedPns", YES_NO_OPTIONS)}
+              {...sp("acceptedPns", transformOptions(codesets?.["YES_NO"]))}
               required
             />
           </div>

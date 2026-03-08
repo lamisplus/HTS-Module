@@ -53,10 +53,24 @@ const IctSectionB = ({
     setFieldValue("contacts", updated);
   };
 
-  const handleContactChange = (idx, field, value) => {
-    const updated = contacts.map((c, i) =>
-      i === idx ? { ...c, [field]: value } : c
-    );
+  // Handles two call signatures from ContactCard:
+  //   (idx, fieldName, value)  → single field update
+  //   (idx, patchObject)       → atomic multi-field update (object as 2nd arg)
+  //
+  // The patch signature is critical for checkboxes and dropdowns that must
+  // clear dependent fields simultaneously. Without it, a forEach loop calling
+  // this handler multiple times reads the same stale contacts closure each time,
+  // causing all but the last update to be lost.
+  const handleContactChange = (idx, fieldOrPatch, value) => {
+    const updated = contacts.map((c, i) => {
+      if (i !== idx) return c;
+      if (typeof fieldOrPatch === "object" && fieldOrPatch !== null) {
+        // Patch object — spread all fields atomically
+        return { ...c, ...fieldOrPatch };
+      }
+      // Single field
+      return { ...c, [fieldOrPatch]: value };
+    });
     setFieldValue("contacts", updated);
   };
 

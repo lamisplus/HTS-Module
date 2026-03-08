@@ -164,7 +164,7 @@ function PatientCard(props) {
                             }}
                           >
                             <span style={{ textTransform: "capitalize" }}>
-                              Back
+                              Home
                             </span>
                           </ButtonMui>
                         </Link>

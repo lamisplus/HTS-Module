@@ -40,7 +40,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
       value: item.display
     }));
   };
