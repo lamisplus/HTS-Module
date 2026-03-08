@@ -327,20 +327,6 @@ const HtsIctOrchestrator = ({
   );
 };
 
-// ── Thin wrapper around NewPatientHtsForm to intercept formik values ─────────
-/**
- * NewPatientHtsFormWithWatcher
- *
- * Wraps NewPatientHtsForm and forwards every formik value change
- * to the orchestrator via onValuesChange. It does this by monkey-patching
- * the onSubmit so that after the API call succeeds it notifies the parent.
- * For real-time changes we pass a renderProp / callback down via a custom prop.
- *
- * NOTE: The cleanest way to do this is to accept an onValuesChange prop
- * directly inside NewPatientHtsForm and call it inside a useEffect watching
- * formik.values. The snippet below shows the change that needs to be made
- * to NewPatientHtsForm — see the comment block at the bottom of this file.
- */
 const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack }) => {
   return (
     <NewPatientHtsForm
@@ -353,33 +339,3 @@ const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack 
 
 export default HtsIctOrchestrator;
 
-/**
- * ─────────────────────────────────────────────────────────────────────────────
- * REQUIRED CHANGE TO NewPatientHtsForm.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * 1. Accept two new optional props:
- *      onValuesChange  — (values) => void
- *      onSubmitSuccess — (record, values) => void
- *      onBack          — () => void
- *
- * 2. Inside the component body, add a useEffect that fires onValuesChange:
- *
- *      useEffect(() => {
- *        onValuesChange?.(formik.values);
- *      }, [formik.values]);
- *
- * 3. In the existing onSubmit function, after a successful API response:
- *
- *      const response = await createEncounter(payload);
- *      onSubmitSuccess?.(response.data, values);   // ← add this line
- *      // keep the existing toast.success and history.push (or skip push
- *      // when onSubmitSuccess is provided, so the orchestrator controls nav)
- *
- * 4. For the Back button, use onBack prop when provided:
- *      onClick={() => onBack ? onBack() : history.push("/")}
- *
- * These changes are minimal and non-breaking — all props are optional so
- * the existing standalone usage of NewPatientHtsForm is unaffected.
- * ─────────────────────────────────────────────────────────────────────────────
- */
