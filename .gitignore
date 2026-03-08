@@ -4,7 +4,8 @@
 
 # BlueJ files
 *.ctxt
-
+.eslintcache
+**/.eslintcache
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

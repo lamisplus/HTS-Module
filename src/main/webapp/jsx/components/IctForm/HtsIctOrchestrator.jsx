@@ -145,7 +145,7 @@ const isIctEligible = (htsValues) => {
   const positiveResult =
     htsValues.confirmatoryHivTest === "Positive" ||
     htsValues.initialHivTest === "Positive";
-    return true
+  return true
   // return sessionMatch && positiveResult;
 };
 
@@ -246,10 +246,10 @@ const HtsIctOrchestrator = ({
           const badgeBg = item.done
             ? "#2e7d32"
             : isActive
-            ? COLORS.primary
-            : isLocked
-            ? "#d0d7de"
-            : COLORS.primaryLight;
+              ? COLORS.primary
+              : isLocked
+                ? "#d0d7de"
+                : COLORS.primaryLight;
 
           const badgeColor = item.done || isActive ? "#fff" : isLocked ? "#8c959f" : COLORS.primary;
 
