@@ -17,6 +17,7 @@ import { queryClient } from "./main/webapp/utils/queryClient";
 import { useRoles } from "./main/webapp/hooks/useRoles";
 import { useMemo } from "react";
 import NewPatientHtsForm from "./main/webapp/jsx/components/NewToolForms/NewPatientHtsForm";
+import HtsIctOrchestrator from "./main/webapp/jsx/components/IctForm/HtsIctOrchestrator";
 
 export default function App() {
   const { hasRole } = useRoles();
@@ -42,7 +43,8 @@ export default function App() {
           </Route>
           <Route path="/register-patient">
             {/* <RegisterPatient /> */}
-            <NewPatientHtsForm/>
+            {/* <NewPatientHtsForm/> */}
+            <HtsIctOrchestrator/>
           </Route>
           <Route path="/register-hivst-patient">
             <HIVSTPatient />
