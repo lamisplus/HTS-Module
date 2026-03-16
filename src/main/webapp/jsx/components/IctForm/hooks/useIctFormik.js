@@ -60,6 +60,13 @@ const buildInitialValues = (htsValues) => ({
   artUniqueId: htsValues?.artUniqueId || "",
   isOnArt: htsValues?.isOnArt || false,
 
+  // ── System linkage — carried from HTS values ─────────────────────────
+  // currentOrganisationUnitId is mapped to facilityId in the payload builder.
+  // Sourced from htsValues (which fetches it from /account in BasicInformationSection).
+  // IctSectionA also fetches it independently as a fallback.
+  currentOrganisationUnitId: htsValues?.currentOrganisationUnitId || "",
+  personId: htsValues?.personId || "",
+
   // ── Editable Section A fields ─────────────────────────────────────────
   dateOfService: "",
   setting: htsValues?.setting || "",

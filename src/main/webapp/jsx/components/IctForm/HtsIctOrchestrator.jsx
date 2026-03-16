@@ -33,9 +33,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
-import NewPatientHtsForm from "./NewPatientHtsForm";
+import NewPatientHtsForm from "../NewToolForms/NewPatientHtsForm";
 import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
-import IctForm from "./IctForm";
+import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
 
 const VIEWS = {
@@ -140,13 +140,13 @@ const useStyles = makeStyles(() => ({
  * eligible for ICT (real-time — runs on every formik value change).
  */
 const isIctEligible = (htsValues) => {
-  if (!htsValues) return false;
-  const sessionMatch = htsValues.typeOfSession === "Index Testing";
-  const positiveResult =
-    htsValues.confirmatoryHivTest === "Positive" ||
-    htsValues.initialHivTest === "Positive";
-  // return true
-  return sessionMatch && positiveResult;
+  // if (!htsValues) return false;
+  // const sessionMatch = htsValues.typeOfSession === "Index Testing";
+  // const positiveResult =
+  //   htsValues.confirmatoryHivTest === "Positive" ||
+  //   htsValues.initialHivTest === "Positive";
+  // return sessionMatch && positiveResult;
+  return true
 };
 
 const HtsIctOrchestrator = ({
@@ -157,11 +157,13 @@ const HtsIctOrchestrator = ({
   ictInitial,
   isOnArt = false,
   fullRecord,
+  existingIctId,    // ID of an existing ICT record to view or edit
+  ictReadOnly = false, // When true, ICT form opens in view-only mode
 }) => {
   const classes = useStyles();
 
   const [activeView, setActiveView] = useState(VIEWS.HTS);
-  const [ictEligible, setIctEligible] = useState(false);
+  const [ictEligible, setIctEligible] = useState(true);
   const [htsSubmitted, setHtsSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null);   // HTS formik values snapshot
   const [htsRecord, setHtsRecord] = useState(null);   // API response after HTS submit
@@ -196,17 +198,24 @@ const HtsIctOrchestrator = ({
     setHtsValues(formValues);
     setHtsSubmitted(true);
 
-    if (isIctEligible(formValues)) {
-      setIctEligible(true);
-      // Auto-navigate to ICT after a brief moment
-      setTimeout(() => setActiveView(VIEWS.ICT), 600);
-      toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
-    }
+    // if (isIctEligible(formValues)) {
+    //   setIctEligible(true);
+    //   // Auto-navigate to ICT after a brief moment
+    //   setTimeout(() => setActiveView(VIEWS.ICT), 600);
+    //   toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+    // }
+
+    setIctEligible(true);
+    setTimeout(() => setActiveView(VIEWS.ICT), 600);
+    toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
   };
 
   // ── ICT submit callback ───────────────────────────────────────────────────
-  const handleIctSubmitSuccess = () => {
-    onDone?.();
+  const [ictSubmitted, setIctSubmitted] = useState(false);
+
+  const handleIctSubmitSuccess = (ictResponse) => {
+    setIctSubmitted(true);
+    onDone?.(ictResponse);
   };
 
   // ── Nav item config ───────────────────────────────────────────────────────
@@ -223,12 +232,15 @@ const HtsIctOrchestrator = ({
       key: VIEWS.ICT,
       step: 2,
       label: "Index Contact Testing",
-      sub: ictEligible
-        ? htsSubmitted
-          ? "Ready to fill" : "Eligible — complete HTS first"
-        : "Not yet eligible",
+      sub: ictSubmitted
+        ? "Completed"
+        : ictEligible
+          ? htsSubmitted
+            ? "Ready to fill"
+            : "Eligible — complete HTS first"
+          : "Not yet eligible",
       locked: !ictEligible,
-      done: false,
+      done: ictSubmitted,
     },
   ];
 
@@ -317,8 +329,9 @@ const HtsIctOrchestrator = ({
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSubmitSuccess}
             onBack={() => setActiveView(VIEWS.HTS)}
-            readOnly={false}
+            readOnly={ictReadOnly}
             initialValues={ictInitial}
+            existingId={existingIctId}
           />
         )}
       </div>
@@ -326,6 +339,20 @@ const HtsIctOrchestrator = ({
   );
 };
 
+// ── Thin wrapper around NewPatientHtsForm to intercept formik values ─────────
+/**
+ * NewPatientHtsFormWithWatcher
+ *
+ * Wraps NewPatientHtsForm and forwards every formik value change
+ * to the orchestrator via onValuesChange. It does this by monkey-patching
+ * the onSubmit so that after the API call succeeds it notifies the parent.
+ * For real-time changes we pass a renderProp / callback down via a custom prop.
+ *
+ * NOTE: The cleanest way to do this is to accept an onValuesChange prop
+ * directly inside NewPatientHtsForm and call it inside a useEffect watching
+ * formik.values. The snippet below shows the change that needs to be made
+ * to NewPatientHtsForm — see the comment block at the bottom of this file.
+ */
 const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack }) => {
   return (
     <NewPatientHtsForm
@@ -338,3 +365,33 @@ const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack 
 
 export default HtsIctOrchestrator;
 
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * REQUIRED CHANGE TO NewPatientHtsForm.jsx
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * 1. Accept two new optional props:
+ *      onValuesChange  — (values) => void
+ *      onSubmitSuccess — (record, values) => void
+ *      onBack          — () => void
+ *
+ * 2. Inside the component body, add a useEffect that fires onValuesChange:
+ *
+ *      useEffect(() => {
+ *        onValuesChange?.(formik.values);
+ *      }, [formik.values]);
+ *
+ * 3. In the existing onSubmit function, after a successful API response:
+ *
+ *      const response = await createEncounter(payload);
+ *      onSubmitSuccess?.(response.data, values);   // ← add this line
+ *      // keep the existing toast.success and history.push (or skip push
+ *      // when onSubmitSuccess is provided, so the orchestrator controls nav)
+ *
+ * 4. For the Back button, use onBack prop when provided:
+ *      onClick={() => onBack ? onBack() : history.push("/")}
+ *
+ * These changes are minimal and non-breaking — all props are optional so
+ * the existing standalone usage of NewPatientHtsForm is unaffected.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */

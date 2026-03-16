@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
-import { useNewPatientFormik } from "./hooks/useNewPatientFormik";
-import FormAccordion from "./sections/FormAccordion";
-import BasicInformationSection from "./sections/BasicInformationSection";
-import PreTestCounsellingSection from "./sections/PreTestCounsellingSection";
-import DiagnosticTestingSection from "./sections/DiagnosticTestingSection";
-import PostTestCounsellingSection from "./sections/PostTestCounsellingSection";
-import { COLORS } from "./constants";
+import { useNewPatientFormik } from "../NewToolForms/hooks/useNewPatientFormik"; 
+import FormAccordion from "../NewToolForms/sections/FormAccordion";
+import BasicInformationSection from "../NewToolForms/sections/BasicInformationSection";
+import PreTestCounsellingSection from "../NewToolForms/sections/PreTestCounsellingSection";
+import DiagnosticTestingSection from "../NewToolForms/sections/DiagnosticTestingSection";
+import PostTestCounsellingSection from "../NewToolForms/sections/PostTestCounsellingSection";
+import { COLORS } from "../NewToolForms/constants";
 import { createEncounter } from "../../services/createHtsEncounter.service";
-import { arrayToObject, buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
+import { arrayToObject, buildHtsEncounterPayload } from "../NewToolForms/utils/htsEncounterPayload";
 import { toast } from "react-toastify";
 
 const useStyles = makeStyles(() => ({
@@ -56,7 +56,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const NewPatientHtsForm = () => {
+const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => {
   const classes = useStyles();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(false)
@@ -70,7 +70,13 @@ const NewPatientHtsForm = () => {
       const response = await createEncounter(payload);
       setIsLoading(false)
       toast.success("Encounter created successfully")
-      history.push("/")
+      if (onSubmitSuccess) {
+        // createEncounter service already unwraps axios response.data,
+        // so `response` IS the HTS encounter object — pass it directly.
+        onSubmitSuccess(response, values);
+      } else {
+        history.push("/")
+      }
 
     } catch (error) {
       console.error("Failed to create encounter:", error.response?.data || error.message);
@@ -82,6 +88,11 @@ const NewPatientHtsForm = () => {
     }
   };
   const { formik } = useNewPatientFormik(onSubmit);
+
+  // Real-time value forwarding for the orchestrator eligibility watcher
+  React.useEffect(() => {
+    onValuesChange?.(formik.values);
+  }, [formik.values]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
@@ -137,7 +148,7 @@ const NewPatientHtsForm = () => {
           icon="left arrow"
           labelPosition="left"
           style={{ backgroundColor: COLORS.primary, color: "#fff" }}
-          onClick={() => history.push("/")}
+          onClick={() => onBack ? onBack() : history.push("/")}
         />
       </div>
 

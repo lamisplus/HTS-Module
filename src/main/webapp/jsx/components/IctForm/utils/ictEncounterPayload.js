@@ -1,97 +1,114 @@
 /**
  * ictEncounterPayload.js
  *
- * Builds the API request payload from ICT Formik values.
- * Call this just before POST /api/v1/ict-encounter (or equivalent).
+ * Builds the flat API request payload from ICT Formik values.
+ * Matches the IctEncounterRequest DTO shape exactly:
+ *   - All index client fields are flat top-level keys (not nested under indexClient)
+ *   - contacts array uses the field names from IctContactRequest
+ *   - Null-guards applied for all conditional fields
  */
 
 export const buildIctEncounterPayload = (values) => {
-  const {
-    facilityName,
-    state,
-    lga,
-    indexClientId,
-    indexFirstName,
-    indexMiddleName,
-    indexSurname,
-    indexSex,
-    indexDob,
-    indexAge,
-    indexPhone,
-    indexAltPhone,
-    indexAddress,
-    artUniqueId,
-    isOnArt,
-    dateOfService,
-    setting,
-    facilitySetting,
-    communityEntryPoint,
-    artClinic,
-    clientCategory,
-    clientCategoryOther,
-    offeredPns,
-    acceptedPns,
-    contacts,
-  } = values;
+  const isAccepted =
+    values.offeredPns?.toLowerCase() === "yes" &&
+    values.acceptedPns?.toLowerCase() === "yes";
 
   return {
-    // Section A
-    facilityName,
-    state,
-    lga,
-    dateOfService,
-    setting,
-    facilitySetting: setting === "Facility" ? facilitySetting : null,
-    communityEntryPoint: setting === "Community" ? communityEntryPoint : null,
-    artClinic: isOnArt ? artClinic : null,
-    indexClient: {
-      indexClientId,
-      firstName: indexFirstName,
-      middleName: indexMiddleName,
-      surname: indexSurname,
-      sex: indexSex,
-      dateOfBirth: indexDob,
-      age: indexAge ? parseInt(indexAge, 10) : null,
-      phoneNumber: indexPhone,
-      alternatePhone: indexAltPhone || null,
-      address: indexAddress,
-      artUniqueId: artUniqueId || null,
-    },
-    clientCategory,
-    clientCategoryOther: clientCategory === "Other" ? clientCategoryOther : null,
-    offeredPns,
-    acceptedPns: offeredPns === "Yes" ? acceptedPns : null,
+    // ── Person & facility linkage ────────────────────────────────────────────
+    // personId always required. facilityId from currentOrganisationUnitId,
+    // matching the same pattern used by the HTS payload builder.
+    personId:   values.personId                ?? null,
+    facilityId: values?.facilityId != null
+                  ? Number(values?.facilityId || values?.currentOrganisationUnitId)
+                  : null,
 
-    // Section B — only included when PNS was accepted
-    contacts:
-      acceptedPns === "Yes"
-        ? contacts.map((c) => ({
-            contactId: c.contactId,
-            nameOfContact: c.nameOfContact,
-            relationshipToIndex: c.relationshipToIndex,
-            sex: c.contactSex,
-            ageGroup: c.contactAgeGroup,
-            address: c.contactAddress || null,
-            phoneNumber: c.contactPhone || null,
-            sameAddressAsIndex: !!c.sameAddressAsIndex,
-            notificationMethod: c.notificationMethod,
-            followUpLocation: c.followUpLocation,
-            attempts: c.attempts !== "" ? parseInt(c.attempts, 10) : null,
-            knownHivPositive: c.knownHivPositive,
-            dateTestedHiv: c.dateTestedHiv || null,
-            hivTestResult: c.knownHivPositive === "No" ? c.hivTestResult : null,
-            dateEnrolledArt:
-              c.knownHivPositive === "Yes" || c.hivTestResult === "Positive"
-                ? c.dateEnrolledArt
-                : null,
-            enrolledInOvc: c.contactAgeGroup === "<15" ? !!c.enrolledInOvc : false,
-            dateEnrolledOvc:
-              c.contactAgeGroup === "<15" && c.enrolledInOvc
-                ? c.dateEnrolledOvc
-                : null,
-            ovcId:
-              c.contactAgeGroup === "<15" && c.enrolledInOvc ? c.ovcId : null,
-          }))
-        : [],
+    // htsEncounterId is attached by the caller (IctForm.jsx) from htsRecord.id
+    // after the HTS form submits. We don't set it here to keep the builder pure.
+
+    // ── Section A: Visit & Setting ──────────────────────────────────────────
+    dateOfService: values.dateOfService || null,
+    setting: values.setting || null,
+    facilitySetting:
+      values.setting === "Facility" ? values.facilitySetting || null : null,
+    communityEntryPoint:
+      values.setting === "Community" ? values.communityEntryPoint || null : null,
+    artClinic: values.isOnArt ? values.artClinic || null : null,
+
+    // ── Section A: Index Client Snapshot (flat, stored in JSONB on backend) ─
+    indexClientId:  values.indexClientId  || null,
+    artUniqueId:    values.artUniqueId    || null,
+    indexFirstName: values.indexFirstName || null,
+    indexMiddleName:values.indexMiddleName|| null,
+    indexSurname:   values.indexSurname   || null,
+    indexSex:       values.indexSex       || null,
+    indexDob:       values.indexDob       || null,
+    indexAge:       values.indexAge       ? parseInt(values.indexAge, 10) : null,
+    indexPhone:     values.indexPhone     || null,
+    indexAltPhone:  values.indexAltPhone  || null,
+    indexAddress:   values.indexAddress   || null,
+
+    // ── Section A: Category & PNS ───────────────────────────────────────────
+    clientCategory:      values.clientCategory      || null,
+    clientCategoryOther:
+      values.clientCategory === "Other"
+        ? values.clientCategoryOther || null
+        : null,
+    offeredPns:  values.offeredPns  || null,
+    acceptedPns:
+      values.offeredPns?.toLowerCase() === "yes"
+        ? values.acceptedPns || null
+        : null,
+
+    // ── Section B: Contacts ─────────────────────────────────────────────────
+    // Only included (and validated by backend) when offeredPns=Yes & acceptedPns=Yes
+    contacts: isAccepted
+      ? (values.contacts || []).map((c) => buildContactPayload(c))
+      : [],
+  };
+};
+
+const buildContactPayload = (c) => {
+  const isKnownPositive = c.knownHivPositive?.toLowerCase() === "yes";
+  const isKnownNegative = c.knownHivPositive?.toLowerCase() === "no";
+  const newTestPositive = c.hivTestResult?.toLowerCase() === "positive";
+  const isUnder15 = c.contactAgeGroup === "<15";
+
+  return {
+    contactId:           c.contactId           || null,
+    nameOfContact:       c.nameOfContact        || null,
+    relationshipToIndex: c.relationshipToIndex  || null,
+    contactSex:          c.contactSex           || null,
+    contactAgeGroup:     c.contactAgeGroup      || null,
+    contactPhone:        c.contactPhone         || null,
+    contactAddress:      c.contactAddress       || null,
+    sameAddressAsIndex:  !!c.sameAddressAsIndex,
+    notificationMethod:  c.notificationMethod   || null,
+    followUpLocation:    c.followUpLocation     || null,
+    attempts:
+      c.attempts !== "" && c.attempts != null
+        ? parseInt(c.attempts, 10)
+        : 0,
+
+    // HIV status
+    knownHivPositive: c.knownHivPositive || null,
+
+    // Only relevant when knownHivPositive = No
+    hivTestResult: isKnownNegative ? c.hivTestResult || null : null,
+
+    // Date of test: present for both known positive (previous test) and known negative (new test)
+    dateTestedHiv: c.dateTestedHiv || null,
+
+    // ART enrolment: required when known positive OR newly tested positive
+    dateEnrolledArt:
+      isKnownPositive || (isKnownNegative && newTestPositive)
+        ? c.dateEnrolledArt || null
+        : null,
+
+    // OVC: only applicable when contact is under 15
+    enrolledInOvc: isUnder15 ? !!c.enrolledInOvc : false,
+    dateEnrolledOvc:
+      isUnder15 && c.enrolledInOvc ? c.dateEnrolledOvc || null : null,
+    ovcId:
+      isUnder15 && c.enrolledInOvc ? c.ovcId || null : null,
   };
 };

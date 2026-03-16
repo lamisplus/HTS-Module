@@ -18,10 +18,14 @@ import { useRoles } from "./main/webapp/hooks/useRoles";
 import { useMemo } from "react";
 import NewPatientHtsForm from "./main/webapp/jsx/components/NewToolForms/NewPatientHtsForm";
 import HtsIctOrchestrator from "./main/webapp/jsx/components/IctForm/HtsIctOrchestrator";
+import { useHistory } from "react-router-dom";
+
 
 export default function App() {
   const { hasRole } = useRoles();
   const isRDE = hasRole("RDE");
+  const history = useHistory();
+
 
   const permissions = useMemo(
     () => ({
@@ -44,7 +48,7 @@ export default function App() {
           <Route path="/register-patient">
             {/* <RegisterPatient /> */}
             {/* <NewPatientHtsForm/> */}
-            <HtsIctOrchestrator/>
+            <HtsIctOrchestrator onDone={() => history.push("/")} isOnArt={false}/>
           </Route>
           <Route path="/register-hivst-patient">
             <HIVSTPatient />
