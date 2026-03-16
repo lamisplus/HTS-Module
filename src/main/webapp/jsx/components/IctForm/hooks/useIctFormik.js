@@ -86,7 +86,9 @@ export const useIctFormik = (onSubmit, htsValues) => {
   const formik = useFormik({
     initialValues: buildInitialValues(htsValues),
     validationSchema: buildIctValidationSchema(),
-    enableReinitialize: true,
+    // MUST be false — enableReinitialize: true wipes the contacts array
+    // every time the parent re-renders, losing all contacts the user added.
+    enableReinitialize: false,
     onSubmit,
   });
   return { formik };

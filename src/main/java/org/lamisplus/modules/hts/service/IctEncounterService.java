@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -36,7 +35,6 @@ public class IctEncounterService {
 
     // ── Create ────────────────────────────────────────────────────────────────
 
-    @Transactional
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPersonId());
 
@@ -51,22 +49,19 @@ public class IctEncounterService {
             encounter.setHtsEncounter(hts);
         }
 
+        // Add contacts to the collection before saving so JPA cascades them
+        addContactsToEncounter(request.getContacts(), encounter);
+
         IctEncounter saved = ictEncounterRepository.save(encounter);
-
-        // Persist contacts
-        persistContacts(request.getContacts(), saved);
-
         return toResponse(saved);
     }
 
     // ── Read ──────────────────────────────────────────────────────────────────
 
-    @Transactional(readOnly = true)
     public IctEncounterResponse getById(Long id) {
         return toResponse(findActiveOrThrow(id));
     }
 
-    @Transactional(readOnly = true)
     public List<IctEncounterResponse> getByPersonId(Long personId) {
         return ictEncounterRepository
                 .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(personId, 0)
@@ -75,7 +70,6 @@ public class IctEncounterService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
     public IctEncounterResponse getByHtsEncounterId(Long htsEncounterId) {
         return ictEncounterRepository
                 .findByHtsEncounter_IdAndArchived(htsEncounterId, 0)
@@ -84,7 +78,6 @@ public class IctEncounterService {
                         "No ICT encounter found for HTS encounter id " + htsEncounterId));
     }
 
-    @Transactional(readOnly = true)
     public Page<IctEncounterResponse> search(Long facilityId, String search, Pageable pageable) {
         return ictEncounterRepository
                 .search(facilityId, search, pageable)
@@ -93,7 +86,6 @@ public class IctEncounterService {
 
     // ── Update ────────────────────────────────────────────────────────────────
 
-    @Transactional
     public IctEncounterResponse update(Long id, IctEncounterRequest request) {
         IctEncounter encounter = findActiveOrThrow(id);
         mapRequestToEncounter(request, encounter);
@@ -104,11 +96,12 @@ public class IctEncounterService {
             encounter.setHtsEncounter(hts);
         }
 
-        // Replace contacts wholesale: delete existing, re-persist from request.
-        // This is intentionally simple — contacts are fully owned by the encounter
-        // and there is no independent contact lifecycle to preserve.
-        ictContactRepository.deleteAllByIctEncounterId(id);
-        persistContacts(request.getContacts(), encounter);
+        // Replace contacts wholesale using JPA orphanRemoval.
+        // Clearing the collection marks all existing contacts for deletion.
+        // New contacts are added directly to the collection so JPA cascades
+        // the entire operation within the same transaction — no raw JPQL needed.
+        encounter.getContacts().clear();
+        addContactsToEncounter(request.getContacts(), encounter);
 
         IctEncounter updated = ictEncounterRepository.save(encounter);
         return toResponse(updated);
@@ -116,7 +109,6 @@ public class IctEncounterService {
 
     // ── Delete (soft) ─────────────────────────────────────────────────────────
 
-    @Transactional
     public void delete(Long id) {
         IctEncounter encounter = findActiveOrThrow(id);
         encounter.setArchived(1);
@@ -164,14 +156,13 @@ public class IctEncounterService {
         e.setData(data);
     }
 
-    private void persistContacts(List<IctContactRequest> contactRequests, IctEncounter encounter) {
+    private void addContactsToEncounter(List<IctContactRequest> contactRequests, IctEncounter encounter) {
         if (contactRequests == null || contactRequests.isEmpty()) return;
-
-        List<IctContact> contacts = contactRequests.stream()
+        // Add directly to the managed collection — CascadeType.ALL persists them
+        // when the encounter is saved, within the same JPA transaction.
+        contactRequests.stream()
                 .map(cr -> mapToContact(cr, encounter))
-                .collect(Collectors.toList());
-
-        ictContactRepository.saveAll(contacts);
+                .forEach(encounter.getContacts()::add);
     }
 
     private IctContact mapToContact(IctContactRequest cr, IctEncounter encounter) {

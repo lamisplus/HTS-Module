@@ -18,8 +18,8 @@ export const buildIctEncounterPayload = (values) => {
     // personId always required. facilityId from currentOrganisationUnitId,
     // matching the same pattern used by the HTS payload builder.
     personId:   values.personId                ?? null,
-    facilityId: values?.facilityId != null
-                  ? Number(values?.facilityId || values?.currentOrganisationUnitId)
+    facilityId: values.currentOrganisationUnitId != null
+                  ? Number(values.currentOrganisationUnitId)
                   : null,
 
     // htsEncounterId is attached by the caller (IctForm.jsx) from htsRecord.id
@@ -29,9 +29,9 @@ export const buildIctEncounterPayload = (values) => {
     dateOfService: values.dateOfService || null,
     setting: values.setting || null,
     facilitySetting:
-      values.setting === "Facility" ? values.facilitySetting || null : null,
+      values.setting?.toLowerCase() === "facility" ? values.facilitySetting || null : null,
     communityEntryPoint:
-      values.setting === "Community" ? values.communityEntryPoint || null : null,
+      values.setting?.toLowerCase() === "community" ? values.communityEntryPoint || null : null,
     artClinic: values.isOnArt ? values.artClinic || null : null,
 
     // ── Section A: Index Client Snapshot (flat, stored in JSONB on backend) ─
@@ -50,7 +50,7 @@ export const buildIctEncounterPayload = (values) => {
     // ── Section A: Category & PNS ───────────────────────────────────────────
     clientCategory:      values.clientCategory      || null,
     clientCategoryOther:
-      values.clientCategory === "Other"
+      values.clientCategory?.toLowerCase() === "other"
         ? values.clientCategoryOther || null
         : null,
     offeredPns:  values.offeredPns  || null,

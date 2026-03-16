@@ -89,6 +89,26 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     fetchStates(1);
   }, []);
 
+  // Fetch facilityId from /account if not already seeded from HTS values.
+  // This covers the ART-triggered ICT path where HTS was not filled in this session.
+  useEffect(() => {
+    if (values.currentOrganisationUnitId) return; // already populated from HTS
+    const fetchAccount = async () => {
+      try {
+        const response = await axios.get(`${url}account`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const orgId = response.data?.currentOrganisationUnitId;
+        if (orgId) {
+          setFieldValue("currentOrganisationUnitId", orgId);
+        }
+      } catch (err) {
+        console.error("Failed to fetch account for facilityId:", err?.message);
+      }
+    };
+    fetchAccount();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // When statesList is ready AND values.state has an ID, fetch the LGAs for that state.
   // values.state is the numeric state ID coming from the HTS / person record.
   useEffect(() => {
@@ -156,15 +176,15 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   const handleOfferedPnsChange = (e) => {
     setFieldValue("offeredPns", e.target.value);
-    if (e.target.value.toLowerCase() !== "yes") setFieldValue("acceptedPns", "");
+    if (e.target.value?.toLowerCase() !== "yes") setFieldValue("acceptedPns", "");
   };
 
   // ── Visibility flags ──────────────────────────────────────────────────────
-  const showFacilitySetting = values.setting === "Facility";
-  const showCommunityEntry = values.setting === "Community";
+  const showFacilitySetting = values.setting?.toLowerCase() === "facility";
+  const showCommunityEntry = values.setting?.toLowerCase() === "community";
   const showArtClinic = !!values.isOnArt;
-  const showCategoryOther = values.clientCategory === "Other";
-  const showAcceptedPns = values.offeredPns.toLowerCase() === "yes";
+  const showCategoryOther = values.clientCategory?.toLowerCase() === "other";
+  const showAcceptedPns = values.offeredPns?.toLowerCase() === "yes";
 
   // ── Resolve display names from fetched lists ──────────────────────────────
   // values.state and values.lga hold numeric IDs (from HTS / person record).

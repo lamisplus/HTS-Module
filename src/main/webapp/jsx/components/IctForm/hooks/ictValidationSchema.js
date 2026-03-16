@@ -46,9 +46,9 @@ const contactSchema = yup.object({
   contactPhone: yup
     .string()
     .nullable()
-    .test("phone-digits", "Phone must be 10 digits", (val) => {
+    .test("phone-digits", "Phone number must be 10 or 11 digits", (val) => {
       if (!val) return true;
-      return /^[0-9]{10}$/.test(val);
+      return /^[0-9]{10,11}$/.test(val);
     }),
 
   notificationMethod: yup.string().required("Notification method is required"),
@@ -69,7 +69,7 @@ const contactSchema = yup.object({
   dateTestedHiv: yup.mixed().test("date-tested-hiv", "Date tested is required", function (val) {
     const { knownHivPositive, hivTestResult } = this.parent;
     // Required when: knownHivPositive=Yes OR (knownHivPositive=No and we show new test)
-    if (knownHivPositive === "Yes" || knownHivPositive === "No") {
+    if (knownHivPositive?.toLowerCase() === "yes" || knownHivPositive?.toLowerCase() === "no") {
       if (!val) return this.createError({ message: "Date tested is required" });
       if (new Date(val) > today)
         return this.createError({ message: "Cannot be a future date" });
@@ -85,7 +85,7 @@ const contactSchema = yup.object({
   dateEnrolledArt: yup.mixed().test("art-enroll-conditional", "ART enrollment date is required", function (val) {
     const { knownHivPositive, hivTestResult } = this.parent;
     const needsArt =
-      knownHivPositive === "Yes" || hivTestResult === "Positive";
+      knownHivPositive?.toLowerCase() === "yes" || hivTestResult?.toLowerCase() === "positive";
     if (!needsArt) return true;
     if (!val) return this.createError({ message: "Date enrolled on ART is required" });
     if (new Date(val) > today)
@@ -142,7 +142,7 @@ export const buildIctValidationSchema = () =>
     offeredPns: yup.string().required("Offered PNS is required"),
 
     acceptedPns: yup.mixed().test("accepted-pns-conditional", "Accepted PNS is required", function (val) {
-      if (this.parent.offeredPns !== "Yes") return true;
+      if (this.parent.offeredPns?.toLowerCase() !== "yes") return true;
       return !!val || this.createError({ message: "Accepted PNS is required when PNS was offered" });
     }),
 
@@ -150,7 +150,7 @@ export const buildIctValidationSchema = () =>
     // Only validate contacts array when acceptedPns === "Yes"
 
     contacts: yup.mixed().test("contacts-required", "At least one contact is required", function (val) {
-      if (this.parent.acceptedPns !== "Yes") return true;
+      if (this.parent.acceptedPns?.toLowerCase() !== "yes") return true;
       if (!Array.isArray(val) || val.length === 0)
         return this.createError({ message: "At least one contact must be added when PNS is accepted" });
       // Run per-contact schema against each item
