@@ -330,10 +330,10 @@ const IctSectionA = ({ formik, readOnly = false }) => {
               value={values.indexAltPhone || ""}
               onChange={readOnly ? undefined : handleChange}
               onBlur={handleBlur}
-              maxLength={10}
+              maxLength={11}
               disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
-              placeholder="10 digits"
+              placeholder="10-11 digits"
             />
             {touched.indexAltPhone && errors.indexAltPhone && (
               <span style={errorStyle}>{errors.indexAltPhone}</span>

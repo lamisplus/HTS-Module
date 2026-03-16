@@ -435,7 +435,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Type of Session"
-            {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
+            // {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
+            {...sp("typeOfSession", MODALITY_OPTIONS)}
             onChange={readOnly ? undefined : handleTypeOfSessionChange}
             required
           />

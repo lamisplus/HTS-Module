@@ -140,13 +140,13 @@ const useStyles = makeStyles(() => ({
  * eligible for ICT (real-time — runs on every formik value change).
  */
 const isIctEligible = (htsValues) => {
-  // if (!htsValues) return false;
-  // const sessionMatch = htsValues.typeOfSession === "Index Testing";
-  // const positiveResult =
-  //   htsValues.confirmatoryHivTest === "Positive" ||
-  //   htsValues.initialHivTest === "Positive";
-  // return sessionMatch && positiveResult;
-  return true
+  if (!htsValues) return false;
+  const sessionMatch = htsValues.typeOfSession === "INDEX";
+  const positiveResult =
+    htsValues.confirmatoryHivTest === "Positive" ||
+    htsValues.initialHivTest === "Positive";
+  return sessionMatch && positiveResult;
+  // return true
 };
 
 const HtsIctOrchestrator = ({
@@ -163,7 +163,7 @@ const HtsIctOrchestrator = ({
   const classes = useStyles();
 
   const [activeView, setActiveView] = useState(VIEWS.HTS);
-  const [ictEligible, setIctEligible] = useState(true);
+  const [ictEligible, setIctEligible] = useState(false);
   const [htsSubmitted, setHtsSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null);   // HTS formik values snapshot
   const [htsRecord, setHtsRecord] = useState(null);   // API response after HTS submit
@@ -198,16 +198,16 @@ const HtsIctOrchestrator = ({
     setHtsValues(formValues);
     setHtsSubmitted(true);
 
-    // if (isIctEligible(formValues)) {
-    //   setIctEligible(true);
-    //   // Auto-navigate to ICT after a brief moment
-    //   setTimeout(() => setActiveView(VIEWS.ICT), 600);
-    //   toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
-    // }
+    if (isIctEligible(formValues)) {
+      setIctEligible(true);
+      // Auto-navigate to ICT after a brief moment
+      setTimeout(() => setActiveView(VIEWS.ICT), 600);
+      toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+    }
 
-    setIctEligible(true);
-    setTimeout(() => setActiveView(VIEWS.ICT), 600);
-    toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+    // setIctEligible(true);
+    // setTimeout(() => setActiveView(VIEWS.ICT), 600);
+    // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
   };
 
   // ── ICT submit callback ───────────────────────────────────────────────────

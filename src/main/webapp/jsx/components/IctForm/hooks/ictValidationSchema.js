@@ -50,6 +50,14 @@ const contactSchema = yup.object({
       if (!val) return true;
       return /^[0-9]{10,11}$/.test(val);
     }),
+    
+    indexAltPhone: yup
+    .string()
+    .nullable()
+    .test("alt-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
+      if (!val) return true;
+      return /^[0-9]{10,11}$/.test(val);
+    }),
 
   notificationMethod: yup.string().required("Notification method is required"),
 
