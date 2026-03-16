@@ -145,8 +145,8 @@ const isIctEligible = (htsValues) => {
   const positiveResult =
     htsValues.confirmatoryHivTest === "Positive" ||
     htsValues.initialHivTest === "Positive";
-  return true
-  // return sessionMatch && positiveResult;
+  // return true
+  return sessionMatch && positiveResult;
 };
 
 const HtsIctOrchestrator = ({
@@ -225,8 +225,7 @@ const HtsIctOrchestrator = ({
       label: "Index Contact Testing",
       sub: ictEligible
         ? htsSubmitted
-          ? "Ready to fill"
-          : "Eligible — complete HTS first"
+          ? "Ready to fill" : "Eligible — complete HTS first"
         : "Not yet eligible",
       locked: !ictEligible,
       done: false,
