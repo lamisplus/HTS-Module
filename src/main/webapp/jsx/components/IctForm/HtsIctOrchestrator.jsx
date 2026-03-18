@@ -1,35 +1,3 @@
-/**
- * HtsIctOrchestrator.jsx
- *
- * Parent wrapper that hosts both the HTS form and the ICT form with a
- * left-hand sidebar navigator.
- *
- * SIDEBAR LOGIC
- * ─────────────
- * HTS   — always active
- * ICT   — greyed-out and locked until the HTS form reaches eligibility:
- *           • typeOfSession === "Index Testing"   AND
- *           • initialHivTest === "Positive"        (or confirmatoryHivTest === "Positive")
- *
- * When eligibility is detected IN REAL TIME (via HTS formik watcher):
- *   • ICT menu item turns blue and clickable
- *   • A toast fires once: "This client is eligible for ICT — the form is now enabled"
- *
- * FORM FLOW
- * ─────────
- * 1. User fills HTS form → submits → API returns htsRecord
- * 2. active view switches to "ICT" automatically
- * 3. ICT form is pre-populated from htsValues + htsRecord
- *
- * Props:
- *   patientId   — optional; passed through to sub-forms
- *   onDone      — called after both forms complete (e.g. navigate back to patient list)
- *   isExisting  — open in view/edit mode for an existing patient
- *   htsInitial  — initial values when opening an existing HTS record
- *   ictInitial  — initial values when opening an existing ICT record
- *   isOnArt     — Boolean; forwarded to ICT form
- */
-
 import React, { useState, useEffect, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
@@ -37,6 +5,7 @@ import NewPatientHtsForm from "../NewToolForms/NewPatientHtsForm";
 import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
+import { getHtsEcounter } from "../../services/getHtsEncounter";
 
 const VIEWS = {
   HTS: "HTS",
@@ -135,10 +104,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-/**
- * Evaluates whether the current HTS form values make this patient
- * eligible for ICT (real-time — runs on every formik value change).
- */
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
   const sessionMatch = htsValues.typeOfSession === "INDEX";
@@ -169,6 +134,37 @@ const HtsIctOrchestrator = ({
   const [htsRecord, setHtsRecord] = useState(null);   // API response after HTS submit
 
   const eligibilityToastFiredRef = useRef(false);
+
+  // ── Auto-fetch HTS record when isExisting=true but htsInitial is not provided ──
+  // This covers the ict-view scenario where we only have the ICT record and need
+  // to retrieve the linked HTS record to populate ExistingPatientHtsForm.
+  // Uses ictInitial.htsEncounterId which is always present on the ICT response.
+  const [resolvedHtsInitial, setResolvedHtsInitial] = useState(
+    htsInitial && Object.keys(htsInitial).length > 0 ? htsInitial : null
+  );
+  const [isFetchingHts, setIsFetchingHts] = useState(false);
+
+  useEffect(() => {
+    // Only run when: viewing an existing record, htsInitial is empty,
+    // and the ICT record carries an htsEncounterId to fetch from.
+    const htsInitialIsEmpty = !htsInitial || Object.keys(htsInitial).length === 0;
+    const htsEncounterId = ictInitial?.htsEncounterId;
+
+    if (isExisting && htsInitialIsEmpty && htsEncounterId) {
+      setIsFetchingHts(true);
+      getHtsEcounter(htsEncounterId)
+        .then((response) => {
+          // getHtsEcounter returns response.data (already unwrapped)
+          const data = response?.data ?? response;
+          if (data) setResolvedHtsInitial(data);
+        })
+        .catch((err) => {
+          console.error("HtsIctOrchestrator: failed to fetch linked HTS record", err?.message);
+        })
+        .finally(() => setIsFetchingHts(false));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Real-time eligibility detection ──────────────────────────────────────
   // Called by the HTS form child on every formik change (via onValuesChange prop)
@@ -313,10 +309,16 @@ const HtsIctOrchestrator = ({
           />
         )}
 
-        {activeView === VIEWS.HTS && isExisting && (
+        {activeView === VIEWS.HTS && isExisting && isFetchingHts && (
+          <div style={{ padding: 40, textAlign: "center", color: "#57606a", fontSize: 14 }}>
+            Loading HTS record…
+          </div>
+        )}
+
+        {activeView === VIEWS.HTS && isExisting && !isFetchingHts && (
           <ExistingPatientHtsForm
-            fullRecord={fullRecord}
-            initialValues={htsInitial}
+            fullRecord={fullRecord || { id: ictInitial?.htsEncounterId }}
+            initialValues={resolvedHtsInitial}
             readOnly={false}
             backButtonAction={onDone}
           />
@@ -365,33 +367,3 @@ const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack 
 
 export default HtsIctOrchestrator;
 
-/**
- * ─────────────────────────────────────────────────────────────────────────────
- * REQUIRED CHANGE TO NewPatientHtsForm.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- *
- * 1. Accept two new optional props:
- *      onValuesChange  — (values) => void
- *      onSubmitSuccess — (record, values) => void
- *      onBack          — () => void
- *
- * 2. Inside the component body, add a useEffect that fires onValuesChange:
- *
- *      useEffect(() => {
- *        onValuesChange?.(formik.values);
- *      }, [formik.values]);
- *
- * 3. In the existing onSubmit function, after a successful API response:
- *
- *      const response = await createEncounter(payload);
- *      onSubmitSuccess?.(response.data, values);   // ← add this line
- *      // keep the existing toast.success and history.push (or skip push
- *      // when onSubmitSuccess is provided, so the orchestrator controls nav)
- *
- * 4. For the Back button, use onBack prop when provided:
- *      onClick={() => onBack ? onBack() : history.push("/")}
- *
- * These changes are minimal and non-breaking — all props are optional so
- * the existing standalone usage of NewPatientHtsForm is unaffected.
- * ─────────────────────────────────────────────────────────────────────────────
- */

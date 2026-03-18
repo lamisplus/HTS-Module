@@ -10,9 +10,11 @@ import { usePermissions } from "../../../hooks/usePermissions";
 import { useRoles } from "../../../hooks/useRoles";
 
 
+const NewEncounterHtsIctOrchestrator = lazy(() => import("../NewToolForms/NewEncounterHtsIctOrchestrator"));
 const ExistingPatientHtsForm = lazy(() => import("../NewToolForms/ExistingPatientHtsForm"));
 const NewEncounterHtsForm = lazy(() => import("../NewToolForms/NewEncounterHtsForm"));
 const HTSEncounterHistory = lazy(() => import("./HTSEncounterHistory"));
+const ICTEncounterHistory = lazy(() => import("./ICTEncounterHistory"));
 const PatientVisits = lazy(() => import("../Patient/PatientVisits"));
 const ContineousRegistrationTesting = lazy(() => import("./../Patient/ContineousRegistrationTesting"));
 const History = lazy(() => import("./History"));
@@ -250,13 +252,29 @@ const Home = (props) => {
                       }
                     </Suspense>
                   </Tab>
-{/* {console.log(props?.patientObj)} */}
+
+
+                  <Tab eventKey="ict-history" title="ICT HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "ict-history" &&
+                        <ICTEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                        />
+
+                      }
+                    </Suspense>
+                  </Tab>
+                  
+                  {/* {console.log(props?.patientObj)} */}
                   <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
                     <Suspense fallback={<LoadingSpinner />}>
                       {key === "new-hts-encounter-existing-patient" &&
-                        <NewEncounterHtsForm
+                        <NewEncounterHtsIctOrchestrator
                           person={props?.patientObj?.person || props?.patientObj}
-                          backButtonAction={() => setKey("home")}
+                          onDone={() => setKey("home")}
+                          isOnArt={false}
                         />
                       }
                     </Suspense>

@@ -34,6 +34,13 @@ export const buildIctEncounterPayload = (values) => {
       values.setting?.toLowerCase() === "community" ? values.communityEntryPoint || null : null,
     artClinic: values.isOnArt ? values.artClinic || null : null,
 
+    // ── Section A: Facility context (stored in JSONB on backend) ─────────────
+    // These three are display values needed to re-populate the form on view/edit.
+    // state and lga are the human-readable names resolved by IctSectionA at fill time.
+    facilityName: values.facilityName || null,
+    state:        values.state        || null,
+    lga:          values.lga          || null,
+
     // ── Section A: Index Client Snapshot (flat, stored in JSONB on backend) ─
     indexClientId:  values.indexClientId  || null,
     artUniqueId:    values.artUniqueId    || null,

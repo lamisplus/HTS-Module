@@ -14,6 +14,8 @@ import ViewEditHivst from "../Patient/HIVST/ViewEditHivst";
 import { calculate_age } from "../utils";
 import moment from "moment";
 import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
+import HtsIctOrchestrator from "../IctForm/HtsIctOrchestrator";
+import IctForm from "../IctForm/IctForm";
 
 
 const styles = (theme) => ({
@@ -60,13 +62,13 @@ function PatientCard(props) {
     history.location && history.location.state
       ? history.location.state.patientObject
       : {};
-      
-      const patientObj =
-      history.location && history.location.state
+
+  const patientObj =
+    history.location && history.location.state
       ? history.location.state.patientObj
       : {};
-      
-      console.log(patientObject, patientObj)
+
+  console.log(patientObject, patientObj)
 
   const clientCode =
     history.location && history.location.state
@@ -81,6 +83,8 @@ function PatientCard(props) {
     activeObject: {},
     actionType: "",
   });
+
+  console.log(activePage.activeObject)
 
   const handleMoveToHome = () => {
     setActivePage({
@@ -158,6 +162,27 @@ function PatientCard(props) {
               fullRecord={patientObj}
             />
           )}
+
+          {
+            activePage.activePage === "ict-view" && (
+              <IctForm 
+                initialValues={activePage.activeObject}
+                onBack={handleMoveToHome}
+                onSubmitSuccess={handleMoveToHome}
+                existingId={activePage.activeObject?.id}
+                readOnly
+              />
+            )}
+
+          {
+            activePage.activePage === "ict-edit" && (
+              <IctForm 
+                initialValues={activePage.activeObject}
+                onBack={handleMoveToHome}
+                onSubmitSuccess={handleMoveToHome}
+                existingId={activePage.activeObject?.id}
+              />
+            )}
 
           {activePage.activePage === "hivst_view" && (
             <ViewEditHivst

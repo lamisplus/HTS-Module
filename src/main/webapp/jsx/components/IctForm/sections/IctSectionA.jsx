@@ -92,33 +92,66 @@ const IctSectionA = ({ formik, readOnly = false }) => {
   // Fetch facilityId from /account if not already seeded from HTS values.
   // This covers the ART-triggered ICT path where HTS was not filled in this session.
   useEffect(() => {
-    if (values.currentOrganisationUnitId) return; // already populated from HTS
+    // Always fetch account to ensure facilityName is populated.
+    // currentOrganisationUnitId is only seeded if missing.
     const fetchAccount = async () => {
       try {
         const response = await axios.get(`${url}account`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const orgId = response.data?.currentOrganisationUnitId;
-        if (orgId) {
+        const orgId   = response.data?.currentOrganisationUnitId;
+        const orgName = response.data?.currentOrganisationUnitName;
+        if (orgId && !values.currentOrganisationUnitId) {
           setFieldValue("currentOrganisationUnitId", orgId);
         }
+        // Always seed facilityName — it is never in the person object and
+        // must come from /account whether creating or viewing a record.
+        if (orgName) {
+          setFieldValue("facilityName", orgName);
+        }
       } catch (err) {
-        console.error("Failed to fetch account for facilityId:", err?.message);
+        console.error("Failed to fetch account:", err?.message);
       }
     };
     fetchAccount();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When statesList is ready AND values.state has an ID, fetch the LGAs for that state.
-  // values.state is the numeric state ID coming from the HTS / person record.
+  // When statesList is ready AND values.state looks like a numeric ID,
+  // resolve it to its display name and seed that name back into values.state
+  // so the payload builder stores a human-readable name (not a raw ID).
+  // Also trigger LGA fetch using the numeric ID.
   useEffect(() => {
     if (statesList?.length > 0 && values?.state) {
-      const matched = statesList.find((s) => String(s.id) === String(values.state));
-      if (matched) {
-        fetchLgas(matched.id);
+      const looksLikeId = /^\d+$/.test(String(values.state).trim());
+      if (looksLikeId) {
+        const matched = statesList.find((s) => String(s.id) === String(values.state));
+        if (matched) {
+          setFieldValue("state", matched.name, false); // seed display name
+          fetchLgas(matched.id);
+        }
+      } else {
+        // Already a name — still need to fetch LGAs.
+        // Match by name to get the numeric id for the LGA API call.
+        const matched = statesList.find(
+          (s) => s.name.toLowerCase() === String(values.state).toLowerCase()
+        );
+        if (matched) fetchLgas(matched.id);
       }
     }
-  }, [statesList, values?.state]);
+  }, [statesList, values?.state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When lgasList is ready AND values.lga looks like a numeric ID, resolve to name.
+  useEffect(() => {
+    if (lgasList?.length > 0 && values?.lga) {
+      const looksLikeId = /^\d+$/.test(String(values.lga).trim());
+      if (looksLikeId) {
+        const matched = lgasList.find((l) => String(l.id) === String(values.lga));
+        if (matched) {
+          setFieldValue("lga", matched.name, false); // seed display name
+        }
+      }
+    }
+  }, [lgasList, values?.lga]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -310,10 +343,10 @@ const IctSectionA = ({ formik, readOnly = false }) => {
               value={values.indexPhone || ""}
               onChange={readOnly ? undefined : handleChange}
               onBlur={handleBlur}
-              maxLength={10}
+              maxLength={11}
               disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
-              placeholder="10 digits"
+              placeholder="10-11 digits"
             />
             {touched.indexPhone && errors.indexPhone && (
               <span style={errorStyle}>{errors.indexPhone}</span>

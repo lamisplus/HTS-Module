@@ -31,6 +31,7 @@ import { buildIctEncounterPayload } from "./utils/ictEncounterPayload";
 import { createIctEncounter } from "./services/createIctEncounter.service";
 import { updateIctEncounter } from "./services/updateIctEncounter.service";
 import { COLORS } from "../NewToolForms/constants";
+import { getHtsEcounter } from "../../services/getHtsEncounter";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -95,6 +96,68 @@ const modeBadgeStyle = (mode) => {
       color: c.color,
     },
     label: c.label,
+  };
+};
+
+// ─── API response → Formik mapper ────────────────────────────────────────────
+//
+// The ICT API response stores index client fields and facility snapshot inside
+// the `data` JSONB column. This function flattens them to the top-level formik
+// field names so the form populates correctly in view/edit mode.
+//
+// Top-level fields on the response (already named correctly):
+//   id, uuid, personId, htsEncounterId, facilityId, dateOfService,
+//   setting, clientCategory, offeredPns, acceptedPns, contacts
+//
+// Fields nested inside response.data (need flattening):
+//   facilityName, state, lga, facilitySetting, communityEntryPoint,
+//   artClinic, clientCategoryOther,
+//   indexClientId, artUniqueId, indexFirstName, indexMiddleName, indexSurname,
+//   indexSex, indexDob, indexAge, indexPhone, indexAltPhone, indexAddress
+//
+const mapIctResponseToFormValues = (response) => {
+  if (!response) return {};
+
+  // data is a JsonNode serialised as a plain object by Jackson
+  const d = response.data ?? {};
+
+  return {
+    // ── Top-level scalars ────────────────────────────────────────────────
+    personId:        response.personId        ?? "",
+    htsEncounterId:  response.htsEncounterId  ?? "",
+    facilityId:      response.facilityId      ?? "",
+    dateOfService:   response.dateOfService   ?? "",
+    setting:         response.setting         ?? "",
+    clientCategory:  response.clientCategory  ?? "",
+    offeredPns:      response.offeredPns      ?? "",
+    acceptedPns:     response.acceptedPns     ?? "",
+
+    // ── From data JSONB — facility context ───────────────────────────────
+    facilityName:        d.facilityName        ?? "",
+    state:               d.state               ?? "",
+    lga:                 d.lga                 ?? "",
+    facilitySetting:     d.facilitySetting     ?? "",
+    communityEntryPoint: d.communityEntryPoint ?? "",
+    artClinic:           d.artClinic           ?? "",
+    clientCategoryOther: d.clientCategoryOther ?? "",
+
+    // ── From data JSONB — index client snapshot ──────────────────────────
+    indexClientId:   d.indexClientId   ?? "",
+    artUniqueId:     d.artUniqueId     ?? "",
+    indexFirstName:  d.indexFirstName  ?? "",
+    indexMiddleName: d.indexMiddleName ?? "",
+    indexSurname:    d.indexSurname    ?? "",
+    indexSex:        d.indexSex        ?? "",
+    indexDob:        d.indexDob        ?? "",
+    indexAge:        d.indexAge        != null ? String(d.indexAge) : "",
+    indexPhone:      d.indexPhone      ?? "",
+    indexAltPhone:   d.indexAltPhone   ?? "",
+    indexAddress:    d.indexAddress    ?? "",
+
+    // ── Contacts — already a properly shaped array from the API ─────────
+    // Each contact object field names match formik exactly (contactSex,
+    // contactAgeGroup, knownHivPositive, etc.) so no per-field mapping needed.
+    contacts: Array.isArray(response.contacts) ? response.contacts : [],
   };
 };
 
@@ -169,15 +232,40 @@ const IctForm = ({
     initialValues ? undefined : mergedHtsValues
   );
 
-  // If viewing or editing an existing record, override all formik values from
-  // initialValues once on mount. Done field-by-field so we don't trigger a full
-  // reinit which would clear any user edits in progress.
+  // If viewing or editing an existing record:
+  // 1. Flatten the ICT API response through mapIctResponseToFormValues and seed formik.
+  // 2. Then use htsEncounterId to fetch the linked HTS encounter and extract
+  //    clientState, clientLga, facilityName from its data JSONB — these are
+  //    not stored on the ICT record itself.
   React.useEffect(() => {
-    if (initialValues) {
-      Object.entries(initialValues).forEach(([k, v]) =>
-        formik.setFieldValue(k, v, false)
-      );
-    }
+    if (!initialValues) return;
+
+    // Step 1: seed all ICT fields immediately
+    const mapped = mapIctResponseToFormValues(initialValues);
+    Object.entries(mapped).forEach(([k, v]) =>
+      formik.setFieldValue(k, v, false)
+    );
+
+    // Step 2: fetch the linked HTS encounter for state, LGA, facilityName
+    const htsId = initialValues.htsEncounterId;
+    if (!htsId) return;
+
+    getHtsEcounter(htsId)
+      .then((res) => {
+        // getHtsEcounter returns response.data (already unwrapped by axios)
+        const htsData = res?.data ?? res;
+        const d = htsData?.data ?? {};
+
+        // clientState and clientLga are numeric IDs stored in the HTS JSONB.
+        // IctSectionA will resolve them to display names via the org-units API.
+        if (d.clientState != null) formik.setFieldValue("state",        String(d.clientState), false);
+        if (d.clientLga   != null) formik.setFieldValue("lga",          String(d.clientLga),   false);
+        if (d.facilityName)        formik.setFieldValue("facilityName",  d.facilityName,        false);
+      })
+      .catch((err) => {
+        console.error("IctForm: failed to fetch linked HTS record for state/LGA", err?.message);
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

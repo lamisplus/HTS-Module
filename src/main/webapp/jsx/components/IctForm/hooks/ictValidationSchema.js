@@ -59,6 +59,14 @@ const contactSchema = yup.object({
       return /^[0-9]{10,11}$/.test(val);
     }),
 
+    indexPhone: yup
+    .string()
+    .nullable()
+    .test("index-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
+      if (!val) return true;
+      return /^[0-9]{10,11}$/.test(val);
+    }),
+
   notificationMethod: yup.string().required("Notification method is required"),
 
   followUpLocation: yup.string().required("Follow-up location is required"),

@@ -259,7 +259,7 @@ const blankClinicalValues = {
  * person           {Object}   Full patient/person object from the dashboard.
  * backButtonAction {Function} Called on Back button click and after successful submit.
  */
-const NewEncounterHtsForm = ({ person, backButtonAction }) => {
+const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmitSuccess }) => {
   console.log("person payload", person)
   const classes = useStyles();
   const history = useHistory();
@@ -278,9 +278,15 @@ const NewEncounterHtsForm = ({ person, backButtonAction }) => {
 
     try {
       setIsLoading(true);
-      await createEncounter(payload);
+      const response = await createEncounter(payload);
       toast.success("New HTS encounter created successfully");
-      backButtonAction?.();
+      if (onSubmitSuccess) {
+        // createEncounter already unwraps axios response.data
+        // so response IS the HTS encounter object — pass it + values to orchestrator
+        onSubmitSuccess(response, values);
+      } else {
+        backButtonAction?.();
+      }
     } catch (error) {
       console.error("Failed to create encounter:", error.response?.data || error.message);
       toast.error("Failed to create HTS encounter");
@@ -297,6 +303,12 @@ const NewEncounterHtsForm = ({ person, backButtonAction }) => {
     enableReinitialize: false, // values are set once; don't wipe on re-render
     onSubmit,
   });
+
+  // Forward every formik value change to the orchestrator for real-time
+  // eligibility detection (typeOfSession + HIV test result watching).
+  React.useEffect(() => {
+    onValuesChange?.(formik.values);
+  }, [formik.values]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // If the person prop updates (unlikely but safe), re-seed only the demographic
   // fields without touching any clinical fields the user may have started filling.
