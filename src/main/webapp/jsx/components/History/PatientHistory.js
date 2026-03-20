@@ -8,6 +8,9 @@ import { getCheckModalityForHTS } from "../../../utility";
 import LoadingSpinner from "../../../reuseables/Loading";
 import { usePermissions } from "../../../hooks/usePermissions";
 import { useRoles } from "../../../hooks/useRoles";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { toast } from "react-toastify";
+import { useHtsEligibility } from "../NewToolForms/hooks/useHtsEligibility";
 
 
 const NewEncounterHtsIctOrchestrator = lazy(() => import("../NewToolForms/NewEncounterHtsIctOrchestrator"));
@@ -60,9 +63,10 @@ const Home = (props) => {
   const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] = useState(false);
 
 
-
   const { hasRole } = useRoles();
   const isRDE = hasRole("RDE");
+
+
 
 
   const calculateLastVisitDate = (visitDate) => {
@@ -114,6 +118,7 @@ const Home = (props) => {
 
     return htsType;
   };
+
 
 
 
@@ -266,19 +271,26 @@ const Home = (props) => {
                       }
                     </Suspense>
                   </Tab>
-                  
+
                   {/* {console.log(props?.patientObj)} */}
-                  <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "new-hts-encounter-existing-patient" &&
-                        <NewEncounterHtsIctOrchestrator
-                          person={props?.patientObj?.person || props?.patientObj}
-                          onDone={() => setKey("home")}
-                          isOnArt={false}
-                        />
-                      }
-                    </Suspense>
-                  </Tab>
+
+
+                  {
+                    props?.clientEligibility?.isPatientEligibleForHts && (
+                      <Tab eventKey="new-hts-encounter-existing-patient" title="NEW HTS">
+                        <Suspense fallback={<LoadingSpinner />}>
+                          {key === "new-hts-encounter-existing-patient" &&
+                            <NewEncounterHtsIctOrchestrator
+                              person={props?.patientObj?.person || props?.patientObj}
+                              onDone={() => setKey("home")}
+                              isOnArt={false}
+                            />
+                          }
+                        </Suspense>
+                      </Tab>
+
+                    )
+                  }
 
                   {/* {lastVisitModalityAndCheckedIn && (
                     <Tab

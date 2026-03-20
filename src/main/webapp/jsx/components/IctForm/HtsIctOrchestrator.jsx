@@ -106,7 +106,7 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  const sessionMatch = htsValues.typeOfSession === "INDEX";
+  const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index";
   const positiveResult =
     htsValues.confirmatoryHivTest === "Positive" ||
     htsValues.initialHivTest === "Positive";

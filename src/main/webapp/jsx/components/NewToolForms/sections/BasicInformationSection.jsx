@@ -207,12 +207,12 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     setFieldValue("sex", sex);
     const map = arrayToObject(codesets?.["SEX"])
     setFieldValue("sexCode", String(map[sex]))
-    if (sex === "Male") {
+    if (sex.toLowerCase() === "male") {
       setFieldValue("pregnancyStatus", "");
       setFieldValue("breastfeedingDuration", "");
       setFieldValue("numberOfCoWives", "");
     }
-    if (sex === "Female") {
+    if (sex.toLowerCase() === "female") {
       setFieldValue("numberOfWives", "");
     }
   };
@@ -222,7 +222,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     setFieldValue("maritalStatus", status);
     const map = arrayToObject(codesets?.["MARITAL_STATUS"])
     setFieldValue("maritalStatusCode", String(map[status]));
-    if (status !== "Married") {
+    if (status.toLowerCase() !== "married") {
       setFieldValue("numberOfWives", "");
       setFieldValue("numberOfCoWives", "");
     }
@@ -231,7 +231,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handlePregnancyStatusChange = (e) => {
     const status = e.target.value;
     setFieldValue("pregnancyStatus", status);
-    if (status !== "Breastfeeding") {
+    if (status.toLowerCase() !== "breastfeeding") {
       setFieldValue("breastfeedingDuration", "");
     }
   };
@@ -278,7 +278,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleTypeOfSessionChange = (e) => {
     const val = e.target.value;
     setFieldValue("typeOfSession", val);
-    if (val !== "Index Testing") {
+    if (val.toLowerCase() !== "index") {
       setFieldValue("indexTesting", "");
       setFieldValue("indexRelationship", "");
       setFieldValue("indexClientCode", "");
@@ -297,7 +297,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleDobTypeChange = (e) => {
     const type = e.target.value;
     setFieldValue("dobType", type);
-    if (type === "Actual") {
+    if (type.toLowerCase() === "actual") {
       setFieldValue("age", "");
     } else {
       setFieldValue("dateOfBirth", "");
@@ -343,18 +343,18 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   // ─── Visibility flags ───────────────────────────────────────────────────
 
-  const showFacilitySetting = values.setting === "Facility";
-  const showCommunityEntry = values.setting === "Community";
+  const showFacilitySetting = values.setting.toLowerCase() === "facility";
+  const showCommunityEntry = values.setting.toLowerCase() === "community";
 
-  const showIndexFields = values.typeOfSession === "Index Testing";
+  const showIndexFields = values.typeOfSession.toLowerCase() === "index";
   const showIndexDetails = showIndexFields && values.indexTesting.toLowerCase() === "yes";
 
-  const showPregnancy = values.sex === "Female";
-  const showBreastfeedingDuration = values.pregnancyStatus === "Breastfeeding";
-  const showNumberOfWives = values.sex === "Male" && values.maritalStatus === "Married";
-  const showNumberOfCoWives = values.sex === "Female" && values.maritalStatus === "Married";
+  const showPregnancy = values.sex.toLowerCase() === "female";
+  const showBreastfeedingDuration = values.pregnancyStatus.toLowerCase() === "breastfeeding";
+  const showNumberOfWives = values.sex.toLowerCase() === "male" && values.maritalStatus.toLowerCase() === "married";
+  const showNumberOfCoWives = values.sex.toLowerCase() === "female" && values.maritalStatus.toLowerCase() === "married";
 
-  const dobIsActual = values.dobType === "Actual" || !values.dobType;
+  const dobIsActual = values.dobType.toLowerCase() === "actual" || !values.dobType;
 
   // Prepare options for LGA select using fetched data
   const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.id }));
@@ -529,7 +529,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                       type="radio"
                       name="dobType"
                       value="Actual"
-                      checked={values.dobType === "Actual"}
+                      checked={values.dobType.toLowerCase() === "actual"}
                       onChange={readOnly ? undefined : handleDobTypeChange}
                       disabled={readOnly}
                     />
@@ -540,7 +540,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                       type="radio"
                       name="dobType"
                       value="Estimated"
-                      checked={values.dobType === "Estimated"}
+                      checked={values.dobType.toLowerCase() === "estimated"}
                       onChange={readOnly ? undefined : handleDobTypeChange}
                       disabled={readOnly}
                     />
@@ -700,7 +700,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {/* Pregnancy */}
         {showPregnancy && (
-          <div className={`col-md-6 ${formik.values.maritalStatus === "Married" ? "mt-4" : ""}`}>
+          <div className={`col-md-6 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
             <FormSelect
               label="Pregnancy Status"
               {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
@@ -711,7 +711,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showBreastfeedingDuration && (
-          <div className={`col-md-6 ${formik.values.pregnancyStatus === "Breastfeeding" ? "mt-4" : ""}`}>
+          <div className={`col-md-6 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", BREASTFEEDING_DURATION_OPTIONS)}

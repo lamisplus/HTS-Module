@@ -183,7 +183,6 @@ const HTSEncounterHistory = (props) => {
   const [loading, setLoading] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-
   const patientId =
     props.patientObj?.personId ?? props.patientObj?.id ?? null;
 
@@ -267,11 +266,17 @@ const HTSEncounterHistory = (props) => {
             render: (rowData) => resolveHivTestLabel(rowData.initialHivTest),
           },
           {
+            title: "Confirmatory HIV Test",
+            field: "confirmatoryHivTest ",
+            filtering: false,
+            render: (rowData) => resolveHivTestLabel(rowData.confirmatoryHivTest),
+          },
+          {
             title: "Syphilis Result",
             field: "syphilisTestResult",
             filtering: false,
           },
-          
+
           {
             title: "Actions",
             field: "actions",
@@ -316,6 +321,7 @@ const HTSEncounterHistory = (props) => {
           setting: record.setting ?? "",
           modality: record.data?.modality ?? "",
           initialHivTest: record.data?.initialHivTest ?? "",
+          confirmatoryHivTest: record.data?.confirmatoryHivTest ?? "",
           syphilisTestResult: record.data?.syphilisTestResult ?? "",
           _raw: record,
         }))}

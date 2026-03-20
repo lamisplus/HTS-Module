@@ -204,7 +204,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   const handleCategoryChange = (e) => {
     setFieldValue("clientCategory", e.target.value);
-    if (e.target.value !== "Other") setFieldValue("clientCategoryOther", "");
+    if (e.target.value.toLowerCase() !== "other") setFieldValue("clientCategoryOther", "");
   };
 
   const handleOfferedPnsChange = (e) => {

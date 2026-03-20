@@ -39,7 +39,7 @@ const nonBlankMin2 = (label) =>
  */
 const resolveAge = (parent) => {
   const { dobType, dateOfBirth, age } = parent;
-  if (dobType === "Estimated") {
+  if (dobType.toLowerCase() === "estimated") {
     const n = Number(age);
     return isNaN(n) ? null : n;
   }
@@ -60,7 +60,7 @@ const resolveAge = (parent) => {
  */
 const skipKnowledgeAndRisk = (ctx) => {
   const { modality } = ctx.parent;
-  if (modality === "PMTCT") return true;
+  if (modality.toLowerCase() === "pmtct") return true;
   const age = resolveAge(ctx.parent);
   return age !== null && age <= 15;
 };
@@ -93,7 +93,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "dob-required-when-actual",
           "Date of birth is required",
           function (value) {
-            if (this.parent.dobType !== "Actual") return true;
+            if (this.parent.dobType.toLowerCase() !== "actual") return true;
             if (!value) return false;
             const d = new Date(value);
             if (isNaN(d.getTime())) return this.createError({ message: "Enter a valid date" });
@@ -109,7 +109,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "age-required-when-estimated",
           "Age is required",
           function (value) {
-            if (this.parent.dobType !== "Estimated") return true;
+            if (this.parent.dobType.toLowerCase() !== "estimated") return true;
             if (value === "" || value === undefined || value === null)
               return this.createError({ message: "Age is required" });
             const n = Number(value);
@@ -136,7 +136,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "Number of wives is required and must be at least 1",
           function (value) {
             const { sex, maritalStatus } = this.parent;
-            if (sex !== "Male" || maritalStatus !== "Married") return true;
+            if (sex.toLowerCase() !== "male" || maritalStatus.toLowerCase() !== "married") return true;
             if (value === "" || value === undefined || value === null)
               return this.createError({ message: "Number of wives is required" });
             if (Number(value) < 1)
@@ -151,7 +151,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "Number of co-wives is required",
           function (value) {
             const { sex, maritalStatus } = this.parent;
-            if (sex !== "Female" || maritalStatus !== "Married") return true;
+            if (sex.toLowerCase() !== "female" || maritalStatus.toLowerCase() !== "married") return true;
             if (value === "" || value === undefined || value === null)
               return this.createError({ message: "Number of co-wives is required" });
             if (Number(value) < 0)
@@ -175,7 +175,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "pregnancy-required-for-female",
           "Pregnancy status is required",
           function (value) {
-            if (this.parent.sex !== "Female") return true;
+            if (this.parent.sex.toLowerCase() !== "female") return true;
             return !!value || this.createError({ message: "Pregnancy status is required for female clients" });
           }
         ),
@@ -185,7 +185,7 @@ export const buildValidationSchema = (isNewPatient) => {
           "breastfeeding-duration-conditional",
           "Duration of breastfeeding is required",
           function (value) {
-            if (this.parent.pregnancyStatus !== "Breastfeeding") return true;
+            if (this.parent.pregnancyStatus.toLowerCase() !== "breastfeeding") return true;
             return !!value || this.createError({ message: "Duration of breastfeeding is required" });
           }
         ),
@@ -219,7 +219,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "facility-setting-conditional",
       "Facility setting is required",
       function (value) {
-        if (this.parent.setting !== "Facility") return true;
+        if (this.parent.setting.toLowerCase() !== "facility") return true;
         return !!value || this.createError({ message: "Facility setting is required" });
       }
     ),
@@ -229,7 +229,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "community-entry-conditional",
       "Community entry point is required",
       function (value) {
-        if (this.parent.setting !== "Community") return true;
+        if (this.parent.setting.toLowerCase() !== "community") return true;
         return !!value || this.createError({ message: "Community entry point is required" });
       }
     ),
@@ -239,7 +239,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "index-testing-conditional",
       "Please indicate whether this is index testing",
       function (value) {
-        if (this.parent.typeOfSession !== "Index Testing") return true;
+        if (this.parent.typeOfSession.toLowerCase() !== "index") return true;
         return !!value || this.createError({ message: "Index testing selection is required" });
       }
     ),
@@ -250,7 +250,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Relationship of index client is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession !== "Index Testing" || indexTesting !== "Yes") return true;
+        if (typeOfSession.toLowerCase() !== "index" || indexTesting.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Relationship of index client is required" });
       }
     ),
@@ -261,7 +261,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Index client code/ID is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession !== "Index Testing" || indexTesting !== "Yes") return true;
+        if (typeOfSession.toLowerCase() !== "index" || indexTesting.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Index client code/ID is required" });
       }
     ),
@@ -284,7 +284,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Time of last negative test is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.previouslyTestedNegative !== "Yes") return true;
+        if (this.parent.previouslyTestedNegative.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Time of last negative test is required" });
       }
     ),
@@ -353,7 +353,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -363,7 +363,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -373,7 +373,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -393,7 +393,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -403,7 +403,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -422,7 +422,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "vaginal-discharge-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex !== "Female") return true;
+        if (this.parent.sex.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -431,7 +431,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "lower-abdominal-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex !== "Female") return true;
+        if (this.parent.sex.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -441,7 +441,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "urethral-discharge-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex !== "Male") return true;
+        if (this.parent.sex.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -450,7 +450,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "scrotal-swelling-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex !== "Male") return true;
+        if (this.parent.sex.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -467,7 +467,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -477,7 +477,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -487,7 +487,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "Y=yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -497,7 +497,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -507,7 +507,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "Yes") return true;
+        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -521,7 +521,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "acute-infection-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.initialHivTest !== "Negative") return true;
+        if (this.parent.initialHivTest.toLowerCase() !== "negative") return true;
         return !!value || this.createError({ message: "This field is required when initial test is Negative" });
       }
     ),
@@ -531,7 +531,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "confirmatory-conditional",
       "Confirmatory HIV test is required",
       function (value) {
-        if (this.parent.initialHivTest !== "Positive") return true;
+        if (this.parent.initialHivTest.toLowerCase() !== "positive") return true;
         return !!value || this.createError({ message: "Confirmatory HIV test is required for positive results" });
       }
     ),
@@ -541,7 +541,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "recency-conditional",
       "Recency test is required",
       function (value) {
-        if (this.parent.initialHivTest !== "Positive") return true;
+        if (this.parent.initialHivTest.toLowerCase() !== "positive") return true;
         return !!value || this.createError({ message: "Recency test is required for positive clients" });
       }
     ),

@@ -16,6 +16,9 @@ import moment from "moment";
 import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
 import HtsIctOrchestrator from "../IctForm/HtsIctOrchestrator";
 import IctForm from "../IctForm/IctForm";
+import { useHtsEligibility } from "../NewToolForms/hooks/useHtsEligibility";
+import { toast } from "react-toastify";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 
 
 const styles = (theme) => ({
@@ -68,7 +71,6 @@ function PatientCard(props) {
       ? history.location.state.patientObj
       : {};
 
-  console.log(patientObject, patientObj)
 
   const clientCode =
     history.location && history.location.state
@@ -76,15 +78,18 @@ function PatientCard(props) {
       : "";
 
 
+
+
   const [personInfo, setPersonInfo] = useState({})
+  const [encounters, setEncounters] = useState(null);
+  const [isLoadingEncounters, setIsLoadingEncounters] = useState(false);
+  const patientId = patientObj?.personId || patientObject?.personId || patientObj?.person?.id || patientObject?.person?.id
 
   const [activePage, setActivePage] = useState({
     activePage: "home",
     activeObject: {},
     actionType: "",
   });
-
-  console.log(activePage.activeObject)
 
   const handleMoveToHome = () => {
     setActivePage({
@@ -95,10 +100,33 @@ function PatientCard(props) {
   }
 
 
-  useEffect(() => { }, [activePage]);
+  const fetchEncounters = async () => {
+    setIsLoadingEncounters(true);
+    try {
+      const data = await getHtsEcounterForAPatient(patientId);
+      setEncounters(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error("Failed to load HTS encounter history.");
+    } finally {
+      setIsLoadingEncounters(false);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchEncounters()
+
+  }, [activePage]);
   const patientAge = calculate_age(
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
+
+  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult } = useHtsEligibility(
+    encounters,
+    isLoadingEncounters
+  );
+
+  console.log(encounters)
 
   return (
     <div className={classes.root}>
@@ -115,13 +143,15 @@ function PatientCard(props) {
           </li>
         </ol>
       </div>
+
       <Card>
         <CardContent>
           <PatientCardDetail
             patientObj={patientObj}
-            clientCode={clientCode}
+            clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
             patientObject={patientObject}
             setPersonInfo={setPersonInfo}
+            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
           />
 
           {activePage.activePage === "home" && (
@@ -138,8 +168,11 @@ function PatientCard(props) {
                   : ""
               }
               setActivePage={setActivePage}
-              clientCode={clientCode}
+              // clientCode={clientCode}
+              clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
+
               patientAge={patientObj?.data?.age}
+              clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
             />
           )}
 
@@ -165,7 +198,7 @@ function PatientCard(props) {
 
           {
             activePage.activePage === "ict-view" && (
-              <IctForm 
+              <IctForm
                 initialValues={activePage.activeObject}
                 onBack={handleMoveToHome}
                 onSubmitSuccess={handleMoveToHome}
@@ -176,7 +209,7 @@ function PatientCard(props) {
 
           {
             activePage.activePage === "ict-edit" && (
-              <IctForm 
+              <IctForm
                 initialValues={activePage.activeObject}
                 onBack={handleMoveToHome}
                 onSubmitSuccess={handleMoveToHome}
@@ -189,7 +222,8 @@ function PatientCard(props) {
               patientObj={patientObj}
               activePage={activePage}
               setActivePage={setActivePage}
-              clientCode={clientCode}
+              // clientCode={clientCode}
+              clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
               patientAge={patientAge}
               patientObject={patientObject}
             />

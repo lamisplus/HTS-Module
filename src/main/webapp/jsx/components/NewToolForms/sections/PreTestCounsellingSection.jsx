@@ -28,6 +28,7 @@ const KNOWLEDGE_FIELDS = [
   "clientInformedPreventionMethods",
   "clientInformedPossibleResults",
   "informedConsentGiven",
+  "previouslyTestedNegative"
 ];
 
 const PERSONAL_RISK_FIELDS = [
@@ -88,13 +89,13 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
   };
 
   const skipSection =
-    values.modality === "PMTCT" || (values.age && Number(values.age) <= 15);
+    values.modality.toLowerCase() === "pmtct" || (values.age && Number(values.age) <= 15) || values?.pregnancyStatus.toLowerCase() === "pregnant";
 
   const showTimeSinceNegative = values.previouslyTestedNegative.toLowerCase() === "yes";
   const showSexDependent = values.everHadSexualIntercourse.toLowerCase() === "yes";
   const showSexPartnerRisk = values.everHadSexualIntercourse.toLowerCase() === "yes";
-  const isFemale = values.sex === "Female";
-  const isMale = values.sex === "Male";
+  const isFemale = values.sex.toLowerCase() === "female";
+  const isMale = values.sex.toLowerCase() === "male";
 
   const knowledgeScore = calcScore(KNOWLEDGE_FIELDS, values);
   const personalRiskScore = calcScore(PERSONAL_RISK_FIELDS, values);
@@ -138,7 +139,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Knowledge Assessment is not applicable for PMTCT modality or clients aged 15 and below.
+          Knowledge Assessment is not applicable for PMTCT modality, clients aged 15 and below or Pregnant clients.
         </div>
       ) : (
         <>
@@ -197,7 +198,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Personal HIV Risk Assessment is not applicable for this client.
+          Personal HIV Risk Assessment is not applicable for PMTCT modality, clients aged 15 and below or Pregnant clients.
         </div>
       ) : (
         <>
@@ -330,7 +331,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
       <SectionSubheading>Sex Partner Risk Assessment (Last 3 months)</SectionSubheading>
 
-      {values.everHadSexualIntercourse === "No" ? (
+      {values.everHadSexualIntercourse.toLowerCase() === "no" ? (
         <div style={skippedNoticeStyle}>
           Sex Partner Risk Assessment is not applicable — client has not had sexual intercourse.
         </div>

@@ -30,18 +30,18 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const handleInitialTestChange = (e) => {
     const val = e.target.value;
     setFieldValue("initialHivTest", val);
-    if (val !== "Positive") {
+    if (val.toLowerCase() !== "positive") {
       setFieldValue("confirmatoryHivTest", "");
       setFieldValue("recencyTest", "");
     }
-    if (val !== "Negative") {
+    if (val.toLowerCase() !== "negative") {
       setFieldValue("suspectedAcuteInfection", "");
     }
   };
 
-  const showConfirmatory = values.initialHivTest === "Positive";
-  const showRecency = values.initialHivTest === "Positive";
-  const showSuspectedAcute = values.initialHivTest === "Negative";
+  const showConfirmatory = values.initialHivTest.toLowerCase() === "positive";
+  const showRecency = values.initialHivTest.toLowerCase() === "positive";
+  const showSuspectedAcute = values.initialHivTest.toLowerCase() === "negative";
 
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];

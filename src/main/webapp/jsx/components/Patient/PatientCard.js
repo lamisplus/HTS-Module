@@ -79,8 +79,7 @@ function PatientCard(props) {
   async function PatientCurrentObject() {
     axios
       .get(
-        `${baseUrl}hts/persons/${
-          patientObjs.personId ? patientObjs.personId : patientObjs.id
+        `${baseUrl}hts/persons/${patientObjs.personId ? patientObjs.personId : patientObjs.id
         }`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -102,7 +101,7 @@ function PatientCard(props) {
           ].hivTestResult2
         );
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }
 
 
@@ -208,7 +207,7 @@ function PatientCard(props) {
                           Gender :{" "}
                           <b style={{ color: "#0B72AA" }}>
                             {patientObj.personResponseDto &&
-                            patientObj.personResponseDto.sex !== null
+                              patientObj.personResponseDto.sex !== null
                               ? patientObj.personResponseDto.sex
                               : ""}
                           </b>
@@ -239,16 +238,17 @@ function PatientCard(props) {
                           {" "}
                           Client Code :{" "}
                           <b style={{ color: "#0B72AA" }}>
-                            {patientObj && patientObj?.clientCode
+                            {/* {patientObj && patientObj?.clientCode
                               ? patientObj?.clientCode
-                              : ""}{" "}
+                              : ""}{" "} */}
+                            {props?.clientCode}
                           </b>
                         </span>
                       </Col>
-                      <Col md={12}>
+                      <Col md={4}>
                         <div>
                           <Typography variant="caption">
-                            {htscount < 1 || (!htsResult && !htsResult2) ? (
+                            {/* {htscount < 1 || (!htsResult && !htsResult2) ? (
                               <Label color="blue" size={"mini"}>
                                 STATUS : Not Tested
                               </Label>
@@ -262,7 +262,45 @@ function PatientCard(props) {
                               <Label color="teal" size={"mini"}>
                                 STATUS : Negative
                               </Label>
-                            )}
+                            )} */}
+                            {
+                              props?.clientEligibility?.confirmatoryResult === "positive" ?
+                                (<Label color={"red"} size={"mini"}>
+                                  STATUS : Positive
+                                </Label>) :
+
+                                props?.clientEligibility?.confirmatoryResult === "negative" ?
+                                  (
+                                    <Label color="teal" size={"mini"}>
+                                      STATUS : Negative
+                                    </Label>
+                                  ) : (
+
+                                    <Label color="blue" size={"mini"}>
+                                      STATUS : Not Tested
+                                    </Label>
+                                  )
+                            }
+                          </Typography>
+                        </div>
+                      </Col>
+
+                      <Col md={4}>
+                        <div>
+                          <Typography variant="caption">
+                            <Label color={"teal"} size={"mini"}>
+                              ELigible for HTS : {String(props?.clientEligibility?.isPatientEligibleForHts)}
+                            </Label>
+                          </Typography>
+                        </div>
+                      </Col>
+
+                      <Col md={12} style={{ marginTop: 10 }}>
+                        <div>
+                          <Typography variant="caption">
+                            <Label color={"teal"} size={"large"}>
+                              Reason for HTS eligibility : {String(props?.clientEligibility?.eligibilityReason)}
+                            </Label>
                           </Typography>
                         </div>
                       </Col>
