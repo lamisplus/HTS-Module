@@ -29,6 +29,7 @@ const defaultValues = {
   clientState: "",
   clientLga: "",
   address: "",
+  landmark:"",
   previouslyTestedNegative: "",
   timeOfLastNegativeTest: "",
   clientInformedTransmissionRoutes: "",

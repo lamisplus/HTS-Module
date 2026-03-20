@@ -39,7 +39,7 @@ const nonBlankMin2 = (label) =>
  */
 const resolveAge = (parent) => {
   const { dobType, dateOfBirth, age } = parent;
-  if (dobType.toLowerCase() === "estimated") {
+  if (dobType?.toLowerCase() === "estimated") {
     const n = Number(age);
     return isNaN(n) ? null : n;
   }
@@ -60,7 +60,7 @@ const resolveAge = (parent) => {
  */
 const skipKnowledgeAndRisk = (ctx) => {
   const { modality } = ctx.parent;
-  if (modality.toLowerCase() === "pmtct") return true;
+  if (modality?.toLowerCase() === "pmtct") return true;
   const age = resolveAge(ctx.parent);
   return age !== null && age <= 15;
 };
@@ -79,121 +79,122 @@ export const buildValidationSchema = (isNewPatient) => {
 
   const demographicFields = isNewPatient
     ? {
-        surname: nonBlankMin2("Surname"),
-        firstName: nonBlankMin2("First name"),
-        // middleName is optional — no rule needed
+      surname: nonBlankMin2("Surname"),
+      firstName: nonBlankMin2("First name"),
+      // middleName is optional — no rule needed
 
-        dobType: yup
-          .string()
-          .oneOf(["Actual", "Estimated"], "Please select Actual or Estimated")
-          .required("Please select Actual or Estimated"),
+      dobType: yup
+        .string()
+        .oneOf(["Actual", "Estimated"], "Please select Actual or Estimated")
+        .required("Please select Actual or Estimated"),
 
-        // dateOfBirth is required only when dobType === "Actual"
-        dateOfBirth: yup.mixed().test(
-          "dob-required-when-actual",
-          "Date of birth is required",
-          function (value) {
-            if (this.parent.dobType.toLowerCase() !== "actual") return true;
-            if (!value) return false;
-            const d = new Date(value);
-            if (isNaN(d.getTime())) return this.createError({ message: "Enter a valid date" });
-            if (d > new Date()) return this.createError({ message: "Date of birth cannot be in the future" });
-            return true;
-          }
-        ),
+      // dateOfBirth is required only when dobType === "Actual"
+      dateOfBirth: yup.mixed().test(
+        "dob-required-when-actual",
+        "Date of birth is required",
+        function (value) {
+          if (this.parent.dobType?.toLowerCase() !== "actual") return true;
+          if (!value) return false;
+          const d = new Date(value);
+          if (isNaN(d.getTime())) return this.createError({ message: "Enter a valid date" });
+          if (d > new Date()) return this.createError({ message: "Date of birth cannot be in the future" });
+          return true;
+        }
+      ),
 
-        facilityName: yup.string().required("Facility/Site name is required"),
+      facilityName: yup.string().required("Facility/Site name is required"),
 
-        // age is required only when dobType === "Estimated"
-        age: yup.mixed().test(
-          "age-required-when-estimated",
-          "Age is required",
-          function (value) {
-            if (this.parent.dobType.toLowerCase() !== "estimated") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Age is required" });
-            const n = Number(value);
-            if (isNaN(n) || n < 0)
-              return this.createError({ message: "Age must be a non-negative number" });
-            if (n > 130)
-              return this.createError({ message: "Age must be 130 or less" });
-            return true;
-          }
-        ),
+      // age is required only when dobType === "Estimated"
+      age: yup.mixed().test(
+        "age-required-when-estimated",
+        "Age is required",
+        function (value) {
+          if (this.parent.dobType?.toLowerCase() !== "estimated") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Age is required" });
+          const n = Number(value);
+          if (isNaN(n) || n < 0)
+            return this.createError({ message: "Age must be a non-negative number" });
+          if (n > 130)
+            return this.createError({ message: "Age must be 130 or less" });
+          return true;
+        }
+      ),
 
-        sex: yup.string().required("Sex is required"),
+      sex: yup.string().required("Sex is required"),
 
-        phoneNumber: yup
-          .string()
-          .required("Phone number is required")
-          .matches(/^[0-9]{10,11}$/, "Phone number must be 10 or 11 digits"),
+      phoneNumber: yup
+        .string()
+        .required("Phone number is required")
+        .matches(/^[0-9]{10,11}$/, "Phone number must be 10 or 11 digits"),
 
-        maritalStatus: yup.string().required("Marital status is required"),
+      maritalStatus: yup.string().required("Marital status is required"),
 
-        // numberOfWives: required and ≥ 1 only when sex=Male AND maritalStatus=Married
-        numberOfWives: yup.mixed().test(
-          "num-wives-conditional",
-          "Number of wives is required and must be at least 1",
-          function (value) {
-            const { sex, maritalStatus } = this.parent;
-            if (sex.toLowerCase() !== "male" || maritalStatus.toLowerCase() !== "married") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Number of wives is required" });
-            if (Number(value) < 1)
-              return this.createError({ message: "Number of wives must be at least 1" });
-            return true;
-          }
-        ),
+      // numberOfWives: required and ≥ 1 only when sex=Male AND maritalStatus=Married
+      numberOfWives: yup.mixed().test(
+        "num-wives-conditional",
+        "Number of wives is required and must be at least 1",
+        function (value) {
+          const { sex, maritalStatus } = this.parent;
+          if (sex?.toLowerCase() !== "male" || maritalStatus?.toLowerCase() !== "married") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Number of wives is required" });
+          if (Number(value) < 1)
+            return this.createError({ message: "Number of wives must be at least 1" });
+          return true;
+        }
+      ),
 
-        // numberOfCoWives: required and ≥ 0 only when sex=Female AND maritalStatus=Married
-        numberOfCoWives: yup.mixed().test(
-          "num-co-wives-conditional",
-          "Number of co-wives is required",
-          function (value) {
-            const { sex, maritalStatus } = this.parent;
-            if (sex.toLowerCase() !== "female" || maritalStatus.toLowerCase() !== "married") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Number of co-wives is required" });
-            if (Number(value) < 0)
-              return this.createError({ message: "Must be 0 or more" });
-            return true;
-          }
-        ),
+      // numberOfCoWives: required and ≥ 0 only when sex=Female AND maritalStatus=Married
+      numberOfCoWives: yup.mixed().test(
+        "num-co-wives-conditional",
+        "Number of co-wives is required",
+        function (value) {
+          const { sex, maritalStatus } = this.parent;
+          if (sex?.toLowerCase() !== "female" || maritalStatus?.toLowerCase() !== "married") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Number of co-wives is required" });
+          if (Number(value) < 0)
+            return this.createError({ message: "Must be 0 or more" });
+          return true;
+        }
+      ),
 
-        numberOfBiologicalChildren: yup.mixed().test(
-          "num-children-non-negative",
-          "Must be 0 or more",
-          (value) =>
-            value === "" ||
-            value === undefined ||
-            value === null ||
-            Number(value) >= 0
-        ),
+      numberOfBiologicalChildren: yup.mixed().test(
+        "num-children-non-negative",
+        "Must be 0 or more",
+        (value) =>
+          value === "" ||
+          value === undefined ||
+          value === null ||
+          Number(value) >= 0
+      ),
 
-        // pregnancyStatus: required only when sex=Female
-        pregnancyStatus: yup.mixed().test(
-          "pregnancy-required-for-female",
-          "Pregnancy status is required",
-          function (value) {
-            if (this.parent.sex.toLowerCase() !== "female") return true;
-            return !!value || this.createError({ message: "Pregnancy status is required for female clients" });
-          }
-        ),
+      // pregnancyStatus: required only when sex=Female
+      pregnancyStatus: yup.mixed().test(
+        "pregnancy-required-for-female",
+        "Pregnancy status is required",
+        function (value) {
+          if (this.parent.sex?.toLowerCase() !== "female") return true;
+          return !!value || this.createError({ message: "Pregnancy status is required for female clients" });
+        }
+      ),
 
-        // breastfeedingDuration: required only when pregnancyStatus=Breastfeeding
-        breastfeedingDuration: yup.mixed().test(
-          "breastfeeding-duration-conditional",
-          "Duration of breastfeeding is required",
-          function (value) {
-            if (this.parent.pregnancyStatus.toLowerCase() !== "breastfeeding") return true;
-            return !!value || this.createError({ message: "Duration of breastfeeding is required" });
-          }
-        ),
+      // breastfeedingDuration: required only when pregnancyStatus=Breastfeeding
+      breastfeedingDuration: yup.mixed().test(
+        "breastfeeding-duration-conditional",
+        "Duration of breastfeeding is required",
+        function (value) {
+          if (this.parent.pregnancyStatus?.toLowerCase() !== "breastfeeding") return true;
+          return !!value || this.createError({ message: "Duration of breastfeeding is required" });
+        }
+      ),
 
-        clientState: yup.string().required("State is required"),
-        clientLga: yup.string().required("LGA is required"),
-        address: yup.string().required("Address is required"),
-      }
+      clientState: yup.string().required("State is required"),
+      clientLga: yup.string().required("LGA is required"),
+      address: yup.string().required("Address is required"),
+      landmark: yup.string(),
+    }
     : {};
 
   // ── visit / setting fields (both new and existing) ───────────────────────
@@ -219,7 +220,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "facility-setting-conditional",
       "Facility setting is required",
       function (value) {
-        if (this.parent.setting.toLowerCase() !== "facility") return true;
+        if (this.parent.setting?.toLowerCase() !== "facility") return true;
         return !!value || this.createError({ message: "Facility setting is required" });
       }
     ),
@@ -229,7 +230,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "community-entry-conditional",
       "Community entry point is required",
       function (value) {
-        if (this.parent.setting.toLowerCase() !== "community") return true;
+        if (this.parent.setting?.toLowerCase() !== "community") return true;
         return !!value || this.createError({ message: "Community entry point is required" });
       }
     ),
@@ -239,7 +240,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "index-testing-conditional",
       "Please indicate whether this is index testing",
       function (value) {
-        if (this.parent.typeOfSession.toLowerCase() !== "index") return true;
+        if (this.parent.typeOfSession?.toLowerCase() !== "index") return true;
         return !!value || this.createError({ message: "Index testing selection is required" });
       }
     ),
@@ -250,7 +251,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Relationship of index client is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession.toLowerCase() !== "index" || indexTesting.toLowerCase() !== "yes") return true;
+        if (typeOfSession?.toLowerCase() !== "index" || indexTesting?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Relationship of index client is required" });
       }
     ),
@@ -261,7 +262,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Index client code/ID is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession.toLowerCase() !== "index" || indexTesting.toLowerCase() !== "yes") return true;
+        if (typeOfSession?.toLowerCase() !== "index" || indexTesting?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Index client code/ID is required" });
       }
     ),
@@ -284,7 +285,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Time of last negative test is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.previouslyTestedNegative.toLowerCase() !== "yes") return true;
+        if (this.parent.previouslyTestedNegative?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Time of last negative test is required" });
       }
     ),
@@ -353,7 +354,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -363,7 +364,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -373,7 +374,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -393,7 +394,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -403,7 +404,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -422,7 +423,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "vaginal-discharge-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex.toLowerCase() !== "female") return true;
+        if (this.parent.sex?.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -431,7 +432,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "lower-abdominal-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex.toLowerCase() !== "female") return true;
+        if (this.parent.sex?.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -441,7 +442,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "urethral-discharge-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex.toLowerCase() !== "male") return true;
+        if (this.parent.sex?.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -450,7 +451,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "scrotal-swelling-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.sex.toLowerCase() !== "male") return true;
+        if (this.parent.sex?.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -467,7 +468,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -477,7 +478,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -487,7 +488,17 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "Y=yes") return true;
+
+        if (this?.parent?.everHadSexualIntercourse?.toLowerCase() !== "yes") {
+          return true;
+        }
+
+        const age = Number(this?.parent?.age);
+
+        // Skip validation if NOT between 10–19
+        if (age < 10 || age > 19) return true;
+
+        // Enforce required if age is 10–19
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -497,7 +508,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -507,7 +518,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse.toLowerCase() !== "yes") return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
@@ -521,7 +532,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "acute-infection-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.initialHivTest.toLowerCase() !== "negative") return true;
+        if (this.parent.initialHivTest?.toLowerCase() !== "negative") return true;
         return !!value || this.createError({ message: "This field is required when initial test is Negative" });
       }
     ),
@@ -531,7 +542,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "confirmatory-conditional",
       "Confirmatory HIV test is required",
       function (value) {
-        if (this.parent.initialHivTest.toLowerCase() !== "positive") return true;
+        if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
         return !!value || this.createError({ message: "Confirmatory HIV test is required for positive results" });
       }
     ),
@@ -541,7 +552,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "recency-conditional",
       "Recency test is required",
       function (value) {
-        if (this.parent.initialHivTest.toLowerCase() !== "positive") return true;
+        if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
         return !!value || this.createError({ message: "Recency test is required for positive clients" });
       }
     ),

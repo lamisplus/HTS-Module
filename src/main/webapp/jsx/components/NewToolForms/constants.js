@@ -24,7 +24,7 @@ export const SETTING_OPTIONS = [
 export const MODALITY_OPTIONS = [
   { label: "HTS", value: "HTS" },
   { label: "PMTCT", value: "PMTCT" },
-  { label: "Index Testing", value: "INDEX" },
+  { label: "Index Contact Testing", value: "INDEX" },
   { label: "SNS", value: "SNS" },
   { label: "OVC", value: "OVC" },
   { label: "PrEP", value: "PREP" },

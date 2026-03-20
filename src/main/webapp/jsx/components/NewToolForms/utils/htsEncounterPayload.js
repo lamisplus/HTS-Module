@@ -52,6 +52,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
       clientState,
       clientLga,
       address,
+      landmark,
   
       // Knowledge Assessment
       previouslyTestedNegative,
@@ -147,6 +148,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
       clientState,
       clientLga,
       address,
+      landmark,
       previouslyTestedNegative,
       timeOfLastNegativeTest,
       clientInformedTransmissionRoutes,
@@ -204,8 +206,8 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
         surname,
         firstName,
         otherName: middleName,
-        dateOfBirth: dobType === 'Actual' ? dateOfBirth : null,
-        isDateOfBirthEstimated: dobType === 'Estimated',
+        dateOfBirth: dobType?.toLowerCase() === 'actual' ? dateOfBirth : null,
+        isDateOfBirthEstimated: dobType?.toLowerCase() === 'estimated',
         sexId: sexCode,
         genderId: sexCode,
         phoneNumber,
@@ -216,7 +218,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
             district: clientLga,
             stateId: String(clientState),
             countryId: 1,
-            line: [''],
+            line: [landmark],
             postalCode: '',
             organisationUnitId: "",
           },
@@ -245,7 +247,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
         ],
       };
   
-      if (dobType === 'Estimated') {
+      if (dobType?.toLowerCase() === 'estimated') {
         delete payload.person.dateOfBirth;
       }
     }

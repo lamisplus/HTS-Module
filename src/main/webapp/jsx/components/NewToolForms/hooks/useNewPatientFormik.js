@@ -30,6 +30,7 @@ const initialValues = {
   clientState: "",
   clientLga: "",
   address: "",
+  landmark:"",
   previouslyTestedNegative: "",
   timeOfLastNegativeTest: "",
   clientInformedTransmissionRoutes: "",

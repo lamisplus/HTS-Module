@@ -57,6 +57,7 @@ public class HtsEncounterRequest {
     private String clientState;
     private String clientLga;
     private String address;
+    private String landmark;
 
     // Pre-test counselling: Knowledge Assessment
     private String previouslyTestedNegative;

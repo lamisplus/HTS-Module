@@ -6,6 +6,7 @@ import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const VIEWS = {
   HTS: "HTS",
@@ -132,7 +133,7 @@ const HtsIctOrchestrator = ({
   const [htsSubmitted, setHtsSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null);   // HTS formik values snapshot
   const [htsRecord, setHtsRecord] = useState(null);   // API response after HTS submit
-
+  const history = useHistory()
   const eligibilityToastFiredRef = useRef(false);
 
   // ── Auto-fetch HTS record when isExisting=true but htsInitial is not provided ──
@@ -199,6 +200,9 @@ const HtsIctOrchestrator = ({
       // Auto-navigate to ICT after a brief moment
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
       toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+    }
+    else{
+      history.push("/")
     }
 
     // setIctEligible(true);

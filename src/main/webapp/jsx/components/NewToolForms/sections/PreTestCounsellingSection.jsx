@@ -60,6 +60,7 @@ const calcScore = (fields, values) =>
 const PreTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
+  console.log(errors)
 
   const fp = (name) => ({
     name,
@@ -82,7 +83,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
     const val = e.target.value;
     setFieldValue("everHadSexualIntercourse", val);
     if (val.toLowerCase() !== "yes") {
-      ["moreThanOneSexPartner", "unprotectedVaginalSex", "unprotectedAnalSex", "sexUnderInfluence", "historyOfSTI"].forEach(
+      ["moreThanOneSexPartner", "unprotectedVaginalSex", "unprotectedAnalSex", "adolescentHivPositive", "sexUnderInfluence", "historyOfSTI"].forEach(
         (f) => setFieldValue(f, "")
       );
     }
@@ -114,7 +115,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase() : item.display,
       value: item.display
     }));
   };
@@ -353,12 +354,18 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                 {...sp("partnerPregnantOnArv", transformOptions(codesets?.["YES_NO"]))}
               />
             </div>
-            <div className="col-md-6">
-              <FormSelect
-                label="Adolescent (10-19 yrs) Known to be HIV Infected (on ARV or NOT)"
-                {...sp("adolescentHivPositive", transformOptions(codesets?.["YES_NO"]))}
-              />
-            </div>
+
+            {
+              Number(values?.age) >= 10 && Number(values?.age) <= 19 && (
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Adolescent (10-19 yrs) Known to be HIV Infected (on ARV or NOT)"
+                    {...sp("adolescentHivPositive", transformOptions(codesets?.["YES_NO"]))}
+                  />
+                </div>
+              )
+
+            }
             <div className="col-md-6">
               <FormSelect
                 label="Known HIV Positive Partner Not Regularly Taking Drugs"
@@ -372,9 +379,12 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               />
             </div>
           </div>
-          <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
+
         </>
       )}
+      <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
+      {console.log(knowledgeScore, sexPartnerRiskScore, personalRiskScore, tbScore, stiScore)}
+      <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
     </div>
   );
 };

@@ -94,7 +94,7 @@ const contactSchema = yup.object({
   }),
 
   hivTestResult: yup.mixed().test("hiv-result-required", "HIV test result is required", function (val) {
-    if (this.parent.knownHivPositive.toLowerCase() !== "no") return true;
+    if (this.parent.knownHivPositive?.toLowerCase() !== "no") return true;
     return !!val || this.createError({ message: "HIV test result is required" });
   }),
 
@@ -140,18 +140,18 @@ export const buildIctValidationSchema = () =>
     setting: yup.string().required("Setting is required"),
 
     facilitySetting: yup.mixed().test("facility-setting-conditional", "Facility setting is required", function (val) {
-      if (this.parent.setting.toLowerCase() !== "facility") return true;
+      if (this.parent.setting?.toLowerCase() !== "facility") return true;
       return !!val || this.createError({ message: "Facility setting is required" });
     }),
 
     communityEntryPoint: yup.mixed().test("community-ep-conditional", "Community entry point is required", function (val) {
-      if (this.parent.setting.toLowerCase() !== "community") return true;
+      if (this.parent.setting?.toLowerCase() !== "community") return true;
       return !!val || this.createError({ message: "Community entry point is required" });
     }),
 
     clientCategory: yup.string().required("Client category is required"),
     clientCategoryOther: yup.mixed().test("category-other", "Please specify", function (val) {
-      if (this.parent.clientCategory.toLowerCase() !== "other") return true;
+      if (this.parent.clientCategory?.toLowerCase() !== "other") return true;
       return !!val || this.createError({ message: "Please specify the client category" });
     }),
 

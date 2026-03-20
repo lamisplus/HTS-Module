@@ -297,6 +297,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleDobTypeChange = (e) => {
     const type = e.target.value;
     setFieldValue("dobType", type);
+    setFieldValue("adolescentHivPositive", "")
     if (type.toLowerCase() === "actual") {
       setFieldValue("age", "");
     } else {
@@ -363,7 +364,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     <div style={{ width: "100%" }}>
       {/* ── Visit / Setting row ── */}
       <div className="row">
-        <div className="col-md-6">
+        {/* <div className="col-md-6">
           <FormGroup style={{ marginBottom: "16px" }}>
             <FormTextField
               label="Facility/Site Name"
@@ -375,7 +376,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               style={{ ...inputStyle, background: "#f6f8fa", color: "#57606a" }}
             />
           </FormGroup>
-        </div>
+        </div> */}
 
         <div className="col-md-6">
           <FormTextField
@@ -417,7 +418,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         {showCommunityEntry && (
           <div className="col-md-6">
             <FormSelect
-              label="Community Entry Point"
+              label="Community Setting"
               {...sp("communityEntryPoint", transformOptions(codesets?.["COMMUNITY_HTS_TEST_SETTING"]))}
               required
             />
@@ -724,7 +725,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       <SectionSubheading>Address Information</SectionSubheading>
 
       <div className="row">
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>
               State of Residence <span style={{ color: "red" }}> *</span>
@@ -753,7 +754,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </FormGroup>
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormSelect
             label="LGA of Residence"
             {...sp("clientLga", lgaOptions, !values.clientState || loadingLgas)}
@@ -764,6 +765,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               Loading LGAs...
             </small>
           )}
+        </div>
+
+        <div className="col-md-4">
+          <FormTextField
+            label="Landmark"
+            type="text"
+            {...fp("landmark")}
+          />
         </div>
 
         <div className="col-md-12">
