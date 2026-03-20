@@ -124,7 +124,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   ];
 
   const diagnosticFields = [
-    "hivEarlyDetectResult", "initialHivTest", "suspectedAcuteInfection",
+    "hivEarlyDetectTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
 

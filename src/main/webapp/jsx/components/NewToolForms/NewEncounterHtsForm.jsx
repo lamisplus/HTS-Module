@@ -224,7 +224,7 @@ const blankClinicalValues = {
   adolescentHivPositive: "",
   partnerNotRegularlyOnDrugs: "",
   partnerRecentlyReturnedToTreatment: "",
-  hivEarlyDetectResult: "",
+  hivEarlyDetectTestDone: "",
   initialHivTest: "",
   suspectedAcuteInfection: "",
   confirmatoryHivTest: "",
@@ -351,7 +351,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   ];
 
   const diagnosticFields = [
-    "hivEarlyDetectResult", "initialHivTest", "suspectedAcuteInfection",
+    "hivEarlyDetectTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
 

@@ -161,7 +161,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   ];
 
   const diagnosticFields = [
-    "hivEarlyDetectResult", "initialHivTest", "suspectedAcuteInfection",
+    "hivEarlyDetectTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
 

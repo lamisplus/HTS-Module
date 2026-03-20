@@ -99,7 +99,7 @@ public class HtsEncounterRequest {
     private String partnerRecentlyReturnedToTreatment;
 
     // Diagnostic Testing
-    private String hivEarlyDetectResult;
+    private String hivEarlyDetectTestDone;
     private String initialHivTest;
     private String suspectedAcuteInfection;
     private String confirmatoryHivTest;

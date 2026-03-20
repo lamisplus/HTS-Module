@@ -34,14 +34,14 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       setFieldValue("confirmatoryHivTest", "");
       setFieldValue("recencyTest", "");
     }
-    if (val.toLowerCase() !== "negative") {
-      setFieldValue("suspectedAcuteInfection", "");
-    }
+    // if (val.toLowerCase() !== "negative") {
+    //   setFieldValue("suspectedAcuteInfection", "");
+    // }
   };
 
   const showConfirmatory = values.initialHivTest.toLowerCase() === "positive";
   const showRecency = values.initialHivTest.toLowerCase() === "positive";
-  const showSuspectedAcute = values.initialHivTest.toLowerCase() === "negative";
+  const showSuspectedAcute = values.hivEarlyDetectTestDone.toLowerCase() === "yes";
 
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
@@ -78,16 +78,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       <div className="row">
         <div className="col-md-6">
           <FormSelect
-            label="HIV Early Detect Test Result"
-            {...sp("hivEarlyDetectResult", transformOptions(codesets?.["TEST_RESULT_COMMON"]))}
-          />
-        </div>
-        <div className="col-md-6">
-          <FormSelect
-            label="Initial HIV Test"
-            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
-            onChange={readOnly ? undefined : handleInitialTestChange}
-            required
+            label="HIV Early Detect Test Done ?"
+            {...sp("hivEarlyDetectTestDone", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
         {showSuspectedAcute && (
@@ -98,6 +90,15 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
+       
+        <div className="col-md-6">
+          <FormSelect
+            label="Initial HIV Test"
+            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+            onChange={readOnly ? undefined : handleInitialTestChange}
+            required
+          />
+        </div>
         {showConfirmatory && (
           <div className="col-md-6">
             <FormSelect

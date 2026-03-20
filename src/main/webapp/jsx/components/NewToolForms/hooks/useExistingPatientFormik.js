@@ -59,7 +59,7 @@ const defaultValues = {
   adolescentHivPositive: "",
   partnerNotRegularlyOnDrugs: "",
   partnerRecentlyReturnedToTreatment: "",
-  hivEarlyDetectResult: "",
+  hivEarlyDetectTestDone: "",
   initialHivTest: "",
   suspectedAcuteInfection: "",
   confirmatoryHivTest: "",

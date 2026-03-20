@@ -532,8 +532,8 @@ export const buildValidationSchema = (isNewPatient) => {
       "acute-infection-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.initialHivTest?.toLowerCase() !== "negative") return true;
-        return !!value || this.createError({ message: "This field is required when initial test is Negative" });
+        if (this.parent.hivEarlyDetectTestDone?.toLowerCase() !== "yes") return true;
+        return !!value || this.createError({ message: "This field is required when HIV Early Detect Test Done is yes" });
       }
     ),
 
