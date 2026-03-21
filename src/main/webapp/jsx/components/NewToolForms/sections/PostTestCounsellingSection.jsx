@@ -40,7 +40,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase() : item.display,
       value: item.display
     }));
   };
@@ -59,6 +59,8 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
+  const showCategoryOfClient = values?.hivTestKitsProvided?.toLowerCase() === "yes"
+  const showAcceptedIndexTesting = values?.confirmatoryHivTest?.toLowerCase() === "positive"
 
   return (
     <div style={{ width: "100%" }}>
@@ -77,24 +79,37 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
             required
           />
         </div>
+
         <div className="col-md-6">
           <FormSelect
-            label="HIV Test Kits Provided to Client"
+            label="HIV self Test Kits Provided to Client"
             {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
-        <div className="col-md-6">
-          <FormSelect
-            label="Category of Clients"
-            {...sp("categoryOfClients", transformOptions(codesets?.["TARGET_GROUP"]))}
-          />
-        </div>
-        <div className="col-md-6">
-          <FormSelect
-            label="Accepted Index Testing"
-            {...sp("acceptedIndexTesting", transformOptions(codesets?.["YES_NO"]))}
-          />
-        </div>
+
+        {
+          showCategoryOfClient && (
+            <div className="col-md-6">
+              <FormSelect
+                label="Category of clients receiving HIV self test kit"
+                {...sp("categoryOfClients", transformOptions(codesets?.["TARGET_GROUP"]))}
+              />
+            </div>
+          )
+        }
+
+
+        {
+          showAcceptedIndexTesting && (
+            <div className="col-md-6">
+              <FormSelect
+                label="Accepted Index Testing"
+                {...sp("acceptedIndexTesting", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+          )
+        }
+
         <div className="col-md-6">
           <FormSelect
             label="Provided with Information on FP and Dual Contraception"

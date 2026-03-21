@@ -47,6 +47,7 @@ const SEX_PARTNER_RISK_FIELDS = [
   "adolescentHivPositive",
   "partnerNotRegularlyOnDrugs",
   "partnerRecentlyReturnedToTreatment",
+  "hadSexWithHivPositivePartnerInRiskGroup"
 ];
 
 const TB_FIELDS = ["currentCough", "weightLoss", "fever", "nightSweats"];
@@ -378,12 +379,18 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                 {...sp("partnerRecentlyReturnedToTreatment", transformOptions(codesets?.["YES_NO"]))}
               />
             </div>
+            <div className="col-md-12">
+              <FormSelect
+                label="Have you had sex with a partner who is HIV positive and falls in any of the categories above ?"
+                {...sp("hadSexWithHivPositivePartnerInRiskGroup", transformOptions(codesets?.["YES_NO"]))}
+                required
+              />
+            </div>
           </div>
 
         </>
       )}
       <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
-      {console.log(knowledgeScore, sexPartnerRiskScore, personalRiskScore, tbScore, stiScore)}
       <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
     </div>
   );

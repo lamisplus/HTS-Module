@@ -522,6 +522,7 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
+    hadSexWithHivPositivePartnerInRiskGroup: yup.string().required("This field is required"),
 
     // ── Diagnostic Testing ─────────────────────────────────────────────────
 
@@ -543,7 +544,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Confirmatory HIV test is required",
       function (value) {
         if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
-        return !!value || this.createError({ message: "Confirmatory HIV test is required for positive results" });
+        return !!value || this.createError({ message: "Confirmatory HIV test is required when Initial HIV test is Positive" });
       }
     ),
 
@@ -553,7 +554,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Recency test is required",
       function (value) {
         if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
-        return !!value || this.createError({ message: "Recency test is required for positive clients" });
+        return !!value || this.createError({ message: "Recency test is required for client whose Initial HIV Test is positive" });
       }
     ),
 
@@ -562,8 +563,30 @@ export const buildValidationSchema = (isNewPatient) => {
     previouslyTestedThisYear: yup.string().required("This field is required"),
     clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
-    categoryOfClients: yup.string().required("This field is required"),
-    acceptedIndexTesting: yup.string().required("This field is required"),
+    // categoryOfClients: yup.string().required("This field is required"),
+    
+    // categoryOfClients: visible only when hivTestKitsProvided=yes
+    categoryOfClients: yup.mixed().test(
+      "categoryOfClients-conditional",
+      "Category of client is required",
+      function (value) {
+        if (this.parent.hivTestKitsProvided?.toLowerCase() !== "yes") return true;
+        return !!value || this.createError({ message: "Category of client is required when HIV self test kit provided to client is yes" });
+      }
+    ),
+    
+    
+    // acceptedIndexTesting: visible only when confirmatoryHivTest=Positive
+    acceptedIndexTesting: yup.mixed().test(
+      "acceptedIndextesting-conditional",
+      "Accepted Index testing is required",
+      function (value) {
+        if (this.parent.confirmatoryHivTest?.toLowerCase() !== "positive") return true;
+        return !!value || this.createError({ message: "Accepted Index testing is required when confirmatory HIV test is positive" });
+      }
+    ),
+
+    // acceptedIndexTesting: yup.string().required("This field is required"),
     providedFpInfo: yup.string().required("This field is required"),
     clientPartnerUseFpMethods: yup.string().required("This field is required"),
     clientPartnerUseCondoms: yup.string().required("This field is required"),

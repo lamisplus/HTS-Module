@@ -157,7 +157,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     "complaintsUrethralDischarge", "complaintsScroralSwelling",
     "complaintsGenitalSores", "complaintsSwollenLymphNodes",
     "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
-    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
+    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup"
   ];
 
   const diagnosticFields = [

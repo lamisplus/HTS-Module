@@ -97,6 +97,7 @@ public class HtsEncounterRequest {
     private String adolescentHivPositive;
     private String partnerNotRegularlyOnDrugs;
     private String partnerRecentlyReturnedToTreatment;
+    private String hadSexWithHivPositivePartnerInRiskGroup;
 
     // Diagnostic Testing
     private String hivEarlyDetectTestDone;

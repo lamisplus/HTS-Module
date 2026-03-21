@@ -107,12 +107,13 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index";
+  // const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index";
   const positiveResult =
-    htsValues.confirmatoryHivTest === "Positive" ||
-    htsValues.initialHivTest === "Positive";
-  return sessionMatch && positiveResult;
+    htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
+    // || htsValues.initialHivTest?.toLowerCase() === "positive";
+  // return sessionMatch && positiveResult;
   // return true
+  return positiveResult
 };
 
 const HtsIctOrchestrator = ({
@@ -164,7 +165,7 @@ const HtsIctOrchestrator = ({
         })
         .finally(() => setIsFetchingHts(false));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Real-time eligibility detection ──────────────────────────────────────
@@ -201,7 +202,7 @@ const HtsIctOrchestrator = ({
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
       toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
     }
-    else{
+    else {
       history.push("/")
     }
 

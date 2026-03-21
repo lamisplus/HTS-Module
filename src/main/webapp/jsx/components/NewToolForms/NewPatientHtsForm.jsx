@@ -120,7 +120,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
     "complaintsUrethralDischarge", "complaintsScroralSwelling",
     "complaintsGenitalSores", "complaintsSwollenLymphNodes",
     "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
-    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
+    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup"
   ];
 
   const diagnosticFields = [

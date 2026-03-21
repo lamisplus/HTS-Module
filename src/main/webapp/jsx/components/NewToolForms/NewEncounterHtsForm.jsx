@@ -224,6 +224,7 @@ const blankClinicalValues = {
   adolescentHivPositive: "",
   partnerNotRegularlyOnDrugs: "",
   partnerRecentlyReturnedToTreatment: "",
+  hadSexWithHivPositivePartnerInRiskGroup: "",
   hivEarlyDetectTestDone: "",
   initialHivTest: "",
   suspectedAcuteInfection: "",
@@ -347,7 +348,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     "complaintsUrethralDischarge", "complaintsScroralSwelling",
     "complaintsGenitalSores", "complaintsSwollenLymphNodes",
     "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
-    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
+    "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup"
   ];
 
   const diagnosticFields = [

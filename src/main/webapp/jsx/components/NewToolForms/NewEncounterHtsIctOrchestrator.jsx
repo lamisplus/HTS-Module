@@ -125,9 +125,9 @@ const useStyles = makeStyles(() => ({
     animation: "$pulse 1.5s infinite",
   },
   "@keyframes pulse": {
-    "0%":   { opacity: 1, transform: "scale(1)"   },
-    "50%":  { opacity: 0.4, transform: "scale(1.4)" },
-    "100%": { opacity: 1, transform: "scale(1)"   },
+    "0%": { opacity: 1, transform: "scale(1)" },
+    "50%": { opacity: 0.4, transform: "scale(1.4)" },
+    "100%": { opacity: 1, transform: "scale(1)" },
   },
   content: {
     flex: 1,
@@ -141,14 +141,15 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  const sessionMatch =
-    htsValues.typeOfSession?.toUpperCase() === "INDEX" ||
-    htsValues.typeOfSession?.toLowerCase() === "index" ||
-    htsValues.typeOfSession?.toLowerCase().includes("index");
+  // const sessionMatch =
+  //   htsValues.typeOfSession?.toUpperCase() === "INDEX" ||
+  //   htsValues.typeOfSession?.toLowerCase() === "index" ||
+  //   htsValues.typeOfSession?.toLowerCase().includes("index");
   const positiveResult =
-    htsValues.confirmatoryHivTest?.toLowerCase() === "positive" ||
-    htsValues.initialHivTest?.toLowerCase() === "positive";
-  return sessionMatch && positiveResult;
+    htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
+  // || htsValues.initialHivTest?.toLowerCase() === "positive";
+  // return sessionMatch && positiveResult;
+  return positiveResult
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -160,12 +161,12 @@ const NewEncounterHtsIctOrchestrator = ({
 }) => {
   const classes = useStyles();
 
-  const [activeView, setActiveView]     = useState(VIEWS.HTS);
-  const [ictEligible, setIctEligible]   = useState(false);
+  const [activeView, setActiveView] = useState(VIEWS.HTS);
+  const [ictEligible, setIctEligible] = useState(false);
   const [htsSubmitted, setHtsSubmitted] = useState(false);
   const [ictSubmitted, setIctSubmitted] = useState(false);
-  const [htsValues, setHtsValues]       = useState(null); // live formik snapshot
-  const [htsRecord, setHtsRecord]       = useState(null); // API response after HTS save
+  const [htsValues, setHtsValues] = useState(null); // live formik snapshot
+  const [htsRecord, setHtsRecord] = useState(null); // API response after HTS save
 
   const eligibilityToastFiredRef = useRef(false);
 
@@ -214,24 +215,24 @@ const NewEncounterHtsIctOrchestrator = ({
   // ── Sidebar nav config ────────────────────────────────────────────────────
   const navItems = [
     {
-      key:    VIEWS.HTS,
-      step:   1,
-      label:  "HIV Testing (HTS)",
-      sub:    htsSubmitted ? "Completed" : "In progress",
+      key: VIEWS.HTS,
+      step: 1,
+      label: "HIV Testing (HTS)",
+      sub: htsSubmitted ? "Completed" : "In progress",
       locked: false,
-      done:   htsSubmitted,
+      done: htsSubmitted,
     },
     {
-      key:    VIEWS.ICT,
-      step:   2,
-      label:  "Index Contact Testing",
-      sub:    ictSubmitted
+      key: VIEWS.ICT,
+      step: 2,
+      label: "Index Contact Testing",
+      sub: ictSubmitted
         ? "Completed"
         : ictEligible
           ? htsSubmitted ? "Ready to fill" : "Eligible — complete HTS first"
           : "Not yet eligible",
       locked: !ictEligible,
-      done:   ictSubmitted,
+      done: ictSubmitted,
     },
   ];
 
@@ -248,15 +249,15 @@ const NewEncounterHtsIctOrchestrator = ({
           const isLocked = item.locked;
 
           const badgeBg =
-            item.done   ? "#2e7d32"          :
-            isActive    ? COLORS.primary      :
-            isLocked    ? "#d0d7de"           :
-                          COLORS.primaryLight;
+            item.done ? "#2e7d32" :
+              isActive ? COLORS.primary :
+                isLocked ? "#d0d7de" :
+                  COLORS.primaryLight;
 
           const badgeColor =
-            item.done || isActive ? "#fff"      :
-            isLocked              ? "#8c959f"   :
-                                    COLORS.primary;
+            item.done || isActive ? "#fff" :
+              isLocked ? "#8c959f" :
+                COLORS.primary;
 
           return (
             <div
