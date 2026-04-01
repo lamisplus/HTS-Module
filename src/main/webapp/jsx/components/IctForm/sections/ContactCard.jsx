@@ -406,12 +406,18 @@ const ContactCard = ({
               onKeyDown={handlePhoneKeyDown}
               onPaste={handlePhonePaste}
               maxLength={11}
-              disabled={readOnly || !!contact.sameAddressAsIndex}
+              // disabled={readOnly || !!contact.sameAddressAsIndex}
+              disabled={readOnly}
               style={
-                readOnly || !!contact.sameAddressAsIndex
+                readOnly
                   ? disabledInputStyle
                   : inputStyle
               }
+              // style={
+              //   readOnly || !!contact.sameAddressAsIndex
+              //     ? disabledInputStyle
+              //     : inputStyle
+              // }
               placeholder="Numbers only"
             />
             {touched.contactPhone && errors.contactPhone && (
@@ -579,7 +585,7 @@ const ContactCard = ({
                 required
               />
             </div>
-            
+
             <div className="col-md-4">
               <FormGroup style={{ marginBottom: "16px" }}>
                 <Label style={labelStyle}>
