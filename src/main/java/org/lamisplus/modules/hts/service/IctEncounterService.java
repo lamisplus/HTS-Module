@@ -183,6 +183,7 @@ public class IctEncounterService {
         c.setHivTestResult(cr.getHivTestResult());
         c.setDateTestedHiv(cr.getDateTestedHiv());
         c.setDateEnrolledArt(cr.getDateEnrolledArt());
+        c.setContactOnArt(cr.getContactOnArt());
         c.setEnrolledInOvc(Boolean.TRUE.equals(cr.getEnrolledInOvc()));
         c.setDateEnrolledOvc(cr.getDateEnrolledOvc());
         c.setOvcId(cr.getOvcId());
@@ -235,6 +236,7 @@ public class IctEncounterService {
         r.setHivTestResult(c.getHivTestResult());
         r.setDateTestedHiv(c.getDateTestedHiv());
         r.setDateEnrolledArt(c.getDateEnrolledArt());
+        r.setContactOnArt(c.getContactOnArt());
         r.setEnrolledInOvc(c.getEnrolledInOvc());
         r.setDateEnrolledOvc(c.getDateEnrolledOvc());
         r.setOvcId(c.getOvcId());

@@ -37,6 +37,7 @@ export const makeBlankContact = (indexClientId, existingCount) => ({
   dateTestedHiv: "",
   hivTestResult: "",
   dateEnrolledArt: "",
+  contactOnArt: "",
   enrolledInOvc: false,
   dateEnrolledOvc: "",
   ovcId: "",

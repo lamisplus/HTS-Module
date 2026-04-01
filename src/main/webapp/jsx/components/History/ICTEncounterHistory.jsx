@@ -194,7 +194,7 @@ const ICTEncounterHistory = (props) => {
         });
     };
 
-    // Colour-coded label for Yes/No PNS fields
+    // Colour-coded label for Yes/No Index Testing Services fields
     const resolvePnsLabel = (value) => {
         if (!value) return <Label size="mini">N/A</Label>;
         const lower = value.toLowerCase();
@@ -217,7 +217,7 @@ const ICTEncounterHistory = (props) => {
                 isLoading={loading}
                 columns={[
                     {
-                        title: "Date of Service",
+                        title: "Visit Date",
                         field: "dateOfService",
                         filtering: false,
                     },
@@ -232,13 +232,13 @@ const ICTEncounterHistory = (props) => {
                         filtering: false,
                     },
                     {
-                        title: "Offered PNS",
+                        title: "Offered Index Testing Services",
                         field: "offeredPns",
                         filtering: false,
                         render: (rowData) => resolvePnsLabel(rowData.offeredPns),
                     },
                     {
-                        title: "Accepted PNS",
+                        title: "Accepted Index Testing Services",
                         field: "acceptedPns",
                         filtering: false,
                         render: (rowData) => resolvePnsLabel(rowData.acceptedPns),

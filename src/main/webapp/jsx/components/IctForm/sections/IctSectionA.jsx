@@ -89,11 +89,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     fetchStates(1);
   }, []);
 
-  // Fetch facilityId from /account if not already seeded from HTS values.
-  // This covers the ART-triggered ICT path where HTS was not filled in this session.
   useEffect(() => {
-    // Always fetch account to ensure facilityName is populated.
-    // currentOrganisationUnitId is only seeded if missing.
     const fetchAccount = async () => {
       try {
         const response = await axios.get(`${url}account`, {
@@ -116,10 +112,6 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     fetchAccount();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When statesList is ready AND values.state looks like a numeric ID,
-  // resolve it to its display name and seed that name back into values.state
-  // so the payload builder stores a human-readable name (not a raw ID).
-  // Also trigger LGA fetch using the numeric ID.
   useEffect(() => {
     if (statesList?.length > 0 && values?.state) {
       const looksLikeId = /^\d+$/.test(String(values.state).trim());
@@ -253,7 +245,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       <div className="row">
         <div className="col-md-4">
           <FormTextField
-            label="Date of Service"
+            label="Visit Date"
             type="date"
             {...fp("dateOfService")}
             required
@@ -328,6 +320,16 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         <div className="col-md-4">
           <ReadOnlyField label="Age" value={values.indexAge} />
         </div>
+
+        <div className="col-md-4">
+          <FormSelect
+            label="Client Category"
+            {...sp("clientCategory", CLIENT_CATEGORY_OPTIONS)}
+            onChange={readOnly ? undefined : handleCategoryChange}
+            required
+          />
+        </div>
+
       </div>
 
       {/* ── Contact info (phone editable, address editable if needed) ── */}
@@ -385,17 +387,9 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       </div>
 
       {/* ── Client Category ── */}
-      <SectionSubheading>Client Category & PNS</SectionSubheading>
+      <SectionSubheading>Index Services</SectionSubheading>
       <div className="row">
-        <div className="col-md-4">
-          <FormSelect
-            label="Client Category"
-            {...sp("clientCategory", CLIENT_CATEGORY_OPTIONS)}
-            onChange={readOnly ? undefined : handleCategoryChange}
-            required
-          />
-        </div>
-
+       
         {showCategoryOther && (
           <div className="col-md-4">
             <FormTextField
@@ -408,7 +402,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
         <div className="col-md-4">
           <FormSelect
-            label="Offered PNS?"
+            label="Offered Index Testing Services ?"
             {...sp("offeredPns", transformOptions(codesets?.["YES_NO"]))}
             onChange={readOnly ? undefined : handleOfferedPnsChange}
             required
@@ -418,7 +412,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         {showAcceptedPns && (
           <div className="col-md-4">
             <FormSelect
-              label="Accepted PNS?"
+              label="Accepted Index Testing Services?"
               {...sp("acceptedPns", transformOptions(codesets?.["YES_NO"]))}
               required
             />

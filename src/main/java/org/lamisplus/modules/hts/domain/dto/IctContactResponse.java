@@ -23,6 +23,7 @@ public class IctContactResponse {
     private String hivTestResult;
     private LocalDate dateTestedHiv;
     private LocalDate dateEnrolledArt;
+    private String contactOnArt;
     private Boolean enrolledInOvc;
     private LocalDate dateEnrolledOvc;
     private String ovcId;

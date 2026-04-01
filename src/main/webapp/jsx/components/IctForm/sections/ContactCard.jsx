@@ -140,7 +140,7 @@ const ContactCard = ({
     if (!Array.isArray(items)) return [];
     return items.map((item) => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase() : item.display,
       value: item.display,
     }));
   };
@@ -169,7 +169,7 @@ const ContactCard = ({
     name,
     value: val(name),
     onChange: (e) => set(name, e.target.value),
-    onBlur: () => {},
+    onBlur: () => { },
     error: touched[name] && !!errors[name],
     helperText: touched[name] && errors[name],
     disabled: readOnly,
@@ -179,7 +179,7 @@ const ContactCard = ({
   const sp = (name, options, extraDisabled = false) => ({
     name,
     value: val(name),
-    onBlur: () => {},
+    onBlur: () => { },
     error: touched[name] && !!errors[name],
     helperText: touched[name] && errors[name],
     disabled: readOnly || extraDisabled,
@@ -192,17 +192,16 @@ const ContactCard = ({
     if (readOnly) return;
     const checked = e.target.checked;
     if (checked) {
-      // Single atomic patch — all three fields land in one setFieldValue call
       patch({
         sameAddressAsIndex: true,
         contactAddress: indexAddress || "",
-        contactPhone: indexPhone || "",
+        // contactPhone: indexPhone || "",
       });
     } else {
       patch({
         sameAddressAsIndex: false,
         contactAddress: "",
-        contactPhone: "",
+        // contactPhone: "",
       });
     }
   };
@@ -231,6 +230,7 @@ const ContactCard = ({
       knownHivPositive: v,
       dateTestedHiv: "",
       hivTestResult: "",
+      contactOnArt: "",
       dateEnrolledArt: "",
     });
   };
@@ -242,11 +242,23 @@ const ContactCard = ({
       patch({
         hivTestResult: v,
         dateEnrolledArt: "",
+        contactOnArt: "",
       });
     } else {
       set("hivTestResult", v);
     }
   };
+
+  const handleOnArt = (e) => {
+    if (readOnly) return
+    const v = e.target.value;
+    patch({
+      contactOnArt: v,
+      dateEnrolledArt: "",
+      contactOnArt: ""
+    })
+
+  }
 
   const handleEnrolledOvcChange = (e) => {
     if (readOnly) return;
@@ -287,7 +299,7 @@ const ContactCard = ({
   const showArtEnrollDate =
     isKnownPositive || val("hivTestResult").toLowerCase() === "positive";
   const isUnder15 = val("contactAgeGroup") === "<15";
-
+  const showisArtStartDate = val("contactOnArt").toLowerCase() === "yes"
   return (
     <div style={cardStyle}>
 
@@ -523,59 +535,16 @@ const ContactCard = ({
                 )}
               </FormGroup>
             </div>
-            <div className="col-md-4">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>
-                  Date Enrolled on ART <span style={{ color: "red" }}> *</span>
-                </Label>
-                <Input
-                  type="date"
-                  value={val("dateEnrolledArt")}
-                  onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
-                  max={today}
-                  onKeyPress={(e) => e.preventDefault()}
-                  disabled={readOnly}
-                  style={readOnly ? disabledInputStyle : inputStyle}
-                />
-                {touched.dateEnrolledArt && errors.dateEnrolledArt && (
-                  <span style={errorStyle}>{errors.dateEnrolledArt}</span>
-                )}
-              </FormGroup>
-            </div>
-          </>
-        )}
 
-        {/* Known Negative / newly testing path */}
-        {isKnownNegative && (
-          <>
             <div className="col-md-4">
               <FormSelect
-                label="HIV Test Result"
-                {...sp("hivTestResult", HIV_TEST_RESULT_OPTIONS)}
-                onChange={handleHivResultChange}
-                required
+                label="On ART ?"
+                {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
+                onChange={readOnly ? undefined : handleOnArt}
               />
             </div>
-            <div className="col-md-4">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>
-                  Date Partner Tested <span style={{ color: "red" }}> *</span>
-                </Label>
-                <Input
-                  type="date"
-                  value={val("dateTestedHiv")}
-                  onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
-                  max={today}
-                  onKeyPress={(e) => e.preventDefault()}
-                  disabled={readOnly}
-                  style={readOnly ? disabledInputStyle : inputStyle}
-                />
-                {touched.dateTestedHiv && errors.dateTestedHiv && (
-                  <span style={errorStyle}>{errors.dateTestedHiv}</span>
-                )}
-              </FormGroup>
-            </div>
-            {showArtEnrollDate && (
+
+            {showisArtStartDate && (
               <div className="col-md-4">
                 <FormGroup style={{ marginBottom: "16px" }}>
                   <Label style={labelStyle}>
@@ -595,6 +564,74 @@ const ContactCard = ({
                   )}
                 </FormGroup>
               </div>
+            )}
+          </>
+        )}
+
+        {/* Known Negative / newly testing path */}
+        {isKnownNegative && (
+          <>
+            <div className="col-md-4">
+              <FormSelect
+                label="HIV Test Result"
+                {...sp("hivTestResult", HIV_TEST_RESULT_OPTIONS)}
+                onChange={handleHivResultChange}
+                required
+              />
+            </div>
+            
+            <div className="col-md-4">
+              <FormGroup style={{ marginBottom: "16px" }}>
+                <Label style={labelStyle}>
+                  Date Contact Tested <span style={{ color: "red" }}> *</span>
+                </Label>
+                <Input
+                  type="date"
+                  value={val("dateTestedHiv")}
+                  onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
+                  max={today}
+                  onKeyPress={(e) => e.preventDefault()}
+                  disabled={readOnly}
+                  style={readOnly ? disabledInputStyle : inputStyle}
+                />
+                {touched.dateTestedHiv && errors.dateTestedHiv && (
+                  <span style={errorStyle}>{errors.dateTestedHiv}</span>
+                )}
+              </FormGroup>
+            </div>
+
+
+            {showArtEnrollDate && (
+              <>
+                <div className="col-md-4">
+                  <FormSelect
+                    label="On ART ?"
+                    {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
+                    onChange={readOnly ? undefined : handleOnArt}
+                  />
+                </div>
+                {showisArtStartDate && (
+                  <div className="col-md-4">
+                    <FormGroup style={{ marginBottom: "16px" }}>
+                      <Label style={labelStyle}>
+                        Date Enrolled on ART <span style={{ color: "red" }}> *</span>
+                      </Label>
+                      <Input
+                        type="date"
+                        value={val("dateEnrolledArt")}
+                        onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
+                        max={today}
+                        onKeyPress={(e) => e.preventDefault()}
+                        disabled={readOnly}
+                        style={readOnly ? disabledInputStyle : inputStyle}
+                      />
+                      {touched.dateEnrolledArt && errors.dateEnrolledArt && (
+                        <span style={errorStyle}>{errors.dateEnrolledArt}</span>
+                      )}
+                    </FormGroup>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

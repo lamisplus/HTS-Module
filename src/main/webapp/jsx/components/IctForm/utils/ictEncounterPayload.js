@@ -17,10 +17,10 @@ export const buildIctEncounterPayload = (values) => {
     // ── Person & facility linkage ────────────────────────────────────────────
     // personId always required. facilityId from currentOrganisationUnitId,
     // matching the same pattern used by the HTS payload builder.
-    personId:   values.personId                ?? null,
+    personId: values.personId ?? null,
     facilityId: values.currentOrganisationUnitId != null
-                  ? Number(values.currentOrganisationUnitId)
-                  : null,
+      ? Number(values.currentOrganisationUnitId)
+      : null,
 
     // htsEncounterId is attached by the caller (IctForm.jsx) from htsRecord.id
     // after the HTS form submits. We don't set it here to keep the builder pure.
@@ -38,29 +38,29 @@ export const buildIctEncounterPayload = (values) => {
     // These three are display values needed to re-populate the form on view/edit.
     // state and lga are the human-readable names resolved by IctSectionA at fill time.
     facilityName: values.facilityName || null,
-    state:        values.state        || null,
-    lga:          values.lga          || null,
+    state: values.state || null,
+    lga: values.lga || null,
 
     // ── Section A: Index Client Snapshot (flat, stored in JSONB on backend) ─
-    indexClientId:  values.indexClientId  || null,
-    artUniqueId:    values.artUniqueId    || null,
+    indexClientId: values.indexClientId || null,
+    artUniqueId: values.artUniqueId || null,
     indexFirstName: values.indexFirstName || null,
-    indexMiddleName:values.indexMiddleName|| null,
-    indexSurname:   values.indexSurname   || null,
-    indexSex:       values.indexSex       || null,
-    indexDob:       values.indexDob       || null,
-    indexAge:       values.indexAge       ? parseInt(values.indexAge, 10) : null,
-    indexPhone:     values.indexPhone     || null,
-    indexAltPhone:  values.indexAltPhone  || null,
-    indexAddress:   values.indexAddress   || null,
+    indexMiddleName: values.indexMiddleName || null,
+    indexSurname: values.indexSurname || null,
+    indexSex: values.indexSex || null,
+    indexDob: values.indexDob || null,
+    indexAge: values.indexAge ? parseInt(values.indexAge, 10) : null,
+    indexPhone: values.indexPhone || null,
+    indexAltPhone: values.indexAltPhone || null,
+    indexAddress: values.indexAddress || null,
 
-    // ── Section A: Category & PNS ───────────────────────────────────────────
-    clientCategory:      values.clientCategory      || null,
+    // ── Section A: Category & Index Testing Services ───────────────────────────────────────────
+    clientCategory: values.clientCategory || null,
     clientCategoryOther:
       values.clientCategory?.toLowerCase() === "other"
         ? values.clientCategoryOther || null
         : null,
-    offeredPns:  values.offeredPns  || null,
+    offeredPns: values.offeredPns || null,
     acceptedPns:
       values.offeredPns?.toLowerCase() === "yes"
         ? values.acceptedPns || null
@@ -81,16 +81,16 @@ const buildContactPayload = (c) => {
   const isUnder15 = c.contactAgeGroup === "<15";
 
   return {
-    contactId:           c.contactId           || null,
-    nameOfContact:       c.nameOfContact        || null,
-    relationshipToIndex: c.relationshipToIndex  || null,
-    contactSex:          c.contactSex           || null,
-    contactAgeGroup:     c.contactAgeGroup      || null,
-    contactPhone:        c.contactPhone         || null,
-    contactAddress:      c.contactAddress       || null,
-    sameAddressAsIndex:  !!c.sameAddressAsIndex,
-    notificationMethod:  c.notificationMethod   || null,
-    followUpLocation:    c.followUpLocation     || null,
+    contactId: c.contactId || null,
+    nameOfContact: c.nameOfContact || null,
+    relationshipToIndex: c.relationshipToIndex || null,
+    contactSex: c.contactSex || null,
+    contactAgeGroup: c.contactAgeGroup || null,
+    contactPhone: c.contactPhone || null,
+    contactAddress: c.contactAddress || null,
+    sameAddressAsIndex: !!c.sameAddressAsIndex,
+    notificationMethod: c.notificationMethod || null,
+    followUpLocation: c.followUpLocation || null,
     attempts:
       c.attempts !== "" && c.attempts != null
         ? parseInt(c.attempts, 10)
@@ -110,6 +110,8 @@ const buildContactPayload = (c) => {
       isKnownPositive || (isKnownNegative && newTestPositive)
         ? c.dateEnrolledArt || null
         : null,
+
+    contactOnArt: c.contactOnArt,
 
     // OVC: only applicable when contact is under 15
     enrolledInOvc: isUnder15 ? !!c.enrolledInOvc : false,

@@ -291,10 +291,10 @@ const IctForm = ({
   const sectionBLocked = pnsNotOffered || pnsDeclined || offeredPnsUnset;
 
   const lockReason = pnsNotOffered
-    ? "PNS was not offered to the index client. Section B is not applicable."
+    ? "Index Testing Services was not offered to the index client. Section B is not applicable."
     : pnsDeclined
-    ? "The index client declined PNS. Section B is not applicable."
-    : "Please complete the 'Offered PNS' and 'Accepted PNS' fields in Section A first.";
+    ? "The index client declined Index Testing Services. Section B is not applicable."
+    : "Please complete the 'Offered Index Testing Services' and 'Accepted Index Testing Services' fields in Section A first.";
 
   const badge = modeBadgeStyle(mode);
 
@@ -344,7 +344,7 @@ const IctForm = ({
             title="Section B — Contact Enumeration & Testing Tracker"
             subtitle={
               sectionBLocked
-                ? "Locked — complete PNS fields in Section A to enable"
+                ? "Locked — complete Index Testing Services fields in Section A to enable"
                 : `${values.contacts?.length || 0} contact(s) added`
             }
             hasError={hasSubmitted && !!errors.contacts}

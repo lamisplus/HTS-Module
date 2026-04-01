@@ -80,34 +80,38 @@ const contactSchema = yup.object({
     .typeError("Must be a number"),
 
   knownHivPositive: yup.string().required("Known HIV status is required"),
+  dateTestedHiv: yup.date(),
 
   // If knownHivPositive = Yes → dateTested + dateEnrolledArt required
-  dateTestedHiv: yup.mixed().test("date-tested-hiv", "Date tested is required", function (val) {
-    const { knownHivPositive, hivTestResult } = this.parent;
-    // Required when: knownHivPositive=Yes OR (knownHivPositive=No and we show new test)
-    if (knownHivPositive?.toLowerCase() === "yes" || knownHivPositive?.toLowerCase() === "no") {
-      if (!val) return this.createError({ message: "Date tested is required" });
-      if (new Date(val) > today)
-        return this.createError({ message: "Cannot be a future date" });
-    }
-    return true;
-  }),
+  // dateTestedHiv: yup.mixed().test("date-tested-hiv", "Date tested is required", function (val) {
+  //   const { knownHivPositive, hivTestResult } = this.parent;
+  //   // Required when: knownHivPositive=Yes OR (knownHivPositive=No and we show new test)
+  //   if (knownHivPositive?.toLowerCase() === "yes" || knownHivPositive?.toLowerCase() === "no") {
+  //     if (!val) return this.createError({ message: "Date tested is required" });
+  //     if (new Date(val) > today)
+  //       return this.createError({ message: "Cannot be a future date" });
+  //   }
+  //   return true;
+  // }),
 
   hivTestResult: yup.mixed().test("hiv-result-required", "HIV test result is required", function (val) {
     if (this.parent.knownHivPositive?.toLowerCase() !== "no") return true;
     return !!val || this.createError({ message: "HIV test result is required" });
   }),
 
-  dateEnrolledArt: yup.mixed().test("art-enroll-conditional", "ART enrollment date is required", function (val) {
-    const { knownHivPositive, hivTestResult } = this.parent;
-    const needsArt =
-      knownHivPositive?.toLowerCase() === "yes" || hivTestResult?.toLowerCase() === "positive";
-    if (!needsArt) return true;
-    if (!val) return this.createError({ message: "Date enrolled on ART is required" });
-    if (new Date(val) > today)
-      return this.createError({ message: "Cannot be a future date" });
-    return true;
-  }),
+  // dateEnrolledArt: yup.mixed().test("art-enroll-conditional", "ART enrollment date is required", function (val) {
+  //   const { knownHivPositive, hivTestResult } = this.parent;
+  //   const needsArt =
+  //     knownHivPositive?.toLowerCase() === "yes" || hivTestResult?.toLowerCase() === "positive";
+  //   if (!needsArt) return true;
+  //   if (!val) return this.createError({ message: "Date enrolled on ART is required" });
+  //   if (new Date(val) > today)
+  //     return this.createError({ message: "Cannot be a future date" });
+  //   return true;
+  // }),
+
+  dateEnrolledArt: yup.string(),
+  contactOnArt: yup.string(),
 
   // OVC — only for contacts < 15 years
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
@@ -155,11 +159,11 @@ export const buildIctValidationSchema = () =>
       return !!val || this.createError({ message: "Please specify the client category" });
     }),
 
-    offeredPns: yup.string().required("Offered PNS is required"),
+    offeredPns: yup.string().required("Offered Index Testing Services is required"),
 
-    acceptedPns: yup.mixed().test("accepted-pns-conditional", "Accepted PNS is required", function (val) {
+    acceptedPns: yup.mixed().test("accepted-pns-conditional", "Accepted Index Testing Services is required", function (val) {
       if (this.parent.offeredPns?.toLowerCase() !== "yes") return true;
-      return !!val || this.createError({ message: "Accepted PNS is required when PNS was offered" });
+      return !!val || this.createError({ message: "Accepted Index Testing Services is required when Index Testing Services was offered" });
     }),
 
     // ── Section B ──────────────────────────────────────────────────────────
@@ -168,7 +172,7 @@ export const buildIctValidationSchema = () =>
     contacts: yup.mixed().test("contacts-required", "At least one contact is required", function (val) {
       if (this.parent.acceptedPns?.toLowerCase() !== "yes") return true;
       if (!Array.isArray(val) || val.length === 0)
-        return this.createError({ message: "At least one contact must be added when PNS is accepted" });
+        return this.createError({ message: "At least one contact must be added when Index Testing Services is accepted" });
       // Run per-contact schema against each item
       try {
         val.forEach((contact, i) => contactSchema.validateSync(contact, { abortEarly: false }));

@@ -49,6 +49,7 @@ public class IctContactRequest {
 
     // Required when knownHivPositive = Yes OR hivTestResult = Positive
     private LocalDate dateEnrolledArt;
+    private String contactOnArt;
 
     // OVC fields: only applicable when contactAgeGroup = "<15"
     private Boolean enrolledInOvc;

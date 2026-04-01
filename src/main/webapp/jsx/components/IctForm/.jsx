@@ -1,12 +1,42 @@
+/**
+ * HtsIctOrchestrator.jsx
+ *
+ * Parent wrapper that hosts both the HTS form and the ICT form with a
+ * left-hand sidebar navigator.
+ *
+ * SIDEBAR LOGIC
+ * ─────────────
+ * HTS   — always active
+ * ICT   — greyed-out and locked until the HTS form reaches eligibility:
+ *           • typeOfSession === "Index Testing"   AND
+ *           • initialHivTest === "Positive"        (or confirmatoryHivTest === "Positive")
+ *
+ * When eligibility is detected IN REAL TIME (via HTS formik watcher):
+ *   • ICT menu item turns blue and clickable
+ *   • A toast fires once: "This client is eligible for ICT — the form is now enabled"
+ *
+ * FORM FLOW
+ * ─────────
+ * 1. User fills HTS form → submits → API returns htsRecord
+ * 2. active view switches to "ICT" automatically
+ * 3. ICT form is pre-populated from htsValues + htsRecord
+ *
+ * Props:
+ *   patientId   — optional; passed through to sub-forms
+ *   onDone      — called after both forms complete (e.g. navigate back to patient list)
+ *   isExisting  — open in view/edit mode for an existing patient
+ *   htsInitial  — initial values when opening an existing HTS record
+ *   ictInitial  — initial values when opening an existing ICT record
+ *   isOnArt     — Boolean; forwarded to ICT form
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
-import NewPatientHtsForm from "../NewToolForms/NewPatientHtsForm";
+import NewPatientHtsForm from "./NewPatientHtsForm";
 import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
-import IctForm from "../IctForm/IctForm";
+import IctForm from "./IctForm";
 import { COLORS } from "../NewToolForms/constants";
-import { getHtsEcounter } from "../../services/getHtsEncounter";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const VIEWS = {
   HTS: "HTS",
@@ -105,15 +135,18 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+/**
+ * Evaluates whether the current HTS form values make this patient
+ * eligible for ICT (real-time — runs on every formik value change).
+ */
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  // const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index";
+  const sessionMatch = htsValues.typeOfSession === "Index Testing";
   const positiveResult =
-    htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
-    // || htsValues.initialHivTest?.toLowerCase() === "positive";
-    // return sessionMatch && positiveResult;
-    return true
-  // return positiveResult
+    htsValues.confirmatoryHivTest === "Positive" ||
+    htsValues.initialHivTest === "Positive";
+  // return true
+  return sessionMatch && positiveResult;
 };
 
 const HtsIctOrchestrator = ({
@@ -124,8 +157,6 @@ const HtsIctOrchestrator = ({
   ictInitial,
   isOnArt = false,
   fullRecord,
-  existingIctId,    // ID of an existing ICT record to view or edit
-  ictReadOnly = false, // When true, ICT form opens in view-only mode
 }) => {
   const classes = useStyles();
 
@@ -134,36 +165,11 @@ const HtsIctOrchestrator = ({
   const [htsSubmitted, setHtsSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null);   // HTS formik values snapshot
   const [htsRecord, setHtsRecord] = useState(null);   // API response after HTS submit
-  const history = useHistory()
+
   const eligibilityToastFiredRef = useRef(false);
 
-  const [resolvedHtsInitial, setResolvedHtsInitial] = useState(
-    htsInitial && Object.keys(htsInitial).length > 0 ? htsInitial : null
-  );
-  const [isFetchingHts, setIsFetchingHts] = useState(false);
-
-  useEffect(() => {
-    // Only run when: viewing an existing record, htsInitial is empty,
-    // and the ICT record carries an htsEncounterId to fetch from.
-    const htsInitialIsEmpty = !htsInitial || Object.keys(htsInitial).length === 0;
-    const htsEncounterId = ictInitial?.htsEncounterId;
-
-    if (isExisting && htsInitialIsEmpty && htsEncounterId) {
-      setIsFetchingHts(true);
-      getHtsEcounter(htsEncounterId)
-        .then((response) => {
-          // getHtsEcounter returns response.data (already unwrapped)
-          const data = response?.data ?? response;
-          if (data) setResolvedHtsInitial(data);
-        })
-        .catch((err) => {
-          console.error("HtsIctOrchestrator: failed to fetch linked HTS record", err?.message);
-        })
-        .finally(() => setIsFetchingHts(false));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // ── Real-time eligibility detection ──────────────────────────────────────
+  // Called by the HTS form child on every formik change (via onValuesChange prop)
   const handleHtsValuesChange = (values) => {
     const eligible = isIctEligible(values);
     setHtsValues(values);
@@ -184,6 +190,7 @@ const HtsIctOrchestrator = ({
     }
   };
 
+  // ── HTS submit callback ───────────────────────────────────────────────────
   const handleHtsSubmitSuccess = (record, formValues) => {
     setHtsRecord(record);
     setHtsValues(formValues);
@@ -191,27 +198,18 @@ const HtsIctOrchestrator = ({
 
     if (isIctEligible(formValues)) {
       setIctEligible(true);
+      // Auto-navigate to ICT after a brief moment
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
       toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
     }
-    else {
-      history.push("/")
-    }
-
-    // setIctEligible(true);
-    // setTimeout(() => setActiveView(VIEWS.ICT), 600);
-    // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
   };
 
-  
-  const [ictSubmitted, setIctSubmitted] = useState(false);
-
-  const handleIctSubmitSuccess = (ictResponse) => {
-    setIctSubmitted(true);
-    onDone?.(ictResponse);
+  // ── ICT submit callback ───────────────────────────────────────────────────
+  const handleIctSubmitSuccess = () => {
+    onDone?.();
   };
 
-
+  // ── Nav item config ───────────────────────────────────────────────────────
   const navItems = [
     {
       key: VIEWS.HTS,
@@ -225,15 +223,12 @@ const HtsIctOrchestrator = ({
       key: VIEWS.ICT,
       step: 2,
       label: "Index Contact Testing",
-      sub: ictSubmitted
-        ? "Completed"
-        : ictEligible
-          ? htsSubmitted
-            ? "Ready to fill"
-            : "Eligible — complete HTS first"
-          : "Not yet eligible",
+      sub: ictEligible
+        ? htsSubmitted
+          ? "Ready to fill" : "Eligible — complete HTS first"
+        : "Not yet eligible",
       locked: !ictEligible,
-      done: ictSubmitted,
+      done: false,
     },
   ];
 
@@ -306,16 +301,10 @@ const HtsIctOrchestrator = ({
           />
         )}
 
-        {activeView === VIEWS.HTS && isExisting && isFetchingHts && (
-          <div style={{ padding: 40, textAlign: "center", color: "#57606a", fontSize: 14 }}>
-            Loading HTS record…
-          </div>
-        )}
-
-        {activeView === VIEWS.HTS && isExisting && !isFetchingHts && (
+        {activeView === VIEWS.HTS && isExisting && (
           <ExistingPatientHtsForm
-            fullRecord={fullRecord || { id: ictInitial?.htsEncounterId }}
-            initialValues={resolvedHtsInitial}
+            fullRecord={fullRecord}
+            initialValues={htsInitial}
             readOnly={false}
             backButtonAction={onDone}
           />
@@ -328,9 +317,8 @@ const HtsIctOrchestrator = ({
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSubmitSuccess}
             onBack={() => setActiveView(VIEWS.HTS)}
-            readOnly={ictReadOnly}
+            readOnly={false}
             initialValues={ictInitial}
-            existingId={existingIctId}
           />
         )}
       </div>
@@ -338,20 +326,6 @@ const HtsIctOrchestrator = ({
   );
 };
 
-// ── Thin wrapper around NewPatientHtsForm to intercept formik values ─────────
-/**
- * NewPatientHtsFormWithWatcher
- *
- * Wraps NewPatientHtsForm and forwards every formik value change
- * to the orchestrator via onValuesChange. It does this by monkey-patching
- * the onSubmit so that after the API call succeeds it notifies the parent.
- * For real-time changes we pass a renderProp / callback down via a custom prop.
- *
- * NOTE: The cleanest way to do this is to accept an onValuesChange prop
- * directly inside NewPatientHtsForm and call it inside a useEffect watching
- * formik.values. The snippet below shows the change that needs to be made
- * to NewPatientHtsForm — see the comment block at the bottom of this file.
- */
 const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack }) => {
   return (
     <NewPatientHtsForm

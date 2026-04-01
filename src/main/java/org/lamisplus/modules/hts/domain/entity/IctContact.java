@@ -81,6 +81,9 @@ public class IctContact {
     @Column(name = "date_enrolled_art")
     private LocalDate dateEnrolledArt;
 
+    @Column(name = "contact_on_art")
+    private String contactOnArt;
+
     @Column(name = "enrolled_in_ovc")
     private Boolean enrolledInOvc = false;
 
