@@ -23,7 +23,9 @@ export const generateContactId = (indexClientId, sequence) => {
 /** Build a blank contact row with a pre-generated ID */
 export const makeBlankContact = (indexClientId, existingCount) => ({
   contactId: generateContactId(indexClientId, existingCount + 1),
-  nameOfContact: "",
+  firstnameOfContact: "",
+  middlenameOfContact: "",
+  surnameOfContact: "",
   relationshipToIndex: "",
   contactSex: "",
   contactAgeGroup: "",

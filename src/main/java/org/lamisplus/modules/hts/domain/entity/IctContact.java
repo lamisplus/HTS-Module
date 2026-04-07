@@ -39,8 +39,14 @@ public class IctContact {
     @Column(name = "contact_id", length = 100)
     private String contactId;
 
-    @Column(name = "name_of_contact", nullable = false)
-    private String nameOfContact;
+    @Column(name = "firstname_of_contact", nullable = false)
+    private String firstnameOfContact;
+
+    @Column(name = "middlename_of_contact")
+    private String middlenameOfContact;
+
+    @Column(name = "surname_of_contact", nullable = false)
+    private String surnameOfContact;
 
     @Column(name = "relationship_to_index", length = 100)
     private String relationshipToIndex;

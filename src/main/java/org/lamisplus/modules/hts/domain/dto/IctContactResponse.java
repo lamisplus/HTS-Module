@@ -9,7 +9,9 @@ public class IctContactResponse {
     private Long id;
     private String uuid;
     private String contactId;
-    private String nameOfContact;
+    private String firstnameOfContact;
+    private String middlenameOfContact;
+    private String surnameOfContact;
     private String relationshipToIndex;
     private String contactSex;
     private String contactAgeGroup;

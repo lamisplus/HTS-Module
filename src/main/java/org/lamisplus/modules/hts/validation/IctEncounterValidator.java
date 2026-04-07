@@ -64,7 +64,7 @@ public class IctEncounterValidator implements ConstraintValidator<ValidIctEncoun
         // ── Section B: Contacts (only validate when PNS offered AND accepted) ─
         boolean contactsRequired =
                 "Yes".equalsIgnoreCase(request.getOfferedPns()) &&
-                "Yes".equalsIgnoreCase(request.getAcceptedPns());
+                        "Yes".equalsIgnoreCase(request.getAcceptedPns());
 
         if (contactsRequired) {
             List<IctContactRequest> contacts = request.getContacts();
@@ -106,15 +106,18 @@ public class IctEncounterValidator implements ConstraintValidator<ValidIctEncoun
             valid = false;
         }
 
-        // Known HIV Positive = Yes → dateTestedHiv and dateEnrolledArt required
+        // Known HIV Positive = Yes
         if ("Yes".equalsIgnoreCase(c.getKnownHivPositive())) {
             if (c.getDateTestedHiv() == null) {
                 addViolation(context, "Date previously tested for HIV is required", prefix + "dateTestedHiv");
                 valid = false;
             }
-            if (c.getDateEnrolledArt() == null) {
-                addViolation(context, "Date enrolled on ART is required for known positive contact", prefix + "dateEnrolledArt");
-                valid = false;
+            // dateEnrolledArt is only required when the contact is confirmed to be on ART
+            if ("Yes".equalsIgnoreCase(c.getContactOnArt())) {
+                if (c.getDateEnrolledArt() == null) {
+                    addViolation(context, "Date enrolled on ART is required when contact is on ART", prefix + "dateEnrolledArt");
+                    valid = false;
+                }
             }
         }
 

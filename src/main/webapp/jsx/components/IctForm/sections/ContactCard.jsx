@@ -250,12 +250,13 @@ const ContactCard = ({
   };
 
   const handleOnArt = (e) => {
+    console.log(e.target.value, readOnly)
     if (readOnly) return
     const v = e.target.value;
+
     patch({
       contactOnArt: v,
       dateEnrolledArt: "",
-      contactOnArt: ""
     })
 
   }
@@ -308,7 +309,7 @@ const ContactCard = ({
         <div style={{ display: "flex", alignItems: "center" }}>
           <span style={contactBadgeStyle}>{index + 1}</span>
           <span style={{ fontWeight: 700, fontSize: "15px", color: "#24292f" }}>
-            {contact.nameOfContact || `Contact ${index + 1}`}
+            {contact?.firstnameOfContact + contact?.surnameOfContact || `Contact ${index + 1}`}
           </span>
           {contact.contactId && (
             <span
@@ -348,8 +349,14 @@ const ContactCard = ({
 
       {/* ── Identity ── */}
       <div className="row">
-        <div className="col-md-6">
-          <FormTextField label="Name of Contact" {...fp("nameOfContact")} required />
+        <div className="col-md-4">
+          <FormTextField label="First Name of Contact" {...fp("firstnameOfContact")} required />
+        </div>
+        <div className="col-md-4">
+          <FormTextField label="Middle Name of Contact" {...fp("middlenameOfContact")} />
+        </div>
+        <div className="col-md-4">
+          <FormTextField label="Surname of Contact" {...fp("surnameOfContact")} required />
         </div>
         <div className="col-md-6">
           <FormSelect
@@ -611,7 +618,7 @@ const ContactCard = ({
               <>
                 <div className="col-md-4">
                   <FormSelect
-                    label="On ART ?"
+                    label="On ART ? xxxx"
                     {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
                     onChange={readOnly ? undefined : handleOnArt}
                   />

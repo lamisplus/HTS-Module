@@ -82,7 +82,9 @@ const buildContactPayload = (c) => {
 
   return {
     contactId: c.contactId || null,
-    nameOfContact: c.nameOfContact || null,
+    firstnameOfContact: c.firstnameOfContact || null,
+    middlenameOfContact: c.middlenameOfContact || null,
+    surnameOfContact: c.surnameOfContact || null,
     relationshipToIndex: c.relationshipToIndex || null,
     contactSex: c.contactSex || null,
     contactAgeGroup: c.contactAgeGroup || null,

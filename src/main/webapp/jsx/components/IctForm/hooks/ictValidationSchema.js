@@ -32,9 +32,20 @@ const pastOrToday = (label) =>
 // ── Per-contact schema ──────────────────────────────────────────────────────
 
 const contactSchema = yup.object({
-  nameOfContact: yup
+  firstnameOfContact: yup
     .string()
-    .required("Contact name is required")
+    .required("Contact First name is required")
+    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+      !!v && v.replace(/\s/g, "").length >= 2
+    ),
+  middlenameOfContact: yup
+    .string()
+    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+      !!v && v.replace(/\s/g, "").length >= 2
+    ),
+  surnameOfContact: yup
+    .string()
+    .required("Contact Surname is required")
     .test("min2", "Must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),

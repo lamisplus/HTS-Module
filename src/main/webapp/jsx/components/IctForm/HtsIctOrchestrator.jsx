@@ -6,7 +6,7 @@ import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom";
 
 const VIEWS = {
   HTS: "HTS",
@@ -112,8 +112,8 @@ const isIctEligible = (htsValues) => {
     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
     // || htsValues.initialHivTest?.toLowerCase() === "positive";
     // return sessionMatch && positiveResult;
-    return true
-  // return positiveResult
+    // return true
+  return positiveResult
 };
 
 const HtsIctOrchestrator = ({

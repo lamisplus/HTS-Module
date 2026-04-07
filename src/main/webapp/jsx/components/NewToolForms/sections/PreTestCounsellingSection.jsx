@@ -390,8 +390,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
         </>
       )}
-      <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
-      <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
+      <div className="row">
+        <div className="col-md-6">
+          <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
+        </div>
+        <div className="col-md-6">
+          <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
+        </div>
+      </div>
     </div>
   );
 };

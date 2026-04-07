@@ -298,11 +298,12 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     const type = e.target.value;
     setFieldValue("dobType", type);
     setFieldValue("adolescentHivPositive", "")
-    if (type.toLowerCase() === "actual") {
+    // if (type.toLowerCase() === "actual") {
       setFieldValue("age", "");
-    } else {
       setFieldValue("dateOfBirth", "");
-    }
+    // } else {
+      // setFieldValue("dateOfBirth", "");
+    // }
   };
 
   const handleDateOfBirthChange = (e) => {

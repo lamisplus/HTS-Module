@@ -14,8 +14,14 @@ public class IctContactRequest {
     /** Frontend-generated human-readable contact ID */
     private String contactId;
 
-    @NotBlank(message = "Name of contact is required")
-    private String nameOfContact;
+    @NotBlank(message = "First name of contact is required")
+    private String firstnameOfContact;
+
+    // @NotBlank(message = "Middle name of contact is required")
+    private String middlenameOfContact;
+
+    @NotBlank(message = "Surname of contact is required")
+    private String surnameOfContact;
 
     @NotBlank(message = "Relationship to index client is required")
     private String relationshipToIndex;

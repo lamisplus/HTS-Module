@@ -20,7 +20,6 @@
                              references="patient_person(id)"/>
             </column>
 
-
             <column name="hts_encounter_id" type="BIGINT">
                 <constraints nullable="true"
                              foreignKeyName="fk_ict_encounter_hts"
@@ -35,12 +34,10 @@
                 <constraints nullable="false"/>
             </column>
 
-
             <column name="setting" type="VARCHAR(100)"/>
             <column name="client_category" type="VARCHAR(100)"/>
             <column name="offered_pns" type="VARCHAR(10)"/>
             <column name="accepted_pns" type="VARCHAR(10)"/>
-
 
             <column name="data" type="JSONB"/>
 
@@ -87,9 +84,18 @@
             <column name="contact_id" type="VARCHAR(100)"/>
 
             <!-- Core contact fields — stored as columns for reporting queries -->
-            <column name="name_of_contact" type="VARCHAR(255)">
+            <column name="firstname_of_contact" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+
+            <column name="middlename_of_contact" type="VARCHAR(255)">
+                <constraints />
+            </column>
+
+            <column name="surname_of_contact" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
             <column name="relationship_to_index" type="VARCHAR(100)"/>
             <column name="contact_sex" type="VARCHAR(20)"/>
             <column name="contact_age_group" type="VARCHAR(20)"/>
@@ -103,6 +109,7 @@
             <column name="hiv_test_result" type="VARCHAR(20)"/>
             <column name="date_tested_hiv" type="DATE"/>
             <column name="date_enrolled_art" type="DATE"/>
+            <column name="contact_on_art" type="VARCHAR(20)"/>
             <column name="enrolled_in_ovc" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="date_enrolled_ovc" type="DATE"/>
             <column name="ovc_id" type="VARCHAR(100)"/>
@@ -126,6 +133,13 @@
         <createIndex indexName="idx_ict_contact_known_hiv" tableName="ict_contact">
             <column name="known_hiv_positive"/>
         </createIndex>
+    </changeSet>
+
+    <!-- ── Add contact_on_art to already-deployed ict_contact tables ────────── -->
+    <changeSet id="add_contact_on_art_to_ict_contact" author="lamisplus">
+        <addColumn tableName="ict_contact">
+            <column name="contact_on_art" type="VARCHAR(20)"/>
+        </addColumn>
     </changeSet>
 
 </databaseChangeLog>

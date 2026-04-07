@@ -169,7 +169,9 @@ public class IctEncounterService {
         IctContact c = new IctContact();
         c.setIctEncounter(encounter);
         c.setContactId(cr.getContactId());
-        c.setNameOfContact(cr.getNameOfContact());
+        c.setFirstnameOfContact(cr.getFirstnameOfContact());
+        c.setMiddlenameOfContact(cr.getMiddlenameOfContact());
+        c.setSurnameOfContact(cr.getSurnameOfContact());
         c.setRelationshipToIndex(cr.getRelationshipToIndex());
         c.setContactSex(cr.getContactSex());
         c.setContactAgeGroup(cr.getContactAgeGroup());
@@ -222,7 +224,9 @@ public class IctEncounterService {
         r.setId(c.getId());
         r.setUuid(c.getUuid());
         r.setContactId(c.getContactId());
-        r.setNameOfContact(c.getNameOfContact());
+        r.setFirstnameOfContact(c.getFirstnameOfContact());
+        r.setMiddlenameOfContact(c.getMiddlenameOfContact());
+        r.setSurnameOfContact(c.getSurnameOfContact());
         r.setRelationshipToIndex(c.getRelationshipToIndex());
         r.setContactSex(c.getContactSex());
         r.setContactAgeGroup(c.getContactAgeGroup());
