@@ -330,10 +330,6 @@ const IctSectionA = ({ formik, readOnly = false }) => {
           />
         </div>
 
-      </div>
-
-      {/* ── Contact info (phone editable, address editable if needed) ── */}
-      <div className="row" style={{ marginTop: 4 }}>
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>
@@ -356,7 +352,13 @@ const IctSectionA = ({ formik, readOnly = false }) => {
           </FormGroup>
         </div>
 
-        <div className="col-md-4">
+
+      </div>
+
+      {/* ── Contact info (phone editable, address editable if needed) ── */}
+      <div className="row" style={{ marginTop: 4 }}>
+        
+        <div className="col-md-12">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>Alternative Phone Number</Label>
             <Input
@@ -376,7 +378,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
           </FormGroup>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-12">
           <FormTextField
             label="Descriptive Residential Address"
             type="textarea"

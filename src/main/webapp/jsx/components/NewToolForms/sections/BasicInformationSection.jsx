@@ -379,7 +379,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </FormGroup>
         </div> */}
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormTextField
             label="Date of Visit"
             type="date"
@@ -388,7 +388,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           />
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormTextField
             label="Client Code"
             {...fp("clientCode")}
@@ -397,7 +397,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           />
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormSelect
             label="Setting"
             {...sp("setting", transformOptions(codesets?.["HTS_ENTRY_POINT"]))}
@@ -407,7 +407,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         </div>
 
         {showFacilitySetting && (
-          <div className="col-md-6">
+          <div className="col-md-4">
             <FormSelect
               label="Facility Setting"
               {...sp("facilitySetting", transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]))}
@@ -417,7 +417,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showCommunityEntry && (
-          <div className="col-md-6">
+          <div className="col-md-4">
             <FormSelect
               label="Community Setting"
               {...sp("communityEntryPoint", transformOptions(codesets?.["COMMUNITY_HTS_TEST_SETTING"]))}
@@ -426,7 +426,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormSelect
             label="Modality"
             {...sp("modality", MODALITY_OPTIONS)}
@@ -434,7 +434,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           />
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormSelect
             label="Type of Session"
             // {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
@@ -445,7 +445,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         </div>
 
         {showIndexFields && (
-          <div className="col-md-6">
+          <div className="col-md-4">
             <FormSelect
               label="Index Testing"
               {...sp("indexTesting", transformOptions(codesets?.["YES_NO"]))}
@@ -457,14 +457,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {showIndexDetails && (
           <>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <FormSelect
                 label="Relationship of Index Client"
                 {...sp("indexRelationship", transformOptions(codesets?.["INDEX_TESTING"]))}
                 required
               />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <FormTextField
                 label="Index Client Code/ID"
                 {...fp("indexClientCode")}
@@ -490,19 +490,19 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <div className="col-md-4">
               <ReadOnlyField label="Middle Name" value={values.middleName} />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <ReadOnlyField label="Date of Birth" value={values.dateOfBirth} />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <ReadOnlyField label="Age" value={values.age} />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <ReadOnlyField label="Sex" value={values.sex} />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <ReadOnlyField label="Phone Number" value={values.phoneNumber} />
             </div>
-            <div className="col-md-6">
+            <div className="col-md-4">
               <ReadOnlyField label="Marital Status" value={values.maritalStatus} />
             </div>
           </>
@@ -613,7 +613,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
 
-            <div className="col-md-6">
+            <div className="col-md-4">
               <FormTextField
                 label="Phone Number"
                 {...fp("phoneNumber")}
@@ -621,7 +621,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
 
-            <div className="col-md-6">
+            <div className="col-md-4">
               <FormSelect
                 label="Marital Status"
                 {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
@@ -634,7 +634,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {/* Marital sub-fields */}
         {showNumberOfWives && (
-          <div className="col-md-6">
+          <div className="col-md-4">
             <Label style={labelStyle}>No. of Wives</Label>
             <Input
               type="number"
@@ -657,7 +657,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showNumberOfCoWives && (
-          <div className="col-md-6">
+          <div className="col-md-4">
             <Label style={labelStyle}>No. of Co-wives</Label>
             <Input
               type="number"
@@ -679,7 +679,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        <div className="col-md-6">
+        <div className="col-md-4">
           <Label style={labelStyle}>{"No. of Biological Children < 15 years"}</Label>
           <Input
             type="number"
@@ -702,7 +702,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
         {/* Pregnancy */}
         {showPregnancy && (
-          <div className={`col-md-6 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
+          <div className={`col-md-4 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
             <FormSelect
               label="Pregnancy Status"
               {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
@@ -713,7 +713,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showBreastfeedingDuration && (
-          <div className={`col-md-6 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
+          <div className={`col-md-4 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", BREASTFEEDING_DURATION_OPTIONS)}

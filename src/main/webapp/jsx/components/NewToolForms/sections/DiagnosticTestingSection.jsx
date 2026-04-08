@@ -1,13 +1,5 @@
 import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
-import {
-  HIV_TEST_RESULT_OPTIONS,
-  CONFIRMATORY_TEST_OPTIONS,
-  SYPHILIS_TEST_OPTIONS,
-  RECENCY_TEST_OPTIONS,
-  HIV_EARLY_DETECT_OPTIONS,
-  YES_NO_OPTIONS,
-} from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
-import { useNewPatientFormik } from "../NewToolForms/hooks/useNewPatientFormik"; 
+import { useNewPatientFormik } from "../NewToolForms/hooks/useNewPatientFormik";
 import FormAccordion from "../NewToolForms/sections/FormAccordion";
 import BasicInformationSection from "../NewToolForms/sections/BasicInformationSection";
 import PreTestCounsellingSection from "../NewToolForms/sections/PreTestCounsellingSection";
@@ -69,7 +69,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
       setIsLoading(true)
       const response = await createEncounter(payload);
       setIsLoading(false)
-      toast.success("Encounter created successfully")
+      toast.success("Encounter created successfully", { autoClose: 10000 })
       if (onSubmitSuccess) {
         onSubmitSuccess(response?.data, values);
       } else {

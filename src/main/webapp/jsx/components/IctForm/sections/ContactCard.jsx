@@ -1,35 +1,3 @@
-/**
- * ContactCard.jsx
- *
- * ROOT CAUSE ANALYSIS & FIXES:
- *
- * Bug 1 — setMany stale closure: the previous setMany() called onChange(index, field, value)
- * in a forEach loop. Each call in IctSectionB.handleContactChange() maps over the contacts
- * array from its OWN closure — the same snapshot every time. So only the LAST field in the
- * loop survived; all earlier fields were overwritten back to their old value on the next
- * render cycle. This is why checkboxes appeared to do nothing visually and didn't persist.
- * FIX: onChange now accepts EITHER (index, field, value) for a single field OR
- *      (index, patchObject) for an atomic multi-field update. IctSectionB is updated
- *      to handle both signatures in one setFieldValue call.
- *
- * Bug 2 — FormSelect value fallback: FormSelect renders value={value || ""} which coerces
- * any falsy value (including the number 0) to "". The knownHivPositive yesNoOptions
- * built from codesets use value: item.display. As long as the stored field value exactly
- * matches an option's value string this works — but the || "" guard can hide mismatches.
- * FIX: value={value ?? ""} (nullish coalescing) to only coerce null/undefined, not 0 or "".
- *      Since FormSelect is a shared component we replicate the select inline for
- *      knownHivPositive to have full control.
- *
- * Additional fixes carried forward:
- *  - YES_NO options from useGetCodesets("YES_NO")
- *  - All Yes/No comparisons use .toLowerCase()
- *  - Age group change clears OVC fields atomically
- *  - OVC checkbox toggles correctly both ways
- *  - Same-address checkbox visual state + uncheck clears phone & address
- *  - Phone blocks non-numeric characters
- *  - All conditional fields clear when parent condition changes
- */
-
 import React, { useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import {
@@ -308,9 +276,9 @@ const ContactCard = ({
       <div style={cardHeaderStyle}>
         <div style={{ display: "flex", alignItems: "center" }}>
           <span style={contactBadgeStyle}>{index + 1}</span>
-          <span style={{ fontWeight: 700, fontSize: "15px", color: "#24292f" }}>
+          {/* <span style={{ fontWeight: 700, fontSize: "15px", color: "#24292f" }}>
             {contact?.firstnameOfContact + contact?.surnameOfContact || `Contact ${index + 1}`}
-          </span>
+          </span> */}
           {contact.contactId && (
             <span
               style={{
@@ -358,7 +326,7 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormTextField label="Surname of Contact" {...fp("surnameOfContact")} required />
         </div>
-        <div className="col-md-6">
+        <div className="col-md-4">
           <FormSelect
             label="Relationship to Index Client"
             {...sp("relationshipToIndex", RELATIONSHIP_TO_INDEX_OPTIONS)}
@@ -366,7 +334,7 @@ const ContactCard = ({
             required
           />
         </div>
-        <div className="col-md-3">
+        <div className="col-md-4">
           <FormSelect
             label="Sex"
             {...sp("contactSex", CONTACT_SEX_OPTIONS)}
@@ -374,7 +342,7 @@ const ContactCard = ({
             required
           />
         </div>
-        <div className="col-md-3">
+        <div className="col-md-4">
           <FormSelect
             label="Age Group"
             {...sp("contactAgeGroup", CONTACT_AGE_GROUP_OPTIONS)}
@@ -399,7 +367,7 @@ const ContactCard = ({
           </label>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-12">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>Contact Phone Number</Label>
             <Input
@@ -433,7 +401,7 @@ const ContactCard = ({
           </FormGroup>
         </div>
 
-        <div className="col-md-8">
+        <div className="col-md-12">
           <FormTextField
             label="Home / Contact Address (include landmark)"
             type="textarea"

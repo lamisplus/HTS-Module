@@ -192,7 +192,7 @@ const HtsIctOrchestrator = ({
     if (isIctEligible(formValues)) {
       setIctEligible(true);
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
-      toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+      // toast.success("HTS record saved. Opening ICT form…", { autoClose: 10000 });
     }
     else {
       history.push("/")
