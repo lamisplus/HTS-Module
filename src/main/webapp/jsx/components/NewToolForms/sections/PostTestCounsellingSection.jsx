@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import {
   PREVIOUSLY_TESTED_OPTIONS,
-  CATEGORY_OF_CLIENTS_OPTIONS,
 } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 

@@ -258,7 +258,7 @@ const HTSEncounterHistory = (props) => {
           { title: "Date of Visit", field: "dateOfVisit", filtering: false },
           { title: "Client Code", field: "clientCode", filtering: false },
           { title: "Setting", field: "setting", filtering: false },
-          { title: "Modality", field: "modality", filtering: false },
+          // { title: "Modality", field: "modality", filtering: false },
           {
             title: "Initial HIV Test",
             field: "initialHivTest",
@@ -319,7 +319,7 @@ const HTSEncounterHistory = (props) => {
           dateOfVisit: record.dateOfVisit ?? "",
           clientCode: record.clientCode ?? "",
           setting: record.setting ?? "",
-          modality: record.data?.modality ?? "",
+          // modality: record.data?.modality ?? "",
           initialHivTest: record.data?.initialHivTest ?? "",
           confirmatoryHivTest: record.data?.confirmatoryHivTest ?? "",
           syphilisTestResult: record.data?.syphilisTestResult ?? "",

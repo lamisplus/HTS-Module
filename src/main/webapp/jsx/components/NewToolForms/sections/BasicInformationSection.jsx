@@ -9,12 +9,6 @@ import {
   inputStyle,
   selectStyle,
 } from "./FormFields";
-import {
-  MODALITY_OPTIONS,
-  BREASTFEEDING_DURATION_OPTIONS,
-  INDEX_RELATIONSHIP_OPTIONS,
-
-} from "../constants";
 import axios from "axios";
 import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
@@ -186,7 +180,9 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       "MARITAL_STATUS",
       "SOURCE_REFERRAL",
       "SEX",
-      "YES_NO"
+      "YES_NO",
+      "ENROLLMENT_SETTING",
+      "DURATION_OF_BREASTFEEDING"
     ],
     patientId: accountDetail?.currentOrganisationUnitName,
     onSuccess: loadCodesets,
@@ -348,7 +344,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const showFacilitySetting = values.setting.toLowerCase() === "facility";
   const showCommunityEntry = values.setting.toLowerCase() === "community";
 
-  const showIndexFields = values.typeOfSession.toLowerCase() === "index";
+  const showIndexFields = values.typeOfSession.toLowerCase() === "index contact testing";
   const showIndexDetails = showIndexFields && values.indexTesting.toLowerCase() === "yes";
 
   const showPregnancy = values.sex.toLowerCase() === "female";
@@ -426,19 +422,18 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        <div className="col-md-4">
+        {/* <div className="col-md-4">
           <FormSelect
             label="Modality"
             {...sp("modality", MODALITY_OPTIONS)}
             required
           />
-        </div>
+        </div> */}
 
         <div className="col-md-4">
           <FormSelect
             label="Type of Session"
-            // {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
-            {...sp("typeOfSession", MODALITY_OPTIONS)}
+            {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
             onChange={readOnly ? undefined : handleTypeOfSessionChange}
             required
           />
@@ -716,7 +711,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           <div className={`col-md-4 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
             <FormSelect
               label="Duration of Breastfeeding"
-              {...sp("breastfeedingDuration", BREASTFEEDING_DURATION_OPTIONS)}
+              {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}
               required
             />
           </div>

@@ -84,7 +84,7 @@ const HTSEncounterList = () => {
               age: row.data?.age ?? "",
               dateOfVisit: row.dateOfVisit ?? "",
               setting: row.setting ?? "",
-              modality: row.data?.modality ?? "",
+              // modality: row.data?.modality ?? "",
               initialHivTest: row.data?.initialHivTest ?? "",
               htsCount: row.htsCount,
               _raw: row,
@@ -136,11 +136,11 @@ const HTSEncounterList = () => {
             field: "setting",
             filtering: false,
           },
-          {
-            title: "Modality",
-            field: "modality",
-            filtering: false,
-          },
+          // {
+          //   title: "Modality",
+          //   field: "modality",
+          //   filtering: false,
+          // },
           {
             title: "Initial HIV Test",
             field: "initialHivTest",

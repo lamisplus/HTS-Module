@@ -8,7 +8,7 @@ const initialValues = {
   facilitySetting: "",
   facilityName: "",
   communityEntryPoint: "",
-  modality: "",
+  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",

@@ -91,7 +91,8 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
   };
 
   const skipSection =
-    values.modality.toLowerCase() === "pmtct" || (values.age && Number(values.age) <= 15) || values?.pregnancyStatus.toLowerCase() === "pregnant";
+  (values.age && Number(values.age) <= 15) || values?.pregnancyStatus.toLowerCase() === "pregnant";
+    // values?.modality?.toLowerCase() === "pmtct" || 
 
   const showTimeSinceNegative = values.previouslyTestedNegative.toLowerCase() === "yes";
   const showSexDependent = values.everHadSexualIntercourse.toLowerCase() === "yes";

@@ -185,7 +185,7 @@ const blankClinicalValues = {
   setting: "",
   facilitySetting: "",
   communityEntryPoint: "",
-  modality: "",
+  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",
@@ -330,7 +330,8 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    "modality", "typeOfSession", "indexRelationship", "indexClientCode",
+    // "modality",
+     "typeOfSession", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",

@@ -100,7 +100,8 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    "modality", "typeOfSession", "indexRelationship", "indexClientCode",
+    // "modality",
+     "typeOfSession", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",

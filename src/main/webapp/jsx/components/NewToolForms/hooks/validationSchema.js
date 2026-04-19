@@ -211,7 +211,7 @@ export const buildValidationSchema = (isNewPatient) => {
 
     setting: yup.string().required("Setting is required"),
 
-    modality: yup.string().required("Modality is required"),
+    // modality: yup.string().required("Modality is required"),
 
     typeOfSession: yup.string().required("Type of session is required"),
 
@@ -240,7 +240,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "index-testing-conditional",
       "Please indicate whether this is index testing",
       function (value) {
-        if (this.parent.typeOfSession?.toLowerCase() !== "index") return true;
+        if (this.parent.typeOfSession?.toLowerCase() !== "index contact testing") return true;
         return !!value || this.createError({ message: "Index testing selection is required" });
       }
     ),
@@ -251,7 +251,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Relationship of index client is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession?.toLowerCase() !== "index" || indexTesting?.toLowerCase() !== "yes") return true;
+        if (typeOfSession?.toLowerCase() !== "index contact testing" || indexTesting?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Relationship of index client is required" });
       }
     ),
@@ -262,7 +262,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Index client code/ID is required",
       function (value) {
         const { typeOfSession, indexTesting } = this.parent;
-        if (typeOfSession?.toLowerCase() !== "index" || indexTesting?.toLowerCase() !== "yes") return true;
+        if (typeOfSession?.toLowerCase() !== "index contact testing" || indexTesting?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "Index client code/ID is required" });
       }
     ),

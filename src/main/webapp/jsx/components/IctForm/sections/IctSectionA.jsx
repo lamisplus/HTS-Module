@@ -17,9 +17,6 @@ import {
   labelStyle,
   inputStyle,
 } from "../../NewToolForms/sections/FormFields";
-import {
-  CLIENT_CATEGORY_OPTIONS,
-} from "../ictConstants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import axios from "axios";
 import { url, token } from "../../../../api";
@@ -156,6 +153,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       "FACILITY_HTS_TEST_SETTING",
       "COMMUNITY_HTS_TEST_SETTING",
       "YES_NO",
+      "INDEX_CLIENT_CATEGORY"
     ],
     patientId: "ictSectionA",
     onSuccess: (data) => setCodesets(data),
@@ -324,7 +322,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         <div className="col-md-4">
           <FormSelect
             label="Client Category"
-            {...sp("clientCategory", CLIENT_CATEGORY_OPTIONS)}
+            {...sp("clientCategory", transformOptions(codesets?.["INDEX_CLIENT_CATEGORY"]))}
             onChange={readOnly ? undefined : handleCategoryChange}
             required
           />

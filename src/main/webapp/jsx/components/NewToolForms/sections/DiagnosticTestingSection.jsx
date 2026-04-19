@@ -57,7 +57,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       "TEST_RESULT_COMMON",
       "STI_HIV_RESULT",
       "PARTNER_SYPHILIS_STATUS",
-      "RECENCY_TESTING"
+      "RECENCY_TESTING",
+      "SYPHILIS_RESULT"
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
@@ -106,7 +107,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Syphilis Test Result"
-            {...sp("syphilisTestResult", transformOptions(codesets?.["PARTNER_SYPHILIS_STATUS"]))}
+            {...sp("syphilisTestResult", transformOptions(codesets?.["SYPHILIS_RESULT"]))}
           />
         </div>
         {showRecency && (

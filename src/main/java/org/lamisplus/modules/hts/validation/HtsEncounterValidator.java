@@ -110,7 +110,7 @@ public class HtsEncounterValidator implements ConstraintValidator<ValidHtsEncoun
         }
 
         // --- Index testing conditional ---
-        if ("Index Testing".equalsIgnoreCase(request.getTypeOfSession())) {
+        if ("index contact testing".equalsIgnoreCase(request.getTypeOfSession())) {
             if (request.getIndexTesting() == null) {
                 context.buildConstraintViolationWithTemplate("Please indicate whether this is index testing")
                         .addPropertyNode("indexTesting").addConstraintViolation();

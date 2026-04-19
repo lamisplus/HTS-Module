@@ -142,8 +142,8 @@ const useStyles = makeStyles(() => ({
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
   // const sessionMatch =
-  //   htsValues.typeOfSession?.toUpperCase() === "INDEX" ||
-  //   htsValues.typeOfSession?.toLowerCase() === "index" ||
+  //   htsValues.typeOfSession?.toUpperCase() === "INDEX CONTACT TESTING" ||
+  //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
   //   htsValues.typeOfSession?.toLowerCase().includes("index");
   const positiveResult =
     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"

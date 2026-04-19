@@ -3,9 +3,9 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <!-- ── ict_encounter ────────────────────────────────────────────────────── -->
-    <changeSet id="create_ict_encounter_table" author="lamisplus">
-        <createTable tableName="ict_encounter">
+    <!-- ── hts_ict_encounter ────────────────────────────────────────────────────── -->
+    <changeSet id="create_ict_encounter_table" author="Emmanuel">
+        <createTable tableName="hts_ict_encounter">
             <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -13,7 +13,6 @@
                 <constraints nullable="false" unique="true"/>
             </column>
 
-            <!-- Owning person — always present -->
             <column name="person_id" type="BIGINT">
                 <constraints nullable="false"
                              foreignKeyName="fk_ict_encounter_person"
@@ -51,23 +50,24 @@
             <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
-        <createIndex indexName="idx_ict_encounter_person" tableName="ict_encounter">
+        <!-- FIXED: index names now properly namespaced -->
+        <createIndex indexName="idx_hts_ict_encounter_person" tableName="hts_ict_encounter">
             <column name="person_id"/>
         </createIndex>
-        <createIndex indexName="idx_ict_encounter_hts" tableName="ict_encounter">
+        <createIndex indexName="idx_hts_ict_encounter_hts" tableName="hts_ict_encounter">
             <column name="hts_encounter_id"/>
         </createIndex>
-        <createIndex indexName="idx_ict_encounter_facility" tableName="ict_encounter">
+        <createIndex indexName="idx_hts_ict_encounter_facility" tableName="hts_ict_encounter">
             <column name="facility_id"/>
         </createIndex>
-        <createIndex indexName="idx_ict_encounter_date_service" tableName="ict_encounter">
+        <createIndex indexName="idx_hts_ict_encounter_date_service" tableName="hts_ict_encounter">
             <column name="date_of_service"/>
         </createIndex>
     </changeSet>
 
-
-    <changeSet id="create_ict_contact_table" author="lamisplus">
-        <createTable tableName="ict_contact">
+    <!-- ── hts_ict_contact ────────────────────────────────────────────────────── -->
+    <changeSet id="create_ict_contact_table" author="Emmanuel">
+        <createTable tableName="hts_ict_contact">
             <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -77,21 +77,15 @@
             <column name="ict_encounter_id" type="BIGINT">
                 <constraints nullable="false"
                              foreignKeyName="fk_ict_contact_encounter"
-                             references="ict_encounter(id)"/>
+                             references="hts_ict_encounter(id)"/>   <!-- FIXED -->
             </column>
 
-            <!-- Frontend-generated human-readable contact ID, e.g. ICT-CLIENT001-1-abc -->
             <column name="contact_id" type="VARCHAR(100)"/>
 
-            <!-- Core contact fields — stored as columns for reporting queries -->
             <column name="firstname_of_contact" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-
-            <column name="middlename_of_contact" type="VARCHAR(255)">
-                <constraints />
-            </column>
-
+            <column name="middlename_of_contact" type="VARCHAR(255)"/>
             <column name="surname_of_contact" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
@@ -114,7 +108,6 @@
             <column name="date_enrolled_ovc" type="DATE"/>
             <column name="ovc_id" type="VARCHAR(100)"/>
 
-            <!-- Overflow for future fields -->
             <column name="data" type="JSONB"/>
 
             <column name="archived" type="INT" defaultValueNumeric="0">
@@ -127,19 +120,12 @@
             <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
-        <createIndex indexName="idx_ict_contact_encounter" tableName="ict_contact">
+        <!-- FIXED: correct table name + namespaced index names -->
+        <createIndex indexName="idx_hts_ict_contact_encounter" tableName="hts_ict_contact">
             <column name="ict_encounter_id"/>
         </createIndex>
-        <createIndex indexName="idx_ict_contact_known_hiv" tableName="ict_contact">
+        <createIndex indexName="idx_hts_ict_contact_known_hiv" tableName="hts_ict_contact">
             <column name="known_hiv_positive"/>
         </createIndex>
     </changeSet>
-
-    <!-- ── Add contact_on_art to already-deployed ict_contact tables ────────── -->
-    <changeSet id="add_contact_on_art_to_ict_contact" author="lamisplus">
-        <addColumn tableName="ict_contact">
-            <column name="contact_on_art" type="VARCHAR(20)"/>
-        </addColumn>
-    </changeSet>
-
 </databaseChangeLog>

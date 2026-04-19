@@ -72,7 +72,7 @@ export function checkHtsEligibility(encounters) {
 /**
  * @param {Array} encounters - the array returned by getHtsEcounterForAPatient()
  * @param {boolean} isLoadingEncounters - loading flag so eligibility is only computed once data is ready
- */
+ */ 
 export function useHtsEligibility(encounters, isLoadingEncounters) {
   const { isEligible, reason, confirmatoryResult } = useMemo(() => {
     if (isLoadingEncounters) {

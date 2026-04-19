@@ -9,12 +9,7 @@ import {
   selectStyle,
 } from "../../NewToolForms/sections/FormFields";
 import {
-  RELATIONSHIP_TO_INDEX_OPTIONS,
-  CONTACT_SEX_OPTIONS,
   CONTACT_AGE_GROUP_OPTIONS,
-  NOTIFICATION_METHOD_OPTIONS,
-  FOLLOW_UP_LOCATION_OPTIONS,
-  HIV_TEST_RESULT_OPTIONS,
 } from "../ictConstants";
 import { COLORS } from "../../NewToolForms/constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
@@ -99,7 +94,7 @@ const ContactCard = ({
   const [codesets, setCodesets] = useState(null);
 
   useGetCodesets({
-    codesetsKeys: ["YES_NO"],
+    codesetsKeys: ["YES_NO", "SEX", "HIV_TEST_RESULT", "RELATIONSHIP_CONTACT", "NOTIFICATION_CONTACT", "FOLLOW UP_APPOINTMENT_LOCATION"],
     patientId: `contactCard_${index}`,
     onSuccess: (data) => setCodesets(data),
   });
@@ -118,16 +113,6 @@ const ContactCard = ({
   // ── Field value accessor ──────────────────────────────────────────────────
   const val = (name) => contact[name] ?? "";
 
-  // ── Atomic updaters ───────────────────────────────────────────────────────
-  // FIX Bug 1:
-  // set()     → single field update  → calls onChange(index, field, value)
-  // patch()   → multi-field atomic   → calls onChange(index, patchObject)
-  //
-  // IctSectionB.handleContactChange MUST handle both signatures:
-  //   (idx, field, value)   → { ...contact, [field]: value }
-  //   (idx, patchObject)    → { ...contact, ...patchObject }
-  //
-  // See IctSectionB fix note at bottom of this file.
   const set = (name, value) => onChange(index, name, value);
 
   const patch = (patchObj) => onChange(index, patchObj);
@@ -329,7 +314,7 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormSelect
             label="Relationship to Index Client"
-            {...sp("relationshipToIndex", RELATIONSHIP_TO_INDEX_OPTIONS)}
+            {...sp("relationshipToIndex", transformOptions(codesets?.["RELATIONSHIP_CONTACT"]))}
             onChange={(e) => !readOnly && set("relationshipToIndex", e.target.value)}
             required
           />
@@ -337,7 +322,7 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormSelect
             label="Sex"
-            {...sp("contactSex", CONTACT_SEX_OPTIONS)}
+            {...sp("contactSex", transformOptions(codesets?.["SEX"]))}
             onChange={(e) => !readOnly && set("contactSex", e.target.value)}
             required
           />
@@ -416,7 +401,7 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormSelect
             label="Notification Method Selected"
-            {...sp("notificationMethod", NOTIFICATION_METHOD_OPTIONS)}
+            {...sp("notificationMethod", transformOptions(codesets?.["NOTIFICATION_CONTACT"]))}
             onChange={(e) => !readOnly && set("notificationMethod", e.target.value)}
             required
           />
@@ -424,7 +409,7 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormSelect
             label="Follow-Up Appointment Location"
-            {...sp("followUpLocation", FOLLOW_UP_LOCATION_OPTIONS)}
+            {...sp("followUpLocation", transformOptions(codesets?.["FOLLOW UP_APPOINTMENT_LOCATION"]))}
             onChange={(e) => !readOnly && set("followUpLocation", e.target.value)}
             required
           />
@@ -461,13 +446,7 @@ const ContactCard = ({
       <SectionSubheading>HIV Testing &amp; Linkage</SectionSubheading>
       <div className="row">
 
-        {/*
-          Known HIV Positive — rendered as a raw <select> instead of FormSelect.
-          Reason: FormSelect uses value={value || ""} which coerces falsy values
-          and can mask mismatches between stored value and option values.
-          Using value={val("knownHivPositive") ?? ""} (nullish only) ensures the
-          selected option tracks correctly once the codeset loads and a value is set.
-        */}
+        
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>
@@ -555,7 +534,7 @@ const ContactCard = ({
             <div className="col-md-4">
               <FormSelect
                 label="HIV Test Result"
-                {...sp("hivTestResult", HIV_TEST_RESULT_OPTIONS)}
+                {...sp("hivTestResult", transformOptions(codesets?.["HIV_TEST_RESULT"]))}
                 onChange={handleHivResultChange}
                 required
               />

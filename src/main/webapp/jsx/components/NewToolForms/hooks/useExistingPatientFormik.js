@@ -7,7 +7,7 @@ const defaultValues = {
   setting: "",
   facilitySetting: "",
   communityEntryPoint: "",
-  modality: "",
+  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",
@@ -98,4 +98,4 @@ export const useExistingPatientFormik = (onSubmit, externalInitialValues) => {
     onSubmit,
   });
   return { formik };
-};
+}; 
