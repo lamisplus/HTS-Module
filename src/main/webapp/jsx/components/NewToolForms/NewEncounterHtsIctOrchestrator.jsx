@@ -167,7 +167,6 @@ const NewEncounterHtsIctOrchestrator = ({
   const [ictSubmitted, setIctSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null); // live formik snapshot
   const [htsRecord, setHtsRecord] = useState(null); // API response after HTS save
-
   const eligibilityToastFiredRef = useRef(false);
 
   // ── Real-time eligibility — fired on every HTS formik change ─────────────

@@ -167,11 +167,7 @@ const mapPersonToFormValues = (person) => {
     clientState: addr?.stateId != null ? String(addr.stateId) : "",
     clientLga: addr?.district ?? "",
     address: addr?.city ?? "",
-
-    // ── Identifiers ───────────────────────────────────────────────────────
     clientCode: hospitalNumber,
-
-    // ── System linkage (passed to payload builder) ────────────────────────
     personId: person?.id != null ? String(person.id) : "",
     currentOrganisationUnitId: person?.facilityId != null ? String(person.facilityId) : "",
   };
