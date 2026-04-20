@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ict_encounter")
+@Table(name = "hts_ict_encounter")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)

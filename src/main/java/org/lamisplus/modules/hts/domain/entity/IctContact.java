@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ict_contact")
+@Table(name = "hts_ict_contact")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
