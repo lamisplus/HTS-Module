@@ -17,6 +17,7 @@ public class IctContactRequest {
     @NotBlank(message = "First name of contact is required")
     private String firstnameOfContact;
 
+    
     // @NotBlank(message = "Middle name of contact is required")
     private String middlenameOfContact;
 
