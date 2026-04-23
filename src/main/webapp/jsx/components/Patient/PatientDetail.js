@@ -126,8 +126,6 @@ function PatientCard(props) {
     isLoadingEncounters
   );
 
-  console.log(encounters)
-
   return (
     <div className={classes.root}>
       <div
@@ -168,9 +166,7 @@ function PatientCard(props) {
                   : ""
               }
               setActivePage={setActivePage}
-              // clientCode={clientCode}
               clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
-
               patientAge={patientObj?.data?.age}
               clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
             />

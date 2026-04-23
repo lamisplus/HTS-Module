@@ -59,11 +59,14 @@ const resolveAge = (parent) => {
  * sections should be skipped (and their fields are therefore not required).
  */
 const skipKnowledgeAndRisk = (ctx) => {
-  const { modality } = ctx.parent;
-  if (modality?.toLowerCase() === "pmtct") return true;
+  const { modality, pregnancyStatus } = ctx.parent;
+  // if (modality?.toLowerCase() === "pmtct") return true;
+  if (pregnancyStatus?.toLowerCase() === "pregnant") return true;
+  if (pregnancyStatus?.toLowerCase() === "breastfeeding") return true;
   const age = resolveAge(ctx.parent);
   return age !== null && age <= 15;
 };
+
 
 // ─── exported builder ─────────────────────────────────────────────────────────
 
@@ -267,9 +270,7 @@ export const buildValidationSchema = (isNewPatient) => {
       }
     ),
 
-    // ── Pre-Test Counselling: Knowledge Assessment ──────────────────────────
-    // All 6 knowledge fields hidden (and therefore optional) when skipKnowledgeAndRisk
-
+    
     previouslyTestedNegative: yup.mixed().test(
       "prev-tested-conditional",
       "This field is required",
@@ -335,9 +336,6 @@ export const buildValidationSchema = (isNewPatient) => {
       }
     ),
 
-    // ── Pre-Test Counselling: Personal HIV Risk Assessment ──────────────────
-    // All hidden when skipKnowledgeAndRisk; sub-fields hidden when everHadSexualIntercourse≠Yes
-
     everHadSexualIntercourse: yup.mixed().test(
       "ever-sex-conditional",
       "This field is required",
@@ -347,8 +345,6 @@ export const buildValidationSchema = (isNewPatient) => {
       }
     ),
 
-    // moreThanOneSexPartner, unprotectedVaginalSex, unprotectedAnalSex,
-    // sexUnderInfluence, historyOfSTI — visible only when everHadSexualIntercourse=Yes
     moreThanOneSexPartner: yup.mixed().test(
       "multi-partner-conditional",
       "This field is required",
@@ -411,11 +407,40 @@ export const buildValidationSchema = (isNewPatient) => {
 
     // ── TB Screening — always visible, always required ─────────────────────
 
-    currentCough: yup.string().required("This field is required"),
-    weightLoss: yup.string().required("This field is required"),
-    fever: yup.string().required("This field is required"),
-    nightSweats: yup.string().required("This field is required"),
+    currentCough: yup.mixed().test(
+      "curent-cough-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
 
+    weightLoss: yup.mixed().test(
+      "weight-loss-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
+
+    fever: yup.mixed().test(
+      "fever-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
+    nightSweats: yup.mixed().test(
+      "night-sweats-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
     // ── STI Screening — sex-conditional fields ─────────────────────────────
 
     // Female-only
@@ -423,6 +448,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "vaginal-discharge-conditional",
       "This field is required",
       function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
         if (this.parent.sex?.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
@@ -432,6 +458,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "lower-abdominal-conditional",
       "This field is required",
       function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
         if (this.parent.sex?.toLowerCase() !== "female") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
@@ -442,6 +469,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "urethral-discharge-conditional",
       "This field is required",
       function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
         if (this.parent.sex?.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
@@ -451,14 +479,31 @@ export const buildValidationSchema = (isNewPatient) => {
       "scrotal-swelling-conditional",
       "This field is required",
       function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
         if (this.parent.sex?.toLowerCase() !== "male") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
 
     // Both sexes
-    complaintsGenitalSores: yup.string().required("This field is required"),
-    complaintsSwollenLymphNodes: yup.string().required("This field is required"),
+
+    complaintsGenitalSores: yup.mixed().test(
+      "complaint-genital-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
+
+    complaintsSwollenLymphNodes: yup.mixed().test(
+      "complaint-swollen-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
 
     // ── Sex Partner Risk Assessment ─────────────────────────────────────────
     // Visible only when everHadSexualIntercourse=Yes AND not skipKnowledgeAndRisk
@@ -488,16 +533,12 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
-
         if (this?.parent?.everHadSexualIntercourse?.toLowerCase() !== "yes") {
           return true;
         }
-
         const age = Number(this?.parent?.age);
-
         // Skip validation if NOT between 10–19
         if (age < 10 || age > 19) return true;
-
         // Enforce required if age is 10–19
         return !!value || this.createError({ message: "This field is required" });
       }
@@ -522,7 +563,16 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
-    hadSexWithHivPositivePartnerInRiskGroup: yup.string().required("This field is required"),
+
+
+    hadSexWithHivPositivePartnerInRiskGroup: yup.mixed().test(
+      "had-sex-with-hiv-conditional",
+      "This field is required",
+      function (value) {
+        if (skipKnowledgeAndRisk(this)) return true;
+        return !!value || this.createError({ message: "This field is required" });
+      }
+    ),
 
     // ── Diagnostic Testing ─────────────────────────────────────────────────
 
@@ -549,14 +599,16 @@ export const buildValidationSchema = (isNewPatient) => {
     ),
 
     // recencyTest: visible only when initialHivTest=Positive
-    recencyTest: yup.mixed().test(
-      "recency-conditional",
-      "Recency test is required",
-      function (value) {
-        if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
-        return !!value || this.createError({ message: "Recency test is required for client whose Initial HIV Test is positive" });
-      }
-    ),
+    // recencyTest: yup.mixed().test(
+    //   "recency-conditional",
+    //   "Recency test is required",
+    //   function (value) {
+    //     if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
+    //     return !!value || this.createError({ message: "Recency test is required for client whose Initial HIV Test is positive" });
+    //   }
+    // ),
+
+    recencyTest: yup.string(),
 
     // ── Post-Test Counselling — all always visible, all required ───────────
 

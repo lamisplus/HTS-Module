@@ -57,6 +57,9 @@ public class IctContact {
     @Column(name = "contact_age_group", length = 20)
     private String contactAgeGroup;
 
+    @Column(name = "contact_age")
+    private Integer contactAge;
+
     @Column(name = "contact_phone", length = 20)
     private String contactPhone;
 
@@ -86,6 +89,9 @@ public class IctContact {
 
     @Column(name = "date_enrolled_art")
     private LocalDate dateEnrolledArt;
+
+    @Column(name = "contact_art_clinic")
+    private String contactArtClinic;
 
     @Column(name = "contact_on_art")
     private String contactOnArt;

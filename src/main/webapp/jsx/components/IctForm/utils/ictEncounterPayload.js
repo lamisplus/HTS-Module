@@ -76,6 +76,7 @@ export const buildIctEncounterPayload = (values) => {
 
 const buildContactPayload = (c) => {
   const isKnownPositive = c.knownHivPositive?.toLowerCase() === "yes";
+  const contactOnArt = c.contactOnArt?.toLowerCase() === "yes";
   const isKnownNegative = c.knownHivPositive?.toLowerCase() === "no";
   const newTestPositive = c.hivTestResult?.toLowerCase() === "positive";
   const isUnder15 = c.contactAgeGroup === "<15";
@@ -88,6 +89,7 @@ const buildContactPayload = (c) => {
     relationshipToIndex: c.relationshipToIndex || null,
     contactSex: c.contactSex || null,
     contactAgeGroup: c.contactAgeGroup || null,
+    contactAge: c.contactAge || null,
     contactPhone: c.contactPhone || null,
     contactAddress: c.contactAddress || null,
     sameAddressAsIndex: !!c.sameAddressAsIndex,
@@ -107,10 +109,15 @@ const buildContactPayload = (c) => {
     // Date of test: present for both known positive (previous test) and known negative (new test)
     dateTestedHiv: c.dateTestedHiv || null,
 
-    // ART enrolment: required when known positive OR newly tested positive
+    // ART enrolment: required when known positive OR newly tested positive )
     dateEnrolledArt:
-      isKnownPositive || (isKnownNegative && newTestPositive)
+      isKnownPositive || (isKnownNegative && newTestPositive) || contactOnArt
         ? c.dateEnrolledArt || null
+        : null,
+
+    contactArtClinic:
+      isKnownPositive || (isKnownNegative && newTestPositive) || contactOnArt
+        ? c.contactArtClinic || null
         : null,
 
     contactOnArt: c.contactOnArt,

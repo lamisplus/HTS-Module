@@ -32,6 +32,9 @@ public class IctContactRequest {
     @NotBlank(message = "Contact age group is required")
     private String contactAgeGroup;
 
+    @NotBlank(message = "Contact age is required")
+    private Integer contactAge;
+
     private String contactPhone;
     private String contactAddress;
     private Boolean sameAddressAsIndex;
@@ -56,6 +59,7 @@ public class IctContactRequest {
     // Required when knownHivPositive = Yes OR hivTestResult = Positive
     private LocalDate dateEnrolledArt;
     private String contactOnArt;
+    private String contactArtClinic;
 
     // OVC fields: only applicable when contactAgeGroup = "<15"
     private Boolean enrolledInOvc;

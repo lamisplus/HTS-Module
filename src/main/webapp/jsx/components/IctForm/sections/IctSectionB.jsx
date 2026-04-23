@@ -1,13 +1,3 @@
-/**
- * IctSectionB.jsx — Contact Enumeration & Testing Tracker
- *
- * Rendered only when the parent decides to show it (acceptedPns logic
- * is handled in IctForm, not here). This component just renders the
- * list of ContactCards plus the Add button.
- *
- * If sectionLocked=true, shows a greyed-out overlay with explanatory message.
- */
-
 import React from "react";
 import { Button } from "semantic-ui-react";
 import ContactCard from "./ContactCard";
@@ -40,8 +30,6 @@ const IctSectionB = ({
 }) => {
   const { values, setFieldValue, errors, touched } = formik;
   const contacts = values.contacts || [];
-
-  // ── Contact array management ──────────────────────────────────────────────
 
   const handleAddContact = () => {
     const newContact = makeBlankContact(values.indexClientId, contacts.length);

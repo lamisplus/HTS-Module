@@ -185,8 +185,17 @@ const ContactCard = ({
       hivTestResult: "",
       contactOnArt: "",
       dateEnrolledArt: "",
+      contactArtClinic: "",
     });
   };
+
+  const handleAgeChange = (e) => {
+    const raw = e.target.value;
+    const wholeOnly = raw.includes(".")
+      ? raw.slice(0, raw.indexOf("."))
+      : raw;
+    set("contactAge", wholeOnly);
+  }
 
   const handleHivResultChange = (e) => {
     if (readOnly) return;
@@ -196,6 +205,7 @@ const ContactCard = ({
         hivTestResult: v,
         dateEnrolledArt: "",
         contactOnArt: "",
+        contactArtClinic: "",
       });
     } else {
       set("hivTestResult", v);
@@ -210,6 +220,7 @@ const ContactCard = ({
     patch({
       contactOnArt: v,
       dateEnrolledArt: "",
+      contactArtClinic: "",
     })
 
   }
@@ -280,6 +291,7 @@ const ContactCard = ({
             </span>
           )}
         </div>
+
         {!readOnly && (
           <button
             type="button"
@@ -302,6 +314,10 @@ const ContactCard = ({
 
       {/* ── Identity ── */}
       <div className="row">
+        <div className="col-md-4">
+          <FormTextField label="Contact ID" {...fp("contactId")} required disabled />
+        </div>
+        
         <div className="col-md-4">
           <FormTextField label="First Name of Contact" {...fp("firstnameOfContact")} required />
         </div>
@@ -327,6 +343,35 @@ const ContactCard = ({
             required
           />
         </div>
+
+        <div className="col-md-4">
+          <FormGroup style={{ marginBottom: "16px" }}>
+            <Label style={labelStyle}>
+              Age <span style={{ color: "red" }}> *</span>
+            </Label>
+            <Input
+              {...fp("contactAge")}
+              type="number"
+              name="contactAge"
+              value={val("contactAge")}
+              onChange={handleAgeChange}
+              min="0"
+              max="130"
+              step="1"
+              disabled={readOnly}
+              style={inputStyle}
+              placeholder="Enter age"
+              onKeyDown={(e) => {
+                if (e.key === "." || e.key === ",") e.preventDefault();
+              }}
+            />
+            {touched.contactAge && errors.contactAge && (
+              <span style={errorStyle}>{errors.contactAge}</span>
+            )}
+          </FormGroup>
+        </div>
+
+
         <div className="col-md-4">
           <FormSelect
             label="Age Group"
@@ -335,6 +380,7 @@ const ContactCard = ({
             required
           />
         </div>
+
       </div>
 
       {/* ── Address / Phone ── */}
@@ -446,7 +492,7 @@ const ContactCard = ({
       <SectionSubheading>HIV Testing &amp; Linkage</SectionSubheading>
       <div className="row">
 
-        
+
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>
@@ -505,25 +551,32 @@ const ContactCard = ({
             </div>
 
             {showisArtStartDate && (
-              <div className="col-md-4">
-                <FormGroup style={{ marginBottom: "16px" }}>
-                  <Label style={labelStyle}>
-                    Date Enrolled on ART <span style={{ color: "red" }}> *</span>
-                  </Label>
-                  <Input
-                    type="date"
-                    value={val("dateEnrolledArt")}
-                    onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
-                    max={today}
-                    onKeyPress={(e) => e.preventDefault()}
-                    disabled={readOnly}
-                    style={readOnly ? disabledInputStyle : inputStyle}
-                  />
-                  {touched.dateEnrolledArt && errors.dateEnrolledArt && (
-                    <span style={errorStyle}>{errors.dateEnrolledArt}</span>
-                  )}
-                </FormGroup>
-              </div>
+              <>
+                <div className="col-md-4">
+                  <FormGroup style={{ marginBottom: "16px" }}>
+                    <Label style={labelStyle}>
+                      Date Enrolled on ART <span style={{ color: "red" }}> *</span>
+                    </Label>
+                    <Input
+                      type="date"
+                      value={val("dateEnrolledArt")}
+                      onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
+                      max={today}
+                      onKeyPress={(e) => e.preventDefault()}
+                      disabled={readOnly}
+                      style={readOnly ? disabledInputStyle : inputStyle}
+                    />
+                    {touched.dateEnrolledArt && errors.dateEnrolledArt && (
+                      <span style={errorStyle}>{errors.dateEnrolledArt}</span>
+                    )}
+                  </FormGroup>
+                </div>
+
+                <div className="col-md-4">
+                  <FormTextField label="ART Clinic" {...fp("contactArtClinic")} required />
+                </div>
+
+              </>
             )}
           </>
         )}
@@ -565,31 +618,37 @@ const ContactCard = ({
               <>
                 <div className="col-md-4">
                   <FormSelect
-                    label="On ART ? xxxx"
+                    label="On ART ?"
                     {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
                     onChange={readOnly ? undefined : handleOnArt}
                   />
                 </div>
                 {showisArtStartDate && (
-                  <div className="col-md-4">
-                    <FormGroup style={{ marginBottom: "16px" }}>
-                      <Label style={labelStyle}>
-                        Date Enrolled on ART <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <Input
-                        type="date"
-                        value={val("dateEnrolledArt")}
-                        onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
-                        max={today}
-                        onKeyPress={(e) => e.preventDefault()}
-                        disabled={readOnly}
-                        style={readOnly ? disabledInputStyle : inputStyle}
-                      />
-                      {touched.dateEnrolledArt && errors.dateEnrolledArt && (
-                        <span style={errorStyle}>{errors.dateEnrolledArt}</span>
-                      )}
-                    </FormGroup>
-                  </div>
+                  <>
+                    <div className="col-md-4">
+                      <FormGroup style={{ marginBottom: "16px" }}>
+                        <Label style={labelStyle}>
+                          Date Enrolled on ART <span style={{ color: "red" }}> *</span>
+                        </Label>
+                        <Input
+                          type="date"
+                          value={val("dateEnrolledArt")}
+                          onChange={(e) => !readOnly && set("dateEnrolledArt", e.target.value)}
+                          max={today}
+                          onKeyPress={(e) => e.preventDefault()}
+                          disabled={readOnly}
+                          style={readOnly ? disabledInputStyle : inputStyle}
+                        />
+                        {touched.dateEnrolledArt && errors.dateEnrolledArt && (
+                          <span style={errorStyle}>{errors.dateEnrolledArt}</span>
+                        )}
+                      </FormGroup>
+                    </div>
+
+                    <div className="col-md-4">
+                      <FormTextField label="ART Clinic" {...fp("contactArtClinic")} required />
+                    </div>
+                  </>
                 )}
               </>
             )}

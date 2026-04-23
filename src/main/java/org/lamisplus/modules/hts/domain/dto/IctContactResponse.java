@@ -15,6 +15,7 @@ public class IctContactResponse {
     private String relationshipToIndex;
     private String contactSex;
     private String contactAgeGroup;
+    private Integer contactAge;
     private String contactPhone;
     private String contactAddress;
     private Boolean sameAddressAsIndex;
@@ -26,6 +27,7 @@ public class IctContactResponse {
     private LocalDate dateTestedHiv;
     private LocalDate dateEnrolledArt;
     private String contactOnArt;
+    private String contactArtClinic;
     private Boolean enrolledInOvc;
     private LocalDate dateEnrolledOvc;
     private String ovcId;

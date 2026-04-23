@@ -51,7 +51,24 @@ const contactSchema = yup.object({
     ),
 
   relationshipToIndex: yup.string().required("Relationship is required"),
+  
   contactSex: yup.string().required("Sex is required"),
+
+  contactAge: yup.mixed().test(
+    "contact-age-required-when-estimated",
+    "Age is required",
+    function (value) {
+      if (value === "" || value === undefined || value === null)
+        return this.createError({ message: "Age is required" });
+      const n = Number(value);
+      if (isNaN(n) || n < 0)
+        return this.createError({ message: "Age must be a non-negative number" });
+      if (n > 130)
+        return this.createError({ message: "Age must be 130 or less" });
+      return true;
+    }
+  ),
+
   contactAgeGroup: yup.string().required("Age group is required"),
 
   contactPhone: yup
@@ -121,8 +138,9 @@ const contactSchema = yup.object({
   //   return true;
   // }),
 
-  dateEnrolledArt: yup.string(),
   contactOnArt: yup.string(),
+  dateEnrolledArt: yup.string(),
+  contactArtClinic: yup.string(),
 
   // OVC — only for contacts < 15 years
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {

@@ -175,6 +175,7 @@ public class IctEncounterService {
         c.setRelationshipToIndex(cr.getRelationshipToIndex());
         c.setContactSex(cr.getContactSex());
         c.setContactAgeGroup(cr.getContactAgeGroup());
+        c.setContactAge(cr.getContactAge());
         c.setContactPhone(cr.getContactPhone());
         c.setContactAddress(cr.getContactAddress());
         c.setSameAddressAsIndex(Boolean.TRUE.equals(cr.getSameAddressAsIndex()));
@@ -184,7 +185,7 @@ public class IctEncounterService {
         c.setKnownHivPositive(cr.getKnownHivPositive());
         c.setHivTestResult(cr.getHivTestResult());
         c.setDateTestedHiv(cr.getDateTestedHiv());
-        c.setDateEnrolledArt(cr.getDateEnrolledArt());
+        c.setContactArtClinic(cr.getContactArtClinic());
         c.setContactOnArt(cr.getContactOnArt());
         c.setEnrolledInOvc(Boolean.TRUE.equals(cr.getEnrolledInOvc()));
         c.setDateEnrolledOvc(cr.getDateEnrolledOvc());
@@ -230,6 +231,7 @@ public class IctEncounterService {
         r.setRelationshipToIndex(c.getRelationshipToIndex());
         r.setContactSex(c.getContactSex());
         r.setContactAgeGroup(c.getContactAgeGroup());
+        r.setContactAge(c.getContactAge());
         r.setContactPhone(c.getContactPhone());
         r.setContactAddress(c.getContactAddress());
         r.setSameAddressAsIndex(c.getSameAddressAsIndex());
@@ -240,6 +242,7 @@ public class IctEncounterService {
         r.setHivTestResult(c.getHivTestResult());
         r.setDateTestedHiv(c.getDateTestedHiv());
         r.setDateEnrolledArt(c.getDateEnrolledArt());
+        r.setContactArtClinic(c.getContactArtClinic());
         r.setContactOnArt(c.getContactOnArt());
         r.setEnrolledInOvc(c.getEnrolledInOvc());
         r.setDateEnrolledOvc(c.getDateEnrolledOvc());
