@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
-import { arrayToObject } from "../utils/htsEncounterPayload";
+import { arrayToObject, generateClientCode } from "../utils/htsEncounterPayload";
 import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
 
 const today = new Date().toISOString().split("T")[0];
@@ -139,6 +139,24 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   }, [statesList, values.clientState, readOnly]);
 
+  // ─── Auto-generate client code (new patient only) ──────────────────────
+  // Triggers once setting + (facilitySetting OR communityEntryPoint) + dateOfVisit
+  // are all filled. Does NOT run for existing patients (clientCode already set).
+  useEffect(() => {
+    if (isExistingPatient) return; // existing record keeps its original code
+    const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
+    const settingSubField =
+      setting.toLowerCase() === "facility" ? facilitySetting :
+      setting.toLowerCase() === "community" ? communityEntryPoint :
+      setting; // fallback: setting itself counts
+    if (setting && settingSubField && dateOfVisit) {
+      // Only generate if the field is still empty (avoid overwriting on re-render)
+      if (!clientCode) {
+        setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
+      }
+    }
+  }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch account details (existing code)
   const handleFetchFacilityName = async () => {
     try {
@@ -194,6 +212,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     setFieldValue("setting", e.target.value);
     setFieldValue("facilitySetting", "");
     setFieldValue("communityEntryPoint", "");
+    // Reset client code so it regenerates with the new setting
+    if (!isExistingPatient) {
+      setFieldValue("clientCode", "");
+    }
   };
 
 
@@ -385,12 +407,54 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         </div>
 
         <div className="col-md-4">
-          <FormTextField
-            label="Client Code"
-            {...fp("clientCode")}
-            disabled={isExistingPatient || readOnly}
-            required
-          />
+          <FormGroup style={{ marginBottom: "16px" }}>
+            <Label style={labelStyle}>
+              Client Code <span style={{ color: "red" }}> *</span>
+            </Label>
+            <div style={{ position: "relative" }}>
+              <Input
+                type="text"
+                name="clientCode"
+                value={values.clientCode || ""}
+                readOnly
+                disabled
+                style={{
+                  ...disabledInputStyle,
+                  fontFamily: "monospace",
+                  letterSpacing: "0.04em",
+                  paddingRight: "90px",
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: values.clientCode ? "#2e7d32" : "#8c959f",
+                  background: values.clientCode ? "#e8f5e9" : "#f0f0f0",
+                  padding: "2px 7px",
+                  borderRadius: "8px",
+                  pointerEvents: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {values.clientCode ? "Auto-generated" : "Pending…"}
+              </span>
+            </div>
+            {touched.clientCode && errors.clientCode && (
+              <span style={errorStyle}>{errors.clientCode}</span>
+            )}
+            {!isExistingPatient && !values.clientCode && (
+              <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
+                Fill in Setting, Setting sub-type, and Date of Visit to generate
+              </small>
+            )}
+          </FormGroup>
         </div>
 
         <div className="col-md-4">

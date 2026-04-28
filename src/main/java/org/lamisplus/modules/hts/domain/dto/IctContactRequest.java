@@ -11,14 +11,11 @@ import java.time.LocalDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class IctContactRequest {
 
-    /** Frontend-generated human-readable contact ID */
     private String contactId;
 
     @NotBlank(message = "First name of contact is required")
     private String firstnameOfContact;
 
-    
-    // @NotBlank(message = "Middle name of contact is required")
     private String middlenameOfContact;
 
     @NotBlank(message = "Surname of contact is required")
@@ -33,7 +30,7 @@ public class IctContactRequest {
     @NotBlank(message = "Contact age group is required")
     private String contactAgeGroup;
 
-    @NotBlank(message = "Contact age is required")
+    @NotNull(message = "Contact age is required")   // ← fixed: was @NotBlank
     private Integer contactAge;
 
     private String contactPhone;
@@ -51,18 +48,12 @@ public class IctContactRequest {
     @NotBlank(message = "Known HIV positive status is required")
     private String knownHivPositive;
 
-    // Conditional: required when knownHivPositive = No
     private String hivTestResult;
-
-    // Required when knownHivPositive is Yes or No (date of test/previous test)
     private LocalDate dateTestedHiv;
-
-    // Required when knownHivPositive = Yes OR hivTestResult = Positive
     private LocalDate dateEnrolledArt;
     private String contactOnArt;
     private String contactArtClinic;
 
-    // OVC fields: only applicable when contactAgeGroup = "<15"
     private Boolean enrolledInOvc;
     private LocalDate dateEnrolledOvc;
     private String ovcId;

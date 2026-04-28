@@ -1,5 +1,44 @@
 // utils/htsEncounterPayload.js
 
+/**
+ * Derives a short alphabetic abbreviation from a setting label.
+ * e.g. "Facility" → "F", "Community" → "C", "Home Based" → "HB"
+ */
+const toSettingAbbr = (setting) => {
+  if (!setting) return "HTS";
+  return setting
+    .trim()
+    .split(/\s+/)
+    .map((word) => word[0]?.toUpperCase() || "")
+    .join("");
+};
+
+/**
+ * Generates a unique HTS Client Code in the format:
+ *   {SettingAbbr}01/{YY}/{MM}/{4-digit-random}{2-random-letters}
+ *
+ * Example: FC01/25/08/0047XR
+ *
+ * @param {string} setting      — value of the `setting` form field
+ * @param {string} dateOfVisit  — ISO date string e.g. "2025-08-14"
+ * @returns {string}
+ */
+export const generateClientCode = (setting, dateOfVisit) => {
+  const abbr = toSettingAbbr(setting);
+  const FACILITY_CODE = "01";
+
+  const date = dateOfVisit ? new Date(dateOfVisit) : new Date();
+  const yy = String(date.getFullYear()).slice(-2);
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+
+  const serial = String(Math.floor(Math.random() * 9000) + 1000); // 1000–9999
+  const letters = Array.from({ length: 2 }, () =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26))
+  ).join("");
+
+  return `${abbr}${FACILITY_CODE}/${yy}/${mm}/${serial}${letters}`;
+};
+
 export function arrayToObject(arr) {
     return arr.reduce((acc, item) => {
       acc[item.display] = item.id;

@@ -210,7 +210,9 @@ export const buildValidationSchema = (isNewPatient) => {
       .max(new Date(), "Date of visit cannot be in the future")
       .required("Date of visit is required"),
 
-    clientCode: yup.string().required("Client code is required"),
+    clientCode: yup
+      .string()
+      .required("Client code could not be generated — ensure Setting, Setting sub-type, and Date of Visit are filled"),
 
     setting: yup.string().required("Setting is required"),
 
