@@ -104,8 +104,9 @@
             <column name="contact_age_group" type="VARCHAR(20)"/>
             <column name="contact_age" type="INT"/>
             <column name="contact_phone" type="VARCHAR(20)"/>
-            <column name="contact_address" type="TEXT"/>
             <column name="same_address_as_index" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="contact_art_clinic" type="TEXT"/>
+            <column name="contact_address" type="TEXT"/>
             <column name="notification_method" type="VARCHAR(100)"/>
             <column name="follow_up_location" type="VARCHAR(100)"/>
             <column name="attempts" type="INT" defaultValueNumeric="0"/>

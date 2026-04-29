@@ -7,7 +7,7 @@ import org.springframework.core.annotation.Order;
 @Order(20)
 @Installer(name = "hts-encounter-schema-installer-new",
         description = "Creates the hts_encounter table for new merged HTS form",
-        version = 6)
+        version = 10)
 public class HtsEncounterSchemaInstaller extends AcrossLiquibaseInstaller {
     public HtsEncounterSchemaInstaller() {
         super("classpath:installers/hts/encounter_schema.xml");

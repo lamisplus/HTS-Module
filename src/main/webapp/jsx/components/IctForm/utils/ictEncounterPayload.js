@@ -6,7 +6,26 @@
  *   - All index client fields are flat top-level keys (not nested under indexClient)
  *   - contacts array uses the field names from IctContactRequest
  *   - Null-guards applied for all conditional fields
+ *
+ * Fixes applied:
+ *   [1] contactAge  — parseInt to Integer  (was `|| null`, sent raw string; broke @NotNull Integer)
+ *   [2] personId    — Number() cast        (was raw string from Formik; backend expects Long)
+ *   [3] htsEncounterId — explicit null placeholder so callers cannot silently omit it
+ *   [4] contactOnArt   — null fallback     (was bare `c.contactOnArt`, could send undefined)
+ *   [5] indexAge    — safe null check      (was falsy `?` check, broke on age 0)
+ *   [6] contactAge  — safe null check      (was `|| null`, broke on age 0)
  */
+
+/**
+ * Safe integer parser.
+ * Returns null when val is null / undefined / empty string.
+ * Correctly handles 0.
+ */
+const toIntOrNull = (val) => {
+  if (val === null || val === undefined || val === "") return null;
+  const n = parseInt(val, 10);
+  return isNaN(n) ? null : n;
+};
 
 export const buildIctEncounterPayload = (values) => {
   const isAccepted =
@@ -15,28 +34,32 @@ export const buildIctEncounterPayload = (values) => {
 
   return {
     // ── Person & facility linkage ────────────────────────────────────────────
-    // personId always required. facilityId from currentOrganisationUnitId,
-    // matching the same pattern used by the HTS payload builder.
-    personId: values.personId ?? null,
-    facilityId: values.currentOrganisationUnitId != null
-      ? Number(values.currentOrganisationUnitId)
-      : null,
+    // FIX [2]: cast personId to Number — backend expects Long, Formik gives string
+    personId: values.personId != null ? Number(values.personId) : null,
+    facilityId:
+      values.currentOrganisationUnitId != null
+        ? Number(values.currentOrganisationUnitId)
+        : null,
 
-    // htsEncounterId is attached by the caller (IctForm.jsx) from htsRecord.id
-    // after the HTS form submits. We don't set it here to keep the builder pure.
+    // FIX [3]: explicit null so the caller (IctForm.jsx) is forced to overwrite
+    // this field with htsRecord.id after the HTS form submits.
+    // Leaving it absent caused silent unlinked ICT saves when callers forgot.
+    htsEncounterId: null,
 
     // ── Section A: Visit & Setting ──────────────────────────────────────────
     dateOfService: values.dateOfService || null,
     setting: values.setting || null,
     facilitySetting:
-      values.setting?.toLowerCase() === "facility" ? values.facilitySetting || null : null,
+      values.setting?.toLowerCase() === "facility"
+        ? values.facilitySetting || null
+        : null,
     communityEntryPoint:
-      values.setting?.toLowerCase() === "community" ? values.communityEntryPoint || null : null,
+      values.setting?.toLowerCase() === "community"
+        ? values.communityEntryPoint || null
+        : null,
     artClinic: values.isOnArt ? values.artClinic || null : null,
 
     // ── Section A: Facility context (stored in JSONB on backend) ─────────────
-    // These three are display values needed to re-populate the form on view/edit.
-    // state and lga are the human-readable names resolved by IctSectionA at fill time.
     facilityName: values.facilityName || null,
     state: values.state || null,
     lga: values.lga || null,
@@ -49,12 +72,13 @@ export const buildIctEncounterPayload = (values) => {
     indexSurname: values.indexSurname || null,
     indexSex: values.indexSex || null,
     indexDob: values.indexDob || null,
-    indexAge: values.indexAge ? parseInt(values.indexAge, 10) : null,
+    // FIX [5]: was `values.indexAge ? parseInt(...)` — falsy check sent null for age 0
+    indexAge: toIntOrNull(values.indexAge),
     indexPhone: values.indexPhone || null,
     indexAltPhone: values.indexAltPhone || null,
     indexAddress: values.indexAddress || null,
 
-    // ── Section A: Category & Index Testing Services ───────────────────────────────────────────
+    // ── Section A: Category & Index Testing Services ────────────────────────
     clientCategory: values.clientCategory || null,
     clientCategoryOther:
       values.clientCategory?.toLowerCase() === "other"
@@ -76,25 +100,29 @@ export const buildIctEncounterPayload = (values) => {
 
 const buildContactPayload = (c) => {
   const isKnownPositive = c.knownHivPositive?.toLowerCase() === "yes";
-  const contactOnArt = c.contactOnArt?.toLowerCase() === "yes";
   const isKnownNegative = c.knownHivPositive?.toLowerCase() === "no";
+  const contactOnArt    = c.contactOnArt?.toLowerCase() === "yes";
   const newTestPositive = c.hivTestResult?.toLowerCase() === "positive";
-  const isUnder15 = c.contactAgeGroup === "<15";
+  const isUnder15       = c.contactAgeGroup === "<15";
 
   return {
-    contactId: c.contactId || null,
-    firstnameOfContact: c.firstnameOfContact || null,
-    middlenameOfContact: c.middlenameOfContact || null,
-    surnameOfContact: c.surnameOfContact || null,
-    relationshipToIndex: c.relationshipToIndex || null,
-    contactSex: c.contactSex || null,
-    contactAgeGroup: c.contactAgeGroup || null,
-    contactAge: c.contactAge || null,
-    contactPhone: c.contactPhone || null,
-    contactAddress: c.contactAddress || null,
-    sameAddressAsIndex: !!c.sameAddressAsIndex,
-    notificationMethod: c.notificationMethod || null,
-    followUpLocation: c.followUpLocation || null,
+    contactId:            c.contactId || null,
+    firstnameOfContact:   c.firstnameOfContact || null,
+    middlenameOfContact:  c.middlenameOfContact || null,
+    surnameOfContact:     c.surnameOfContact || null,
+    relationshipToIndex:  c.relationshipToIndex || null,
+    contactSex:           c.contactSex || null,
+    contactAgeGroup:      c.contactAgeGroup || null,
+
+    // FIX [1] + [6]: was `c.contactAge || null` — sent raw string AND broke on age 0.
+    // Backend @NotNull Integer requires a parsed integer, never a string.
+    contactAge: toIntOrNull(c.contactAge),
+
+    contactPhone:         c.contactPhone || null,
+    contactAddress:       c.contactAddress || null,
+    sameAddressAsIndex:   !!c.sameAddressAsIndex,
+    notificationMethod:   c.notificationMethod || null,
+    followUpLocation:     c.followUpLocation || null,
     attempts:
       c.attempts !== "" && c.attempts != null
         ? parseInt(c.attempts, 10)
@@ -109,7 +137,7 @@ const buildContactPayload = (c) => {
     // Date of test: present for both known positive (previous test) and known negative (new test)
     dateTestedHiv: c.dateTestedHiv || null,
 
-    // ART enrolment: required when known positive OR newly tested positive )
+    // ART enrolment: required when known positive OR newly tested positive OR on ART
     dateEnrolledArt:
       isKnownPositive || (isKnownNegative && newTestPositive) || contactOnArt
         ? c.dateEnrolledArt || null
@@ -120,13 +148,12 @@ const buildContactPayload = (c) => {
         ? c.contactArtClinic || null
         : null,
 
-    contactOnArt: c.contactOnArt,
+    // FIX [4]: was bare `c.contactOnArt` — could send undefined if user skipped field
+    contactOnArt: c.contactOnArt || null,
 
     // OVC: only applicable when contact is under 15
-    enrolledInOvc: isUnder15 ? !!c.enrolledInOvc : false,
-    dateEnrolledOvc:
-      isUnder15 && c.enrolledInOvc ? c.dateEnrolledOvc || null : null,
-    ovcId:
-      isUnder15 && c.enrolledInOvc ? c.ovcId || null : null,
+    enrolledInOvc:   isUnder15 ? !!c.enrolledInOvc : false,
+    dateEnrolledOvc: isUnder15 && c.enrolledInOvc ? c.dateEnrolledOvc || null : null,
+    ovcId:           isUnder15 && c.enrolledInOvc ? c.ovcId || null : null,
   };
 };

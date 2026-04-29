@@ -7,7 +7,7 @@ import org.springframework.core.annotation.Order;
 @Order(21)
 @Installer(name = "ict-encounter-schema-installer-new",
         description = "Creates ict_encounter and ict_contact tables for the ICT form",
-        version = 6)
+        version = 10)
 public class IctEncounterSchemaInstaller extends AcrossLiquibaseInstaller {
     public IctEncounterSchemaInstaller() {
         super("classpath:installers/hts/ict_encounter_schema.xml");
