@@ -14,6 +14,7 @@ import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { arrayToObject, generateClientCode } from "../utils/htsEncounterPayload";
 import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
+import { capitalizeFirstLetter } from "../../utils";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -78,12 +79,13 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     disabled: readOnly || extraDisabled,
   });
 
+  
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
-      value: item.display
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
+      value: item?.code || item?.display
     }));
   };
 
@@ -131,7 +133,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   // If an existing patient already has a state, fetch its LGAs once statesList is loaded
   useEffect(() => {
-    if ( statesList.length > 0 && values.clientState) {
+    if (statesList.length > 0 && values.clientState) {
       const selectedState = statesList.find(s => String(s.id) === String(values.clientState));
       if (selectedState) {
         fetchLgas(selectedState.id);
@@ -147,8 +149,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
     const settingSubField =
       setting.toLowerCase() === "facility" ? facilitySetting :
-      setting.toLowerCase() === "community" ? communityEntryPoint :
-      setting; // fallback: setting itself counts
+        setting.toLowerCase() === "community" ? communityEntryPoint :
+          setting; // fallback: setting itself counts
     if (setting && settingSubField && dateOfVisit) {
       // Only generate if the field is still empty (avoid overwriting on re-render)
       if (!clientCode) {
@@ -317,10 +319,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     setFieldValue("dobType", type);
     setFieldValue("adolescentHivPositive", "")
     // if (type.toLowerCase() === "actual") {
-      setFieldValue("age", "");
-      setFieldValue("dateOfBirth", "");
+    setFieldValue("age", "");
+    setFieldValue("dateOfBirth", "");
     // } else {
-      // setFieldValue("dateOfBirth", "");
+    // setFieldValue("dateOfBirth", "");
     // }
   };
 
@@ -531,7 +533,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
           </>
-         )} 
+        )}
       </div>
 
       <SectionSubheading>Client Demographics</SectionSubheading>
@@ -562,7 +564,22 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               <ReadOnlyField label="Phone Number" value={values.phoneNumber} />
             </div>
             <div className="col-md-4">
-              <ReadOnlyField label="Marital Status" value={values.maritalStatus} />
+              {console.log(values)}
+
+              {
+                values?.maritalStatus !== "" ? (
+                  <ReadOnlyField label="Marital Status" value={values.maritalStatus} />) :
+                  (
+                    <FormSelect
+                      label="Marital Status"
+                      {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
+                      onChange={readOnly ? undefined : handleMaritalStatusChange}
+                      required
+                    />
+
+                  )
+
+              }
             </div>
           </>
         ) : (

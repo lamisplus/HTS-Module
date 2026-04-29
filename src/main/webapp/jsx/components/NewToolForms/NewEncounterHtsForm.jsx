@@ -257,7 +257,6 @@ const blankClinicalValues = {
  * backButtonAction {Function} Called on Back button click and after successful submit.
  */
 const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmitSuccess }) => {
-  console.log("person payload", person)
   const classes = useStyles();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
@@ -300,6 +299,10 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     enableReinitialize: false, // values are set once; don't wipe on re-render
     onSubmit,
   });
+
+  console.log("person payload", person)
+  console.log("formik", formik)
+
 
   // Forward every formik value change to the orchestrator for real-time
   // eligibility detection (typeOfSession + HIV test result watching).

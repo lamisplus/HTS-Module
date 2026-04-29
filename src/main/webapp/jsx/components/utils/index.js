@@ -1,7 +1,7 @@
 export const calculate_age = (dob) => {
 
   if (!dob) {
-    return null; 
+    return null;
   }
 
   const today = new Date();
@@ -31,6 +31,10 @@ export const calculate_age = (dob) => {
 
   return age;
 };
+
+export const capitalizeFirstLetter = str => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+
 
 export const generateDobFromAge = (age) => {
   // Use January 1st of the current year - age

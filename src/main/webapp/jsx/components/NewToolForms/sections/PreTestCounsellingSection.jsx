@@ -3,6 +3,7 @@ import { FormSelect, SectionSubheading, ScoreDisplay } from "./FormFields";
 import { COLORS } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { useState } from "react";
+import { capitalizeFirstLetter } from "../../utils";
 
 const skippedNoticeStyle = {
   padding: "12px 16px",
@@ -117,8 +118,8 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase() : item.display,
-      value: item.display
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
+      value: item?.code || item?.display
     }));
   };
 

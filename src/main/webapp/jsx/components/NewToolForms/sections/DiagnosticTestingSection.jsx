@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { capitalizeFirstLetter } from "../../utils";
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -39,8 +40,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase(): item.display,
-      value: item.display
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
+      value: item?.code || item?.display
     }));
   };
 

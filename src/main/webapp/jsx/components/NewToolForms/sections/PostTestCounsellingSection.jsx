@@ -4,6 +4,7 @@ import {
   PREVIOUSLY_TESTED_OPTIONS,
 } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+import { capitalizeFirstLetter } from "../../utils";
 
 const COMPLETED_BY_OPTIONS = [
   { label: "Counsellor", value: "Counsellor" },
@@ -39,8 +40,8 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? item.display.toLowerCase() : item.display,
-      value: item.display
+      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
+      value: item?.code || item?.display
     }));
   };
 
