@@ -85,7 +85,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     return items.map(item => ({
       id: item.id,
       label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      value: item?.code || item?.display
+      // value: item?.code || item?.display
+      value: item?.display
     }));
   };
 
