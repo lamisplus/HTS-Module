@@ -3,10 +3,15 @@ import { FormSelect, SectionSubheading } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 
+const HIV_EARLY_DETECT_RESULT_OPTIONS = [
+  { label: "Antigen Reactive", value: "Antigen Reactive" },
+  { label: "Antigen + Antibody Reactive", value: "Antigen + Antibody Reactive" },
+  { label: "Antibody Reactive", value: "Antibody Reactive" },
+];
+
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
-
 
   const fp = (name) => ({
     name,
@@ -27,25 +32,43 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       setFieldValue("confirmatoryHivTest", "");
       setFieldValue("recencyTest", "");
     }
-    // if (val.toLowerCase() !== "negative") {
-    //   setFieldValue("suspectedAcuteInfection", "");
-    // }
   };
 
-  const showConfirmatory = values.initialHivTest.toLowerCase() === "positive";
-  const showRecency = values.initialHivTest.toLowerCase() === "positive";
-  const showSuspectedAcute = values.hivEarlyDetectTestDone.toLowerCase() === "yes";
+  const handleEarlyDetectResultChange = (e) => {
+    const val = e.target.value;
+    setFieldValue("hivEarlyDetectResult", val);
+    // Auto‑set suspectedAcuteInfection when acute indicators are selected
+    if (val === "Antigen Reactive" || val === "Antigen + Antibody Reactive") {
+      setFieldValue("suspectedAcuteInfection", "Yes");
+    } else {
+      setFieldValue("suspectedAcuteInfection", "");
+    }
+    // If Antibody Reactive, confirmatory field will be enabled by schema; 
+    // but we also ensure it's cleared when switching away
+    if (val === "Antibody Reactive") {
+      // keep existing confirmatoryHivTest value; do nothing
+    } else {
+      setFieldValue("confirmatoryHivTest", "");
+    }
+  };
+
+  const showConfirmatory =
+    values.initialHivTest?.toLowerCase() === "positive" ||
+    values.hivEarlyDetectResult === "Antibody Reactive";
+  const showRecency = values.initialHivTest?.toLowerCase() === "positive";
+  const showEarlyDetectResult = values.hivEarlyDetectTestDone?.toLowerCase() === "yes";
+  const showAcuteInfectionBanner =
+    values.hivEarlyDetectResult === "Antigen Reactive" ||
+    values.hivEarlyDetectResult === "Antigen + Antibody Reactive";
 
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
       label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      // value: item?.code || item?.display
       value: item?.display
     }));
   };
-
 
   const loadCodesets = (data) => {
     setCodesets(data);
@@ -66,7 +89,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
-
   return (
     <div style={{ width: "100%" }}>
       <SectionSubheading>HIV Testing</SectionSubheading>
@@ -77,15 +99,19 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             {...sp("hivEarlyDetectTestDone", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
-        {showSuspectedAcute && (
+
+        {showEarlyDetectResult && (
           <div className="col-md-6">
             <FormSelect
-              label="Suspected Acute HIV Infection?"
-              {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
+              label="HIV Early Detect Result"
+              {...sp("hivEarlyDetectResult", HIV_EARLY_DETECT_RESULT_OPTIONS)}
+              onChange={readOnly ? undefined : handleEarlyDetectResultChange}
+              required
             />
           </div>
         )}
-       
+
+
         <div className="col-md-6">
           <FormSelect
             label="Initial HIV Test"
@@ -102,6 +128,25 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
+
+
+        {showAcuteInfectionBanner && (
+          <div className="col-md-12">
+            <div style={{
+              background: "#fff3e0",
+              border: "1px solid #ff9800",
+              borderRadius: 4,
+              padding: "10px 14px",
+              marginBottom: 16,
+              color: "#e65100",
+              fontWeight: 600,
+              fontSize: 14,
+            }}>
+              ⚠️ Suspected Acute HIV Infection — This client should be enrolled in PrEP/PEP and have access to the HIV Module for laboratory tests only.
+            </div>
+          </div>
+        )}
+
       </div>
 
       <SectionSubheading>Syphilis / Recency Testing</SectionSubheading>

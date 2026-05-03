@@ -589,11 +589,22 @@ export const buildValidationSchema = (isNewPatient) => {
         if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
-    ),
+      ),
+      
+      // ── Diagnostic Testing ─────────────────────────────────────────────────
+      
+      hivEarlyDetectTestDone: yup.string().required("This field is required"),
 
-    // ── Diagnostic Testing ─────────────────────────────────────────────────
-
-    initialHivTest: yup.string().required("Initial HIV test result is required"),
+      hivEarlyDetectResult: yup.mixed().test(
+        "earlyDetectResult-conditional",
+        "HIV Early Detect Result is required",
+        function (value) {
+          if (this.parent.hivEarlyDetectTestDone?.toLowerCase() !== "yes") return true;
+          return !!value || this.createError({ message: "HIV Early Detect Result is required" });
+        }
+      ),
+      
+      initialHivTest: yup.string().required("Initial HIV test result is required"),
 
     // suspectedAcuteInfection: visible only when initialHivTest=Negative
     suspectedAcuteInfection: yup.mixed().test(
@@ -605,13 +616,18 @@ export const buildValidationSchema = (isNewPatient) => {
       }
     ),
 
+
     // confirmatoryHivTest: visible only when initialHivTest=Positive
     confirmatoryHivTest: yup.mixed().test(
       "confirmatory-conditional",
       "Confirmatory HIV test is required",
       function (value) {
-        if (this.parent.initialHivTest?.toLowerCase() !== "positive") return true;
-        return !!value || this.createError({ message: "Confirmatory HIV test is required when Initial HIV test is Positive" });
+        const { initialHivTest, hivEarlyDetectResult } = this.parent;
+        const needsConfirmatory =
+          initialHivTest?.toLowerCase() === "positive" ||
+          hivEarlyDetectResult?.toLowerCase() === "antibody reactive";
+        if (!needsConfirmatory) return true;
+        return !!value || this.createError({ message: "Confirmatory HIV test is required" });
       }
     ),
 

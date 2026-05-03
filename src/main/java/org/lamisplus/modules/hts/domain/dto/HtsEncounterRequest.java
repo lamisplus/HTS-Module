@@ -106,6 +106,7 @@ public class HtsEncounterRequest {
     private String confirmatoryHivTest;
     private String syphilisTestResult;
     private String recencyTest;
+    private String hivEarlyDetectResult;
 
     // Post-Test Counselling
     private String previouslyTestedThisYear;
