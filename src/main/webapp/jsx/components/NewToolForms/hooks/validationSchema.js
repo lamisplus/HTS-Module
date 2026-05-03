@@ -128,8 +128,8 @@ export const buildValidationSchema = (isNewPatient) => {
 
       phoneNumber: yup
         .string(),
-        //.required("Phone number is required"),
-        // .matches(/^[0-9]{10,13}$/, "Phone number must be 10 or 13 digits"),
+      //.required("Phone number is required"),
+      // .matches(/^[0-9]{10,13}$/, "Phone number must be 10 or 13 digits"),
 
       maritalStatus: yup.string(), //.required("Marital status is required"),
 
@@ -208,8 +208,21 @@ export const buildValidationSchema = (isNewPatient) => {
     dateOfVisit: yup
       .date()
       .max(new Date(), "Date of visit cannot be in the future")
+      .test(
+        "visit-not-before-dob",
+        "Date of visit cannot be earlier than date of birth",
+        function (value) {
+          const { dateOfBirth } = this.parent;
+          // Skip if either value is missing
+          if (!value || !dateOfBirth) return true;
+          const visitDate = new Date(value);
+          const dobDate = new Date(dateOfBirth);
+          if (visitDate < dobDate) return false;
+          return true;
+        }
+      )
       .required("Date of visit is required"),
-
+      
     clientCode: yup
       .string()
       .required("Client code could not be generated — ensure Setting, Setting sub-type, and Date of Visit are filled"),
@@ -272,7 +285,7 @@ export const buildValidationSchema = (isNewPatient) => {
       }
     ),
 
-    
+
     previouslyTestedNegative: yup.mixed().test(
       "prev-tested-conditional",
       "This field is required",
@@ -620,7 +633,7 @@ export const buildValidationSchema = (isNewPatient) => {
     clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
     // categoryOfClients: yup.string().required("This field is required"),
-    
+
     // categoryOfClients: visible only when hivTestKitsProvided=yes
     categoryOfClients: yup.mixed().test(
       "categoryOfClients-conditional",
@@ -630,8 +643,8 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Category of client is required when HIV self test kit provided to client is yes" });
       }
     ),
-    
-    
+
+
     // acceptedIndexTesting: visible only when confirmatoryHivTest=Positive
     acceptedIndexTesting: yup.mixed().test(
       "acceptedIndextesting-conditional",

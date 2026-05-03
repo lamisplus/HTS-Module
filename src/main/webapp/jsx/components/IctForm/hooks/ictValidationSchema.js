@@ -40,9 +40,9 @@ const contactSchema = yup.object({
     ),
   middlenameOfContact: yup
     .string(),
-    // .test("min2", "Must contain at least 2 non-space characters", (v) =>
-    //   !!v && v.replace(/\s/g, "").length >= 2
-    // ),
+  // .test("min2", "Must contain at least 2 non-space characters", (v) =>
+  //   !!v && v.replace(/\s/g, "").length >= 2
+  // ),
   surnameOfContact: yup
     .string()
     .required("Contact Surname is required")
@@ -51,7 +51,7 @@ const contactSchema = yup.object({
     ),
 
   relationshipToIndex: yup.string().required("Relationship is required"),
-  
+
   contactSex: yup.string().required("Sex is required"),
 
   contactAge: yup.mixed().test(
@@ -78,8 +78,8 @@ const contactSchema = yup.object({
       if (!val) return true;
       return /^[0-9]{10,11}$/.test(val);
     }),
-    
-    indexAltPhone: yup
+
+  indexAltPhone: yup
     .string()
     .nullable()
     .test("alt-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
@@ -87,7 +87,7 @@ const contactSchema = yup.object({
       return /^[0-9]{10,11}$/.test(val);
     }),
 
-    indexPhone: yup
+  indexPhone: yup
     .string()
     .nullable()
     .test("index-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
@@ -168,8 +168,19 @@ export const buildIctValidationSchema = () =>
     dateOfService: yup
       .date()
       .max(today, "Date of service cannot be in the future")
+      .test(
+        "service-not-before-dob",
+        "Date of service cannot be earlier than index client's date of birth",
+        function (value) {
+          const { indexDob } = this.parent;
+          if (!value || !indexDob) return true;
+          const serviceDate = new Date(value);
+          const dobDate = new Date(indexDob);
+          if (serviceDate < dobDate) return false;
+          return true;
+        }
+      )
       .required("Date of service is required"),
-
     setting: yup.string().required("Setting is required"),
 
     facilitySetting: yup.mixed().test("facility-setting-conditional", "Facility setting is required", function (val) {
