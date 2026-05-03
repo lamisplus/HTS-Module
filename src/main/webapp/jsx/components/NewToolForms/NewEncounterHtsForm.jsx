@@ -167,7 +167,7 @@ const mapPersonToFormValues = (person) => {
     clientState: addr?.stateId != null ? String(addr.stateId) : "",
     clientLga: addr?.district ?? "",
     address: addr?.city ?? "",
-    clientCode: hospitalNumber,
+    clientCode: "",
     personId: person?.id != null ? String(person.id) : "",
     currentOrganisationUnitId: person?.facilityId != null ? String(person.facilityId) : "",
   };

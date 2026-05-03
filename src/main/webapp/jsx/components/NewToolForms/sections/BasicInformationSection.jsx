@@ -142,11 +142,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   }, [statesList, values.clientState, readOnly]);
 
-  // ─── Auto-generate client code (new patient only) ──────────────────────
-  // Triggers once setting + (facilitySetting OR communityEntryPoint) + dateOfVisit
-  // are all filled. Does NOT run for existing patients (clientCode already set).
   useEffect(() => {
-    if (isExistingPatient) return; // existing record keeps its original code
+    // if (isExistingPatient) return; // existing record keeps its original code
     const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
     const settingSubField =
       setting.toLowerCase() === "facility" ? facilitySetting :
@@ -452,11 +449,16 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             {touched.clientCode && errors.clientCode && (
               <span style={errorStyle}>{errors.clientCode}</span>
             )}
-            {!isExistingPatient && !values.clientCode && (
+            {!values.clientCode && (
               <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
                 Fill in Setting, Setting sub-type, and Date of Visit to generate
               </small>
             )}
+            {/* {!isExistingPatient && !values.clientCode && (
+              <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
+                Fill in Setting, Setting sub-type, and Date of Visit to generate
+              </small>
+            )} */}
           </FormGroup>
         </div>
 
