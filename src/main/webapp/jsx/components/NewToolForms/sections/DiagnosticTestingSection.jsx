@@ -111,24 +111,15 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-
-        <div className="col-md-6">
-          <FormSelect
-            label="Initial HIV Test"
-            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
-            onChange={readOnly ? undefined : handleInitialTestChange}
-            required
-          />
-        </div>
-        {showConfirmatory && (
+        {showEarlyDetectResult && (
           <div className="col-md-6">
             <FormSelect
-              label="Confirmatory HIV Test"
-              {...sp("confirmatoryHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+              label="Suspected Acute HIV Infection?"
+              {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
+              required
             />
           </div>
         )}
-
 
         {showAcuteInfectionBanner && (
           <div className="col-md-12">
@@ -147,6 +138,22 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
+        <div className="col-md-6">
+          <FormSelect
+            label="Initial HIV Test"
+            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+            onChange={readOnly ? undefined : handleInitialTestChange}
+            required
+          />
+        </div>
+        {showConfirmatory && (
+          <div className="col-md-6">
+            <FormSelect
+              label="Confirmatory HIV Test"
+              {...sp("confirmatoryHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+            />
+          </div>
+        )}
       </div>
 
       <SectionSubheading>Syphilis / Recency Testing</SectionSubheading>
