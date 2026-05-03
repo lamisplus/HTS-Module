@@ -144,11 +144,9 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
       <SectionSubheading>(A) Knowledge Assessment</SectionSubheading>
 
       {skipSection ? (
-
         <div style={skippedNoticeStyle}>
-          Knowledge Assessment is not applicable for PMTCT modality, clients aged 15 and below or Pregnant/Breastfeeding clients.
+          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
         </div>
-
       ) : (
         <>
           <div className="row">
@@ -164,6 +162,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                 <FormSelect
                   label="Time of Last HIV Negative Test Result"
                   {...sp("timeOfLastNegativeTest", transformOptions(codesets?.["RECENT_HIV_TEST"]))}
+                  required
                 />
               </div>
             )}
@@ -171,30 +170,35 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Client Informed About HIV Transmission Routes"
                 {...sp("clientInformedTransmissionRoutes", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Risk Factors for HIV Transmission"
                 {...sp("clientInformedRiskFactors", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed on Preventing HIV Transmission Methods"
                 {...sp("clientInformedPreventionMethods", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Possible Test Results"
                 {...sp("clientInformedPossibleResults", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Informed Consent for HIV Testing Given"
                 {...sp("informedConsentGiven", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
           </div>
@@ -206,7 +210,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Personal HIV Risk Assessment is not applicable for PMTCT modality, clients aged 15 and below or Pregnant/Breastfeeding clients.
+          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
         </div>
       ) : (
         <>
@@ -225,23 +229,23 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="More Than One Sex Partner"
                     {...sp("moreThanOneSexPartner", transformOptions(codesets?.["YES_NO"]))}
+                    required
                   />
                 </div>
-                {
-                  isFemale && (
-                    <div className="col-md-6">
-                      <FormSelect
-                        label="Unprotected Vaginal Sex"
-                        {...sp("unprotectedVaginalSex", transformOptions(codesets?.["YES_NO"]))}
-                      />
-                    </div>
-
-                  )
-                }
+                {isFemale && (
+                  <div className="col-md-6">
+                    <FormSelect
+                      label="Unprotected Vaginal Sex"
+                      {...sp("unprotectedVaginalSex", transformOptions(codesets?.["YES_NO"]))}
+                      required
+                    />
+                  </div>
+                )}
                 <div className="col-md-6">
                   <FormSelect
                     label="Unprotected Anal Sex"
                     {...sp("unprotectedAnalSex", transformOptions(codesets?.["YES_NO"]))}
+                    required
                   />
                 </div>
               </>
@@ -259,12 +263,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Sex Under the Influence of Drugs or Alcohol"
                     {...sp("sexUnderInfluence", transformOptions(codesets?.["YES_NO"]))}
+                    required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="History of STI"
                     {...sp("historyOfSTI", transformOptions(codesets?.["YES_NO"]))}
+                    required
                   />
                 </div>
               </>
@@ -275,154 +281,157 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
       )}
 
       <SectionSubheading>(C) TB and Syndromic STI Screening</SectionSubheading>
-      {
-        skipSection ? (
-          <div style={skippedNoticeStyle}>
-            TB and Syndromic STI Screening is not applicable for PMTCT modality, clients aged 15 and below or Pregnant/Breastfeeding clients.
+      {skipSection ? (
+        <div style={skippedNoticeStyle}>
+          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+        </div>
+      ) : (
+        <div>
+          <p style={subsectionLabelStyle}>Clinical TB Screening</p>
+
+          <div className="row">
+            <div className="col-md-6">
+              <FormSelect label="Current Cough" {...sp("currentCough", transformOptions(codesets?.["YES_NO"]))} required />
+            </div>
+            <div className="col-md-6">
+              <FormSelect label="Weight Loss" {...sp("weightLoss", transformOptions(codesets?.["YES_NO"]))} required />
+            </div>
+            <div className="col-md-6">
+              <FormSelect label="Fever" {...sp("fever", transformOptions(codesets?.["YES_NO"]))} required />
+            </div>
+            <div className="col-md-6">
+              <FormSelect label="Night Sweats" {...sp("nightSweats", transformOptions(codesets?.["YES_NO"]))} required />
+            </div>
           </div>
 
-        ) : (
-          <div>
-            <p style={subsectionLabelStyle}>Clinical TB Screening</p>
+          <ScoreDisplay label="TB Screening Score:" score={tbScore} />
 
-            <div className="row">
-              <div className="col-md-6">
-                <FormSelect label="Current Cough" {...sp("currentCough", transformOptions(codesets?.["YES_NO"]))} />
-              </div>
-              <div className="col-md-6">
-                <FormSelect label="Weight Loss" {...sp("weightLoss", transformOptions(codesets?.["YES_NO"]))} />
-              </div>
-              <div className="col-md-6">
-                <FormSelect label="Fever" {...sp("fever", transformOptions(codesets?.["YES_NO"]))} />
-              </div>
-              <div className="col-md-6">
-                <FormSelect label="Night Sweats" {...sp("nightSweats", transformOptions(codesets?.["YES_NO"]))} />
-              </div>
-            </div>
-
-            <ScoreDisplay label="TB Screening Score:" score={tbScore} />
-
-            <p style={subsectionLabelStyle}>Syndromic STI Screening</p>
-            <div className="row">
-              {isFemale && (
-                <>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
-                      {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
-                      {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                </>
-              )}
-              {isMale && (
-                <>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
-                      {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Male: Complaints of Scrotal Swelling or Pain?"
-                      {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                </>
-              )}
-              <div className="col-md-6">
-                <FormSelect
-                  label="Complaints of Genital Sore(s)"
-                  {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
-                />
-              </div>
-              <div className="col-md-6">
-                <FormSelect
-                  label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
-                  {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
-                />
-              </div>
-            </div>
-
-            <ScoreDisplay label="STI Screening Score:" score={stiScore} />
-
-            <SectionSubheading>Sex Partner Risk Assessment (Last 3 months)</SectionSubheading>
-
-            {values.everHadSexualIntercourse.toLowerCase() === "no" ? (
-              <div style={skippedNoticeStyle}>
-                Sex Partner Risk Assessment is not applicable — client has not had sexual intercourse.
-              </div>
-            ) : (
+          <p style={subsectionLabelStyle}>Syndromic STI Screening</p>
+          <div className="row">
+            {isFemale && (
               <>
-                <p style={{ fontSize: "14px", color: "#57606a", marginBottom: "12px" }}>
-                  Have you had sex with a partner who is HIV positive and falls in any of the categories below?
-                </p>
-                <div className="row">
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Partner Newly Diagnosed and Started Treatment < 3-6 Months Ago?"
-                      {...sp("partnerNewlyDiagnosed", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Partner Pregnant and Currently Receiving ARV for PMTCT?"
-                      {...sp("partnerPregnantOnArv", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
+                    {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
+                    {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+              </>
+            )}
+            {isMale && (
+              <>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
+                    {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Male: Complaints of Scrotal Swelling or Pain?"
+                    {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+              </>
+            )}
+            <div className="col-md-6">
+              <FormSelect
+                label="Complaints of Genital Sore(s)"
+                {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <FormSelect
+                label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
+                {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
+                required
+              />
+            </div>
+          </div>
 
-                  {
-                    Number(values?.age) >= 10 && Number(values?.age) <= 19 && (
-                      <div className="col-md-6">
-                        <FormSelect
-                          label="Adolescent (10-19 yrs) Known to be HIV Infected (on ARV or NOT)"
-                          {...sp("adolescentHivPositive", transformOptions(codesets?.["YES_NO"]))}
-                        />
-                      </div>
-                    )
+          <ScoreDisplay label="STI Screening Score:" score={stiScore} />
 
-                  }
+          <SectionSubheading>Sex Partner Risk Assessment (Last 3 months)</SectionSubheading>
+
+          {values.everHadSexualIntercourse.toLowerCase() === "no" ? (
+            <div style={skippedNoticeStyle}>
+              Sex Partner Risk Assessment is not applicable — client has not had sexual intercourse.
+            </div>
+          ) : (
+            <>
+              <p style={{ fontSize: "14px", color: "#57606a", marginBottom: "12px" }}>
+                Have you had sex with a partner who is HIV positive and falls in any of the categories below?
+              </p>
+              <div className="row">
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Partner Newly Diagnosed and Started Treatment < 3-6 Months Ago?"
+                    {...sp("partnerNewlyDiagnosed", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Partner Pregnant and Currently Receiving ARV for PMTCT?"
+                    {...sp("partnerPregnantOnArv", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+
+                {Number(values?.age) >= 10 && Number(values?.age) <= 19 && (
                   <div className="col-md-6">
                     <FormSelect
-                      label="Known HIV Positive Partner Not Regularly Taking Drugs"
-                      {...sp("partnerNotRegularlyOnDrugs", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <FormSelect
-                      label="Known HIV Positive Recently Returned to Treatment After LTFU"
-                      {...sp("partnerRecentlyReturnedToTreatment", transformOptions(codesets?.["YES_NO"]))}
-                    />
-                  </div>
-                  <div className="col-md-12">
-                    <FormSelect
-                      label="Have you had sex with a partner who is HIV positive and falls in any of the categories above ?"
-                      {...sp("hadSexWithHivPositivePartnerInRiskGroup", transformOptions(codesets?.["YES_NO"]))}
+                      label="Adolescent (10-19 yrs) Known to be HIV Infected (on ARV or NOT)"
+                      {...sp("adolescentHivPositive", transformOptions(codesets?.["YES_NO"]))}
                       required
                     />
                   </div>
+                )}
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Known HIV Positive Partner Not Regularly Taking Drugs"
+                    {...sp("partnerNotRegularlyOnDrugs", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
                 </div>
-
-              </>
-            )}
-            <div className="row">
-              <div className="col-md-6">
-                <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Known HIV Positive Recently Returned to Treatment After LTFU"
+                    {...sp("partnerRecentlyReturnedToTreatment", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
+                <div className="col-md-12">
+                  <FormSelect
+                    label="Have you had sex with a partner who is HIV positive and falls in any of the categories above ?"
+                    {...sp("hadSexWithHivPositivePartnerInRiskGroup", transformOptions(codesets?.["YES_NO"]))}
+                    required
+                  />
+                </div>
               </div>
-              <div className="col-md-6">
-                <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
-              </div>
+            </>
+          )}
+          <div className="row">
+            <div className="col-md-6">
+              <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
             </div>
-
+            <div className="col-md-6">
+              <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
+            </div>
           </div>
-        )
-      }
+        </div>
+      )}
     </div>
   );
 };
