@@ -15,6 +15,7 @@ import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { toast } from "react-toastify";
 import { token, url } from "../../../api";
 import axios from "axios";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 
 // ─── Styles (identical to the other HTS forms) ────────────────────────────────
 
@@ -269,16 +270,29 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const mergedInitialValues = { ...blankClinicalValues, ...demographicValues };
 
   const onSubmit = async (values) => {
-    // isNewPatient=false → payload builder attaches personId instead of full person block
+    // Prevent duplicate HTS encounter for the same person on the same date
+    if (person?.id) {
+      try {
+        const existingEncounters = await getHtsEcounterForAPatient(person.id);
+        const hasDuplicate = Array.isArray(existingEncounters) &&
+          existingEncounters.some(enc => enc.dateOfVisit === values.dateOfVisit);
+        if (hasDuplicate) {
+          toast.error("An HTS record already exists for this patient on the selected date.");
+          return;
+        }
+      } catch (err) {
+        toast.error("Unable to verify existing encounters. Please try again.");
+        return;
+      }
+    }
+  
     const payload = buildHtsEncounterPayload(values, false);
-
+  
     try {
       setIsLoading(true);
       const response = await createEncounter(payload);
       toast.success("New HTS encounter created successfully");
       if (onSubmitSuccess) {
-        // createEncounter already unwraps axios response.data
-        // so response IS the HTS encounter object — pass it + values to orchestrator
         onSubmitSuccess(response, values);
       } else {
         backButtonAction?.();
@@ -290,7 +304,6 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
       setIsLoading(false);
     }
   };
-
   // Use the full "new patient" validation schema — demographics are pre-filled
   // so they will pass; clinical fields are validated as normal.
   const formik = useFormik({
