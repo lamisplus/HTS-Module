@@ -39,10 +39,10 @@ const contactSchema = yup.object({
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   middlenameOfContact: yup
-    .string()
-    .test("min2", "Must contain at least 2 non-space characters", (v) =>
-      !!v && v.replace(/\s/g, "").length >= 2
-    ),
+    .string(),
+    // .test("min2", "Must contain at least 2 non-space characters", (v) =>
+    //   !!v && v.replace(/\s/g, "").length >= 2
+    // ),
   surnameOfContact: yup
     .string()
     .required("Contact Surname is required")

@@ -30,6 +30,7 @@
             </column>
             <column name="setting" type="VARCHAR(50)"/>
             <column name="data" type="JSONB"/>
+            <column name="PMTCT_HTS" type="JSONB"/>
             <column name="archived" type="INT" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>

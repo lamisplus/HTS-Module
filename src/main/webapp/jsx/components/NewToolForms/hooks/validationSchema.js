@@ -82,8 +82,8 @@ export const buildValidationSchema = (isNewPatient) => {
 
   const demographicFields = isNewPatient
     ? {
-      surname: nonBlankMin2("Surname"),
-      firstName: nonBlankMin2("First name"),
+      surname: yup.string(), //nonBlankMin2("Surname"),
+      firstName: yup.string(), //nonBlankMin2("First name"),
       // middleName is optional — no rule needed
 
       dobType: yup
@@ -127,11 +127,11 @@ export const buildValidationSchema = (isNewPatient) => {
       sex: yup.string().required("Sex is required"),
 
       phoneNumber: yup
-        .string()
-        .required("Phone number is required")
-        .matches(/^[0-9]{10,11}$/, "Phone number must be 10 or 11 digits"),
+        .string(),
+        //.required("Phone number is required"),
+        // .matches(/^[0-9]{10,13}$/, "Phone number must be 10 or 13 digits"),
 
-      maritalStatus: yup.string().required("Marital status is required"),
+      maritalStatus: yup.string(), //.required("Marital status is required"),
 
       // numberOfWives: required and ≥ 1 only when sex=Male AND maritalStatus=Married
       numberOfWives: yup.mixed().test(
@@ -193,9 +193,9 @@ export const buildValidationSchema = (isNewPatient) => {
         }
       ),
 
-      clientState: yup.string().required("State is required"),
-      clientLga: yup.string().required("LGA is required"),
-      address: yup.string().required("Address is required"),
+      clientState: yup.string(), //.required("State is required"),
+      clientLga: yup.string(), //.required("LGA is required"),
+      address: yup.string(), //.required("Address is required"),
       landmark: yup.string(),
     }
     : {};
@@ -362,6 +362,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
+        if (this.parent.sex?.toLowerCase() !== "female") return true;
         if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
@@ -572,6 +573,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "This field is required",
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
+        if (this.parent.everHadSexualIntercourse?.toLowerCase() !== "yes") return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),

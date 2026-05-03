@@ -266,7 +266,7 @@ const NewEncounterHtsIctOrchestrator = ({
                 isActive ? classes.navItemActive : "",
                 isLocked ? classes.navItemLocked : "",
               ].join(" ")}
-              onClick={() => { if (!isLocked) setActiveView(item.key); }}
+              // onClick={() => { if (!isLocked) setActiveView(item.key); }}
               title={isLocked ? "Complete the HTS form first to unlock ICT" : undefined}
             >
               <span

@@ -62,7 +62,7 @@ const calcScore = (fields, values) =>
 const PreTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
-  
+
 
   const fp = (name) => ({
     name,
@@ -227,12 +227,17 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                     {...sp("moreThanOneSexPartner", transformOptions(codesets?.["YES_NO"]))}
                   />
                 </div>
-                <div className="col-md-6">
-                  <FormSelect
-                    label="Unprotected Vaginal Sex"
-                    {...sp("unprotectedVaginalSex", transformOptions(codesets?.["YES_NO"]))}
-                  />
-                </div>
+                {
+                  isFemale && (
+                    <div className="col-md-6">
+                      <FormSelect
+                        label="Unprotected Vaginal Sex"
+                        {...sp("unprotectedVaginalSex", transformOptions(codesets?.["YES_NO"]))}
+                      />
+                    </div>
+
+                  )
+                }
                 <div className="col-md-6">
                   <FormSelect
                     label="Unprotected Anal Sex"
