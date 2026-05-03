@@ -160,7 +160,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         {showRecency && (
           <div className="col-md-6">
             <FormSelect
-              label="Recency Test Result (for positive clients only)"
+              label="Recency Test Result"
               {...sp("recencyTest", transformOptions(codesets?.["RECENCY_TESTING"]))}
             />
           </div>
