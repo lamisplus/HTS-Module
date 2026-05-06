@@ -20,8 +20,6 @@ const HTSList = lazy(() => import("./Patient/HTSList"));
 const HIVSTPatient = lazy(() => import("./Patient/HIVST/HIVSTPatient"));
 const CheckedInPatients = lazy(() => import("./Patient/CheckedInPatients"));
 
-
-
 const divStyle = {
   borderRadius: "2px",
   fontSize: 14,

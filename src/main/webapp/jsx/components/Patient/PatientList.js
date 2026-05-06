@@ -177,7 +177,7 @@ const Patients = (props) => {
                                         fontWeight: "bolder",
                                       }}
                                     >
-                                      Patient Dashboard
+                                      New HTS
                                     </span>
                                   </Button>
                                 </ButtonGroup>

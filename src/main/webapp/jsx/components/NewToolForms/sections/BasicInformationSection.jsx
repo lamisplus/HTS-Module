@@ -79,7 +79,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     disabled: readOnly || extraDisabled,
   });
 
-  
+
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
@@ -537,18 +537,107 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             </div>
           </>
         )}
+
+{showNumberOfWives && (
+          <div className="col-md-4">
+            <Label style={labelStyle}>No. of Wives</Label>
+            <Input
+              type="number"
+              name="numberOfWives"
+              value={values.numberOfWives || ""}
+              onChange={readOnly ? undefined : handleNoOfWives}
+              onBlur={handleBlur}
+              min="0"
+              step="1"
+              disabled={readOnly}
+              style={readOnly ? disabledInputStyle : inputStyle}
+              onKeyDown={(e) => {
+                if (e.key === "." || e.key === ",") e.preventDefault();
+              }}
+            />
+            {touched.numberOfWives && errors.numberOfWives && (
+              <span style={errorStyle}>{errors.numberOfWives}</span>
+            )}
+          </div>
+        )}
+
+        {showNumberOfCoWives && (
+          <div className="col-md-4">
+            <Label style={labelStyle}>No. of Co-wives</Label>
+            <Input
+              type="number"
+              name="numberOfCoWives"
+              value={values.numberOfCoWives || ""}
+              onChange={readOnly ? undefined : handleCoWives}
+              onBlur={handleBlur}
+              min="0"
+              step="1"
+              disabled={readOnly}
+              style={readOnly ? disabledInputStyle : inputStyle}
+              onKeyDown={(e) => {
+                if (e.key === "." || e.key === ",") e.preventDefault();
+              }}
+            />
+            {touched.numberOfCoWives && errors.numberOfCoWives && (
+              <span style={errorStyle}>{errors.numberOfCoWives}</span>
+            )}
+          </div>
+        )}
+
+        <div className="col-md-4">
+          <Label style={labelStyle}>{"No. of Biological Children < 15 years"}</Label>
+          <Input
+            type="number"
+            name="numberOfBiologicalChildren"
+            value={values.numberOfBiologicalChildren || ""}
+            onChange={readOnly ? undefined : handleNoOfBiologicalChildren}
+            onBlur={handleBlur}
+            min="0"
+            step="1"
+            disabled={readOnly}
+            style={readOnly ? disabledInputStyle : inputStyle}
+            onKeyDown={(e) => {
+              if (e.key === "." || e.key === ",") e.preventDefault();
+            }}
+          />
+          {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
+            <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
+          )}
+        </div>
+
+        {/* Pregnancy */}
+        {showPregnancy && (
+          <div className={`col-md-4 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
+            <FormSelect
+              label="Pregnancy Status"
+              {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
+              onChange={readOnly ? undefined : handlePregnancyStatusChange}
+              required
+            />
+          </div>
+        )}
+
+        {showBreastfeedingDuration && (
+          <div className={`col-md-4 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
+            <FormSelect
+              label="Duration of Breastfeeding"
+              {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}
+              required
+            />
+          </div>
+        )}
       </div>
 
-      <SectionSubheading>Client Demographics</SectionSubheading>
+      {/* <SectionSubheading>Client Demographics</SectionSubheading> */}
 
       {/* ── Demographics ── */}
       <div className="row">
         {isExistingPatient ? (
           <>
-            <div className="col-md-4">
+            {/* <div className="col-md-4">
               <ReadOnlyField label="Surname" value={values.surname} />
-            </div>
-            <div className="col-md-4">
+            </div> */}
+            {/* <div className="col-md-4">
               <ReadOnlyField label="First Name" value={values.firstName} />
             </div>
             <div className="col-md-4">
@@ -565,10 +654,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             </div>
             <div className="col-md-4">
               <ReadOnlyField label="Phone Number" value={values.phoneNumber} />
-            </div>
-            <div className="col-md-4">
-              {console.log(values)}
-
+            </div> */}
+            {/* <div className="col-md-4">
               {
                 values?.maritalStatus !== "" ? (
                   <ReadOnlyField label="Marital Status" value={values.maritalStatus} />) :
@@ -583,7 +670,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                   )
 
               }
-            </div>
+            </div> */}
           </>
         ) : (
           <>
@@ -712,94 +799,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {/* Marital sub-fields */}
-        {showNumberOfWives && (
-          <div className="col-md-4">
-            <Label style={labelStyle}>No. of Wives</Label>
-            <Input
-              type="number"
-              name="numberOfWives"
-              value={values.numberOfWives || ""}
-              onChange={readOnly ? undefined : handleNoOfWives}
-              onBlur={handleBlur}
-              min="0"
-              step="1"
-              disabled={readOnly}
-              style={readOnly ? disabledInputStyle : inputStyle}
-              onKeyDown={(e) => {
-                if (e.key === "." || e.key === ",") e.preventDefault();
-              }}
-            />
-            {touched.numberOfWives && errors.numberOfWives && (
-              <span style={errorStyle}>{errors.numberOfWives}</span>
-            )}
-          </div>
-        )}
-
-        {showNumberOfCoWives && (
-          <div className="col-md-4">
-            <Label style={labelStyle}>No. of Co-wives</Label>
-            <Input
-              type="number"
-              name="numberOfCoWives"
-              value={values.numberOfCoWives || ""}
-              onChange={readOnly ? undefined : handleCoWives}
-              onBlur={handleBlur}
-              min="0"
-              step="1"
-              disabled={readOnly}
-              style={readOnly ? disabledInputStyle : inputStyle}
-              onKeyDown={(e) => {
-                if (e.key === "." || e.key === ",") e.preventDefault();
-              }}
-            />
-            {touched.numberOfCoWives && errors.numberOfCoWives && (
-              <span style={errorStyle}>{errors.numberOfCoWives}</span>
-            )}
-          </div>
-        )}
-
-        <div className="col-md-4">
-          <Label style={labelStyle}>{"No. of Biological Children < 15 years"}</Label>
-          <Input
-            type="number"
-            name="numberOfBiologicalChildren"
-            value={values.numberOfBiologicalChildren || ""}
-            onChange={readOnly ? undefined : handleNoOfBiologicalChildren}
-            onBlur={handleBlur}
-            min="0"
-            step="1"
-            disabled={readOnly}
-            style={readOnly ? disabledInputStyle : inputStyle}
-            onKeyDown={(e) => {
-              if (e.key === "." || e.key === ",") e.preventDefault();
-            }}
-          />
-          {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
-            <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
-          )}
-        </div>
-
-        {/* Pregnancy */}
-        {showPregnancy && (
-          <div className={`col-md-4 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
-            <FormSelect
-              label="Pregnancy Status"
-              {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
-              onChange={readOnly ? undefined : handlePregnancyStatusChange}
-              required
-            />
-          </div>
-        )}
-
-        {showBreastfeedingDuration && (
-          <div className={`col-md-4 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
-            <FormSelect
-              label="Duration of Breastfeeding"
-              {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}
-              required
-            />
-          </div>
-        )}
       </div>
 
       <SectionSubheading>Address Information</SectionSubheading>
