@@ -285,9 +285,9 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
         return;
       }
     }
-  
+
     const payload = buildHtsEncounterPayload(values, false);
-  
+
     try {
       setIsLoading(true);
       const response = await createEncounter(payload);
@@ -313,7 +313,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     onSubmit,
   });
 
-  console.log("person payload", person)
+  console.log("patientInfo", patientInfo)
   console.log("formik", formik)
 
 
@@ -343,7 +343,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
     // "modality",
-     "typeOfSession", "indexRelationship", "indexClientCode",
+    "typeOfSession", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
