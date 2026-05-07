@@ -118,7 +118,6 @@
             <column name="enrolled_in_ovc" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="date_enrolled_ovc" type="DATE"/>
             <column name="ovc_id" type="VARCHAR(100)"/>
-            <column name="data" type="JSONB"/>
             <column name="archived" type="INT" defaultValueNumeric="0">
                 <constraints nullable="false"/>
             </column>

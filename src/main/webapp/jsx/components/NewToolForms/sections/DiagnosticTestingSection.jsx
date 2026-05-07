@@ -1,10 +1,11 @@
+// src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 
 const HIV_EARLY_DETECT_RESULT_OPTIONS = [
-  { label: "Antigen Reactive", value: "Antigen Reactive" },
+  { label: "Antigen Reactive", value: "Antigen Reactive" }, // these are not codesets, keep as is
   { label: "Antigen + Antibody Reactive", value: "Antigen + Antibody Reactive" },
   { label: "Antibody Reactive", value: "Antibody Reactive" },
 ];
@@ -28,7 +29,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const handleInitialTestChange = (e) => {
     const val = e.target.value;
     setFieldValue("initialHivTest", val);
-    if (val.toLowerCase() !== "positive") {
+    if (val !== "STI_HIV_RESULT_POSITIVE") {
       setFieldValue("confirmatoryHivTest", "");
       setFieldValue("recencyTest", "");
     }
@@ -37,26 +38,23 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const handleEarlyDetectResultChange = (e) => {
     const val = e.target.value;
     setFieldValue("hivEarlyDetectResult", val);
-    // Auto‑set suspectedAcuteInfection when acute indicators are selected
     if (val === "Antigen Reactive" || val === "Antigen + Antibody Reactive") {
-      setFieldValue("suspectedAcuteInfection", "Yes");
+      setFieldValue("suspectedAcuteInfection", "YES_NO_YES");
     } else {
       setFieldValue("suspectedAcuteInfection", "");
     }
-    // If Antibody Reactive, confirmatory field will be enabled by schema; 
-    // but we also ensure it's cleared when switching away
     if (val === "Antibody Reactive") {
-      // keep existing confirmatoryHivTest value; do nothing
+      // keep existing confirmatory, do nothing
     } else {
       setFieldValue("confirmatoryHivTest", "");
     }
   };
 
   const showConfirmatory =
-    values.initialHivTest?.toLowerCase() === "positive" ||
+    values.initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
     values.hivEarlyDetectResult === "Antibody Reactive";
-  const showRecency = values.initialHivTest?.toLowerCase() === "positive";
-  const showEarlyDetectResult = values.hivEarlyDetectTestDone?.toLowerCase() === "yes";
+  const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
+  const showEarlyDetectResult = values.hivEarlyDetectTestDone === "YES_NO_YES";
   const showAcuteInfectionBanner =
     values.hivEarlyDetectResult === "Antigen Reactive" ||
     values.hivEarlyDetectResult === "Antigen + Antibody Reactive";
@@ -65,8 +63,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      value: item?.display
+      label: capitalizeFirstLetter(item.display),
+      value: item.code,
     }));
   };
 
@@ -83,7 +81,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       "STI_HIV_RESULT",
       "PARTNER_SYPHILIS_STATUS",
       "RECENCY_TESTING",
-      "SYPHILIS_RESULT"
+      "SYPHILIS_RESULT",
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
@@ -99,7 +97,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             {...sp("hivEarlyDetectTestDone", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
-
         {showEarlyDetectResult && (
           <div className="col-md-6">
             <FormSelect
@@ -110,7 +107,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
-
         {showEarlyDetectResult && (
           <div className="col-md-6">
             <FormSelect
@@ -120,7 +116,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
-
         {showAcuteInfectionBanner && (
           <div className="col-md-12">
             <div style={{
@@ -137,7 +132,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             </div>
           </div>
         )}
-
         <div className="col-md-6">
           <FormSelect
             label="Initial HIV Test"
@@ -155,7 +149,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
       </div>
-
       <SectionSubheading>Syphilis / Recency Testing</SectionSubheading>
       <div className="row">
         <div className="col-md-6">

@@ -16,9 +16,11 @@ import { toast } from "react-toastify";
 import { token, url } from "../../../api";
 import axios from "axios";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { getCodesets } from "../../services/getCodesets.service";
+import { convertFieldsToCodes } from "../../../utils";
 
-// ─── Styles (identical to the other HTS forms) ────────────────────────────────
 
+// ─── Styles ────────────────────────────────────────────────────────────────
 const useStyles = makeStyles(() => ({
   root: {
     backgroundColor: "#f6f8fa",
@@ -63,50 +65,21 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-// ─── Person → Formik mapper ───────────────────────────────────────────────────
-
-/**
- * Translates the person object (from the patient dashboard) into the flat
- * formik field names used by the HTS form.
- *
- * Confirmed API shape:
- * {
- *   id, surname, firstName, otherName, sex,
- *   gender:        { id, display },
- *   maritalStatus: { id, display },
- *   dateOfBirth, isDateOfBirthEstimated,
- *   identifier:    { identifier: [{ type, value, assignerId }] },
- *   contactPoint:  { contactPoint: [{ type, value }] },
- *   address:       { address: [{ city, line, stateId, district, ... }] },
- *   facilityId
- * }
- *
- * Every accessor uses optional chaining + nullish coalescing so the
- * component never crashes on a partial or future-shaped object.
- */
+// ─── Person → Formik mapper (unchanged, returns display strings) ───────────
 const mapPersonToFormValues = (person) => {
   if (!person) return {};
 
-  // ── Address ───────────────────────────────────────────────────────────────
-  // Confirmed: person.address.address[0]
-  // Fallback:  plain array directly on person.address
   const addressArr =
     person?.address?.address ??
     (Array.isArray(person?.address) ? person.address : []);
   const addr = addressArr[0] ?? {};
 
-  // ── Phone ─────────────────────────────────────────────────────────────────
-  // Confirmed: person.contactPoint.contactPoint[0]
-  // Fallback:  plain array directly on person.contactPoint
   const cpArr =
     person?.contactPoint?.contactPoint ??
     (Array.isArray(person?.contactPoint) ? person.contactPoint : []);
   const phoneEntry = cpArr.find((cp) => cp?.type === "phone") ?? cpArr[0] ?? {};
   const phone = phoneEntry?.value ?? person?.phoneNumber ?? "";
 
-  // ── Hospital Number ───────────────────────────────────────────────────────
-  // Confirmed: person.identifier.identifier[0]
-  // Fallback:  plain array directly on person.identifier
   const idArr =
     person?.identifier?.identifier ??
     (Array.isArray(person?.identifier) ? person.identifier : []);
@@ -116,20 +89,14 @@ const mapPersonToFormValues = (person) => {
     person?.hospitalNumber ??
     "";
 
-  // ── Sex ───────────────────────────────────────────────────────────────────
-  // person.sex is the display string  (e.g. "Female")
-  // person.gender.id is the numeric code for the payload
   const sexDisplay = person?.sex ?? person?.gender?.display ?? "";
   const sexCode = person?.gender?.id != null ? String(person.gender.id) : "";
 
-  // ── Marital status ────────────────────────────────────────────────────────
-  // person.maritalStatus is { id, display } — not a plain string
   const maritalDisplay = person?.maritalStatus?.display ?? "";
   const maritalCode = person?.maritalStatus?.id != null
     ? String(person.maritalStatus.id)
     : "";
 
-  // ── DOB & age ─────────────────────────────────────────────────────────────
   const dob = person?.dateOfBirth ?? "";
   const isEstimated = !!person?.isDateOfBirthEstimated;
 
@@ -146,25 +113,19 @@ const mapPersonToFormValues = (person) => {
   }
 
   return {
-    // ── Identity ──────────────────────────────────────────────────────────
     surname: person?.surname ?? "",
     firstName: person?.firstName ?? "",
-    middleName: person?.otherName ?? "",   // API field is otherName; formik uses middleName
-
-    // ── DOB ───────────────────────────────────────────────────────────────
+    middleName: person?.otherName ?? "",
     dobType: isEstimated ? "Estimated" : "Actual",
-    // dateOfBirth: isEstimated ? "" : dob,   // blank the picker when estimated
-    dateOfBirth: dob,   // blank the picker when estimated
+    dateOfBirth: dob,
     age: computedAge,
 
-    // ── Demographics ──────────────────────────────────────────────────────
     sex: sexDisplay,
     sexCode: sexCode,
     maritalStatus: maritalDisplay,
     maritalStatusCode: maritalCode,
     phoneNumber: phone,
 
-    // ── Address ───────────────────────────────────────────────────────────
     clientState: addr?.stateId != null ? String(addr.stateId) : "",
     clientLga: addr?.district ?? "",
     address: addr?.city ?? "",
@@ -174,15 +135,13 @@ const mapPersonToFormValues = (person) => {
   };
 };
 
-// ─── Blank clinical values (everything NOT demographic) ───────────────────────
-
+// ─── Blank clinical values ────────────────────────────────────────────────
 const blankClinicalValues = {
   dateOfVisit: "",
   facilityName: "",
   setting: "",
   facilitySetting: "",
   communityEntryPoint: "",
-  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",
@@ -223,6 +182,7 @@ const blankClinicalValues = {
   partnerRecentlyReturnedToTreatment: "",
   hadSexWithHivPositivePartnerInRiskGroup: "",
   hivEarlyDetectTestDone: "",
+  hivEarlyDetectResult: "",
   initialHivTest: "",
   suspectedAcuteInfection: "",
   confirmatoryHivTest: "",
@@ -243,32 +203,71 @@ const blankClinicalValues = {
   designation: "",
 };
 
-
-
-/**
- * NewEncounterHtsForm
- *
- * Creates a brand-new HTS encounter for a patient who is already registered.
- * Demographics are pre-populated from `person` prop and locked (read-only).
- * All clinical fields start blank and are fully editable.
- *
- * Props
- * ─────
- * person           {Object}   Full patient/person object from the dashboard.
- * backButtonAction {Function} Called on Back button click and after successful submit.
- */
+// ─── Component ────────────────────────────────────────────────────────────
 const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmitSuccess }) => {
   const classes = useStyles();
-  const history = useHistory();
   const [isLoading, setIsLoading] = useState(false);
-  const [patientInfo, setPatientInfo] = useState(person)
-  const [isFetchingPatientInfo, setIsFetchingPatientInfo] = useState(false)
+  const [patientInfo, setPatientInfo] = useState(person);
+  const [isFetchingPatientInfo, setIsFetchingPatientInfo] = useState(false);
+  const [codesets, setCodesets] = useState(null);
+  const [formInitialValues, setFormInitialValues] = useState(null); // merged values, ready for formik
 
+  // Fetch the required codesets once on mount
+  useEffect(() => {
+    getCodesets("SEX", "MARITAL_STATUS", "PREGNANCY_STATUS", "YES_NO", "DURATION_OF_BREASTFEEDING")
+      .then(setCodesets)
+      .catch(err => console.error("Failed to load codesets", err));
+  }, []);
 
-  // Build the merged initial values once on mount
-  const demographicValues = mapPersonToFormValues(person);
-  const mergedInitialValues = { ...blankClinicalValues, ...demographicValues };
+  // Fetch latest patient data when person.id changes
+  const fetchPatientCurrentBio = async () => {
+    setIsFetchingPatientInfo(true);
+    try {
+      const response = await axios.get(
+        `${url}patient/${person?.id || person?.personId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setPatientInfo(response.data);
+    } catch (error) {
+      console.error("Failed to fetch patient", error);
+      toast.error("Failed to fetch patient details");
+    } finally {
+      setIsFetchingPatientInfo(false);
+    }
+  };
 
+  useEffect(() => {
+    if (person?.id || person?.personId) {
+      fetchPatientCurrentBio();
+    }
+  }, [person?.id, person?.personId]);
+
+  // When both patientInfo and codesets are ready, build the merged initial values
+  useEffect(() => {
+    if (!patientInfo || !codesets) return;
+
+    // 1. Get raw demographic values (display strings)
+    const demoValues = mapPersonToFormValues(patientInfo);
+
+    // 2. Define which fields correspond to which codesets
+    const fieldCodesetMap = {
+      sex: codesets["SEX"],
+      maritalStatus: codesets["MARITAL_STATUS"],
+      pregnancyStatus: codesets["PREGNANCY_STATUS"],
+      breastfeedingDuration: codesets["DURATION_OF_BREASTFEEDING"],
+      // add more fields as needed
+    };
+
+    // 3. Convert the display strings to codes (e.g. "Female" -> "SEX_FEMALE")
+    const convertedDemo = convertFieldsToCodes(demoValues, fieldCodesetMap);
+
+    // 4. Merge with blank clinical values
+    const merged = { ...blankClinicalValues, ...convertedDemo };
+    setFormInitialValues(merged);
+  }, [patientInfo, codesets]);
+
+  // Formik initialisation only when formInitialValues is ready.
+  // We'll use a conditional to avoid rendering form before values are set.
   const onSubmit = async (values) => {
     // Prevent duplicate HTS encounter for the same person on the same date
     if (person?.id) {
@@ -287,7 +286,6 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     }
 
     const payload = buildHtsEncounterPayload(values, false);
-
     try {
       setIsLoading(true);
       const response = await createEncounter(payload);
@@ -304,45 +302,28 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
       setIsLoading(false);
     }
   };
-  // Use the full "new patient" validation schema — demographics are pre-filled
-  // so they will pass; clinical fields are validated as normal.
+
+  // Only create the formik instance when initial values are ready
   const formik = useFormik({
-    initialValues: mergedInitialValues,
-    validationSchema: buildValidationSchema(true),
-    enableReinitialize: false, // values are set once; don't wipe on re-render
+    initialValues: formInitialValues || blankClinicalValues,
+    validationSchema: buildValidationSchema(false), // false because demographics are read-only for existing patient
+    enableReinitialize: true, // reinitialize when formInitialValues updates
     onSubmit,
   });
 
-  console.log("patientInfo", patientInfo)
-  console.log("formik", formik)
-
-
-  // Forward every formik value change to the orchestrator for real-time
-  // eligibility detection (typeOfSession + HIV test result watching).
+  // Forward values to orchestrator for eligibility watcher
   React.useEffect(() => {
     onValuesChange?.(formik.values);
-  }, [formik.values]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [formik.values]);
 
-  // If the person prop updates (unlikely but safe), re-seed only the demographic
-  // fields without touching any clinical fields the user may have started filling.
-  useEffect(() => {
-    if (!patientInfo) return;
-    const demo = mapPersonToFormValues(patientInfo);
-    Object.entries(demo).forEach(([key, val]) => {
-      formik.setFieldValue(key, val, false); // false = skip revalidation on seed
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientInfo]);
-
+  // Standard section error helpers
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
-
   const sectionHasError = (fields) =>
     hasSubmitted && fields.some((f) => !!errors[f]);
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    // "modality",
     "typeOfSession", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
@@ -365,8 +346,8 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   ];
 
   const diagnosticFields = [
-    "hivEarlyDetectTestDone", "initialHivTest", "suspectedAcuteInfection",
-    "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
+    "hivEarlyDetectTestDone", "hivEarlyDetectResult", "initialHivTest",
+    "suspectedAcuteInfection", "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
 
   const postTestFields = [
@@ -377,38 +358,17 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     "clientReferredToOtherServices", "completedBy", "designation",
   ];
 
-
-  const fetchPatientCurrentBio = async () => {
-    setIsFetchingPatientInfo(true)
-    axios
-      .get(
-        `${url}patient/${person?.id || person?.personId
-        }`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        console.log(response.data)
-        setPatientInfo(response.data)
-        setIsFetchingPatientInfo(false)
-      })
-      .catch((error) => {
-        console.log(error)
-        setIsFetchingPatientInfo(false)
-      });
+  // If still loading initial values, show a loading indicator
+  if (!formInitialValues || isFetchingPatientInfo) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "#57606a", fontSize: 14 }}>
+        Loading patient details…
+      </div>
+    );
   }
-
-  useEffect(() => {
-    if (person?.id || person?.personId) {
-      fetchPatientCurrentBio()
-    }
-  }, [person])
-
 
   return (
     <div className={classes.root}>
-      {/* ── Top bar ── */}
       <div className={classes.topBar}>
         <div className={classes.titleBlock}>
           <h2 className={classes.title}>
@@ -432,8 +392,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
           <p className={classes.subtitle}>
             New HTS encounter for{" "}
             <strong>
-              {[person?.firstName, person?.surname].filter(Boolean).join(" ") ||
-                "existing patient"}
+              {[person?.firstName, person?.surname].filter(Boolean).join(" ") || "existing patient"}
             </strong>{" "}
             — demographics are locked, all clinical fields are blank
           </p>
@@ -447,12 +406,8 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
         />
       </div>
 
-      {/* ── Form body ── */}
       <div className={classes.body}>
         <form onSubmit={formik.handleSubmit} noValidate>
-
-          {/* isExistingPatient=true → BasicInformationSection renders demographics
-              as ReadOnlyField components, exactly like ExistingPatientHtsForm does */}
           <FormAccordion
             step={1}
             title="Basic Information"

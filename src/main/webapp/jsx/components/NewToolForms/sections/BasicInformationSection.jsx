@@ -1,3 +1,4 @@
+// src/NewToolForms/sections/BasicInformationSection.jsx
 import React, { useEffect, useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import {
@@ -57,7 +58,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const [accountDetail, setAccountDetail] = useState(null);
   const [codesets, setCodesets] = useState(null);
 
-  // State and LGA data from API
   const [statesList, setStatesList] = useState([]);
   const [lgasList, setLgasList] = useState([]);
   const [loadingStates, setLoadingStates] = useState(false);
@@ -79,19 +79,17 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     disabled: readOnly || extraDisabled,
   });
 
-
+  // ---------- Codeset to options (value = code) ----------
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      // value: item?.code || item?.display
-      value: item?.display
+      label: capitalizeFirstLetter(item.display),
+      value: item.code,
     }));
   };
 
-  // ─── API calls ─────────────────────────────────────────────────────────
-
+  // ---------- API calls ----------
   const fetchStates = async (countryId) => {
     setLoadingStates(true);
     try {
@@ -99,12 +97,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         `${url}organisation-units/parent-organisation-units/${countryId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Sort alphabetically by name for better UX
       const sorted = response.data.sort((a, b) => a.name.localeCompare(b.name));
       setStatesList(sorted);
     } catch (error) {
       console.error("Error fetching states:", error);
-      // Optionally show a user-friendly message
     } finally {
       setLoadingStates(false);
     }
@@ -126,13 +122,11 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-
   useEffect(() => {
     fetchStates(1);
-    getAllHtsEncounter()
+    getAllHtsEncounter();
   }, []);
 
-  // If an existing patient already has a state, fetch its LGAs once statesList is loaded
   useEffect(() => {
     if (statesList.length > 0 && values.clientState) {
       const selectedState = statesList.find(s => String(s.id) === String(values.clientState));
@@ -143,35 +137,27 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   }, [statesList, values.clientState, readOnly]);
 
   useEffect(() => {
-    // if (isExistingPatient) return; // existing record keeps its original code
     const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
     const settingSubField =
-      setting.toLowerCase() === "facility" ? facilitySetting :
-        setting.toLowerCase() === "community" ? communityEntryPoint :
-          setting; // fallback: setting itself counts
-    if (setting && settingSubField && dateOfVisit) {
-      // Only generate if the field is still empty (avoid overwriting on re-render)
-      if (!clientCode) {
-        setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
-      }
+      setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
+      setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
+      setting;
+    if (setting && settingSubField && dateOfVisit && !clientCode) {
+      setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
     }
-  }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]);
 
-  // Fetch account details (existing code)
   const handleFetchFacilityName = async () => {
     try {
       const response = await axios.get(`${url}account`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setAccountDetail(response.data);
       setFieldValue("facilityName", response.data?.currentOrganisationUnitName);
       setFieldValue("currentOrganisationUnitId", response.data?.currentOrganisationUnitId);
       return response.data;
     } catch (error) {
-      console.error("Error fetching account:", error.response?.data || error.message);
+      console.error("Error fetching account:", error);
       throw error;
     }
   };
@@ -180,9 +166,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     handleFetchFacilityName();
   }, []);
 
-  // Load codesets (existing code)
   const loadCodesets = (data) => {
-    console.log(data);
     setCodesets(data);
   };
   useGetCodesets({
@@ -206,31 +190,27 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
-  // ─── Event handlers (modified to work with dynamic data) ───────────────
-
+  // ---------- Event handlers ----------
   const handleSettingChange = (e) => {
     setFieldValue("setting", e.target.value);
     setFieldValue("facilitySetting", "");
     setFieldValue("communityEntryPoint", "");
-    // Reset client code so it regenerates with the new setting
     if (!isExistingPatient) {
       setFieldValue("clientCode", "");
     }
   };
 
-
-
   const handleSexChange = (e) => {
     const sex = e.target.value;
     setFieldValue("sex", sex);
-    const map = arrayToObject(codesets?.["SEX"])
-    setFieldValue("sexCode", String(map[sex]))
-    if (sex.toLowerCase() === "male") {
+    const map = arrayToObject(codesets?.["SEX"]);
+    setFieldValue("sexCode", String(map[sex])); // still store numeric id separately
+    if (sex === "SEX_MALE") {
       setFieldValue("pregnancyStatus", "");
       setFieldValue("breastfeedingDuration", "");
       setFieldValue("numberOfCoWives", "");
     }
-    if (sex.toLowerCase() === "female") {
+    if (sex === "SEX_FEMALE") {
       setFieldValue("numberOfWives", "");
     }
   };
@@ -238,9 +218,9 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleMaritalStatusChange = (e) => {
     const status = e.target.value;
     setFieldValue("maritalStatus", status);
-    const map = arrayToObject(codesets?.["MARITAL_STATUS"])
+    const map = arrayToObject(codesets?.["MARITAL_STATUS"]);
     setFieldValue("maritalStatusCode", String(map[status]));
-    if (status.toLowerCase() !== "married") {
+    if (status !== "MARITAL_STATUS_MARRIED") {
       setFieldValue("numberOfWives", "");
       setFieldValue("numberOfCoWives", "");
     }
@@ -249,54 +229,41 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handlePregnancyStatusChange = (e) => {
     const status = e.target.value;
     setFieldValue("pregnancyStatus", status);
-    if (status.toLowerCase() !== "breastfeeding") {
+    if (status !== "PREGANACY_STATUS_BREASTFEEDING") {
       setFieldValue("breastfeedingDuration", "");
     }
   };
 
   const handleCoWives = (e) => {
-    const cowives = e.target.value;
-    if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault();
-    }
-    setFieldValue("numberOfCoWives", cowives);
+    if (e.target.value === "." || e.target.value === ",") e.preventDefault();
+    setFieldValue("numberOfCoWives", e.target.value);
   };
 
   const handleNoOfWives = (e) => {
-    const wives = e.target.value;
-    if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault();
-    }
-    setFieldValue("numberOfWives", wives);
+    if (e.target.value === "." || e.target.value === ",") e.preventDefault();
+    setFieldValue("numberOfWives", e.target.value);
   };
 
   const handleNoOfBiologicalChildren = (e) => {
-    const children = e.target.value;
-    if (e.target.value === "." || e.target.value === ",") {
-      e.preventDefault();
-    }
-    setFieldValue("numberOfBiologicalChildren", children);
+    if (e.target.value === "." || e.target.value === ",") e.preventDefault();
+    setFieldValue("numberOfBiologicalChildren", e.target.value);
   };
 
-  // Updated state change handler – uses state name, but fetches LGAs using ID
   const handleStateChange = (e) => {
     const stateName = e.target.value;
     setFieldValue("clientState", stateName);
-    setFieldValue("clientLga", ""); // Clear LGA when state changes
-    setLgasList([]); // Clear current LGAs
-
+    setFieldValue("clientLga", "");
+    setLgasList([]);
     if (stateName) {
       const selectedState = statesList.find(s => s.name === stateName);
-      if (selectedState) {
-        fetchLgas(selectedState.id);
-      }
+      if (selectedState) fetchLgas(selectedState.id);
     }
   };
 
   const handleTypeOfSessionChange = (e) => {
     const val = e.target.value;
     setFieldValue("typeOfSession", val);
-    if (val.toLowerCase() !== "index") {
+    if (val !== "COUNSELING_TYPE_INDEX_CONTACT_TESTING") {
       setFieldValue("indexTesting", "");
       setFieldValue("indexRelationship", "");
       setFieldValue("indexClientCode", "");
@@ -306,7 +273,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleIndexTestingChange = (e) => {
     const val = e.target.value;
     setFieldValue("indexTesting", val);
-    if (val.toLowerCase() !== "yes") {
+    if (val !== "YES_NO_YES") {
       setFieldValue("indexRelationship", "");
       setFieldValue("indexClientCode", "");
     }
@@ -315,13 +282,9 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const handleDobTypeChange = (e) => {
     const type = e.target.value;
     setFieldValue("dobType", type);
-    setFieldValue("adolescentHivPositive", "")
-    // if (type.toLowerCase() === "actual") {
+    setFieldValue("adolescentHivPositive", "");
     setFieldValue("age", "");
     setFieldValue("dateOfBirth", "");
-    // } else {
-    // setFieldValue("dateOfBirth", "");
-    // }
   };
 
   const handleDateOfBirthChange = (e) => {
@@ -341,11 +304,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   const handleAgeChange = (e) => {
     const raw = e.target.value;
-    const wholeOnly = raw.includes(".")
-      ? raw.slice(0, raw.indexOf("."))
-      : raw;
+    const wholeOnly = raw.includes(".") ? raw.slice(0, raw.indexOf(".")) : raw;
     setFieldValue("age", wholeOnly);
-
     const n = parseInt(wholeOnly, 10);
     if (!isNaN(n) && n >= 0 && n <= 130) {
       const estimated = new Date();
@@ -361,86 +321,49 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   };
 
-  // ─── Visibility flags ───────────────────────────────────────────────────
+  // ---------- LGA options ----------
+  const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.id }));
 
-  const showFacilitySetting = values.setting.toLowerCase() === "facility";
-  const showCommunityEntry = values.setting.toLowerCase() === "community";
+  // ---------- Visibility flags ----------
+  const showFacilitySetting = values.setting === "HTS_ENTRY_POINT_FACILITY";
+  const showCommunityEntry = values.setting === "HTS_ENTRY_POINT_COMMUNITY";
 
-  const showIndexFields = values.typeOfSession.toLowerCase() === "index contact testing";
-  const showIndexDetails = showIndexFields && values.indexTesting.toLowerCase() === "yes";
+  const showIndexFields = values.typeOfSession === "COUNSELING_TYPE_INDEX_CONTACT_TESTING";
+  const showIndexDetails = showIndexFields && values.indexTesting === "YES_NO_YES";
 
-  const showPregnancy = values.sex.toLowerCase() === "female";
-  const showBreastfeedingDuration = values.pregnancyStatus.toLowerCase() === "breastfeeding";
-  const showNumberOfWives = values.sex.toLowerCase() === "male" && values.maritalStatus.toLowerCase() === "married";
-  const showNumberOfCoWives = values.sex.toLowerCase() === "female" && values.maritalStatus.toLowerCase() === "married";
+  const showPregnancy = values.sex === "SEX_FEMALE";
+  const showBreastfeedingDuration = values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING";
+  const showNumberOfWives = values.sex === "SEX_MALE" && values.maritalStatus === "MARITAL_STATUS_MARRIED";
+  const showNumberOfCoWives = values.sex === "SEX_FEMALE" && values.maritalStatus === "MARITAL_STATUS_MARRIED";
 
   const dobIsActual = values.dobType.toLowerCase() === "actual" || !values.dobType;
 
-  // Prepare options for LGA select using fetched data
-  const lgaOptions = lgasList.map(lga => ({ label: lga.name, value: lga.id }));
-
   return (
     <div style={{ width: "100%" }}>
-      {/* ── Visit / Setting row ── */}
+      {/* Visit / Setting row */}
       <div className="row">
-        {/* <div className="col-md-6">
-          <FormGroup style={{ marginBottom: "16px" }}>
-            <FormTextField
-              label="Facility/Site Name"
-              type="text"
-              {...fp("facilityName")}
-              disabled
-              readOnly
-              required
-              style={{ ...inputStyle, background: "#f6f8fa", color: "#57606a" }}
-            />
-          </FormGroup>
-        </div> */}
-
         <div className="col-md-4">
-          <FormTextField
-            label="Date of Visit"
-            type="date"
-            {...fp("dateOfVisit")}
-            required
-          />
+          <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required />
         </div>
 
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
-            <Label style={labelStyle}>
-              Client Code <span style={{ color: "red" }}> *</span>
-            </Label>
+            <Label style={labelStyle}>Client Code <span style={{ color: "red" }}>*</span></Label>
             <div style={{ position: "relative" }}>
               <Input
                 type="text"
                 name="clientCode"
                 value={values.clientCode || ""}
-                readOnly
-                disabled
-                style={{
-                  ...disabledInputStyle,
-                  fontFamily: "monospace",
-                  letterSpacing: "0.04em",
-                  paddingRight: "90px",
-                }}
+                readOnly disabled
+                style={{ ...disabledInputStyle, fontFamily: "monospace", letterSpacing: "0.04em", paddingRight: "90px" }}
               />
               <span
                 style={{
-                  position: "absolute",
-                  right: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
+                  position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
+                  fontSize: "10px", fontWeight: 700, textTransform: "uppercase",
                   color: values.clientCode ? "#2e7d32" : "#8c959f",
                   background: values.clientCode ? "#e8f5e9" : "#f0f0f0",
-                  padding: "2px 7px",
-                  borderRadius: "8px",
-                  pointerEvents: "none",
-                  whiteSpace: "nowrap",
+                  padding: "2px 7px", borderRadius: "8px", pointerEvents: "none",
                 }}
               >
                 {values.clientCode ? "Auto-generated" : "Pending…"}
@@ -454,11 +377,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                 Fill in Setting, Setting sub-type, and Date of Visit to generate
               </small>
             )}
-            {/* {!isExistingPatient && !values.clientCode && (
-              <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-                Fill in Setting, Setting sub-type, and Date of Visit to generate
-              </small>
-            )} */}
           </FormGroup>
         </div>
 
@@ -491,14 +409,6 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        {/* <div className="col-md-4">
-          <FormSelect
-            label="Modality"
-            {...sp("modality", MODALITY_OPTIONS)}
-            required
-          />
-        </div> */}
-
         <div className="col-md-4">
           <FormSelect
             label="Type of Session"
@@ -529,31 +439,20 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               />
             </div>
             <div className="col-md-4">
-              <FormTextField
-                label="Index Client Code/ID"
-                {...fp("indexClientCode")}
-                required
-              />
+              <FormTextField label="Index Client Code/ID" {...fp("indexClientCode")} required />
             </div>
           </>
         )}
 
-{showNumberOfWives && (
+        {/* Marital sub fields */}
+        {showNumberOfWives && (
           <div className="col-md-4">
             <Label style={labelStyle}>No. of Wives</Label>
-            <Input
-              type="number"
-              name="numberOfWives"
-              value={values.numberOfWives || ""}
-              onChange={readOnly ? undefined : handleNoOfWives}
-              onBlur={handleBlur}
-              min="0"
-              step="1"
-              disabled={readOnly}
+            <Input type="number" name="numberOfWives" value={values.numberOfWives || ""}
+              onChange={readOnly ? undefined : handleNoOfWives} onBlur={handleBlur}
+              min="0" step="1" disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
-              onKeyDown={(e) => {
-                if (e.key === "." || e.key === ",") e.preventDefault();
-              }}
+              onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
             />
             {touched.numberOfWives && errors.numberOfWives && (
               <span style={errorStyle}>{errors.numberOfWives}</span>
@@ -564,19 +463,11 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         {showNumberOfCoWives && (
           <div className="col-md-4">
             <Label style={labelStyle}>No. of Co-wives</Label>
-            <Input
-              type="number"
-              name="numberOfCoWives"
-              value={values.numberOfCoWives || ""}
-              onChange={readOnly ? undefined : handleCoWives}
-              onBlur={handleBlur}
-              min="0"
-              step="1"
-              disabled={readOnly}
+            <Input type="number" name="numberOfCoWives" value={values.numberOfCoWives || ""}
+              onChange={readOnly ? undefined : handleCoWives} onBlur={handleBlur}
+              min="0" step="1" disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle}
-              onKeyDown={(e) => {
-                if (e.key === "." || e.key === ",") e.preventDefault();
-              }}
+              onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
             />
             {touched.numberOfCoWives && errors.numberOfCoWives && (
               <span style={errorStyle}>{errors.numberOfCoWives}</span>
@@ -585,29 +476,20 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         <div className="col-md-4">
-          <Label style={labelStyle}>{"No. of Biological Children < 15 years"}</Label>
-          <Input
-            type="number"
-            name="numberOfBiologicalChildren"
-            value={values.numberOfBiologicalChildren || ""}
-            onChange={readOnly ? undefined : handleNoOfBiologicalChildren}
-            onBlur={handleBlur}
-            min="0"
-            step="1"
-            disabled={readOnly}
+          <Label style={labelStyle}>No. of Biological Children &lt; 15 years</Label>
+          <Input type="number" name="numberOfBiologicalChildren" value={values.numberOfBiologicalChildren || ""}
+            onChange={readOnly ? undefined : handleNoOfBiologicalChildren} onBlur={handleBlur}
+            min="0" step="1" disabled={readOnly}
             style={readOnly ? disabledInputStyle : inputStyle}
-            onKeyDown={(e) => {
-              if (e.key === "." || e.key === ",") e.preventDefault();
-            }}
+            onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
           />
           {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
             <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
           )}
         </div>
 
-        {/* Pregnancy */}
         {showPregnancy && (
-          <div className={`col-md-4 ${formik.values.maritalStatus.toLowerCase() === "married" ? "mt-4" : ""}`}>
+          <div className={`col-md-4 ${formik.values.maritalStatus === "MARITAL_STATUS_MARRIED" ? "mt-4" : ""}`}>
             <FormSelect
               label="Pregnancy Status"
               {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
@@ -618,7 +500,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showBreastfeedingDuration && (
-          <div className={`col-md-4 ${formik.values.pregnancyStatus.toLowerCase() === "breastfeeding" ? "mt-4" : ""}`}>
+          <div className={`col-md-4 ${formik.values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING" ? "mt-4" : ""}`}>
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}
@@ -628,239 +510,97 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
       </div>
 
-      {/* <SectionSubheading>Client Demographics</SectionSubheading> */}
-
-      {/* ── Demographics ── */}
-      <div className="row">
-        {isExistingPatient ? (
-          <>
-            {/* <div className="col-md-4">
-              <ReadOnlyField label="Surname" value={values.surname} />
-            </div> */}
-            {/* <div className="col-md-4">
-              <ReadOnlyField label="First Name" value={values.firstName} />
-            </div>
-            <div className="col-md-4">
-              <ReadOnlyField label="Middle Name" value={values.middleName} />
-            </div>
-            <div className="col-md-4">
-              <ReadOnlyField label="Date of Birth" value={values.dateOfBirth} />
-            </div>
-            <div className="col-md-4">
-              <ReadOnlyField label="Age" value={values.age} />
-            </div>
-            <div className="col-md-4">
-              <ReadOnlyField label="Sex" value={values.sex} />
-            </div>
-            <div className="col-md-4">
-              <ReadOnlyField label="Phone Number" value={values.phoneNumber} />
-            </div> */}
-            {/* <div className="col-md-4">
-              {
-                values?.maritalStatus !== "" ? (
-                  <ReadOnlyField label="Marital Status" value={values.maritalStatus} />) :
-                  (
-                    <FormSelect
-                      label="Marital Status"
-                      {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
-                      onChange={readOnly ? undefined : handleMaritalStatusChange}
-                      required
-                    />
-
-                  )
-
-              }
-            </div> */}
-          </>
-        ) : (
-          <>
-            {/* Name */}
-            <div className="col-md-4">
-              <FormTextField label="Surname" {...fp("surname")} required />
-            </div>
-            <div className="col-md-4">
-              <FormTextField label="First Name" {...fp("firstName")} required />
-            </div>
-            <div className="col-md-4">
-              <FormTextField label="Middle Name" {...fp("middleName")} />
-            </div>
-
-            {/* DOB radio + conditional date / age */}
-            <div className="col-md-12">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>
-                  Date of Birth <span style={{ color: "red" }}> *</span>
-                </Label>
-                <div style={radioGroupStyle}>
-                  <label style={radioLabelStyle}>
-                    <input
-                      type="radio"
-                      name="dobType"
-                      value="Actual"
-                      checked={values.dobType.toLowerCase() === "actual"}
-                      onChange={readOnly ? undefined : handleDobTypeChange}
-                      disabled={readOnly}
-                    />
-                    Actual
-                  </label>
-                  <label style={radioLabelStyle}>
-                    <input
-                      type="radio"
-                      name="dobType"
-                      value="Estimated"
-                      checked={values.dobType.toLowerCase() === "estimated"}
-                      onChange={readOnly ? undefined : handleDobTypeChange}
-                      disabled={readOnly}
-                    />
-                    Estimated
-                  </label>
-                </div>
-                {touched.dobType && errors.dobType && (
-                  <span style={errorStyle}>{errors.dobType}</span>
-                )}
-              </FormGroup>
-            </div>
-
-            <div className="col-md-4">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>
-                  Date {dobIsActual && <span style={{ color: "red" }}> *</span>}
-                </Label>
-                <Input
-                  type="date"
-                  name="dateOfBirth"
-                  value={values.dateOfBirth || ""}
-                  onChange={readOnly || !dobIsActual ? undefined : handleDateOfBirthChange}
-                  onBlur={handleBlur}
-                  max={today}
-                  onKeyPress={(e) => e.preventDefault()}
-                  disabled={readOnly || !dobIsActual}
-                  style={readOnly || !dobIsActual ? disabledInputStyle : inputStyle}
-                />
-                {touched.dateOfBirth && errors.dateOfBirth && (
-                  <span style={errorStyle}>{errors.dateOfBirth}</span>
-                )}
-              </FormGroup>
-            </div>
-
-            <div className="col-md-4">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>
-                  Age {!dobIsActual && <span style={{ color: "red" }}> *</span>}
-                </Label>
-                <Input
-                  type="number"
-                  name="age"
-                  value={values.age || ""}
-                  onChange={readOnly || dobIsActual ? undefined : handleAgeChange}
-                  onBlur={handleBlur}
-                  min="0"
-                  max="130"
-                  step="1"
-                  disabled={readOnly || dobIsActual}
-                  style={readOnly || dobIsActual ? disabledInputStyle : inputStyle}
-                  placeholder={dobIsActual ? "Auto-calculated" : "Enter age"}
-                  onKeyDown={(e) => {
-                    if (e.key === "." || e.key === ",") e.preventDefault();
-                  }}
-                />
-                {touched.age && errors.age && (
-                  <span style={errorStyle}>{errors.age}</span>
-                )}
-              </FormGroup>
-            </div>
-
-            <div className="col-md-4">
-              <FormSelect
-                label="Sex"
-                {...sp("sex", transformOptions(codesets?.["SEX"]))}
-                onChange={readOnly ? undefined : handleSexChange}
-                required
-              />
-            </div>
-
-            <div className="col-md-4">
-              <FormTextField
-                label="Phone Number"
-                {...fp("phoneNumber")}
-                required
-              />
-            </div>
-
-            <div className="col-md-4">
-              <FormSelect
-                label="Marital Status"
-                {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
-                onChange={readOnly ? undefined : handleMaritalStatusChange}
-                required
-              />
-            </div>
-          </>
-        )}
-
-        {/* Marital sub-fields */}
-      </div>
+      {/* Demographics (new patient only) */}
+      {!isExistingPatient && (
+        <div className="row mt-4">
+          <div className="col-md-4"><FormTextField label="Surname" {...fp("surname")} /></div>
+          <div className="col-md-4"><FormTextField label="First Name" {...fp("firstName")} /></div>
+          <div className="col-md-4"><FormTextField label="Middle Name" {...fp("middleName")} /></div>
+          {/* DOB radio + date/age */}
+          <div className="col-md-12">
+            <FormGroup style={{ marginBottom: "16px" }}>
+              <Label style={labelStyle}>Date of Birth <span style={{ color: "red" }}>*</span></Label>
+              <div style={radioGroupStyle}>
+                <label style={radioLabelStyle}>
+                  <input type="radio" name="dobType" value="Actual" checked={values.dobType.toLowerCase() === "actual"}
+                    onChange={readOnly ? undefined : handleDobTypeChange} disabled={readOnly} /> Actual
+                </label>
+                <label style={radioLabelStyle}>
+                  <input type="radio" name="dobType" value="Estimated" checked={values.dobType.toLowerCase() === "estimated"}
+                    onChange={readOnly ? undefined : handleDobTypeChange} disabled={readOnly} /> Estimated
+                </label>
+              </div>
+              {touched.dobType && errors.dobType && <span style={errorStyle}>{errors.dobType}</span>}
+            </FormGroup>
+          </div>
+          <div className="col-md-4">
+            <FormGroup style={{ marginBottom: "16px" }}>
+              <Label style={labelStyle}>Date {dobIsActual && <span style={{ color: "red" }}>*</span>}</Label>
+              <Input type="date" name="dateOfBirth" value={values.dateOfBirth || ""}
+                onChange={readOnly || !dobIsActual ? undefined : handleDateOfBirthChange} onBlur={handleBlur}
+                max={today} onKeyPress={(e) => e.preventDefault()}
+                disabled={readOnly || !dobIsActual} style={readOnly || !dobIsActual ? disabledInputStyle : inputStyle} />
+              {touched.dateOfBirth && errors.dateOfBirth && <span style={errorStyle}>{errors.dateOfBirth}</span>}
+            </FormGroup>
+          </div>
+          <div className="col-md-4">
+            <FormGroup style={{ marginBottom: "16px" }}>
+              <Label style={labelStyle}>Age {!dobIsActual && <span style={{ color: "red" }}>*</span>}</Label>
+              <Input type="number" name="age" value={values.age || ""}
+                onChange={readOnly || dobIsActual ? undefined : handleAgeChange} onBlur={handleBlur}
+                min="0" max="130" step="1"
+                disabled={readOnly || dobIsActual} style={readOnly || dobIsActual ? disabledInputStyle : inputStyle}
+                placeholder={dobIsActual ? "Auto-calculated" : "Enter age"}
+                onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }} />
+              {touched.age && errors.age && <span style={errorStyle}>{errors.age}</span>}
+            </FormGroup>
+          </div>
+          <div className="col-md-4">
+            <FormSelect
+              label="Sex"
+              {...sp("sex", transformOptions(codesets?.["SEX"]))}
+              onChange={readOnly ? undefined : handleSexChange}
+              required
+            />
+          </div>
+          <div className="col-md-4"><FormTextField label="Phone Number" {...fp("phoneNumber")} /></div>
+          <div className="col-md-4">
+            <FormSelect
+              label="Marital Status"
+              {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
+              onChange={readOnly ? undefined : handleMaritalStatusChange}
+            />
+          </div>
+        </div>
+      )}
 
       <SectionSubheading>Address Information</SectionSubheading>
 
       <div className="row">
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
-            <Label style={labelStyle}>
-              State of Residence <span style={{ color: "red" }}> *</span>
-            </Label>
-            <select
-              className="form-control"
-              name="clientState"
-              value={values.clientState || ""}
-              onChange={readOnly ? undefined : handleStateChange}
-              onBlur={handleBlur}
-              disabled={readOnly || loadingStates}
-              style={selectStyle}
-            >
-              <option value="">
-                {loadingStates ? "Loading states..." : "Select option"}
-              </option>
-              {statesList.map((state) => (
-                <option key={state.id} value={state.id}>
-                  {state.name}
-                </option>
-              ))}
+            <Label style={labelStyle}>State of Residence <span style={{ color: "red" }}>*</span></Label>
+            <select className="form-control" name="clientState" value={values.clientState || ""}
+              onChange={readOnly ? undefined : handleStateChange} onBlur={handleBlur}
+              disabled={readOnly || loadingStates} style={selectStyle}>
+              <option value="">{loadingStates ? "Loading states..." : "Select option"}</option>
+              {statesList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
-            {touched.clientState && errors.clientState && (
-              <span style={errorStyle}>{errors.clientState}</span>
-            )}
+            {touched.clientState && errors.clientState && <span style={errorStyle}>{errors.clientState}</span>}
           </FormGroup>
         </div>
-
         <div className="col-md-4">
           <FormSelect
             label="LGA of Residence"
             {...sp("clientLga", lgaOptions, !values.clientState || loadingLgas)}
             required
           />
-          {loadingLgas && (
-            <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-              Loading LGAs...
-            </small>
-          )}
         </div>
-
         <div className="col-md-4">
-          <FormTextField
-            label="Landmark"
-            type="text"
-            {...fp("landmark")}
-          />
+          <FormTextField label="Landmark" type="text" {...fp("landmark")} />
         </div>
-
         <div className="col-md-12">
-          <FormTextField
-            label="Address"
-            type="textarea"
-            {...fp("address")}
-            required
-          />
+          <FormTextField label="Address" type="textarea" {...fp("address")} />
         </div>
       </div>
     </div>

@@ -139,17 +139,23 @@ const useStyles = makeStyles(() => ({
 // ─── Eligibility check ────────────────────────────────────────────────────────
 // Mirrors the logic in HtsIctOrchestrator exactly.
 
+// const isIctEligible = (htsValues) => {
+//   if (!htsValues) return false;
+//   // const sessionMatch =
+//   //   htsValues.typeOfSession?.toUpperCase() === "INDEX CONTACT TESTING" ||
+//   //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
+//   //   htsValues.typeOfSession?.toLowerCase().includes("index");
+//   const positiveResult =
+//     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
+//   // || htsValues.initialHivTest?.toLowerCase() === "positive";
+//   // return sessionMatch && positiveResult;
+//   return positiveResult
+// };
+
+
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  // const sessionMatch =
-  //   htsValues.typeOfSession?.toUpperCase() === "INDEX CONTACT TESTING" ||
-  //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
-  //   htsValues.typeOfSession?.toLowerCase().includes("index");
-  const positiveResult =
-    htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
-  // || htsValues.initialHivTest?.toLowerCase() === "positive";
-  // return sessionMatch && positiveResult;
-  return positiveResult
+  return htsValues.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -298,11 +304,7 @@ const NewEncounterHtsIctOrchestrator = ({
         {activeView === VIEWS.HTS && (
           <NewEncounterHtsForm
             person={person}
-            // Override backButtonAction to call onDone (go back to patient dashboard)
             backButtonAction={onDone}
-            // These two props are the key additions over the standalone usage:
-            // onValuesChange feeds the eligibility watcher in real time.
-            // onSubmitSuccess gives us the htsRecord + formValues after save.
             onValuesChange={handleHtsValuesChange}
             onSubmitSuccess={handleHtsSubmitSuccess}
           />

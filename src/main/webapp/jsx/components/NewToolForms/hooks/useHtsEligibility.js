@@ -1,15 +1,4 @@
 import { useMemo } from "react";
-
-// --- Pure helper (easy to unit-test) ---
-/**
- * Determines whether a patient is eligible to have a new HTS form created.
- *
- * Rules:
- *  1. No previous HTS records → eligible
- *  2. Most-recent record has confirmatoryHivTest === "Positive" → NOT eligible (ever)
- *  3. Most-recent record is Negative AND dateOfVisit is within the last 3 months → NOT eligible
- *  4. Most-recent record is Negative AND dateOfVisit is older than 3 months → eligible
- */
 export function checkHtsEligibility(encounters) {
   // Guard: treat null / undefined / non-array as "no records"
   if (!encounters || !Array.isArray(encounters) || encounters.length === 0) {
@@ -25,7 +14,7 @@ export function checkHtsEligibility(encounters) {
   const confirmatoryResult = latest?.data?.confirmatoryHivTest?.trim().toLowerCase();
 
   // Rule 2: Any documented Positive → permanently ineligible
-  if (confirmatoryResult === "positive") {
+  if (confirmatoryResult === "STI_HIV_RESULT_POSITIVE") {
     return {
       isEligible: false,
       reason:
@@ -35,7 +24,7 @@ export function checkHtsEligibility(encounters) {
   }
 
   // Rule 3 & 4: Last result was Negative — check how long ago
-  if (confirmatoryResult === "negative") {
+  if (confirmatoryResult === "STI_HIV_RESULT_NEGATIVE") {
     const visitDate = new Date(latest.dateOfVisit);
     const today = new Date();
 

@@ -105,15 +105,21 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+// const isIctEligible = (htsValues) => {
+//   if (!htsValues) return false;
+//   // const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index contact testing";
+//   const positiveResult =
+//     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
+//     // || htsValues.initialHivTest?.toLowerCase() === "positive";
+//     // return sessionMatch && positiveResult;
+//     // return true
+//   return positiveResult
+// };
+
+
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  // const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index contact testing";
-  const positiveResult =
-    htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
-    // || htsValues.initialHivTest?.toLowerCase() === "positive";
-    // return sessionMatch && positiveResult;
-    // return true
-  return positiveResult
+  return htsValues.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
 };
 
 const HtsIctOrchestrator = ({

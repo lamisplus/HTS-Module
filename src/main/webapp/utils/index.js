@@ -100,3 +100,23 @@ export const calculate_age = (dob) => {
       }
     }
   };
+
+// src/utils/codesetMapper.js
+export const mapDisplayToCode = (codesetArray, displayValue) => {
+  if (!Array.isArray(codesetArray) || displayValue == null) return displayValue;
+  const match = codesetArray.find(
+    (item) => item.display?.toLowerCase() === String(displayValue).toLowerCase()
+  );
+  return match ? match.code : displayValue;
+};
+
+export const convertFieldsToCodes = (data, codesetMap) => {
+  if (!data) return data;
+  const converted = { ...data };
+  Object.keys(codesetMap).forEach((field) => {
+    if (field in converted && converted[field] !== undefined && converted[field] !== null) {
+      converted[field] = mapDisplayToCode(codesetMap[field], converted[field]);
+    }
+  });
+  return converted;
+};

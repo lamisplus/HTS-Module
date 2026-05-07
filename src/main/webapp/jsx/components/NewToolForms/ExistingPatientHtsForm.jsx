@@ -1,3 +1,4 @@
+// src/NewToolForms/ExistingPatientHtsForm.jsx
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -13,7 +14,9 @@ import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { updateHtsEncounter } from "../../services/updateHtsEncounter";
 import { toast } from "react-toastify";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
-
+// import { convertFieldsToCodes } from "../../utils/codesetMapper";
+import { getCodesets } from "../../services/getCodesets.service";
+import { convertFieldsToCodes } from "../../../utils";
 const useStyles = makeStyles(() => ({
   root: {
     backgroundColor: "#f6f8fa",
@@ -72,67 +75,115 @@ const modeBadgeStyle = (readOnly) => ({
   color: readOnly ? COLORS.primary : "#e65100",
 });
 
-/**
- * ExistingPatientHtsForm
- *
- * Props:
- *   initialValues  — record fetched from backend (pre-populates all fields)
- *   readOnly       — true  → VIEW mode: all fields disabled, no save button
- *                    false → EDIT mode: clinical fields editable, demographics read-only
- */
-const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
-  const [formInitialValues, setFormInitialValues] = useState(initialValues)
-  const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false)
-  const classes = useStyles();
-  const history = useHistory();
-  const [isLoading, setIsLoading] = useState(false)
+// Map of field names to codeset arrays needed for conversion from display to code
+const FIELD_CODESET_MAP = {
+  setting: "HTS_ENTRY_POINT",
+  facilitySetting: "FACILITY_HTS_TEST_SETTING",
+  communityEntryPoint: "COMMUNITY_HTS_TEST_SETTING",
+  typeOfSession: "COUNSELING_TYPE",
+  indexTesting: "YES_NO",
+  indexRelationship: "INDEX_TESTING",
+  sex: "SEX",
+  maritalStatus: "MARITAL_STATUS",
+  pregnancyStatus: "PREGNANCY_STATUS",
+  breastfeedingDuration: "DURATION_OF_BREASTFEEDING",
+  previouslyTestedNegative: "YES_NO",
+  timeOfLastNegativeTest: "RECENT_HIV_TEST",
+  initialHivTest: "STI_HIV_RESULT",
+  confirmatoryHivTest: "STI_HIV_RESULT",
+  recencyTest: "RECENCY_TESTING",
+  syphilisTestResult: "SYPHILIS_RESULT",
+  hivEarlyDetectTestDone: "YES_NO",
+  suspectedAcuteInfection: "YES_NO",
+  hivTestKitsProvided: "YES_NO",
+  categoryOfClients: "TARGET_GROUP",
+  acceptedIndexTesting: "YES_NO",
+  providedFpInfo: "YES_NO",
+  clientPartnerUseFpMethods: "YES_NO",
+  clientPartnerUseCondoms: "YES_NO",
+  correctCondomUseDemonstrated: "YES_NO",
+  condomsProvided: "YES_NO",
+  clientReferredToOtherServices: "YES_NO",
+  completedBy: null, // no codeset
+  designation: null,
+  // add more if needed
+};
 
+const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
+  const [formInitialValues, setFormInitialValues] = useState(null);
+  const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false);
+  const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(false);
+  const [codesets, setCodesets] = useState(null);
+
+  // Fetch codesets once
+  useEffect(() => {
+    getCodesets(
+      "HTS_ENTRY_POINT",
+      "FACILITY_HTS_TEST_SETTING",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "YES_NO",
+      "INDEX_TESTING",
+      "SEX",
+      "MARITAL_STATUS",
+      "PREGNANCY_STATUS",
+      "DURATION_OF_BREASTFEEDING",
+      "RECENT_HIV_TEST",
+      "STI_HIV_RESULT",
+      "RECENCY_TESTING",
+      "SYPHILIS_RESULT",
+      "TARGET_GROUP"
+    ).then(data => setCodesets(data)).catch(err => console.error("Failed to load codesets", err));
+  }, []);
 
   const refreshEncounterData = async () => {
-    setIsRefreshingEncounter(true)
+    setIsRefreshingEncounter(true);
     try {
-      const response = await getHtsEcounter(fullRecord?.id)
-      setFormInitialValues(response?.data)
-      setIsRefreshingEncounter(false)
-
-    }
-    catch {
-      setIsRefreshingEncounter(false)
-    }
-  }
-
-  useEffect(() => {
-    if (fullRecord?.id) {
-      refreshEncounterData()
-    }
-  }, [])
-
-
-  const onSubmit = async (values) => {
-    const payload = buildHtsEncounterPayload(values, true);
-
-    try {
-      setIsLoading(true)
-      const response = await updateHtsEncounter(fullRecord?.id, payload);
-      setIsLoading(false)
-      toast.success("Encounter updated successfully")
-      backButtonAction()
-
-    } catch (error) {
-      console.error("Failed to update encounter:", error.response?.data || error.message);
-      toast.error("Failed to update encounter")
-    }
-    finally {
-      setIsLoading(false)
+      const response = await getHtsEcounter(fullRecord?.id);
+      const rawData = response?.data;
+      // Convert old display values to codes using the loaded codesets
+      if (codesets && rawData) {
+        const codesetLookup = {};
+        Object.keys(FIELD_CODESET_MAP).forEach(field => {
+          const codesetName = FIELD_CODESET_MAP[field];
+          if (codesetName && codesets[codesetName]) {
+            codesetLookup[field] = codesets[codesetName];
+          }
+        });
+        const converted = convertFieldsToCodes(rawData, codesetLookup);
+        setFormInitialValues(converted);
+      } else {
+        setFormInitialValues(rawData);
+      }
+      setIsRefreshingEncounter(false);
+    } catch {
+      setIsRefreshingEncounter(false);
     }
   };
 
+  useEffect(() => {
+    if (fullRecord?.id && codesets) {
+      refreshEncounterData();
+    }
+  }, [fullRecord?.id, codesets]);
 
+  const onSubmit = async (values) => {
+    const payload = buildHtsEncounterPayload(values, true);
+    try {
+      setIsLoading(true);
+      await updateHtsEncounter(fullRecord?.id, payload);
+      setIsLoading(false);
+      toast.success("Encounter updated successfully");
+      backButtonAction();
+    } catch (error) {
+      console.error("Failed to update encounter:", error.response?.data || error.message);
+      toast.error("Failed to update encounter");
+      setIsLoading(false);
+    }
+  };
 
   const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
-
-  console.log("formik", formik)
-
 
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
@@ -142,7 +193,6 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    // "modality", 
     "typeOfSession", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
@@ -183,23 +233,12 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
         <div className={classes.titleBlock}>
           <h2 className={classes.title}>
             HIV Testing Form
-            <span style={modeBadgeStyle(readOnly)}>
-              {readOnly ? "View" : "Edit"}
-            </span>
+            <span style={modeBadgeStyle(readOnly)}>{readOnly ? "View" : "Edit"}</span>
           </h2>
           <p className={classes.subtitle}>
-            {readOnly
-              ? "Viewing existing HTS record — no changes can be made"
-              : "Editing existing HTS record — update the required fields and save"}
+            {readOnly ? "Viewing existing HTS record — no changes can be made" : "Editing existing HTS record — update the required fields and save"}
           </p>
-          {
-            isRefreshingEncounter && (
-              <p className={classes.subtitle}>
-                Refreshing Record, Please wait...
-              </p>
-            )
-          }
-
+          {isRefreshingEncounter && <p className={classes.subtitle}>Refreshing Record, Please wait...</p>}
         </div>
         <Button
           content="Back"
@@ -212,44 +251,19 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
       <div className={classes.body}>
         <form onSubmit={formik.handleSubmit} noValidate>
-          <FormAccordion
-            step={1}
-            title="Basic Information"
-            subtitle="Enter basic information details below"
-            defaultExpanded
-            hasError={sectionHasError(basicFields)}
-          >
-            <BasicInformationSection
-              formik={formik}
-              isExistingPatient
-              readOnly={readOnly || isRefreshingEncounter}
-            />
+          <FormAccordion step={1} title="Basic Information" subtitle="Enter basic information details below" defaultExpanded hasError={sectionHasError(basicFields)}>
+            <BasicInformationSection formik={formik} isExistingPatient readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
-          <FormAccordion
-            step={2}
-            title="Pre-Test Counselling / Risk Assessment"
-            subtitle="Enter pre-test counselling details below"
-            hasError={sectionHasError(preTestFields)}
-          >
+          <FormAccordion step={2} title="Pre-Test Counselling / Risk Assessment" subtitle="Enter pre-test counselling details below" hasError={sectionHasError(preTestFields)}>
             <PreTestCounsellingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
-          <FormAccordion
-            step={3}
-            title="Diagnostic Testing"
-            subtitle="Enter diagnostic testing details below"
-            hasError={sectionHasError(diagnosticFields)}
-          >
+          <FormAccordion step={3} title="Diagnostic Testing" subtitle="Enter diagnostic testing details below" hasError={sectionHasError(diagnosticFields)}>
             <DiagnosticTestingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 
-          <FormAccordion
-            step={4}
-            title="Post Test Counselling"
-            subtitle="Enter post test counselling details below"
-            hasError={sectionHasError(postTestFields)}
-          >
+          <FormAccordion step={4} title="Post Test Counselling" subtitle="Enter post test counselling details below" hasError={sectionHasError(postTestFields)}>
             <PostTestCounsellingSection formik={formik} readOnly={readOnly || isRefreshingEncounter} />
           </FormAccordion>
 

@@ -1,8 +1,7 @@
-import React from "react";
+// src/NewToolForms/sections/PreTestCounsellingSection.jsx
+import React, { useState } from "react";
 import { FormSelect, SectionSubheading, ScoreDisplay } from "./FormFields";
-import { COLORS } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
-import { useState } from "react";
 import { capitalizeFirstLetter } from "../../utils";
 
 const skippedNoticeStyle = {
@@ -18,7 +17,7 @@ const skippedNoticeStyle = {
 const subsectionLabelStyle = {
   fontSize: "14px",
   fontWeight: 700,
-  color: COLORS.primary,
+  color: "#014d87",
   marginBottom: "12px",
   marginTop: "4px",
 };
@@ -29,7 +28,7 @@ const KNOWLEDGE_FIELDS = [
   "clientInformedPreventionMethods",
   "clientInformedPossibleResults",
   "informedConsentGiven",
-  "previouslyTestedNegative"
+  "previouslyTestedNegative",
 ];
 
 const PERSONAL_RISK_FIELDS = [
@@ -48,21 +47,17 @@ const SEX_PARTNER_RISK_FIELDS = [
   "adolescentHivPositive",
   "partnerNotRegularlyOnDrugs",
   "partnerRecentlyReturnedToTreatment",
-  "hadSexWithHivPositivePartnerInRiskGroup"
+  "hadSexWithHivPositivePartnerInRiskGroup",
 ];
 
 const TB_FIELDS = ["currentCough", "weightLoss", "fever", "nightSweats"];
 
 const calcScore = (fields, values) =>
-  fields.reduce((sum, f) => sum + (values[f].toLowerCase() === "yes" ? 1 : 0), 0);
-
-
-
+  fields.reduce((sum, f) => sum + (values[f] === "YES_NO_YES" ? 1 : 0), 0);
 
 const PreTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
-
 
   const fp = (name) => ({
     name,
@@ -78,28 +73,31 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
   const handlePreviouslyTestedChange = (e) => {
     setFieldValue("previouslyTestedNegative", e.target.value);
-    if (e.target.value.toLowerCase() !== "yes") setFieldValue("timeOfLastNegativeTest", "");
+    if (e.target.value !== "YES_NO_YES") setFieldValue("timeOfLastNegativeTest", "");
   };
 
   const handleEverHadSexChange = (e) => {
     const val = e.target.value;
     setFieldValue("everHadSexualIntercourse", val);
-    if (val.toLowerCase() !== "yes") {
-      ["moreThanOneSexPartner", "unprotectedVaginalSex", "unprotectedAnalSex", "adolescentHivPositive", "sexUnderInfluence", "historyOfSTI"].forEach(
+    if (val !== "YES_NO_YES") {
+      ["moreThanOneSexPartner", "unprotectedVaginalSex", "unprotectedAnalSex",
+       "adolescentHivPositive", "sexUnderInfluence", "historyOfSTI"].forEach(
         (f) => setFieldValue(f, "")
       );
     }
   };
 
+  // skip if age <=15 or pregnancy status is pregnant or breastfeeding
   const skipSection =
-    (values.age && Number(values.age) <= 15) || values?.pregnancyStatus.toLowerCase() === "pregnant" || values?.pregnancyStatus.toLowerCase() === "breastfeeding";
-  // values?.modality?.toLowerCase() === "pmtct"
+    (values.age && Number(values.age) <= 15) ||
+    values.pregnancyStatus === "PREGANACY_STATUS_PREGNANT" ||
+    values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING";
 
-  const showTimeSinceNegative = values.previouslyTestedNegative.toLowerCase() === "yes";
-  const showSexDependent = values.everHadSexualIntercourse.toLowerCase() === "yes";
-  const showSexPartnerRisk = values.everHadSexualIntercourse.toLowerCase() === "yes";
-  const isFemale = values.sex.toLowerCase() === "female";
-  const isMale = values.sex.toLowerCase() === "male";
+  const showTimeSinceNegative = values.previouslyTestedNegative === "YES_NO_YES";
+  const showSexDependent = values.everHadSexualIntercourse === "YES_NO_YES";
+  const showSexPartnerRisk = values.everHadSexualIntercourse === "YES_NO_YES";
+  const isFemale = values.sex === "SEX_FEMALE";
+  const isMale = values.sex === "SEX_MALE";
 
   const knowledgeScore = calcScore(KNOWLEDGE_FIELDS, values);
   const personalRiskScore = calcScore(PERSONAL_RISK_FIELDS, values);
@@ -118,26 +116,20 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      // value: item?.code || item?.display
-      value: item?.display
+      label: capitalizeFirstLetter(item.display),
+      value: item.code,
     }));
   };
-
 
   const loadCodesets = (data) => {
     setCodesets(data);
   };
 
   useGetCodesets({
-    codesetsKeys: [
-      "YES_NO",
-      "RECENT_HIV_TEST"
-    ],
+    codesetsKeys: ["YES_NO", "RECENT_HIV_TEST"],
     patientId: "pretestingcounselling",
     onSuccess: loadCodesets,
   });
-
 
   return (
     <div style={{ width: "100%" }}>
@@ -145,7 +137,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
         </div>
       ) : (
         <>
@@ -166,6 +158,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                 />
               </div>
             )}
+            {/* remaining fields unchanged except the sp uses codesets */}
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About HIV Transmission Routes"
@@ -206,11 +199,11 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
         </>
       )}
 
+      {/* (B) Personal Risk Assessment */}
       <SectionSubheading>(B) Personal HIV Risk Assessment (Last 3 months)</SectionSubheading>
-
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
         </div>
       ) : (
         <>
@@ -280,15 +273,15 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
         </>
       )}
 
+      {/* (C) TB & STI */}
       <SectionSubheading>(C) TB and Syndromic STI Screening</SectionSubheading>
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre‑test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
         </div>
       ) : (
         <div>
           <p style={subsectionLabelStyle}>Clinical TB Screening</p>
-
           <div className="row">
             <div className="col-md-6">
               <FormSelect label="Current Cough" {...sp("currentCough", transformOptions(codesets?.["YES_NO"]))} required />
@@ -303,7 +296,6 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect label="Night Sweats" {...sp("nightSweats", transformOptions(codesets?.["YES_NO"]))} required />
             </div>
           </div>
-
           <ScoreDisplay label="TB Screening Score:" score={tbScore} />
 
           <p style={subsectionLabelStyle}>Syndromic STI Screening</p>
@@ -359,12 +351,10 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               />
             </div>
           </div>
-
           <ScoreDisplay label="STI Screening Score:" score={stiScore} />
 
           <SectionSubheading>Sex Partner Risk Assessment (Last 3 months)</SectionSubheading>
-
-          {values.everHadSexualIntercourse.toLowerCase() === "no" ? (
+          {values.everHadSexualIntercourse === "YES_NO_NO" ? (
             <div style={skippedNoticeStyle}>
               Sex Partner Risk Assessment is not applicable — client has not had sexual intercourse.
             </div>
@@ -388,7 +378,6 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                     required
                   />
                 </div>
-
                 {Number(values?.age) >= 10 && Number(values?.age) <= 19 && (
                   <div className="col-md-6">
                     <FormSelect
@@ -427,7 +416,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <ScoreDisplay label="Sex Partner Risk Assessment Score:" score={sexPartnerRiskScore} />
             </div>
             <div className="col-md-6">
-              <ScoreDisplay label="Total HTS Assessment Score:" score={Number(sexPartnerRiskScore) + Number(knowledgeScore) + Number(personalRiskScore) + Number(tbScore) + Number(stiScore)} />
+              <ScoreDisplay label="Total HTS Assessment Score:" score={knowledgeScore + personalRiskScore + tbScore + stiScore + sexPartnerRiskScore} />
             </div>
           </div>
         </div>
