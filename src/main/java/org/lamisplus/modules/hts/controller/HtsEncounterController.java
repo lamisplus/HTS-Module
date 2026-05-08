@@ -61,10 +61,11 @@ public class HtsEncounterController {
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
     }
 
-    @GetMapping("/patient/{personId}")
+    // Path variable renamed from personId → patientId
+    @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
-    public ResponseEntity<List<HtsEncounterResponse>> getEncountersByPersonId(@PathVariable Long personId) {
-        return ResponseEntity.ok(service.getEncountersByPersonId(personId));
+    public ResponseEntity<List<HtsEncounterResponse>> getEncountersByPatientId(@PathVariable Long patientId) {
+        return ResponseEntity.ok(service.getEncountersByPatientId(patientId));
     }
 
     @GetMapping("/patients")

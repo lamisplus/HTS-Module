@@ -49,16 +49,12 @@ export function arrayToObject(arr) {
 /**
  * Builds the request payload for HTS Encounter API from Formik values.
  * @param {Object} formValues - The values from Formik (useNewPatientFormik or useExistingPatientFormik).
- * @param {boolean} isNewPatient - True if creating a new patient (personId absent), false otherwise.
- * @param {Object} resolvers - Object containing functions to resolve IDs:
- *   - getSexId(sexString) => number
- *   - getMaritalStatusId(maritalStatusString) => number
- *   - getStateId(stateName) => number
+ * @param {boolean} isNewPatient - True if creating a new patient (patientId absent), false otherwise.
  * @returns {Object} Payload ready to send to POST /api/v1/hts-encounter
  */
 export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     const {
-      personId,
+      patientId,
       dateOfVisit,
       clientCode,
       setting,
@@ -243,7 +239,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     };
   
     if (!isNewPatient) {
-      payload.personId = personId;
+      payload.patientId = patientId;
     } else {
       payload.person = {
         surname,

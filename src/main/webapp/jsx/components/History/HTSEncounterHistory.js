@@ -184,7 +184,7 @@ const HTSEncounterHistory = (props) => {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const patientId =
-    props.patientObj?.personId ?? props.patientObj?.id ?? null;
+    props.patientObj?.patientId ?? props.patientObj?.id ?? null;
 
   useEffect(() => {
     if (patientId) fetchEncounters();
@@ -258,7 +258,6 @@ const HTSEncounterHistory = (props) => {
           { title: "Date of Visit", field: "dateOfVisit", filtering: false },
           { title: "Client Code", field: "clientCode", filtering: false },
           { title: "Setting", field: "setting", filtering: false },
-          // { title: "Modality", field: "modality", filtering: false },
           {
             title: "Initial HIV Test",
             field: "initialHivTest",
@@ -267,7 +266,7 @@ const HTSEncounterHistory = (props) => {
           },
           {
             title: "Confirmatory HIV Test",
-            field: "confirmatoryHivTest ",
+            field: "confirmatoryHivTest",
             filtering: false,
             render: (rowData) => resolveHivTestLabel(rowData.confirmatoryHivTest),
           },
@@ -276,7 +275,6 @@ const HTSEncounterHistory = (props) => {
             field: "syphilisTestResult",
             filtering: false,
           },
-
           {
             title: "Actions",
             field: "actions",
@@ -319,10 +317,9 @@ const HTSEncounterHistory = (props) => {
           dateOfVisit: record.dateOfVisit ?? "",
           clientCode: record.clientCode ?? "",
           setting: record.setting ?? "",
-          // modality: record.data?.modality ?? "",
-          initialHivTest: record.data?.initialHivTest ?? "",
-          confirmatoryHivTest: record.data?.confirmatoryHivTest ?? "",
-          syphilisTestResult: record.data?.syphilisTestResult ?? "",
+          initialHivTest: record.observation?.initialHivTest ?? "",
+          confirmatoryHivTest: record.observation?.confirmatoryHivTest ?? "",
+          syphilisTestResult: record.observation?.syphilisTestResult ?? "",
           _raw: record,
         }))}
         options={{

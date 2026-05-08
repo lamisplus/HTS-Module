@@ -81,12 +81,10 @@ const modeBadgeStyle = (mode) => {
 const mapIctResponseToFormValues = (response) => {
   if (!response) return {};
 
-  // data is a JsonNode serialised as a plain object by Jackson
   const d = response.data ?? {};
 
   return {
-    // ── Top-level scalars ────────────────────────────────────────────────
-    personId:        response.personId        ?? "",
+    patientId:        response.patientId        ?? "",
     htsEncounterId:  response.htsEncounterId  ?? "",
     facilityId:      response.facilityId      ?? "",
     dateOfService:   response.dateOfService   ?? "",
@@ -95,7 +93,6 @@ const mapIctResponseToFormValues = (response) => {
     offeredPns:      response.offeredPns      ?? "",
     acceptedPns:     response.acceptedPns     ?? "",
 
-    // ── From data JSONB — facility context ───────────────────────────────
     facilityName:        d.facilityName        ?? "",
     state:               d.state               ?? "",
     lga:                 d.lga                 ?? "",
@@ -104,7 +101,6 @@ const mapIctResponseToFormValues = (response) => {
     artClinic:           d.artClinic           ?? "",
     clientCategoryOther: d.clientCategoryOther ?? "",
 
-    // ── From data JSONB — index client snapshot ──────────────────────────
     indexClientId:   d.indexClientId   ?? "",
     artUniqueId:     d.artUniqueId     ?? "",
     indexFirstName:  d.indexFirstName  ?? "",
@@ -117,7 +113,31 @@ const mapIctResponseToFormValues = (response) => {
     indexAltPhone:   d.indexAltPhone   ?? "",
     indexAddress:    d.indexAddress    ?? "",
 
-    contacts: Array.isArray(response.contacts) ? response.contacts : [],
+    contacts: Array.isArray(response.contacts)
+      ? response.contacts.map(c => ({
+          contactCode: c.contactCode ?? "",
+          firstName: c.firstName ?? "",
+          middleName: c.middleName ?? "",
+          surname: c.surname ?? "",
+          relationshipToIndex: c.relationshipToIndex ?? "",
+          sex: c.sex ?? "",
+          phone: c.phone ?? "",
+          address: c.address ?? "",
+          sameAddressAsIndex: !!c.sameAddressAsIndex,
+          notificationMethod: c.notificationMethod ?? "",
+          followUpLocation: c.followUpLocation ?? "",
+          attempts: c.attempts != null ? String(c.attempts) : "",
+          knownHivPositive: c.knownHivPositive ?? "",
+          hivTestResult: c.hivTestResult ?? "",
+          dateTestedHiv: c.dateTestedHiv ?? "",
+          dateEnrolledArt: c.dateEnrolledArt ?? "",
+          onArt: c.onArt ?? "",
+          artClinic: c.artClinic ?? "",
+          enrolledInOvc: !!c.enrolledInOvc,
+          dateEnrolledOvc: c.dateEnrolledOvc ?? "",
+          ovcId: c.ovcId ?? "",
+        }))
+      : [],
   };
 };
 
@@ -129,7 +149,7 @@ const IctForm = ({
   onBack,
   readOnly = false,
   initialValues,
-  existingId,       // Present when editing an existing ICT record
+  existingId,
 }) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
@@ -137,25 +157,20 @@ const IctForm = ({
   const isEditMode = !!existingId && !readOnly;
   const mode = readOnly ? "view" : isEditMode ? "edit" : "new";
 
-  // Merge isOnArt flag into htsValues so the hook can access it
   const mergedHtsValues = htsValues ? { ...htsValues, isOnArt, } : null;
 
   const onSubmit = async (values) => {
     const payload = buildIctEncounterPayload(values);
 
-    // Attach the HTS encounter id so the backend can link the two records.
-    // htsRecord comes from the HTS API response; existingId's hts link is
-    // already stored server-side but we still send it for idempotency.
     if (htsRecord?.id) {
       payload.htsEncounterId = htsRecord.id;
     }
 
-    // personId must be on the payload — sourced from htsValues or initialValues
-    if (!payload.personId) {
-      const pid = values.personId
-        || htsRecord?.personId
-        || initialValues?.personId;
-      if (pid) payload.personId = pid;
+    if (!payload.patientId) {
+      const pid = values.patientId
+        || htsRecord?.patientId
+        || initialValues?.patientId;
+      if (pid) payload.patientId = Number(pid);
     }
 
     try {
@@ -184,9 +199,6 @@ const IctForm = ({
     }
   };
 
-  // Hydrate formik:
-  //   - New record  → seed from HTS values (index client demographics pre-fill)
-  //   - View/Edit   → initialValues override everything
   const { formik } = useIctFormik(
     onSubmit,
     initialValues ? undefined : mergedHtsValues
@@ -195,20 +207,18 @@ const IctForm = ({
   React.useEffect(() => {
     if (!initialValues) return;
 
-    // Step 1: seed all ICT fields immediately
     const mapped = mapIctResponseToFormValues(initialValues);
     Object.entries(mapped).forEach(([k, v]) =>
       formik.setFieldValue(k, v, false)
     );
 
-    // Step 2: fetch the linked HTS encounter for state, LGA, facilityName
     const htsId = initialValues.htsEncounterId || htsRecord?.id;
     if (!htsId) return;
 
     getHtsEcounter(htsId)
       .then((res) => {
         const htsData = res?.data ?? res;
-        const d = htsData?.data ?? {};
+        const d = htsData?.observation ?? {};
 
         if (d.clientState != null) formik.setFieldValue("state",        String(d.clientState), false);
         if (d.clientLga   != null) formik.setFieldValue("lga",          String(d.clientLga),   false);
@@ -232,7 +242,6 @@ const IctForm = ({
     "clientCategory", "clientCategoryOther", "offeredPns", "acceptedPns",
   ];
 
-  // ── Section B gate logic ─────────────────────────────────────────────────
   const offeredLower = values.offeredPns?.toLowerCase() ?? "";
   const acceptedLower = values.acceptedPns?.toLowerCase() ?? "";
 
@@ -252,7 +261,6 @@ const IctForm = ({
 
   return (
     <div className={classes.root}>
-      {/* ── Top bar ── */}
       <div className={classes.topBar}>
         <div>
           <h2 className={classes.title}>
@@ -279,7 +287,6 @@ const IctForm = ({
       <div className={classes.body}>
         <form onSubmit={formik.handleSubmit} noValidate>
 
-          {/* ── Section A ── */}
           <FormAccordion
             step={1}
             title="Section A — Index Client Details"
@@ -290,7 +297,6 @@ const IctForm = ({
             <IctSectionA formik={formik} readOnly={readOnly} />
           </FormAccordion>
 
-          {/* ── Section B ── */}
           <FormAccordion
             step={2}
             title="Section B — Contact Enumeration & Testing Tracker"
@@ -309,7 +315,6 @@ const IctForm = ({
             />
           </FormAccordion>
 
-          {/* ── Footer ── */}
           {!readOnly && (
             <div className={classes.footer}>
               <Button

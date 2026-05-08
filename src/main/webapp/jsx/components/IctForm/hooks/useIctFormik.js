@@ -1,20 +1,11 @@
 /**
  * useIctFormik.js
- *
- * Formik hook for the ICT form.
- *
- * htsValues — the submitted/current HTS form values (passed from the parent
- *             HTS→ICT orchestrator). Used to pre-populate Section A read-only
- *             fields (name, sex, DOB, age, phone, address, clientCode, facilityName).
- *
- * onSubmit  — async handler, receives ICT payload.
  */
-
 import { useFormik } from "formik";
 import { buildIctValidationSchema } from "./ictValidationSchema";
 
-/** Generate a unique Index Contact ID for each contact in Section B */
-export const generateContactId = (indexClientId, sequence) => {
+/** Generate a unique Index Contact Code */
+export const generateContactCode = (indexClientId, sequence) => {
   const ts = Date.now().toString(36).toUpperCase();
   const seq = String(sequence).padStart(2, "0");
   return `ICT-${indexClientId || "X"}-${seq}-${ts}`;
@@ -22,16 +13,14 @@ export const generateContactId = (indexClientId, sequence) => {
 
 /** Build a blank contact row with a pre-generated ID */
 export const makeBlankContact = (indexClientId, existingCount) => ({
-  contactId: generateContactId(indexClientId, existingCount + 1),
-  firstnameOfContact: "",
-  middlenameOfContact: "",
-  surnameOfContact: "",
+  contactCode: generateContactCode(indexClientId, existingCount + 1),
+  firstName: "",
+  middleName: "",
+  surname: "",
   relationshipToIndex: "",
-  contactSex: "",
-  contactAgeGroup: "",
-  contactAge: "",
-  contactAddress: "",
-  contactPhone: "",
+  sex: "",
+  phone: "",
+  address: "",
   sameAddressAsIndex: false,
   notificationMethod: "",
   followUpLocation: "",
@@ -40,15 +29,14 @@ export const makeBlankContact = (indexClientId, existingCount) => ({
   dateTestedHiv: "",
   hivTestResult: "",
   dateEnrolledArt: "",
-  contactArtClinic: "",
-  contactOnArt: "",
+  onArt: "",
+  artClinic: "",
   enrolledInOvc: false,
   dateEnrolledOvc: "",
   ovcId: "",
 });
 
 const buildInitialValues = (htsValues) => ({
-  // ── Auto-populated from HTS (read-only in Section A) ──────────────────
   facilityName: htsValues?.facilityName || "",
   state: htsValues?.clientState || "",
   lga: htsValues?.clientLga || "",
@@ -65,25 +53,20 @@ const buildInitialValues = (htsValues) => ({
   artUniqueId: htsValues?.artUniqueId || "",
   isOnArt: htsValues?.isOnArt || false,
 
-  // ── System linkage — carried from HTS values ─────────────────────────
-  // currentOrganisationUnitId is mapped to facilityId in the payload builder.
-  // Sourced from htsValues (which fetches it from /account in BasicInformationSection).
-  // IctSectionA also fetches it independently as a fallback.
-  currentOrganisationUnitId: htsValues?.currentOrganisationUnitId || "",
-  personId: htsValues?.personId || "",
+  facilityId: htsValues?.facilityId || "",
+  patientId: htsValues?.patientId || "",
+  htsEncounterId: "",
 
-  // ── Editable Section A fields ─────────────────────────────────────────
   dateOfService: "",
   setting: htsValues?.setting || "",
   facilitySetting: htsValues?.facilitySetting || "",
   communityEntryPoint: htsValues?.communityEntryPoint || "",
-  artClinic: "",           // shown only when isOnArt=true
+  artClinic: "",
   clientCategory: "",
   clientCategoryOther: "",
   offeredPns: "",
   acceptedPns: "",
 
-  // ── Section B ─────────────────────────────────────────────────────────
   contacts: [],
 });
 
@@ -91,8 +74,6 @@ export const useIctFormik = (onSubmit, htsValues) => {
   const formik = useFormik({
     initialValues: buildInitialValues(htsValues),
     validationSchema: buildIctValidationSchema(),
-    // MUST be false — enableReinitialize: true wipes the contacts array
-    // every time the parent re-renders, losing all contacts the user added.
     enableReinitialize: false,
     onSubmit,
   });

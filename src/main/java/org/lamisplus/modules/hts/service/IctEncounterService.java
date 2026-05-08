@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,38 +34,41 @@ public class IctEncounterService {
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
 
-    // ── Create ────────────────────────────────────────────────────────────────
-
     public IctEncounterResponse save(IctEncounterRequest request) {
-        Person person = findPersonOrThrow(request.getPersonId());
+        Person person = findPersonOrThrow(request.getPatientId());
 
         IctEncounter encounter = new IctEncounter();
         encounter.setPerson(person);
+
+        // Fix: safely convert person UUID (String or UUID) to UUID
+        Object uuid = person.getUuid();
+        if (uuid instanceof UUID) {
+            encounter.setPatientUuid((UUID) uuid);
+        } else if (uuid instanceof String) {
+            encounter.setPatientUuid(UUID.fromString((String) uuid));
+        }
+
         encounter.setFacilityId(request.getFacilityId());
         mapRequestToEncounter(request, encounter);
 
-        // Link HTS encounter if provided
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
         }
 
-        // Add contacts to the collection before saving so JPA cascades them
         addContactsToEncounter(request.getContacts(), encounter);
 
         IctEncounter saved = ictEncounterRepository.save(encounter);
         return toResponse(saved);
     }
 
-    // ── Read ──────────────────────────────────────────────────────────────────
-
     public IctEncounterResponse getById(Long id) {
         return toResponse(findActiveOrThrow(id));
     }
 
-    public List<IctEncounterResponse> getByPersonId(Long personId) {
+    public List<IctEncounterResponse> getByPatientId(Long patientId) {
         return ictEncounterRepository
-                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(personId, 0)
+                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(patientId, false)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -72,7 +76,7 @@ public class IctEncounterService {
 
     public IctEncounterResponse getByHtsEncounterId(Long htsEncounterId) {
         return ictEncounterRepository
-                .findByHtsEncounter_IdAndArchived(htsEncounterId, 0)
+                .findByHtsEncounter_IdAndArchived(htsEncounterId, false)
                 .map(this::toResponse)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "No ICT encounter found for HTS encounter id " + htsEncounterId));
@@ -84,22 +88,15 @@ public class IctEncounterService {
                 .map(this::toResponse);
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
-
     public IctEncounterResponse update(Long id, IctEncounterRequest request) {
         IctEncounter encounter = findActiveOrThrow(id);
         mapRequestToEncounter(request, encounter);
 
-        // Re-link HTS encounter if a new one is provided
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
         }
 
-        // Replace contacts wholesale using JPA orphanRemoval.
-        // Clearing the collection marks all existing contacts for deletion.
-        // New contacts are added directly to the collection so JPA cascades
-        // the entire operation within the same transaction — no raw JPQL needed.
         encounter.getContacts().clear();
         addContactsToEncounter(request.getContacts(), encounter);
 
@@ -107,22 +104,14 @@ public class IctEncounterService {
         return toResponse(updated);
     }
 
-    // ── Delete (soft) ─────────────────────────────────────────────────────────
-
     public void delete(Long id) {
         IctEncounter encounter = findActiveOrThrow(id);
-        encounter.setArchived(1);
-
-        // Soft-delete contacts as well so they don't leak into queries
-        List<IctContact> contacts =
-                ictContactRepository.findByIctEncounter_IdAndArchivedOrderById(id, 0);
-        contacts.forEach(c -> c.setArchived(1));
+        encounter.setArchived(true);
+        List<IctContact> contacts = ictContactRepository.findByIctEncounter_IdAndArchivedOrderById(id, false);
+        contacts.forEach(c -> c.setArchived(true));
         ictContactRepository.saveAll(contacts);
-
         ictEncounterRepository.save(encounter);
     }
-
-    // ── Mapping helpers ───────────────────────────────────────────────────────
 
     private void mapRequestToEncounter(IctEncounterRequest req, IctEncounter e) {
         e.setDateOfService(req.getDateOfService());
@@ -131,35 +120,28 @@ public class IctEncounterService {
         e.setOfferedPns(req.getOfferedPns());
         e.setAcceptedPns(req.getAcceptedPns());
 
-        // Build JSONB data node for overflow fields
         ObjectNode data = objectMapper.createObjectNode();
         putIfNotNull(data, "facilitySetting",     req.getFacilitySetting());
         putIfNotNull(data, "communityEntryPoint",  req.getCommunityEntryPoint());
         putIfNotNull(data, "artClinic",            req.getArtClinic());
         putIfNotNull(data, "clientCategoryOther",  req.getClientCategoryOther());
-
-        // Index client snapshot — stored in JSONB, not separate columns,
-        // because this is read-only context data, not independently queryable.
-        putIfNotNull(data, "indexClientId",    req.getIndexClientId());
-        putIfNotNull(data, "artUniqueId",      req.getArtUniqueId());
-        putIfNotNull(data, "indexFirstName",   req.getIndexFirstName());
-        putIfNotNull(data, "indexMiddleName",  req.getIndexMiddleName());
-        putIfNotNull(data, "indexSurname",     req.getIndexSurname());
-        putIfNotNull(data, "indexSex",         req.getIndexSex());
-        putIfNotNull(data, "indexPhone",       req.getIndexPhone());
-        putIfNotNull(data, "indexAltPhone",    req.getIndexAltPhone());
-        putIfNotNull(data, "indexAddress",     req.getIndexAddress());
-
-        if (req.getIndexDob() != null)  data.put("indexDob",  req.getIndexDob().toString());
-        if (req.getIndexAge() != null)  data.put("indexAge",  req.getIndexAge());
+        putIfNotNull(data, "indexClientId",        req.getIndexClientId());
+        putIfNotNull(data, "artUniqueId",          req.getArtUniqueId());
+        putIfNotNull(data, "indexFirstName",       req.getIndexFirstName());
+        putIfNotNull(data, "indexMiddleName",      req.getIndexMiddleName());
+        putIfNotNull(data, "indexSurname",         req.getIndexSurname());
+        putIfNotNull(data, "indexSex",             req.getIndexSex());
+        putIfNotNull(data, "indexPhone",           req.getIndexPhone());
+        putIfNotNull(data, "indexAltPhone",        req.getIndexAltPhone());
+        putIfNotNull(data, "indexAddress",         req.getIndexAddress());
+        if (req.getIndexDob() != null) data.put("indexDob", req.getIndexDob().toString());
+        if (req.getIndexAge() != null) data.put("indexAge", req.getIndexAge());
 
         e.setData(data);
     }
 
     private void addContactsToEncounter(List<IctContactRequest> contactRequests, IctEncounter encounter) {
         if (contactRequests == null || contactRequests.isEmpty()) return;
-        // Add directly to the managed collection — CascadeType.ALL persists them
-        // when the encounter is saved, within the same JPA transaction.
         contactRequests.stream()
                 .map(cr -> mapToContact(cr, encounter))
                 .forEach(encounter.getContacts()::add);
@@ -168,16 +150,14 @@ public class IctEncounterService {
     private IctContact mapToContact(IctContactRequest cr, IctEncounter encounter) {
         IctContact c = new IctContact();
         c.setIctEncounter(encounter);
-        c.setContactId(cr.getContactId());
-        c.setFirstnameOfContact(cr.getFirstnameOfContact());
-        c.setMiddlenameOfContact(cr.getMiddlenameOfContact());
-        c.setSurnameOfContact(cr.getSurnameOfContact());
+        c.setContactCode(cr.getContactCode());
+        c.setFirstName(cr.getFirstName());
+        c.setMiddleName(cr.getMiddleName());
+        c.setSurname(cr.getSurname());
         c.setRelationshipToIndex(cr.getRelationshipToIndex());
-        c.setContactSex(cr.getContactSex());
-        c.setContactAgeGroup(cr.getContactAgeGroup());
-        c.setContactAge(cr.getContactAge());
-        c.setContactPhone(cr.getContactPhone());
-        c.setContactAddress(cr.getContactAddress());
+        c.setSex(cr.getSex());
+        c.setPhone(cr.getPhone());
+        c.setAddress(cr.getAddress());
         c.setSameAddressAsIndex(Boolean.TRUE.equals(cr.getSameAddressAsIndex()));
         c.setNotificationMethod(cr.getNotificationMethod());
         c.setFollowUpLocation(cr.getFollowUpLocation());
@@ -185,21 +165,20 @@ public class IctEncounterService {
         c.setKnownHivPositive(cr.getKnownHivPositive());
         c.setHivTestResult(cr.getHivTestResult());
         c.setDateTestedHiv(cr.getDateTestedHiv());
-        c.setContactArtClinic(cr.getContactArtClinic());
-        c.setContactOnArt(cr.getContactOnArt());
+        c.setArtClinic(cr.getArtClinic());
+        c.setOnArt(cr.getOnArt());
         c.setEnrolledInOvc(Boolean.TRUE.equals(cr.getEnrolledInOvc()));
         c.setDateEnrolledOvc(cr.getDateEnrolledOvc());
         c.setOvcId(cr.getOvcId());
         return c;
     }
 
-    // ── Response mappers ──────────────────────────────────────────────────────
-
     private IctEncounterResponse toResponse(IctEncounter e) {
         IctEncounterResponse r = new IctEncounterResponse();
         r.setId(e.getId());
         r.setUuid(e.getUuid());
-        r.setPersonId(e.getPerson() != null ? e.getPerson().getId() : null);
+        r.setPatientId(e.getPerson() != null ? e.getPerson().getId() : null);
+        r.setPatientUuid(e.getPatientUuid());
         r.setHtsEncounterId(e.getHtsEncounter() != null ? e.getHtsEncounter().getId() : null);
         r.setFacilityId(e.getFacilityId());
         r.setDateOfService(e.getDateOfService());
@@ -209,14 +188,12 @@ public class IctEncounterService {
         r.setAcceptedPns(e.getAcceptedPns());
         r.setData(e.getData());
 
-        // Load contacts for this encounter
         List<IctContactResponse> contactResponses =
-                ictContactRepository.findByIctEncounter_IdAndArchivedOrderById(e.getId(), 0)
+                ictContactRepository.findByIctEncounter_IdAndArchivedOrderById(e.getId(), false)
                         .stream()
                         .map(this::toContactResponse)
                         .collect(Collectors.toList());
         r.setContacts(contactResponses);
-
         return r;
     }
 
@@ -224,16 +201,14 @@ public class IctEncounterService {
         IctContactResponse r = new IctContactResponse();
         r.setId(c.getId());
         r.setUuid(c.getUuid());
-        r.setContactId(c.getContactId());
-        r.setFirstnameOfContact(c.getFirstnameOfContact());
-        r.setMiddlenameOfContact(c.getMiddlenameOfContact());
-        r.setSurnameOfContact(c.getSurnameOfContact());
+        r.setContactCode(c.getContactCode());
+        r.setFirstName(c.getFirstName());
+        r.setMiddleName(c.getMiddleName());
+        r.setSurname(c.getSurname());
         r.setRelationshipToIndex(c.getRelationshipToIndex());
-        r.setContactSex(c.getContactSex());
-        r.setContactAgeGroup(c.getContactAgeGroup());
-        r.setContactAge(c.getContactAge());
-        r.setContactPhone(c.getContactPhone());
-        r.setContactAddress(c.getContactAddress());
+        r.setSex(c.getSex());
+        r.setPhone(c.getPhone());
+        r.setAddress(c.getAddress());
         r.setSameAddressAsIndex(c.getSameAddressAsIndex());
         r.setNotificationMethod(c.getNotificationMethod());
         r.setFollowUpLocation(c.getFollowUpLocation());
@@ -242,30 +217,28 @@ public class IctEncounterService {
         r.setHivTestResult(c.getHivTestResult());
         r.setDateTestedHiv(c.getDateTestedHiv());
         r.setDateEnrolledArt(c.getDateEnrolledArt());
-        r.setContactArtClinic(c.getContactArtClinic());
-        r.setContactOnArt(c.getContactOnArt());
+        r.setArtClinic(c.getArtClinic());
+        r.setOnArt(c.getOnArt());
         r.setEnrolledInOvc(c.getEnrolledInOvc());
         r.setDateEnrolledOvc(c.getDateEnrolledOvc());
         r.setOvcId(c.getOvcId());
         return r;
     }
 
-    // ── Lookup helpers ────────────────────────────────────────────────────────
-
     private IctEncounter findActiveOrThrow(Long id) {
-        return ictEncounterRepository.findByIdAndArchived(id, 0)
+        return ictEncounterRepository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "ICT encounter not found with id " + id));
     }
 
-    private Person findPersonOrThrow(Long personId) {
-        return personRepository.findById(personId)
+    private Person findPersonOrThrow(Long patientId) {
+        return personRepository.findById(patientId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Person not found with id " + personId));
+                        "Person not found with id " + patientId));
     }
 
     private HtsEncounter findHtsOrThrow(Long htsId) {
-        return htsEncounterRepository.findByIdAndArchived(htsId, 0)
+        return htsEncounterRepository.findByIdAndArchived(htsId, false)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "HTS encounter not found with id " + htsId));
     }

@@ -14,9 +14,9 @@ import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { updateHtsEncounter } from "../../services/updateHtsEncounter";
 import { toast } from "react-toastify";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
-// import { convertFieldsToCodes } from "../../utils/codesetMapper";
 import { getCodesets } from "../../services/getCodesets.service";
 import { convertFieldsToCodes } from "../../../utils";
+
 const useStyles = makeStyles(() => ({
   root: {
     backgroundColor: "#f6f8fa",
@@ -106,7 +106,6 @@ const FIELD_CODESET_MAP = {
   clientReferredToOtherServices: "YES_NO",
   completedBy: null, // no codeset
   designation: null,
-  // add more if needed
 };
 
 const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
@@ -116,7 +115,6 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   const [isLoading, setIsLoading] = useState(false);
   const [codesets, setCodesets] = useState(null);
 
-  // Fetch codesets once
   useEffect(() => {
     getCodesets(
       "HTS_ENTRY_POINT",
@@ -142,8 +140,8 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     try {
       const response = await getHtsEcounter(fullRecord?.id);
       const rawData = response?.data;
-      // Convert old display values to codes using the loaded codesets
-      if (codesets && rawData) {
+      // rawData is now HtsEncounterResponse; use observation instead of data
+      if (codesets && rawData?.observation) {
         const codesetLookup = {};
         Object.keys(FIELD_CODESET_MAP).forEach(field => {
           const codesetName = FIELD_CODESET_MAP[field];
@@ -151,10 +149,10 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             codesetLookup[field] = codesets[codesetName];
           }
         });
-        const converted = convertFieldsToCodes(rawData, codesetLookup);
+        const converted = convertFieldsToCodes(rawData.observation, codesetLookup);
         setFormInitialValues(converted);
       } else {
-        setFormInitialValues(rawData);
+        setFormInitialValues(rawData?.observation || {});
       }
       setIsRefreshingEncounter(false);
     } catch {

@@ -25,11 +25,6 @@ public class IctEncounterController {
 
     private final IctEncounterService service;
 
-    /**
-     * Create a new ICT encounter.
-     * personId is always required. htsEncounterId is optional but expected
-     * when this is triggered from the HTS→ICT orchestrator flow.
-     */
     @PostMapping
     @PreAuthorize("hasAnyAuthority('hts_create', 'ict_encounter_create')")
     public ResponseEntity<IctEncounterResponse> create(@Valid @RequestBody IctEncounterRequest request) {
@@ -56,30 +51,18 @@ public class IctEncounterController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Get all ICT encounters for a person.
-     * Used by the patient dashboard to show the encounter history.
-     */
-    @GetMapping("/patient/{personId}")
+    @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'ict_encounter_view')")
-    public ResponseEntity<List<IctEncounterResponse>> getByPersonId(@PathVariable Long personId) {
-        return ResponseEntity.ok(service.getByPersonId(personId));
+    public ResponseEntity<List<IctEncounterResponse>> getByPatientId(@PathVariable Long patientId) {
+        return ResponseEntity.ok(service.getByPatientId(patientId));
     }
 
-    /**
-     * Get the ICT encounter linked to a specific HTS encounter.
-     * Used by the HTS→ICT orchestrator to check whether an ICT
-     * encounter already exists for a given HTS session (e.g. on page reload).
-     */
     @GetMapping("/hts/{htsEncounterId}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'ict_encounter_view')")
     public ResponseEntity<IctEncounterResponse> getByHtsEncounterId(@PathVariable Long htsEncounterId) {
         return ResponseEntity.ok(service.getByHtsEncounterId(htsEncounterId));
     }
 
-    /**
-     * Paginated search across ICT encounters for the current facility.
-     */
     @GetMapping
     @PreAuthorize("hasAnyAuthority('hts_view', 'ict_encounter_view')")
     public ResponseEntity<PageDTO> search(

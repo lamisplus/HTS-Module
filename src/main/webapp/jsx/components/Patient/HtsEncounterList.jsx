@@ -1,3 +1,4 @@
+// HTSEncounterList.jsx
 import React, { forwardRef, useState } from "react";
 import MaterialTable, { MTableToolbar } from "material-table";
 import { Link } from "react-router-dom";
@@ -48,7 +49,7 @@ const deduplicateByPerson = (records) => {
   const map = new Map();
 
   records.forEach((record) => {
-    const key = record.personId;
+    const key = record.patientId;  // use patientId
     if (!map.has(key)) {
       map.set(key, { ...record, htsCount: 1 });
     } else {
@@ -80,12 +81,11 @@ const HTSEncounterList = () => {
             data: deduplicated.map((row) => ({
               name: `${row.person?.firstName ?? ""} ${row.person?.surname ?? ""}`.trim(),
               clientCode: row.clientCode,
-              sex: row.person?.sex ?? row.data?.sex ?? "",
-              age: row.data?.age ?? "",
+              sex: row.person?.sex ?? row.observation?.sex ?? "",
+              age: row.observation?.age ?? "",
               dateOfVisit: row.dateOfVisit ?? "",
               setting: row.setting ?? "",
-              // modality: row.data?.modality ?? "",
-              initialHivTest: row.data?.initialHivTest ?? "",
+              initialHivTest: row.observation?.initialHivTest ?? "",
               htsCount: row.htsCount,
               _raw: row,
             })),
@@ -136,11 +136,6 @@ const HTSEncounterList = () => {
             field: "setting",
             filtering: false,
           },
-          // {
-          //   title: "Modality",
-          //   field: "modality",
-          //   filtering: false,
-          // },
           {
             title: "Initial HIV Test",
             field: "initialHivTest",

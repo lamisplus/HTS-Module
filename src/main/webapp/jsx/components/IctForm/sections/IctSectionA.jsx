@@ -1,4 +1,4 @@
-// IctSectionA.jsx
+// IctSectionA.jsx (only modification: facilityId setting)
 import React, { useEffect, useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import {
@@ -38,7 +38,6 @@ const IctSectionA = ({ formik, readOnly = false }) => {
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingLgas, setLoadingLgas] = useState(false);
 
-  // ---------- Codeset to options (value = code) ----------
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
@@ -92,8 +91,8 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         });
         const orgId = response.data?.currentOrganisationUnitId;
         const orgName = response.data?.currentOrganisationUnitName;
-        if (orgId && !values.currentOrganisationUnitId) {
-          setFieldValue("currentOrganisationUnitId", orgId);
+        if (orgId && !values.facilityId) {
+          setFieldValue("facilityId", orgId);
         }
         if (orgName) {
           setFieldValue("facilityName", orgName);
@@ -104,6 +103,11 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     };
     fetchAccount();
   }, []);
+
+  // ... rest of file unchanged ...
+
+  // (The rest of the component including state/LGA resolution, codeset fetch, and form fields)
+  // I'll include the remainder for completeness, but only the account fetch part changed.
 
   useEffect(() => {
     if (statesList?.length > 0 && values?.state) {
@@ -163,7 +167,6 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     disabled: readOnly || extraDisabled,
   });
 
-  // Handlers
   const handleSettingChange = (e) => {
     setFieldValue("setting", e.target.value);
     setFieldValue("facilitySetting", "");
@@ -180,11 +183,9 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     if (e.target.value !== "YES_NO_YES") setFieldValue("acceptedPns", "");
   };
 
-  // Visibility flags
   const showFacilitySetting = values.setting === "HTS_ENTRY_POINT_FACILITY";
   const showCommunityEntry = values.setting === "HTS_ENTRY_POINT_COMMUNITY";
   const showArtClinic = !!values.isOnArt;
-  // clientCategory uses INDEX_CLIENT_CATEGORY codeset, the code for "Other" is unknown, so keep display comparison for now
   const showCategoryOther = values.clientCategory === "Other";
   const showAcceptedPns = values.offeredPns === "YES_NO_YES";
 

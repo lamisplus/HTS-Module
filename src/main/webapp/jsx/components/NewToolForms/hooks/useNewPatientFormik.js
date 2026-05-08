@@ -82,7 +82,8 @@ const initialValues = {
   designation: "",
   sexCode: "",
   maritalStatusCode:"",
-  currentOrganisationUnitId: ""
+  currentOrganisationUnitId: "",
+  patientId: "",   // renamed from personId
 };
 
 export const useNewPatientFormik = (onSubmit) => {

@@ -9,83 +9,46 @@ import { COLORS } from "../NewToolForms/constants";
 /**
  * Maps an HTS encounter record (as returned by the backend) to the flat
  * `htsValues` object that IctForm expects for pre‑populating Section A.
- *
- * The HTS record has top‑level fields (clientCode, setting, personId, facilityId)
- * and a `data` JSONB column containing most clinical and demographic values.
- *
- * Payload shape (relevant parts):
- * {
- *   id, uuid, personId, clientCode, dateOfVisit, setting, facilityId,
- *   person: { firstName, surname, otherName, sex, dateOfBirth,
- *             contactPoint: { contactPoint: [{ type, value }] },
- *             address: { address: [{ city, line, stateId, district, ... }] } },
- *   data: { facilityName, clientState, clientLga, firstName, middleName,
- *           surname, sex, dateOfBirth, age, phoneNumber, address,
- *           facilitySetting, communityEntryPoint, artUniqueId, isOnArt, ... }
- * }
+ * Updated to use observation, patientId.
  */
 const mapHtsRecordToIctValues = (htsRecord) => {
     if (!htsRecord) return {};
 
-    const d = htsRecord.data ?? {};
+    const d = htsRecord.observation ?? {};
     const p = htsRecord.person ?? {};
 
-    // ── Safely extract person-level phone (nested in contactPoint.contactPoint[]) ──
     const personPhone = p.contactPoint?.contactPoint?.[0]?.value ?? "";
-
-    // ── Safely extract person-level address as a flat string ──────────────────
-    // p.address is { address: [{ city, line: [], ... }] }; use city as the
-    // human-readable string, matching how the HTS form stores it in d.address.
     const personAddressObj = p.address?.address?.[0];
     const personAddress = personAddressObj
         ? [personAddressObj.city, ...(personAddressObj.line ?? [])].filter(Boolean).join(", ")
         : "";
 
     return {
-        // ── Facility context ───────────────────────────────────────────────────
         facilityName: d.facilityName ?? "",
-        // clientState / clientLga are stored as string IDs in the data JSONB
         state: d.clientState != null ? String(d.clientState) : "",
         lga: d.clientLga != null ? String(d.clientLga) : "",
-
-        // ── Index client identity ──────────────────────────────────────────────
-        // Prefer data snapshot (taken at time of HTS visit); fall back to person object
         indexClientId: htsRecord.clientCode ?? "",
         indexFirstName: d.firstName ?? p.firstName ?? "",
         indexMiddleName: d.middleName ?? p.otherName ?? "",
         indexSurname: d.surname ?? p.surname ?? "",
         indexSex: d.sex ?? p.sex ?? "",
-        // person.dateOfBirth is null when estimated; d.dateOfBirth has the resolved value
         indexDob: d.dateOfBirth ?? "",
         indexAge: d.age != null ? String(d.age) : "",
-        // d.phoneNumber is the primary source; fall back to person contactPoint array
         indexPhone: d.phoneNumber ?? personPhone,
-        // indexAltPhone is not stored on the HTS data JSONB — leave blank
         indexAltPhone: "",
-        // d.address is already a flat string; fall back to reconstructed person address
         indexAddress: d.address ?? personAddress,
-
-        // ── ART information ────────────────────────────────────────────────────
         artUniqueId: d.artUniqueId ?? "",
         isOnArt: d.isOnArt ?? false,
-
-        // ── System linkage ─────────────────────────────────────────────────────
-        personId: htsRecord.personId != null ? String(htsRecord.personId) : "",
+        patientId: htsRecord.patientId != null ? String(htsRecord.patientId) : "",
         facilityId: htsRecord.facilityId != null ? String(htsRecord.facilityId) : "",
-        // Keep legacy field name in case any downstream consumer still reads it
-        currentOrganisationUnitId:
-            htsRecord.facilityId != null ? String(htsRecord.facilityId) : "",
-        // Carry the HTS encounter id so IctForm / buildIctEncounterPayload can link records
+        currentOrganisationUnitId: htsRecord.facilityId != null ? String(htsRecord.facilityId) : "",
         htsEncounterId: htsRecord.id != null ? String(htsRecord.id) : "",
-
-        // ── Visit / setting context ────────────────────────────────────────────
         setting: htsRecord.setting ?? "",
         facilitySetting: d.facilitySetting ?? "",
         communityEntryPoint: d.communityEntryPoint ?? "",
     };
 };
 
-// ─── Styles ─────────────────────────────────────────────────────────────────
 const loadingContainerStyle = {
     display: "flex",
     flexDirection: "column",
@@ -102,9 +65,8 @@ const errorContainerStyle = {
     color: "#d32f2f",
 };
 
-// ─── Component ───────────────────────────────────────────────────────────────
 const NewIctForExistingPatient = ({
-    patientId,    // ID of the patient (personId)
+    patientId,
     onDone,
     isOnArt = false,
 }) => {
@@ -130,12 +92,10 @@ const NewIctForExistingPatient = ({
                     )
                     : [];
 
-                // Find the most recent encounter with confirmatoryHivTest === "positive"
                 const positiveRecord = sortedEncounters.find(
-                    (enc) => enc?.data?.confirmatoryHivTest?.toLowerCase() === "positive"
+                    (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "positive"
                 );
 
-                console.log(sortedEncounters)
                 if (!positiveRecord) {
                     setError("No positive HIV test result found for this patient. ICT form cannot be created.");
                 } else {
@@ -162,7 +122,6 @@ const NewIctForExistingPatient = ({
         onDone?.();
     };
 
-    // ─── Render ───────────────────────────────────────────────────────────────
     if (loading) {
         return (
             <div style={loadingContainerStyle}>
@@ -191,12 +150,11 @@ const NewIctForExistingPatient = ({
         );
     }
 
-    // Valid positive HTS record – render IctForm
     const htsValues = mapHtsRecordToIctValues(positiveHtsRecord);
 
     return (
         <IctForm
-            htsValues={{ ...positiveHtsRecord?.data, ...positiveHtsRecord }}
+            htsValues={{ ...positiveHtsRecord?.observation, ...positiveHtsRecord }}
             htsRecord={htsValues}
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSuccess}

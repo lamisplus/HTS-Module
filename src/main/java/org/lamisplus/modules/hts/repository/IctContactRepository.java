@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface IctContactRepository extends JpaRepository<IctContact, Long> {
 
-    List<IctContact> findByIctEncounter_IdAndArchivedOrderById(Long ictEncounterId, int archived);
+    // archived is now Boolean
+    List<IctContact> findByIctEncounter_IdAndArchivedOrderById(Long ictEncounterId, Boolean archived);
 }

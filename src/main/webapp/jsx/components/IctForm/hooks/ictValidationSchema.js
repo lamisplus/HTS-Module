@@ -1,47 +1,25 @@
-// ictValidationSchema.js
 import * as yup from "yup";
 
 const today = new Date();
 today.setHours(23, 59, 59, 999);
 
 const contactSchema = yup.object({
-  firstnameOfContact: yup
+  firstName: yup
     .string()
     .required("Contact First name is required")
     .test("min2", "Must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
-  middlenameOfContact: yup.string(),
-  surnameOfContact: yup
+  middleName: yup.string(),
+  surname: yup
     .string()
     .required("Contact Surname is required")
     .test("min2", "Must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   relationshipToIndex: yup.string().required("Relationship is required"),
-  contactSex: yup.string().required("Sex is required"),
-  contactAge: yup.mixed().test(
-    "contact-age-required-when-estimated",
-    "Age is required",
-    function (value) {
-      if (value === "" || value === undefined || value === null)
-        return this.createError({ message: "Age is required" });
-      const n = Number(value);
-      if (isNaN(n) || n < 0) return this.createError({ message: "Age must be a non-negative number" });
-      if (n > 130) return this.createError({ message: "Age must be 130 or less" });
-      return true;
-    }
-  ),
-  contactAgeGroup: yup.string().required("Age group is required"),
-  contactPhone: yup.string().nullable().test("phone-digits", "Phone number must be 10 or 11 digits", (val) => {
-    if (!val) return true;
-    return /^[0-9]{10,11}$/.test(val);
-  }),
-  indexAltPhone: yup.string().nullable().test("alt-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
-    if (!val) return true;
-    return /^[0-9]{10,11}$/.test(val);
-  }),
-  indexPhone: yup.string().nullable().test("index-phone-digits", "Phone number must be 10 or 11 digits", (val) => {
+  sex: yup.string().required("Sex is required"),
+  phone: yup.string().nullable().test("phone-digits", "Phone number must be 10 or 11 digits", (val) => {
     if (!val) return true;
     return /^[0-9]{10,11}$/.test(val);
   }),
@@ -54,18 +32,16 @@ const contactSchema = yup.object({
     if (this.parent.knownHivPositive !== "YES_NO_NO") return true;
     return !!val || this.createError({ message: "HIV test result is required" });
   }),
-  contactOnArt: yup.string(),
+  onArt: yup.string(),
   dateEnrolledArt: yup.string(),
-  contactArtClinic: yup.string(),
+  artClinic: yup.string(),
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
-    if (this.parent.contactAgeGroup !== "<15") return true;
     if (!this.parent.enrolledInOvc) return true;
     if (!val) return this.createError({ message: "Date enrolled in OVC is required" });
     if (new Date(val) > today) return this.createError({ message: "Cannot be a future date" });
     return true;
   }),
   ovcId: yup.mixed().test("ovc-id-conditional", "OVC ID is required", function (val) {
-    if (this.parent.contactAgeGroup !== "<15") return true;
     if (!this.parent.enrolledInOvc) return true;
     return !!val || this.createError({ message: "OVC ID is required" });
   }),
@@ -83,7 +59,6 @@ export const buildIctValidationSchema = () =>
       })
       .required("Date of service is required"),
     setting: yup.string().required("Setting is required"),
-
     facilitySetting: yup.mixed().test("facility-setting-conditional", "Facility setting is required", function (val) {
       if (this.parent.setting !== "HTS_ENTRY_POINT_FACILITY") return true;
       return !!val || this.createError({ message: "Facility setting is required" });

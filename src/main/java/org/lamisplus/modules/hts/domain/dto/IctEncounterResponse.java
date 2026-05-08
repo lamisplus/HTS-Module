@@ -5,12 +5,14 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class IctEncounterResponse {
     private Long id;
-    private String uuid;
-    private Long personId;
+    private UUID uuid;
+    private Long patientId;
+    private UUID patientUuid;
     private Long htsEncounterId;
     private Long facilityId;
     private LocalDate dateOfService;
@@ -18,11 +20,6 @@ public class IctEncounterResponse {
     private String clientCategory;
     private String offeredPns;
     private String acceptedPns;
-
-    /** JSONB overflow: facilitySetting, communityEntryPoint, artClinic,
-     *  clientCategoryOther, full index client demographic snapshot */
     private JsonNode data;
-
-    /** Full contact list — always returned together with the encounter */
     private List<IctContactResponse> contacts;
 }

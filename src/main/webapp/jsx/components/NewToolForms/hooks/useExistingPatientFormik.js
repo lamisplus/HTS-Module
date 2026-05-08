@@ -81,7 +81,8 @@ const defaultValues = {
   designation: "",
   sexCode: "",
   maritalStatusCode: "",
-  currentOrganisationUnitId: ""
+  currentOrganisationUnitId: "",
+  patientId: ""   // renamed from personId
 };
 
 /**
@@ -98,4 +99,4 @@ export const useExistingPatientFormik = (onSubmit, externalInitialValues) => {
     onSubmit,
   });
   return { formik };
-}; 
+};

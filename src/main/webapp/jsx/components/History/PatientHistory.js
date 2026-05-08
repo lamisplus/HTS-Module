@@ -36,7 +36,6 @@ const HIVSTPatientHistory = lazy(() =>
 const ExistenceClientHIVSTRegistration = lazy(() =>
   import("../Patient/HIVST/ExistenceClientHIVSTRegistration")
 );
-// NEW: Lazy import for the new ICT component
 const NewIctForExistingPatient = lazy(() =>
   import("../NewToolForms/NewIctForExistingPatient")
 );
@@ -47,7 +46,6 @@ const divStyle = {
 };
 
 const Home = (props) => {
-  // State definitions
   const [patientList, setPatientList] = useState([]);
   const [patientEncounterList, setPatientEncounterList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,12 +53,7 @@ const Home = (props) => {
   const [LMP, setLMP] = useState("");
   const { hasPermission, hasAnyPermission } = usePermissions();
 
-  const patientId =
-    props.patientObj && props.patientObj.personId
-      ? props.patientObj.personId
-      : props.patientObj.id
-        ? props.patientObj.id
-        : "";
+  const patientId = props.patientObj?.patientId ?? props.patientObj?.id ?? "";
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
@@ -77,8 +70,6 @@ const Home = (props) => {
   const { hasRole } = useRoles();
   const isRDE = hasRole("RDE");
 
-  // Determine if the patient is eligible for a new ICT encounter
-  // Condition: most recent HTS confirmatory test is positive
   const isEligibleForNewIct = useMemo(() => {
     return patientInfo?.confirmatoryHivTest?.toLowerCase() === "positive";
   }, [patientInfo]);
@@ -91,7 +82,6 @@ const Home = (props) => {
     return monthDifference;
   };
 
-  // Main function to determine retesting status
   const determineRetestingStatus = async (lastRecord) => {
     let htsType = "NEW HTS";
     let hivResult = lastRecord?.hivTestResult || lastRecord?.hivTestResult2;
@@ -134,7 +124,6 @@ const Home = (props) => {
     }
   }, []);
 
-  // Get list of patients
   async function patients() {
     setLoading(true);
     try {
@@ -223,7 +212,7 @@ const Home = (props) => {
 
                   <Tab eventKey="ict-history" title="ICT HISTORY">
                     <Suspense fallback={<LoadingSpinner />}>
-                      {key === "ict-history" && (
+                      {key === "ict-history" && ( 
                         <ICTEncounterHistory
                           patientObj={props.patientObj}
                           activePage={props.activePage}
@@ -250,7 +239,6 @@ const Home = (props) => {
                     </Tab>
                   )}
 
-                  
                   <Tab eventKey="new-ict-encounter-existing-patient" title="NEW ICT">
                     <Suspense fallback={<LoadingSpinner />}>
                       {key === "new-ict-encounter-existing-patient" && (

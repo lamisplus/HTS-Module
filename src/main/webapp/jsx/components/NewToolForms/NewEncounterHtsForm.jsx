@@ -1,3 +1,4 @@
+// NewEncounterHtsForm.jsx
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
@@ -130,7 +131,7 @@ const mapPersonToFormValues = (person) => {
     clientLga: addr?.district ?? "",
     address: addr?.city ?? "",
     clientCode: "",
-    personId: person?.id != null ? String(person.id) : "",
+    patientId: person?.id != null ? String(person.id) : "",
     currentOrganisationUnitId: person?.facilityId != null ? String(person.facilityId) : "",
   };
 };
@@ -210,21 +211,19 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const [patientInfo, setPatientInfo] = useState(person);
   const [isFetchingPatientInfo, setIsFetchingPatientInfo] = useState(false);
   const [codesets, setCodesets] = useState(null);
-  const [formInitialValues, setFormInitialValues] = useState(null); // merged values, ready for formik
+  const [formInitialValues, setFormInitialValues] = useState(null);
 
-  // Fetch the required codesets once on mount
   useEffect(() => {
     getCodesets("SEX", "MARITAL_STATUS", "PREGNANCY_STATUS", "YES_NO", "DURATION_OF_BREASTFEEDING")
       .then(setCodesets)
       .catch(err => console.error("Failed to load codesets", err));
   }, []);
 
-  // Fetch latest patient data when person.id changes
   const fetchPatientCurrentBio = async () => {
     setIsFetchingPatientInfo(true);
     try {
       const response = await axios.get(
-        `${url}patient/${person?.id || person?.personId}`,
+        `${url}patient/${person?.id || person?.patientId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPatientInfo(response.data);
@@ -237,37 +236,29 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   };
 
   useEffect(() => {
-    if (person?.id || person?.personId) {
+    if (person?.id || person?.patientId) {
       fetchPatientCurrentBio();
     }
-  }, [person?.id, person?.personId]);
+  }, [person?.id, person?.patientId]);
 
-  // When both patientInfo and codesets are ready, build the merged initial values
   useEffect(() => {
     if (!patientInfo || !codesets) return;
 
-    // 1. Get raw demographic values (display strings)
     const demoValues = mapPersonToFormValues(patientInfo);
 
-    // 2. Define which fields correspond to which codesets
     const fieldCodesetMap = {
       sex: codesets["SEX"],
       maritalStatus: codesets["MARITAL_STATUS"],
       pregnancyStatus: codesets["PREGNANCY_STATUS"],
       breastfeedingDuration: codesets["DURATION_OF_BREASTFEEDING"],
-      // add more fields as needed
     };
 
-    // 3. Convert the display strings to codes (e.g. "Female" -> "SEX_FEMALE")
     const convertedDemo = convertFieldsToCodes(demoValues, fieldCodesetMap);
-
-    // 4. Merge with blank clinical values
     const merged = { ...blankClinicalValues, ...convertedDemo };
     setFormInitialValues(merged);
   }, [patientInfo, codesets]);
 
-  // Formik initialisation only when formInitialValues is ready.
-  // We'll use a conditional to avoid rendering form before values are set.
+  // The onSubmit function for Formik
   const onSubmit = async (values) => {
     // Prevent duplicate HTS encounter for the same person on the same date
     if (person?.id) {
@@ -303,20 +294,17 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     }
   };
 
-  // Only create the formik instance when initial values are ready
   const formik = useFormik({
     initialValues: formInitialValues || blankClinicalValues,
-    validationSchema: buildValidationSchema(false), // false because demographics are read-only for existing patient
-    enableReinitialize: true, // reinitialize when formInitialValues updates
+    validationSchema: buildValidationSchema(false),
+    enableReinitialize: true,
     onSubmit,
   });
 
-  // Forward values to orchestrator for eligibility watcher
   React.useEffect(() => {
     onValuesChange?.(formik.values);
   }, [formik.values]);
 
-  // Standard section error helpers
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
   const sectionHasError = (fields) =>
@@ -358,7 +346,6 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     "clientReferredToOtherServices", "completedBy", "designation",
   ];
 
-  // If still loading initial values, show a loading indicator
   if (!formInitialValues || isFetchingPatientInfo) {
     return (
       <div style={{ padding: 40, textAlign: "center", color: "#57606a", fontSize: 14 }}>

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "hts_ict_encounter")
@@ -31,19 +32,16 @@ public class IctEncounter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 36)
-    private String uuid;
+    @Column(columnDefinition = "uuid", insertable = false, updatable = false, unique = true, nullable = false)
+    private UUID uuid;
 
-    /** The person (index client) this ICT encounter belongs to. Always required. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = false)
     private Person person;
 
-    /**
-     * The HTS encounter that triggered this ICT session.
-     * Nullable: ICT can be opened from the ART module (Virally Unsuppressed / RTT)
-     * without a same-session HTS encounter.
-     */
+    @Column(name = "patient_uuid", columnDefinition = "uuid")
+    private UUID patientUuid;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hts_encounter_id", nullable = true)
     private HtsEncounter htsEncounter;
@@ -54,11 +52,9 @@ public class IctEncounter {
     @Column(name = "date_of_service", nullable = false)
     private LocalDate dateOfService;
 
-    /** Stored as a column for easy filtering/reporting. Also included in data JSONB. */
     @Column(name = "setting", length = 100)
     private String setting;
 
-    /** Newly Diagnosed / Virally Unsuppressed / RTT / Other */
     @Column(name = "client_category", length = 100)
     private String clientCategory;
 
@@ -68,21 +64,15 @@ public class IctEncounter {
     @Column(name = "accepted_pns", length = 10)
     private String acceptedPns;
 
-    /**
-     * JSONB overflow: stores the remaining Section A fields that don't need
-     * individual columns (facilitySetting, communityEntryPoint, artClinic,
-     * clientCategoryOther, index client demographic snapshot, etc.).
-     */
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private JsonNode data;
 
-    /** Contacts collected in Section B. Owned by this encounter. */
     @OneToMany(mappedBy = "ictEncounter", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<IctContact> contacts = new ArrayList<>();
 
     @Column(nullable = false)
-    private Integer archived = 0;
+    private Boolean archived = false;
 
     @CreatedBy
     @Column(name = "created_by")
@@ -99,11 +89,4 @@ public class IctEncounter {
     @LastModifiedDate
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
-
-    @PrePersist
-    public void prePersist() {
-        if (uuid == null) {
-            uuid = java.util.UUID.randomUUID().toString();
-        }
-    }
 }

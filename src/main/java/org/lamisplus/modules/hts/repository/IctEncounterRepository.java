@@ -12,24 +12,15 @@ import java.util.Optional;
 
 public interface IctEncounterRepository extends JpaRepository<IctEncounter, Long> {
 
-    Optional<IctEncounter> findByIdAndArchived(Long id, int archived);
+    Optional<IctEncounter> findByIdAndArchived(Long id, Boolean archived);
 
-    /** All active ICT encounters for a given person, newest first */
-    List<IctEncounter> findByPerson_IdAndArchivedOrderByDateOfServiceDesc(Long personId, int archived);
+    List<IctEncounter> findByPerson_IdAndArchivedOrderByDateOfServiceDesc(Long patientId, Boolean archived);
 
-    /**
-     * Find the ICT encounter linked to a specific HTS encounter.
-     * A given HTS encounter should produce at most one ICT encounter.
-     */
-    Optional<IctEncounter> findByHtsEncounter_IdAndArchived(Long htsEncounterId, int archived);
+    Optional<IctEncounter> findByHtsEncounter_IdAndArchived(Long htsEncounterId, Boolean archived);
 
-    /**
-     * Paginated search across all active ICT encounters for a facility.
-     * Searches on index client name fields stored in the person record.
-     */
     @Query("SELECT e FROM IctEncounter e " +
             "JOIN e.person p " +
-            "WHERE e.archived = 0 AND e.facilityId = :facilityId " +
+            "WHERE e.archived = false AND e.facilityId = :facilityId " +
             "AND ( :search IS NULL OR :search = '*' OR " +
             "      p.surname LIKE %:search% OR " +
             "      p.firstName LIKE %:search% OR " +

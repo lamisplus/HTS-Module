@@ -11,16 +11,14 @@ import java.time.LocalDate;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+// @ValidHtsEncounter  ← REMOVED
 public class HtsEncounterRequest {
 
-    // Reference to existing person (if any)
-    private Long personId;
+    private Long patientId;
 
-    // For new person creation (required when personId is null)
     @Valid
     private PersonDto person;
 
-    // --- Core encounter fields (all will be stored in JSON) ---
     @NotNull(message = "dateOfVisit is required")
     private LocalDate dateOfVisit;
 
@@ -39,7 +37,6 @@ public class HtsEncounterRequest {
     private String indexRelationship;
     private String indexClientCode;
 
-    // Demographics (also stored in JSON, but used for validation)
     private String surname;
     private String firstName;
     private String middleName;
@@ -59,7 +56,6 @@ public class HtsEncounterRequest {
     private String address;
     private String landmark;
 
-    // Pre-test counselling: Knowledge Assessment
     private String previouslyTestedNegative;
     private String timeOfLastNegativeTest;
     private String clientInformedTransmissionRoutes;
@@ -68,7 +64,6 @@ public class HtsEncounterRequest {
     private String clientInformedPossibleResults;
     private String informedConsentGiven;
 
-    // Pre-test counselling: Personal HIV Risk Assessment
     private String everHadSexualIntercourse;
     private String moreThanOneSexPartner;
     private String unprotectedVaginalSex;
@@ -77,13 +72,11 @@ public class HtsEncounterRequest {
     private String sexUnderInfluence;
     private String historyOfSTI;
 
-    // TB Screening
     private String currentCough;
     private String weightLoss;
     private String fever;
     private String nightSweats;
 
-    // STI Screening
     private String complaintsVaginalDischarge;
     private String complaintsLowerAbdominalPain;
     private String complaintsUrethralDischarge;
@@ -91,7 +84,6 @@ public class HtsEncounterRequest {
     private String complaintsGenitalSores;
     private String complaintsSwollenLymphNodes;
 
-    // Sex Partner Risk Assessment
     private String partnerNewlyDiagnosed;
     private String partnerPregnantOnArv;
     private String adolescentHivPositive;
@@ -99,7 +91,6 @@ public class HtsEncounterRequest {
     private String partnerRecentlyReturnedToTreatment;
     private String hadSexWithHivPositivePartnerInRiskGroup;
 
-    // Diagnostic Testing
     private String hivEarlyDetectTestDone;
     private String initialHivTest;
     private String suspectedAcuteInfection;
@@ -108,7 +99,6 @@ public class HtsEncounterRequest {
     private String recencyTest;
     private String hivEarlyDetectResult;
 
-    // Post-Test Counselling
     private String previouslyTestedThisYear;
     private String clientReceivedTestResult;
     private String hivTestKitsProvided;

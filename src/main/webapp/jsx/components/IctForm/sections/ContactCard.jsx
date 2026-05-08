@@ -9,7 +9,6 @@ import {
   inputStyle,
   selectStyle,
 } from "../../NewToolForms/sections/FormFields";
-import { CONTACT_AGE_GROUP_OPTIONS } from "../ictConstants";
 import { COLORS } from "../../NewToolForms/constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
@@ -130,24 +129,14 @@ const ContactCard = ({
     options,
   });
 
-  // ---------- Handlers ----------
+  // Handlers
   const handleSameAddress = (e) => {
     if (readOnly) return;
     const checked = e.target.checked;
     if (checked) {
-      patch({ sameAddressAsIndex: true, contactAddress: indexAddress || "" });
+      patch({ sameAddressAsIndex: true, address: indexAddress || "" });
     } else {
-      patch({ sameAddressAsIndex: false, contactAddress: "" });
-    }
-  };
-
-  const handleAgeGroupChange = (e) => {
-    if (readOnly) return;
-    const v = e.target.value;
-    if (v !== "<15") {
-      patch({ contactAgeGroup: v, enrolledInOvc: false, dateEnrolledOvc: "", ovcId: "" });
-    } else {
-      set("contactAgeGroup", v);
+      patch({ sameAddressAsIndex: false, address: "" });
     }
   };
 
@@ -158,23 +147,17 @@ const ContactCard = ({
       knownHivPositive: v,
       dateTestedHiv: "",
       hivTestResult: "",
-      contactOnArt: "",
+      onArt: "",
       dateEnrolledArt: "",
-      contactArtClinic: "",
+      artClinic: "",
     });
-  };
-
-  const handleAgeChange = (e) => {
-    const raw = e.target.value;
-    const wholeOnly = raw.includes(".") ? raw.slice(0, raw.indexOf(".")) : raw;
-    set("contactAge", wholeOnly);
   };
 
   const handleHivResultChange = (e) => {
     if (readOnly) return;
     const v = e.target.value;
     if (v !== "HIV_TEST_RESULT_POSITIVE") {
-      patch({ hivTestResult: v, dateEnrolledArt: "", contactOnArt: "", contactArtClinic: "" });
+      patch({ hivTestResult: v, dateEnrolledArt: "", onArt: "", artClinic: "" });
     } else {
       set("hivTestResult", v);
     }
@@ -183,7 +166,7 @@ const ContactCard = ({
   const handleOnArt = (e) => {
     if (readOnly) return;
     const v = e.target.value;
-    patch({ contactOnArt: v, dateEnrolledArt: "", contactArtClinic: "" });
+    patch({ onArt: v, dateEnrolledArt: "", artClinic: "" });
   };
 
   const handleEnrolledOvcChange = (e) => {
@@ -208,27 +191,25 @@ const ContactCard = ({
     const pasted = e.clipboardData.getData("text");
     const digitsOnly = pasted.replace(/\D/g, "");
     e.preventDefault();
-    set("contactPhone", digitsOnly);
+    set("phone", digitsOnly);
   };
 
-  // Visibility flags using codes
   const isKnownPositive = val("knownHivPositive") === "YES_NO_YES";
   const isKnownNegative = val("knownHivPositive") === "YES_NO_NO";
   const showArtEnrollDate = isKnownPositive || val("hivTestResult") === "HIV_TEST_RESULT_POSITIVE";
-  const isUnder15 = val("contactAgeGroup") === "<15";
-  const showisArtStartDate = val("contactOnArt") === "YES_NO_YES";
+  const showisArtStartDate = val("onArt") === "YES_NO_YES";
 
   return (
     <div style={cardStyle}>
       <div style={cardHeaderStyle}>
         <div style={{ display: "flex", alignItems: "center" }}>
           <span style={contactBadgeStyle}>{index + 1}</span>
-          {contact.contactId && (
+          {contact.contactCode && (
             <span style={{
               marginLeft: 10, fontSize: "11px", color: "#57606a", fontFamily: "monospace",
               background: "#f0f0f0", padding: "2px 8px", borderRadius: 4,
             }}>
-              ID: {contact.contactId}
+              Code: {contact.contactCode}
             </span>
           )}
         </div>
@@ -242,10 +223,10 @@ const ContactCard = ({
 
       {/* Identity */}
       <div className="row">
-        <div className="col-md-4"><FormTextField label="Contact ID" {...fp("contactId")} required disabled /></div>
-        <div className="col-md-4"><FormTextField label="First Name of Contact" {...fp("firstnameOfContact")} required /></div>
-        <div className="col-md-4"><FormTextField label="Middle Name of Contact" {...fp("middlenameOfContact")} /></div>
-        <div className="col-md-4"><FormTextField label="Surname of Contact" {...fp("surnameOfContact")} required /></div>
+        <div className="col-md-4"><FormTextField label="Contact Code" {...fp("contactCode")} required disabled /></div>
+        <div className="col-md-4"><FormTextField label="First Name of Contact" {...fp("firstName")} required /></div>
+        <div className="col-md-4"><FormTextField label="Middle Name of Contact" {...fp("middleName")} /></div>
+        <div className="col-md-4"><FormTextField label="Surname of Contact" {...fp("surname")} required /></div>
         <div className="col-md-4">
           <FormSelect
             label="Relationship to Index Client"
@@ -257,32 +238,12 @@ const ContactCard = ({
         <div className="col-md-4">
           <FormSelect
             label="Sex"
-            {...sp("contactSex", transformOptions(codesets?.["SEX"]))}
-            onChange={(e) => !readOnly && set("contactSex", e.target.value)}
+            {...sp("sex", transformOptions(codesets?.["SEX"]))}
+            onChange={(e) => !readOnly && set("sex", e.target.value)}
             required
           />
         </div>
-        <div className="col-md-4">
-          <FormGroup style={{ marginBottom: "16px" }}>
-            <Label style={labelStyle}>Age <span style={{ color: "red" }}>*</span></Label>
-            <Input
-              {...fp("contactAge")}
-              type="number" name="contactAge" value={val("contactAge")}
-              onChange={handleAgeChange} min="0" max="130" step="1" disabled={readOnly}
-              style={inputStyle} placeholder="Enter age"
-              onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
-            />
-            {touched.contactAge && errors.contactAge && <span style={errorStyle}>{errors.contactAge}</span>}
-          </FormGroup>
-        </div>
-        <div className="col-md-4">
-          <FormSelect
-            label="Age Group"
-            {...sp("contactAgeGroup", CONTACT_AGE_GROUP_OPTIONS)}
-            onChange={handleAgeGroupChange}
-            required
-          />
-        </div>
+        {/* Age fields removed */}
       </div>
 
       {/* Address / Phone */}
@@ -297,16 +258,16 @@ const ContactCard = ({
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>Contact Phone Number</Label>
             <Input
-              type="text" name="contactPhone" value={val("contactPhone")}
-              onChange={(e) => { const clean = e.target.value.replace(/\D/g, ""); set("contactPhone", clean); }}
+              type="text" name="phone" value={val("phone")}
+              onChange={(e) => { const clean = e.target.value.replace(/\D/g, ""); set("phone", clean); }}
               onKeyDown={handlePhoneKeyDown} onPaste={handlePhonePaste} maxLength={11} disabled={readOnly}
               style={readOnly ? disabledInputStyle : inputStyle} placeholder="Numbers only"
             />
-            {touched.contactPhone && errors.contactPhone && <span style={errorStyle}>{errors.contactPhone}</span>}
+            {touched.phone && errors.phone && <span style={errorStyle}>{errors.phone}</span>}
           </FormGroup>
         </div>
         <div className="col-md-12">
-          <FormTextField label="Home / Contact Address (include landmark)" type="textarea" {...fp("contactAddress")} disabled={readOnly || !!contact.sameAddressAsIndex} />
+          <FormTextField label="Home / Contact Address (include landmark)" type="textarea" {...fp("address")} disabled={readOnly || !!contact.sameAddressAsIndex} />
         </div>
       </div>
 
@@ -381,7 +342,7 @@ const ContactCard = ({
             <div className="col-md-4">
               <FormSelect
                 label="On ART ?"
-                {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
+                {...sp("onArt", transformOptions(codesets?.["YES_NO"]))}
                 onChange={readOnly ? undefined : handleOnArt}
               />
             </div>
@@ -398,7 +359,7 @@ const ContactCard = ({
                   </FormGroup>
                 </div>
                 <div className="col-md-4">
-                  <FormTextField label="ART Clinic" {...fp("contactArtClinic")} required />
+                  <FormTextField label="ART Clinic" {...fp("artClinic")} required />
                 </div>
               </>
             )}
@@ -430,7 +391,7 @@ const ContactCard = ({
                 <div className="col-md-4">
                   <FormSelect
                     label="On ART ?"
-                    {...sp("contactOnArt", transformOptions(codesets?.["YES_NO"]))}
+                    {...sp("onArt", transformOptions(codesets?.["YES_NO"]))}
                     onChange={readOnly ? undefined : handleOnArt}
                   />
                 </div>
@@ -447,7 +408,7 @@ const ContactCard = ({
                       </FormGroup>
                     </div>
                     <div className="col-md-4">
-                      <FormTextField label="ART Clinic" {...fp("contactArtClinic")} required />
+                      <FormTextField label="ART Clinic" {...fp("artClinic")} required />
                     </div>
                   </>
                 )}
@@ -457,34 +418,32 @@ const ContactCard = ({
         )}
       </div>
 
-      {/* OVC */}
-      {isUnder15 && (
-        <div className="row" style={{ marginTop: 4 }}>
-          <div className="col-md-12">
-            <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
-              <input type="checkbox" checked={!!contact.enrolledInOvc} onChange={handleEnrolledOvcChange} disabled={readOnly} />
-              Contact is enrolled in OVC program
-            </label>
-          </div>
-          {!!contact.enrolledInOvc && (
-            <>
-              <div className="col-md-4">
-                <FormGroup style={{ marginBottom: "16px" }}>
-                  <Label style={labelStyle}>Date Enrolled in OVC <span style={{ color: "red" }}>*</span></Label>
-                  <Input type="date" value={val("dateEnrolledOvc")}
-                    onChange={(e) => !readOnly && set("dateEnrolledOvc", e.target.value)}
-                    max={today} onKeyPress={(e) => e.preventDefault()} disabled={readOnly}
-                    style={readOnly ? disabledInputStyle : inputStyle} />
-                  {touched.dateEnrolledOvc && errors.dateEnrolledOvc && <span style={errorStyle}>{errors.dateEnrolledOvc}</span>}
-                </FormGroup>
-              </div>
-              <div className="col-md-4">
-                <FormTextField label="OVC ID" {...fp("ovcId")} required />
-              </div>
-            </>
-          )}
+      {/* OVC (now always visible) */}
+      <div className="row" style={{ marginTop: 4 }}>
+        <div className="col-md-12">
+          <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
+            <input type="checkbox" checked={!!contact.enrolledInOvc} onChange={handleEnrolledOvcChange} disabled={readOnly} />
+            Contact is enrolled in OVC program
+          </label>
         </div>
-      )}
+        {!!contact.enrolledInOvc && (
+          <>
+            <div className="col-md-4">
+              <FormGroup style={{ marginBottom: "16px" }}>
+                <Label style={labelStyle}>Date Enrolled in OVC <span style={{ color: "red" }}>*</span></Label>
+                <Input type="date" value={val("dateEnrolledOvc")}
+                  onChange={(e) => !readOnly && set("dateEnrolledOvc", e.target.value)}
+                  max={today} onKeyPress={(e) => e.preventDefault()} disabled={readOnly}
+                  style={readOnly ? disabledInputStyle : inputStyle} />
+                {touched.dateEnrolledOvc && errors.dateEnrolledOvc && <span style={errorStyle}>{errors.dateEnrolledOvc}</span>}
+              </FormGroup>
+            </div>
+            <div className="col-md-4">
+              <FormTextField label="OVC ID" {...fp("ovcId")} required />
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
