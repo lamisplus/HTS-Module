@@ -53,11 +53,13 @@ const Home = (props) => {
   const [LMP, setLMP] = useState("");
   const { hasPermission, hasAnyPermission } = usePermissions();
 
-  const patientId = props.patientObj?.patientId ?? props.patientObj?.id ?? "";
+  const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
   );
+
+  console.log(props)
 
   const [lastHts, setLastHTS] = useState({});
   const [patientInfo, setPatientInfo] = useState(null);
@@ -212,7 +214,7 @@ const Home = (props) => {
 
                   <Tab eventKey="ict-history" title="ICT HISTORY">
                     <Suspense fallback={<LoadingSpinner />}>
-                      {key === "ict-history" && ( 
+                      {key === "ict-history" && (
                         <ICTEncounterHistory
                           patientObj={props.patientObj}
                           activePage={props.activePage}
@@ -229,8 +231,9 @@ const Home = (props) => {
                     >
                       <Suspense fallback={<LoadingSpinner />}>
                         {key === "new-hts-encounter-existing-patient" && (
+
                           <NewEncounterHtsIctOrchestrator
-                            person={props?.patientObj?.person || props?.patientObj}
+                            person={props?.patientObj}   // full object: { personId, personResponseDto, ... }
                             onDone={() => setKey("home")}
                             isOnArt={false}
                           />
@@ -247,7 +250,7 @@ const Home = (props) => {
                           onDone={() => {
                             setKey("ict-history");
                           }}
-                          isOnArt={false} 
+                          isOnArt={false}
                         />
                       )}
                     </Suspense>

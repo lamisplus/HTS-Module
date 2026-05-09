@@ -52,8 +52,7 @@ const buildInitialValues = (htsValues) => ({
   indexAddress: htsValues?.address || "",
   artUniqueId: htsValues?.artUniqueId || "",
   isOnArt: htsValues?.isOnArt || false,
-
-  facilityId: htsValues?.facilityId || "",
+  facilityId: htsValues?.currentOrganisationUnitId || htsValues?.facilityId || "",
   patientId: htsValues?.patientId || "",
   htsEncounterId: "",
 

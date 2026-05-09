@@ -104,40 +104,46 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     fetchAccount();
   }, []);
 
-  // ... rest of file unchanged ...
 
-  // (The rest of the component including state/LGA resolution, codeset fetch, and form fields)
-  // I'll include the remainder for completeness, but only the account fetch part changed.
 
   useEffect(() => {
     if (statesList?.length > 0 && values?.state) {
       const looksLikeId = /^\d+$/.test(String(values.state).trim());
       if (looksLikeId) {
         const matched = statesList.find((s) => String(s.id) === String(values.state));
-        if (matched) {
-          setFieldValue("state", matched.name, false);
-          fetchLgas(matched.id);
-        }
+        // DO NOT overwrite values.state — keep the numeric id, just fetch LGAs
+        if (matched) fetchLgas(matched.id);
       } else {
+        // It's a display name (legacy data) — resolve to id and store id
         const matched = statesList.find(
           (s) => s.name.toLowerCase() === String(values.state).toLowerCase()
         );
-        if (matched) fetchLgas(matched.id);
+        if (matched) {
+          setFieldValue("state", String(matched.id), false); // store numeric id
+          fetchLgas(matched.id);
+        }
       }
     }
   }, [statesList, values?.state]);
+
 
   useEffect(() => {
     if (lgasList?.length > 0 && values?.lga) {
       const looksLikeId = /^\d+$/.test(String(values.lga).trim());
       if (looksLikeId) {
-        const matched = lgasList.find((l) => String(l.id) === String(values.lga));
+        // Already an id — no overwrite needed
+      } else {
+        // It's a display name (legacy data) — resolve to id
+        const matched = lgasList.find(
+          (l) => l.name.toLowerCase() === String(values.lga).toLowerCase()
+        );
         if (matched) {
-          setFieldValue("lga", matched.name, false);
+          setFieldValue("lga", String(matched.id), false); // store numeric id
         }
       }
     }
   }, [lgasList, values?.lga]);
+
 
   useGetCodesets({
     codesetsKeys: [
@@ -145,7 +151,8 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       "FACILITY_HTS_TEST_SETTING",
       "COMMUNITY_HTS_TEST_SETTING",
       "YES_NO",
-      "INDEX_CLIENT_CATEGORY"
+      "INDEX_CLIENT_CATEGORY",
+      "SEX"
     ],
     patientId: "ictSectionA",
     onSuccess: (data) => setCodesets(data),
@@ -183,15 +190,24 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     if (e.target.value !== "YES_NO_YES") setFieldValue("acceptedPns", "");
   };
 
+  // Derive a display label from a codeset code
+  const getCodeLabel = (codesetKey, code) => {
+    if (!code || !codesets?.[codesetKey]) return code ?? "";
+    const match = codesets[codesetKey].find((item) => item.code === code);
+    return match ? capitalizeFirstLetter(match.display) : code;
+  };
+
   const showFacilitySetting = values.setting === "HTS_ENTRY_POINT_FACILITY";
   const showCommunityEntry = values.setting === "HTS_ENTRY_POINT_COMMUNITY";
   const showArtClinic = !!values.isOnArt;
   const showCategoryOther = values.clientCategory === "Other";
   const showAcceptedPns = values.offeredPns === "YES_NO_YES";
 
+
   const stateDisplayName =
     statesList.find((s) => String(s.id) === String(values.state))?.name ??
     (loadingStates ? "Loading…" : values.state ?? "");
+
   const lgaDisplayName =
     lgasList.find((l) => String(l.id) === String(values.lga))?.name ??
     (loadingLgas ? "Loading…" : values.lga ?? "");
@@ -253,7 +269,10 @@ const IctSectionA = ({ formik, readOnly = false }) => {
         <div className="col-md-4"><ReadOnlyField label="First Name" value={values.indexFirstName} /></div>
         <div className="col-md-4"><ReadOnlyField label="Middle Name" value={values.indexMiddleName} /></div>
         <div className="col-md-4"><ReadOnlyField label="Surname" value={values.indexSurname} /></div>
-        <div className="col-md-4"><ReadOnlyField label="Sex" value={values.indexSex} /></div>
+        <div className="col-md-4">
+          <ReadOnlyField label="Sex" value={getCodeLabel("SEX", values.indexSex)} />
+        </div>
+
         <div className="col-md-4"><ReadOnlyField label="Date of Birth" value={values.indexDob} /></div>
         <div className="col-md-4"><ReadOnlyField label="Age" value={values.indexAge} /></div>
         <div className="col-md-4">

@@ -135,27 +135,35 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     ).then(data => setCodesets(data)).catch(err => console.error("Failed to load codesets", err));
   }, []);
 
+  
+
   const refreshEncounterData = async () => {
     setIsRefreshingEncounter(true);
     try {
       const response = await getHtsEcounter(fullRecord?.id);
       const rawData = response?.data;
-      // rawData is now HtsEncounterResponse; use observation instead of data
-      if (codesets && rawData?.observation) {
+
+      // observation holds all clinical fields saved by the backend.
+      // Fall back to rawData itself in case an older record stored fields at root.
+      const clinicalData = rawData?.observation ?? rawData ?? {};
+
+      if (codesets && Object.keys(clinicalData).length > 0) {
         const codesetLookup = {};
-        Object.keys(FIELD_CODESET_MAP).forEach(field => {
+        Object.keys(FIELD_CODESET_MAP).forEach((field) => {
           const codesetName = FIELD_CODESET_MAP[field];
           if (codesetName && codesets[codesetName]) {
             codesetLookup[field] = codesets[codesetName];
           }
         });
-        const converted = convertFieldsToCodes(rawData.observation, codesetLookup);
+        const converted = convertFieldsToCodes(clinicalData, codesetLookup);
         setFormInitialValues(converted);
       } else {
-        setFormInitialValues(rawData?.observation || {});
+        setFormInitialValues(clinicalData);
       }
-      setIsRefreshingEncounter(false);
-    } catch {
+    } catch (err) {
+      console.error("Failed to refresh encounter", err);
+      toast.error("Failed to load encounter data");
+    } finally {
       setIsRefreshingEncounter(false);
     }
   };

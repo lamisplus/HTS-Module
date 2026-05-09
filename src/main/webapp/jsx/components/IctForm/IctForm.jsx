@@ -57,9 +57,9 @@ const useStyles = makeStyles(() => ({
 
 const modeBadgeStyle = (mode) => {
   const config = {
-    view:   { background: "#e8f0f7", color: COLORS.primary,  label: "View"   },
-    edit:   { background: "#fff3e0", color: "#e65100",        label: "Edit"   },
-    new:    { background: "#e8f5e9", color: "#2e7d32",        label: "New"    },
+    view: { background: "#e8f0f7", color: COLORS.primary, label: "View" },
+    edit: { background: "#fff3e0", color: "#e65100", label: "Edit" },
+    new: { background: "#e8f5e9", color: "#2e7d32", label: "New" },
   };
   const c = config[mode] || config.new;
   return {
@@ -78,68 +78,70 @@ const modeBadgeStyle = (mode) => {
   };
 };
 
+
 const mapIctResponseToFormValues = (response) => {
   if (!response) return {};
-
   const d = response.data ?? {};
 
   return {
-    patientId:        response.patientId        ?? "",
-    htsEncounterId:  response.htsEncounterId  ?? "",
-    facilityId:      response.facilityId      ?? "",
-    dateOfService:   response.dateOfService   ?? "",
-    setting:         response.setting         ?? "",
-    clientCategory:  response.clientCategory  ?? "",
-    offeredPns:      response.offeredPns      ?? "",
-    acceptedPns:     response.acceptedPns     ?? "",
+    patientId:        response.patientId       ?? "",
+    htsEncounterId:   response.htsEncounterId  ?? "",
+    facilityId:       response.facilityId      ?? "",
+    dateOfService:    response.dateOfService   ?? "",
+    setting:          response.setting         ?? "",
+    clientCategory:   response.clientCategory  ?? "",
+    offeredPns:       response.offeredPns      ?? "",
+    acceptedPns:      response.acceptedPns     ?? "",
 
-    facilityName:        d.facilityName        ?? "",
-    state:               d.state               ?? "",
-    lga:                 d.lga                 ?? "",
-    facilitySetting:     d.facilitySetting     ?? "",
-    communityEntryPoint: d.communityEntryPoint ?? "",
-    artClinic:           d.artClinic           ?? "",
-    clientCategoryOther: d.clientCategoryOther ?? "",
+    // These are stored in the encounter's data JSONB
+    facilityName:         d.facilityName        ?? "",
+    state:                d.state               ?? "",   // numeric id string
+    lga:                  d.lga                 ?? "",   // numeric id string
+    facilitySetting:      d.facilitySetting     ?? "",
+    communityEntryPoint:  d.communityEntryPoint ?? "",
+    artClinic:            d.artClinic           ?? "",
+    clientCategoryOther:  d.clientCategoryOther ?? "",
 
-    indexClientId:   d.indexClientId   ?? "",
-    artUniqueId:     d.artUniqueId     ?? "",
-    indexFirstName:  d.indexFirstName  ?? "",
-    indexMiddleName: d.indexMiddleName ?? "",
-    indexSurname:    d.indexSurname    ?? "",
-    indexSex:        d.indexSex        ?? "",
-    indexDob:        d.indexDob        ?? "",
-    indexAge:        d.indexAge        != null ? String(d.indexAge) : "",
-    indexPhone:      d.indexPhone      ?? "",
-    indexAltPhone:   d.indexAltPhone   ?? "",
-    indexAddress:    d.indexAddress    ?? "",
+    indexClientId:    d.indexClientId   ?? "",
+    artUniqueId:      d.artUniqueId     ?? "",
+    indexFirstName:   d.indexFirstName  ?? "",
+    indexMiddleName:  d.indexMiddleName ?? "",
+    indexSurname:     d.indexSurname    ?? "",
+    indexSex:         d.indexSex        ?? "",   // codeset code — display resolved in Section A
+    indexDob:         d.indexDob        ?? "",
+    indexAge:         d.indexAge        != null ? String(d.indexAge) : "",
+    indexPhone:       d.indexPhone      ?? "",
+    indexAltPhone:    d.indexAltPhone   ?? "",
+    indexAddress:     d.indexAddress    ?? "",
 
     contacts: Array.isArray(response.contacts)
-      ? response.contacts.map(c => ({
-          contactCode: c.contactCode ?? "",
-          firstName: c.firstName ?? "",
-          middleName: c.middleName ?? "",
-          surname: c.surname ?? "",
+      ? response.contacts.map((c) => ({
+          contactCode:         c.contactCode         ?? "",
+          firstName:           c.firstName           ?? "",
+          middleName:          c.middleName          ?? "",
+          surname:             c.surname             ?? "",
           relationshipToIndex: c.relationshipToIndex ?? "",
-          sex: c.sex ?? "",
-          phone: c.phone ?? "",
-          address: c.address ?? "",
-          sameAddressAsIndex: !!c.sameAddressAsIndex,
-          notificationMethod: c.notificationMethod ?? "",
-          followUpLocation: c.followUpLocation ?? "",
-          attempts: c.attempts != null ? String(c.attempts) : "",
-          knownHivPositive: c.knownHivPositive ?? "",
-          hivTestResult: c.hivTestResult ?? "",
-          dateTestedHiv: c.dateTestedHiv ?? "",
-          dateEnrolledArt: c.dateEnrolledArt ?? "",
-          onArt: c.onArt ?? "",
-          artClinic: c.artClinic ?? "",
-          enrolledInOvc: !!c.enrolledInOvc,
-          dateEnrolledOvc: c.dateEnrolledOvc ?? "",
-          ovcId: c.ovcId ?? "",
+          sex:                 c.sex                 ?? "",
+          phone:               c.phone               ?? "",
+          address:             c.address             ?? "",
+          sameAddressAsIndex:  !!c.sameAddressAsIndex,
+          notificationMethod:  c.notificationMethod  ?? "",
+          followUpLocation:    c.followUpLocation    ?? "",
+          attempts:            c.attempts            != null ? String(c.attempts) : "",
+          knownHivPositive:    c.knownHivPositive    ?? "",
+          hivTestResult:       c.hivTestResult       ?? "",
+          dateTestedHiv:       c.dateTestedHiv       ?? "",
+          dateEnrolledArt:     c.dateEnrolledArt     ?? "",
+          onArt:               c.onArt               ?? "",
+          artClinic:           c.artClinic           ?? "",
+          enrolledInOvc:       !!c.enrolledInOvc,
+          dateEnrolledOvc:     c.dateEnrolledOvc     ?? "",
+          ovcId:               c.ovcId               ?? "",
         }))
       : [],
   };
 };
+
 
 const IctForm = ({
   htsValues,
@@ -160,7 +162,26 @@ const IctForm = ({
   const mergedHtsValues = htsValues ? { ...htsValues, isOnArt, } : null;
 
   const onSubmit = async (values) => {
+
+    if (htsRecord?.id || values.htsEncounterId) {
+      const htsId = htsRecord?.id || values.htsEncounterId;
+      try {
+        const res = await getHtsEcounter(htsId);
+        const obs = res?.data?.observation ?? res?.observation ?? {};
+        if (obs.confirmatoryHivTest !== "STI_HIV_RESULT_POSITIVE") {
+          toast.error(
+            "ICT can only be created for a client with a confirmed positive HIV test result."
+          );
+          return;
+        }
+      } catch {
+        toast.error("Unable to verify HTS result. Please try again.");
+        return;
+      }
+    }
+
     const payload = buildIctEncounterPayload(values);
+
 
     if (htsRecord?.id) {
       payload.htsEncounterId = htsRecord.id;
@@ -172,6 +193,8 @@ const IctForm = ({
         || initialValues?.patientId;
       if (pid) payload.patientId = Number(pid);
     }
+
+
 
     try {
       setIsLoading(true);
@@ -212,22 +235,7 @@ const IctForm = ({
       formik.setFieldValue(k, v, false)
     );
 
-    const htsId = initialValues.htsEncounterId || htsRecord?.id;
-    if (!htsId) return;
-
-    getHtsEcounter(htsId)
-      .then((res) => {
-        const htsData = res?.data ?? res;
-        const d = htsData?.observation ?? {};
-
-        if (d.clientState != null) formik.setFieldValue("state",        String(d.clientState), false);
-        if (d.clientLga   != null) formik.setFieldValue("lga",          String(d.clientLga),   false);
-        if (d.facilityName)        formik.setFieldValue("facilityName",  d.facilityName,        false);
-      })
-      .catch((err) => {
-        console.error("IctForm: failed to fetch linked HTS record for state/LGA", err?.message);
-      });
-
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -242,11 +250,8 @@ const IctForm = ({
     "clientCategory", "clientCategoryOther", "offeredPns", "acceptedPns",
   ];
 
-  const offeredLower = values.offeredPns?.toLowerCase() ?? "";
-  const acceptedLower = values.acceptedPns?.toLowerCase() ?? "";
-
-  const pnsNotOffered   = offeredLower === "no";
-  const pnsDeclined     = offeredLower === "yes" && acceptedLower === "no";
+  const pnsNotOffered = values.offeredPns === "YES_NO_NO";
+  const pnsDeclined = values.offeredPns === "YES_NO_YES" && values.acceptedPns === "YES_NO_NO";
   const offeredPnsUnset = !values.offeredPns;
 
   const sectionBLocked = pnsNotOffered || pnsDeclined || offeredPnsUnset;
@@ -254,8 +259,8 @@ const IctForm = ({
   const lockReason = pnsNotOffered
     ? "Index Testing Services was not offered to the index client. Section B is not applicable."
     : pnsDeclined
-    ? "The index client declined Index Testing Services. Section B is not applicable."
-    : "Please complete the 'Offered Index Testing Services' and 'Accepted Index Testing Services' fields in Section A first.";
+      ? "The index client declined Index Testing Services. Section B is not applicable."
+      : "Please complete the 'Offered Index Testing Services' and 'Accepted Index Testing Services' fields in Section A first.";
 
   const badge = modeBadgeStyle(mode);
 
@@ -271,8 +276,8 @@ const IctForm = ({
             {readOnly
               ? "Viewing ICT record — no changes can be made"
               : isEditMode
-              ? "Editing existing ICT record — all fields are editable"
-              : "Complete Section A, then add all elicited contacts in Section B"}
+                ? "Editing existing ICT record — all fields are editable"
+                : "Complete Section A, then add all elicited contacts in Section B"}
           </p>
         </div>
         <Button

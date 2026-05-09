@@ -159,6 +159,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     const payload = {
       dateOfVisit,
       clientCode,
+      facilityId: currentOrganisationUnitId ? parseInt(currentOrganisationUnitId, 10) : null,
       setting,
       facilitySetting,
       facilityName,

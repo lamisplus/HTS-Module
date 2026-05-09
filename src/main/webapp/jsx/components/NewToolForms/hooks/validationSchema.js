@@ -411,8 +411,10 @@ export const buildValidationSchema = (isNewPatient) => {
       function (value) {
         if (skipKnowledgeAndRisk(this)) return true;
         if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        const age = Number(this.parent.age);
-        if (age < 10 || age > 19) return true;
+        // Use resolveAge so the check works whether age comes from the
+        // age field or is derived from dateOfBirth (avoids invisible required error)
+        const age = resolveAge(this.parent);
+        if (age === null || age < 10 || age > 19) return true;
         return !!value || this.createError({ message: "This field is required" });
       }
     ),

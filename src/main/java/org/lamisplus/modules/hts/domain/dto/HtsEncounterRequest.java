@@ -30,6 +30,7 @@ public class HtsEncounterRequest {
 
     private String facilitySetting;
     private String facilityName;
+    private Long facilityId;
     private String communityEntryPoint;
     private String modality;
     private String typeOfSession;

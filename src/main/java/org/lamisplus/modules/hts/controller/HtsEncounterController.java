@@ -56,8 +56,9 @@ public class HtsEncounterController {
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<PageDTO> search(
             @RequestParam(required = false, defaultValue = "*") String search,
+            @RequestParam Long facilityId,
             @PageableDefault(sort = "dateOfVisit", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<HtsEncounterResponse> page = service.search(search, pageable);
+        Page<HtsEncounterResponse> page = service.search(facilityId, search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
     }
 
@@ -72,8 +73,9 @@ public class HtsEncounterController {
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<PageDTO> getPatientSummaries(
             @RequestParam(required = false, defaultValue = "*") String search,
+            @RequestParam Long facilityId,
             @PageableDefault(sort = "surname", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<PatientHtsSummaryDto> page = service.getPatientSummaries(search, pageable);
+        Page<PatientHtsSummaryDto> page = service.getPatientSummaries(facilityId, search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
     }
 }

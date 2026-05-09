@@ -1,6 +1,6 @@
 package org.lamisplus.modules.hts.domain.entity;
 
-import com.fasterxml.jackson.databind.JsonNode;
+
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -118,10 +118,6 @@ public class IctContact {
     @Column(name = "ovc_id", length = 100)
     private String ovcId;
 
-    /** JSONB overflow for future/optional contact fields */
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private JsonNode data;
 
     /** BOOLEAN — false = active, true = soft-deleted. */
     @Column(nullable = false)

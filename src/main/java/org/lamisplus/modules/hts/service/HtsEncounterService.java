@@ -1,5 +1,7 @@
 package org.lamisplus.modules.hts.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
@@ -30,9 +32,9 @@ public class HtsEncounterService {
     private final HtsEncounterRepository repository;
     private final PersonRepository personRepository;
     private final PersonService personService;
+    private final ObjectMapper objectMapper;
 
     public HtsEncounterResponse save(HtsEncounterRequest request) {
-        // 1. Resolve person
         Person person;
         if (request.getPatientId() != null) {
             person = personRepository.findById(request.getPatientId())
@@ -46,20 +48,14 @@ public class HtsEncounterService {
                     .orElseThrow(() -> new IllegalStateException("Person creation failed"));
         }
 
-        // 2. Build entity
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
-        // getUuid() may return String or UUID depending on your Person entity;
-        // cast or parse as needed:
-        Object uuid = person.getUuid();
-        if (uuid instanceof UUID) {
-            encounter.setPatientUuid((UUID) uuid);
-        } else if (uuid instanceof String) {
-            encounter.setPatientUuid(UUID.fromString((String) uuid));
-        }
+        encounter.setPatientUuid(resolveUuid(person.getUuid()));
         encounter.setClientCode(request.getClientCode());
         encounter.setDateOfVisit(request.getDateOfVisit());
         encounter.setSetting(request.getSetting());
+        encounter.setObservation(buildObservation(request));
+        encounter.setFacilityId(request.getFacilityId());   // ← add this line
 
         encounter = repository.save(encounter);
         return toResponse(encounter);
@@ -72,6 +68,8 @@ public class HtsEncounterService {
         if (request.getClientCode() != null) existing.setClientCode(request.getClientCode());
         if (request.getDateOfVisit() != null) existing.setDateOfVisit(request.getDateOfVisit());
         if (request.getSetting() != null) existing.setSetting(request.getSetting());
+        existing.setObservation(buildObservation(request));
+        existing.setFacilityId(request.getFacilityId());
 
         existing = repository.save(existing);
         return toResponse(existing);
@@ -83,11 +81,9 @@ public class HtsEncounterService {
         return toResponse(encounter);
     }
 
-    public Page<HtsEncounterResponse> search(String search, Pageable pageable) {
+    public Page<HtsEncounterResponse> search(Long facilityId, String search, Pageable pageable) {
         String searchParam = (search == null || search.equals("*")) ? null : "%" + search + "%";
-        // facilityId removed — adjust your repository query signature if needed,
-        // or pass null / a default. Update the call below to match your repo method:
-        Page<HtsEncounter> page = repository.search(null, searchParam, pageable);
+        Page<HtsEncounter> page = repository.search(facilityId, searchParam, pageable);
         return page.map(this::toResponse);
     }
 
@@ -105,14 +101,10 @@ public class HtsEncounterService {
         return encounters.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public Page<PatientHtsSummaryDto> getPatientSummaries(String search, Pageable pageable) {
-        String searchParam;
-        if (search == null || search.equals("*") || search.trim().isEmpty()) {
-            searchParam = null;
-        } else {
-            searchParam = "%" + search.trim() + "%";
-        }
-        Page<PatientHtsSummaryProjection> page = repository.findPatientSummaries(null, searchParam, pageable);
+    public Page<PatientHtsSummaryDto> getPatientSummaries(Long facilityId, String search, Pageable pageable) {
+        String searchParam = (search == null || search.equals("*") || search.trim().isEmpty())
+                ? null : "%" + search.trim() + "%";
+        Page<PatientHtsSummaryProjection> page = repository.findPatientSummaries(facilityId, searchParam, pageable);
         return page.map(proj -> new PatientHtsSummaryDto(
                 proj.getPersonId(),
                 proj.getFirstName(),
@@ -121,6 +113,120 @@ public class HtsEncounterService {
                 proj.getHospitalNumber(),
                 proj.getEncounterCount()
         ));
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Serialises every clinical field from the request into the observation
+     * JsonNode column so they survive round-trips.
+     */
+    private ObjectNode buildObservation(HtsEncounterRequest r) {
+        ObjectNode obs = objectMapper.createObjectNode();
+
+        // Visit / Setting
+        putStr(obs, "facilityName",             r.getFacilityName());
+        putStr(obs, "facilitySetting",           r.getFacilitySetting());
+        putStr(obs, "communityEntryPoint",       r.getCommunityEntryPoint());
+        putStr(obs, "typeOfSession",             r.getTypeOfSession());
+        putStr(obs, "indexTesting",              r.getIndexTesting());
+        putStr(obs, "indexRelationship",         r.getIndexRelationship());
+        putStr(obs, "indexClientCode",           r.getIndexClientCode());
+
+        // Demographics (stored for display / reporting)
+        putStr(obs, "surname",                   r.getSurname());
+        putStr(obs, "firstName",                 r.getFirstName());
+        putStr(obs, "middleName",                r.getMiddleName());
+        putStr(obs, "dobType",                   r.getDobType());
+        if (r.getDateOfBirth() != null) obs.put("dateOfBirth", r.getDateOfBirth().toString());
+        if (r.getAge()         != null) obs.put("age",         r.getAge());
+        putStr(obs, "sex",                       r.getSex());
+        putStr(obs, "phoneNumber",               r.getPhoneNumber());
+        putStr(obs, "maritalStatus",             r.getMaritalStatus());
+        if (r.getNumberOfWives()             != null) obs.put("numberOfWives",             r.getNumberOfWives());
+        if (r.getNumberOfCoWives()           != null) obs.put("numberOfCoWives",           r.getNumberOfCoWives());
+        if (r.getNumberOfBiologicalChildren()!= null) obs.put("numberOfBiologicalChildren",r.getNumberOfBiologicalChildren());
+        putStr(obs, "pregnancyStatus",           r.getPregnancyStatus());
+        putStr(obs, "breastfeedingDuration",     r.getBreastfeedingDuration());
+        putStr(obs, "clientState",               r.getClientState());
+        putStr(obs, "clientLga",                 r.getClientLga());
+        putStr(obs, "address",                   r.getAddress());
+
+        // Knowledge Assessment
+        putStr(obs, "previouslyTestedNegative",          r.getPreviouslyTestedNegative());
+        putStr(obs, "timeOfLastNegativeTest",             r.getTimeOfLastNegativeTest());
+        putStr(obs, "clientInformedTransmissionRoutes",   r.getClientInformedTransmissionRoutes());
+        putStr(obs, "clientInformedRiskFactors",          r.getClientInformedRiskFactors());
+        putStr(obs, "clientInformedPreventionMethods",    r.getClientInformedPreventionMethods());
+        putStr(obs, "clientInformedPossibleResults",      r.getClientInformedPossibleResults());
+        putStr(obs, "informedConsentGiven",               r.getInformedConsentGiven());
+
+        // Personal HIV Risk
+        putStr(obs, "everHadSexualIntercourse",    r.getEverHadSexualIntercourse());
+        putStr(obs, "moreThanOneSexPartner",        r.getMoreThanOneSexPartner());
+        putStr(obs, "unprotectedVaginalSex",        r.getUnprotectedVaginalSex());
+        putStr(obs, "unprotectedAnalSex",           r.getUnprotectedAnalSex());
+        putStr(obs, "bloodTransfusionLast3Months",  r.getBloodTransfusionLast3Months());
+        putStr(obs, "sexUnderInfluence",            r.getSexUnderInfluence());
+        putStr(obs, "historyOfSTI",                 r.getHistoryOfSTI());
+
+        // TB Screening
+        putStr(obs, "currentCough",   r.getCurrentCough());
+        putStr(obs, "weightLoss",     r.getWeightLoss());
+        putStr(obs, "fever",          r.getFever());
+        putStr(obs, "nightSweats",    r.getNightSweats());
+
+        // STI Screening
+        putStr(obs, "complaintsVaginalDischarge",    r.getComplaintsVaginalDischarge());
+        putStr(obs, "complaintsLowerAbdominalPain",  r.getComplaintsLowerAbdominalPain());
+        putStr(obs, "complaintsUrethralDischarge",   r.getComplaintsUrethralDischarge());
+        putStr(obs, "complaintsScroralSwelling",     r.getComplaintsScroralSwelling());
+        putStr(obs, "complaintsGenitalSores",        r.getComplaintsGenitalSores());
+        putStr(obs, "complaintsSwollenLymphNodes",   r.getComplaintsSwollenLymphNodes());
+
+        // Sex Partner Risk
+        putStr(obs, "partnerNewlyDiagnosed",                   r.getPartnerNewlyDiagnosed());
+        putStr(obs, "partnerPregnantOnArv",                    r.getPartnerPregnantOnArv());
+        putStr(obs, "adolescentHivPositive",                   r.getAdolescentHivPositive());
+        putStr(obs, "partnerNotRegularlyOnDrugs",              r.getPartnerNotRegularlyOnDrugs());
+        putStr(obs, "partnerRecentlyReturnedToTreatment",      r.getPartnerRecentlyReturnedToTreatment());
+        putStr(obs, "hadSexWithHivPositivePartnerInRiskGroup", r.getHadSexWithHivPositivePartnerInRiskGroup());
+
+        // Diagnostic Testing
+        putStr(obs, "hivEarlyDetectTestDone",   r.getHivEarlyDetectTestDone());
+        putStr(obs, "hivEarlyDetectResult",     r.getHivEarlyDetectResult());
+        putStr(obs, "initialHivTest",           r.getInitialHivTest());
+        putStr(obs, "suspectedAcuteInfection",  r.getSuspectedAcuteInfection());
+        putStr(obs, "confirmatoryHivTest",      r.getConfirmatoryHivTest());
+        putStr(obs, "syphilisTestResult",       r.getSyphilisTestResult());
+        putStr(obs, "recencyTest",              r.getRecencyTest());
+
+        // Post-Test Counselling
+        putStr(obs, "previouslyTestedThisYear",       r.getPreviouslyTestedThisYear());
+        putStr(obs, "clientReceivedTestResult",        r.getClientReceivedTestResult());
+        putStr(obs, "hivTestKitsProvided",             r.getHivTestKitsProvided());
+        putStr(obs, "categoryOfClients",               r.getCategoryOfClients());
+        putStr(obs, "acceptedIndexTesting",            r.getAcceptedIndexTesting());
+        putStr(obs, "providedFpInfo",                  r.getProvidedFpInfo());
+        putStr(obs, "clientPartnerUseFpMethods",       r.getClientPartnerUseFpMethods());
+        putStr(obs, "clientPartnerUseCondoms",         r.getClientPartnerUseCondoms());
+        putStr(obs, "correctCondomUseDemonstrated",    r.getCorrectCondomUseDemonstrated());
+        putStr(obs, "condomsProvided",                 r.getCondomsProvided());
+        putStr(obs, "clientReferredToOtherServices",   r.getClientReferredToOtherServices());
+        putStr(obs, "completedBy",                     r.getCompletedBy());
+        putStr(obs, "designation",                     r.getDesignation());
+
+        return obs;
+    }
+
+    private void putStr(ObjectNode node, String key, String value) {
+        if (value != null) node.put(key, value);
+    }
+
+    private UUID resolveUuid(Object uuid) {
+        if (uuid instanceof UUID)   return (UUID) uuid;
+        if (uuid instanceof String) return UUID.fromString((String) uuid);
+        return null;
     }
 
     private HtsEncounterResponse toResponse(HtsEncounter entity) {

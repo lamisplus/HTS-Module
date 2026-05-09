@@ -138,14 +138,18 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   useEffect(() => {
     const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
+    // Never overwrite an existing client code (guards against enableReinitialize
+    // briefly resetting to "" before external values arrive)
+    // if (clientCode) return;
     const settingSubField =
       setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
       setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
       setting;
-    if (setting && settingSubField && dateOfVisit && !clientCode) {
+    if (setting && settingSubField && dateOfVisit) {
       setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
     }
   }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]);
+  
 
   const handleFetchFacilityName = async () => {
     try {

@@ -150,12 +150,12 @@ const NewIctForExistingPatient = ({
         );
     }
 
-    const htsValues = mapHtsRecordToIctValues(positiveHtsRecord);
+    const htsValuesForIct = mapHtsRecordToIctValues(positiveHtsRecord);
 
     return (
         <IctForm
-            htsValues={{ ...positiveHtsRecord?.observation, ...positiveHtsRecord }}
-            htsRecord={htsValues}
+            htsValues={htsValuesForIct}
+            htsRecord={positiveHtsRecord}   // raw record — IctForm reads .id from this
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSuccess}
             onBack={handleBack}

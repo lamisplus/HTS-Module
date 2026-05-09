@@ -3,6 +3,7 @@ package org.lamisplus.modules.hts.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.hts.domain.dto.*;
 import org.lamisplus.modules.hts.domain.entity.HtsEncounter;
@@ -34,13 +35,25 @@ public class IctEncounterService {
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
 
+
+
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPatientId());
+
+        // ── Guard: linked HTS encounter must have a positive confirmatory result ──
+        if (request.getHtsEncounterId() != null) {
+            HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
+            JsonNode obs = hts.getObservation();
+            if (obs == null || !obs.has("confirmatoryHivTest") ||
+                    !"STI_HIV_RESULT_POSITIVE".equals(obs.get("confirmatoryHivTest").asText())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "ICT encounter can only be created for a client with a confirmed positive HIV test result.");
+            }
+        }
 
         IctEncounter encounter = new IctEncounter();
         encounter.setPerson(person);
 
-        // Fix: safely convert person UUID (String or UUID) to UUID
         Object uuid = person.getUuid();
         if (uuid instanceof UUID) {
             encounter.setPatientUuid((UUID) uuid);
@@ -134,6 +147,9 @@ public class IctEncounterService {
         putIfNotNull(data, "indexPhone",           req.getIndexPhone());
         putIfNotNull(data, "indexAltPhone",        req.getIndexAltPhone());
         putIfNotNull(data, "indexAddress",         req.getIndexAddress());
+        putIfNotNull(data, "facilityName", req.getFacilityName());
+        putIfNotNull(data, "state",        req.getState());
+        putIfNotNull(data, "lga",          req.getLga());
         if (req.getIndexDob() != null) data.put("indexDob", req.getIndexDob().toString());
         if (req.getIndexAge() != null) data.put("indexAge", req.getIndexAge());
 

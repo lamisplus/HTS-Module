@@ -41,6 +41,9 @@ public class IctEncounterRequest {
     private String indexPhone;
     private String indexAltPhone;
     private String indexAddress;
+    private String facilityName;
+    private String state;
+    private String lga;
 
     private String clientCategory;
     private String clientCategoryOther;
