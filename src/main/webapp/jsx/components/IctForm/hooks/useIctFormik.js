@@ -46,7 +46,18 @@ const buildInitialValues = (htsValues) => ({
   indexSurname: htsValues?.surname || "",
   indexSex: htsValues?.sex || "",
   indexDob: htsValues?.dateOfBirth || "",
-  indexAge: htsValues?.age || "",
+  indexAge: (() => {
+    if (htsValues?.age) return String(htsValues.age);
+    const dob = htsValues?.dateOfBirth;
+    if (!dob) return "";
+    const birth = new Date(dob);
+    if (isNaN(birth.getTime())) return "";
+    const now = new Date();
+    let years = now.getFullYear() - birth.getFullYear();
+    const m = now.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
+    return years >= 0 ? String(years) : "";
+  })(),
   indexPhone: htsValues?.phoneNumber || "",
   indexAltPhone: "",
   indexAddress: htsValues?.address || "",

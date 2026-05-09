@@ -52,13 +52,13 @@ const mapPersonToFormValues = (dto) => {
   const phoneEntry = cpArr.find((cp) => cp?.type === "phone") ?? cpArr[0] ?? {};
   const phone = phoneEntry?.value ?? "";
 
-  const sexDisplay      = dto?.gender?.display ?? dto?.sex ?? "";
-  const maritalDisplay  = dto?.maritalStatus?.display ?? "";
-  const dob             = dto?.dateOfBirth ?? "";
-  const isEstimated     = !!dto?.isDateOfBirthEstimated;
+  const sexDisplay = dto?.gender?.display ?? dto?.sex ?? "";
+  const maritalDisplay = dto?.maritalStatus?.display ?? "";
+  const dob = dto?.dateOfBirth ?? "";
+  const isEstimated = !!dto?.isDateOfBirthEstimated;
 
   let computedAge = "";
-  if (dob && !isEstimated) {
+  if (dob) {
     const birth = new Date(dob);
     if (!isNaN(birth.getTime())) {
       const now = new Date();
@@ -68,26 +68,25 @@ const mapPersonToFormValues = (dto) => {
       computedAge = years >= 0 ? String(years) : "";
     }
   }
-
   return {
-    surname:              dto?.surname ?? "",
-    firstName:            dto?.firstName ?? "",
-    middleName:           dto?.otherName ?? "",
-    dobType:              isEstimated ? "Estimated" : "Actual",
-    dateOfBirth:          dob,
-    age:                  computedAge,
-    sex:                  sexDisplay,       // display → converted to code below
-    maritalStatus:        maritalDisplay,   // display → converted to code below
-    phoneNumber:          phone,
-    clientState:          addr?.stateId  != null ? String(addr.stateId)  : "",
-    clientLga:            addr?.district != null ? String(addr.district) : "",
-    address:              addr?.line?.[0] ?? "",
-    landmark:             addr?.line?.[0] ?? "",
-    clientCode:           "",
-    patientId:            dto?.id       != null ? String(dto.id)       : "",
+    surname: dto?.surname ?? "",
+    firstName: dto?.firstName ?? "",
+    middleName: dto?.otherName ?? "",
+    dobType: isEstimated ? "Estimated" : "Actual",
+    dateOfBirth: dob,
+    age: computedAge,
+    sex: sexDisplay,       // display → converted to code below
+    maritalStatus: maritalDisplay,   // display → converted to code below
+    phoneNumber: phone,
+    clientState: addr?.stateId != null ? String(addr.stateId) : "",
+    clientLga: addr?.district != null ? String(addr.district) : "",
+    address: addr?.line?.[0] ?? "",
+    landmark: addr?.line?.[0] ?? "",
+    clientCode: "",
+    patientId: dto?.id != null ? String(dto.id) : "",
     currentOrganisationUnitId: dto?.facilityId != null ? String(dto.facilityId) : "",
-    sexCode:              dto?.gender?.id       != null ? String(dto.gender.id)       : "",
-    maritalStatusCode:    dto?.maritalStatus?.id != null ? String(dto.maritalStatus.id) : "",
+    sexCode: dto?.gender?.id != null ? String(dto.gender.id) : "",
+    maritalStatusCode: dto?.maritalStatus?.id != null ? String(dto.maritalStatus.id) : "",
   };
 };
 
@@ -117,26 +116,26 @@ const blankClinicalValues = {
 // ── Component ─────────────────────────────────────────────────────────────────
 const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmitSuccess }) => {
   const classes = useStyles();
-  const [isLoading, setIsLoading]         = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isLoadingForm, setIsLoadingForm] = useState(true);
   const [formInitialValues, setFormInitialValues] = useState(null);
 
   // Keep fetched personDto and codesets in refs so the merge effect
   // can access the latest of both without stale closure issues.
   const personDtoRef = useRef(null);
-  const codesetsRef  = useRef(null);
+  const codesetsRef = useRef(null);
 
   const personId = resolvePersonId(person);
 
   // ── Attempt to merge as soon as BOTH personDto AND codesets are available ──
   const tryBuildFormValues = () => {
-    const dto      = personDtoRef.current;
+    const dto = personDtoRef.current;
     const codesets = codesetsRef.current;
     if (!dto || !codesets) return; // wait for the other one
 
     const raw = mapPersonToFormValues(dto);
     const converted = convertFieldsToCodes(raw, {
-      sex:          codesets["SEX"],
+      sex: codesets["SEX"],
       maritalStatus: codesets["MARITAL_STATUS"],
     });
     setFormInitialValues({ ...blankClinicalValues, ...converted });
@@ -171,7 +170,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     };
 
     fetch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [personId]);
 
   // ── 2. Load codesets ──────────────────────────────────────────────────────
@@ -187,7 +186,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
         codesetsRef.current = {};
         tryBuildFormValues();
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -238,37 +237,37 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const sectionHasError = (fields) => hasSubmitted && fields.some((f) => !!errors[f]);
 
   const basicFields = [
-    "dateOfVisit","clientCode","setting","facilitySetting","communityEntryPoint",
-    "typeOfSession","indexRelationship","indexClientCode","facilityName",
-    "surname","firstName","dobType","dateOfBirth","age","sex","phoneNumber",
-    "maritalStatus","numberOfWives","numberOfCoWives","numberOfBiologicalChildren",
-    "pregnancyStatus","breastfeedingDuration","clientState","clientLga","address",
+    "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
+    "typeOfSession", "indexRelationship", "indexClientCode", "facilityName",
+    "surname", "firstName", "dobType", "dateOfBirth", "age", "sex", "phoneNumber",
+    "maritalStatus", "numberOfWives", "numberOfCoWives", "numberOfBiologicalChildren",
+    "pregnancyStatus", "breastfeedingDuration", "clientState", "clientLga", "address",
   ];
   const preTestFields = [
-    "previouslyTestedNegative","timeOfLastNegativeTest","clientInformedTransmissionRoutes",
-    "clientInformedRiskFactors","clientInformedPreventionMethods","clientInformedPossibleResults",
-    "informedConsentGiven","everHadSexualIntercourse","moreThanOneSexPartner","unprotectedVaginalSex",
-    "unprotectedAnalSex","bloodTransfusionLast3Months","sexUnderInfluence","historyOfSTI",
-    "currentCough","weightLoss","fever","nightSweats","complaintsVaginalDischarge",
-    "complaintsLowerAbdominalPain","complaintsUrethralDischarge","complaintsScroralSwelling",
-    "complaintsGenitalSores","complaintsSwollenLymphNodes","partnerNewlyDiagnosed",
-    "partnerPregnantOnArv","adolescentHivPositive","partnerNotRegularlyOnDrugs",
-    "partnerRecentlyReturnedToTreatment","hadSexWithHivPositivePartnerInRiskGroup",
+    "previouslyTestedNegative", "timeOfLastNegativeTest", "clientInformedTransmissionRoutes",
+    "clientInformedRiskFactors", "clientInformedPreventionMethods", "clientInformedPossibleResults",
+    "informedConsentGiven", "everHadSexualIntercourse", "moreThanOneSexPartner", "unprotectedVaginalSex",
+    "unprotectedAnalSex", "bloodTransfusionLast3Months", "sexUnderInfluence", "historyOfSTI",
+    "currentCough", "weightLoss", "fever", "nightSweats", "complaintsVaginalDischarge",
+    "complaintsLowerAbdominalPain", "complaintsUrethralDischarge", "complaintsScroralSwelling",
+    "complaintsGenitalSores", "complaintsSwollenLymphNodes", "partnerNewlyDiagnosed",
+    "partnerPregnantOnArv", "adolescentHivPositive", "partnerNotRegularlyOnDrugs",
+    "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup",
   ];
   const diagnosticFields = [
-    "hivEarlyDetectTestDone","hivEarlyDetectResult","initialHivTest",
-    "suspectedAcuteInfection","confirmatoryHivTest","syphilisTestResult","recencyTest",
+    "hivEarlyDetectTestDone", "hivEarlyDetectResult", "initialHivTest",
+    "suspectedAcuteInfection", "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
   const postTestFields = [
-    "previouslyTestedThisYear","clientReceivedTestResult","hivTestKitsProvided",
-    "categoryOfClients","acceptedIndexTesting","providedFpInfo","clientPartnerUseFpMethods",
-    "clientPartnerUseCondoms","correctCondomUseDemonstrated","condomsProvided",
-    "clientReferredToOtherServices","completedBy","designation",
+    "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
+    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo", "clientPartnerUseFpMethods",
+    "clientPartnerUseCondoms", "correctCondomUseDemonstrated", "condomsProvided",
+    "clientReferredToOtherServices", "completedBy", "designation",
   ];
 
   const displayName = [
     formik.values.firstName || person?.personResponseDto?.firstName,
-    formik.values.surname   || person?.personResponseDto?.surname,
+    formik.values.surname || person?.personResponseDto?.surname,
   ].filter(Boolean).join(" ") || "existing patient";
 
   if (isLoadingForm) {
@@ -286,9 +285,9 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
           <h2 className={classes.title}>
             HIV Testing Form
             <span style={{
-              display:"inline-block", padding:"2px 12px", borderRadius:"12px",
-              fontSize:"12px", fontWeight:700, letterSpacing:"0.05em",
-              textTransform:"uppercase", background:"#e8f5e9", color:"#2e7d32",
+              display: "inline-block", padding: "2px 12px", borderRadius: "12px",
+              fontSize: "12px", fontWeight: 700, letterSpacing: "0.05em",
+              textTransform: "uppercase", background: "#e8f5e9", color: "#2e7d32",
             }}>
               New Encounter
             </span>
