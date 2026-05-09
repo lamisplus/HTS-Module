@@ -213,6 +213,9 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const [codesets, setCodesets] = useState(null);
   const [formInitialValues, setFormInitialValues] = useState(null);
 
+  console.log("patient record ===>", patientInfo)
+
+
   useEffect(() => {
     getCodesets("SEX", "MARITAL_STATUS", "PREGNANCY_STATUS", "YES_NO", "DURATION_OF_BREASTFEEDING")
       .then(setCodesets)
@@ -309,6 +312,8 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const hasSubmitted = submitCount > 0;
   const sectionHasError = (fields) =>
     hasSubmitted && fields.some((f) => !!errors[f]);
+
+    console.log(formik.errors)
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",

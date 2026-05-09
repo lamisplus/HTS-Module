@@ -336,7 +336,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const showNumberOfWives = values.sex === "SEX_MALE" && values.maritalStatus === "MARITAL_STATUS_MARRIED";
   const showNumberOfCoWives = values.sex === "SEX_FEMALE" && values.maritalStatus === "MARITAL_STATUS_MARRIED";
 
-  const dobIsActual = values.dobType.toLowerCase() === "actual" || !values.dobType;
+  const dobIsActual = values?.dobType?.toLowerCase() === "actual" || !values?.dobType;
 
   return (
     <div style={{ width: "100%" }}>

@@ -17,7 +17,7 @@
             Changes from V2:
             - uuid:        VARCHAR(36) → UUID with gen_random_uuid() default (DB-generated)
             - person_id:   renamed to patient_id
-            - patient_uuid: new UUID column, FK → patient_person.uuid
+            - patient_uuid: new UUID column (no FK because patient_person.uuid may be varchar)
             - facility_id: now BIGINT, FK → base_organisation_unit(id) (reverted from UUID)
             - archived:    INT → BOOLEAN
         </comment>
@@ -39,9 +39,7 @@
             </column>
 
             <column name="patient_uuid" type="UUID">
-                <constraints nullable="true"
-                             foreignKeyName="fk_ict_encounter_patient_uuid"
-                             references="patient_person(uuid)"/>
+                <constraints nullable="true"/>
             </column>
 
             <column name="hts_encounter_id" type="BIGINT">
