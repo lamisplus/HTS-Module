@@ -55,6 +55,8 @@ const Home = (props) => {
 
   const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
 
+  console.log(patientId, props)
+
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
   );

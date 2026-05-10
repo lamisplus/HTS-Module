@@ -155,7 +155,7 @@ const NewIctForExistingPatient = ({
 
     return (
         <IctForm
-            htsValues={htsValuesForIct}
+            htsValues={{...htsValuesForIct, ...positiveHtsRecord, ...positiveHtsRecord?.observation}}
             htsRecord={positiveHtsRecord}   // raw record — IctForm reads .id from this
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSuccess}
