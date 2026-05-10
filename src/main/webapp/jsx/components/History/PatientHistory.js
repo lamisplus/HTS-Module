@@ -59,8 +59,6 @@ const Home = (props) => {
     props.activePage === "NEW HTS" ? "new" : "home"
   );
 
-  console.log(props)
-
   const [lastHts, setLastHTS] = useState({});
   const [patientInfo, setPatientInfo] = useState(null);
   const [lastVisitCount, setLastVisitCount] = useState(null);

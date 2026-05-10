@@ -178,14 +178,126 @@ const DeleteConfirmModal = ({ record, onConfirm, onCancel, deleting }) => {
   );
 };
 
+// ========================
+// CODE SET MAPPINGS
+// ========================
+
+// --- HIV test result mapping ---
+const HIV_RESULT_MAP = {
+  // STI_HIV_RESULT
+  "STI_HIV_RESULT_POSITIVE": { display: "Positive", color: "red" },
+  "STI_HIV_RESULT_NEGATIVE": { display: "Negative", color: "green" },
+  // HIV_TEST_RESULT
+  "HIV_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
+  "HIV_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
+  "HIV_TEST_RESULT_EARLY_DETECT": { display: "Early detect", color: "grey" },
+  "HIV_TEST_RESULT_NOT_DONE": { display: "Not done", color: "grey" },
+  // TEST_RESULT_COMMON
+  "TEST_RESULT_COMMON_POSITIVE": { display: "Positive", color: "red" },
+  "TEST_RESULT_COMMON_NEGATIVE": { display: "Negative", color: "green" },
+  "TEST_RESULT_COMMON_INDETERMINATE": { display: "Indeterminate", color: "grey" },
+};
+
+// --- Syphilis result mapping ---
+const SYPHILIS_RESULT_MAP = {
+  "SYPHILIS_RESULT_POSITIVE": { display: "Positive", color: "red" },
+  "SYPHILIS_RESULT_NEGATIVE": { display: "Negative", color: "green" },
+  "SYPHILIS_RESULT_NOT_DONE": { display: "Not Done", color: "grey" },
+  "SYPHILIS_RESULT_OTHERS": { display: "Others", color: "grey" },
+};
+
+// --- Setting mapping (combining all possible testing setting codes) ---
+// Based on the provided JSON:
+// COMMUNITY_HTS_TEST_SETTING, FACILITY_HTS_TEST_SETTING, ENROLLMENT_SETTING,
+// HTS_ENTRY_POINT, and TEST_SETTING (empty).
+const SETTING_MAP = {
+  // COMMUNITY_HTS_TEST_SETTING
+  "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
+  "COMMUNITY_HTS_TEST_SETTING_CT": "CT",
+  "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES": "Delivery homes",
+  "COMMUNITY_HTS_TEST_SETTING_INDEX": "Index",
+  "COMMUNITY_HTS_TEST_SETTING_OTHERS": "Others",
+  "COMMUNITY_HTS_TEST_SETTING_OUTREACH": "Outreach",
+  "COMMUNITY_HTS_TEST_SETTING_OVC": "OVC",
+  "COMMUNITY_HTS_TEST_SETTING_SNS": "SNS",
+  "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS": "Standalone HTS",
+  "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX": "TBA Orthodox",
+  "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW": "TBA rt-HCW",
+  // FACILITY_HTS_TEST_SETTING
+  "FACILITY_HTS_TEST_SETTING_ANC": "ANC",
+  "FACILITY_HTS_TEST_SETTING_BLOOD_BANK": "Blood Bank",
+  "FACILITY_HTS_TEST_SETTING_CT": "CT",
+  "FACILITY_HTS_TEST_SETTING_EMERGENCY": "Emergency",
+  "FACILITY_HTS_TEST_SETTING_INDEX": "Index",
+  "FACILITY_HTS_TEST_SETTING_L&D": "L&D",
+  "FACILITY_HTS_TEST_SETTING_MALNUTRITION": "Malnutrition",
+  "FACILITY_HTS_TEST_SETTING_OTHERS": "Others",
+  "FACILITY_HTS_TEST_SETTING_PEDIATRIC": "Pediatric",
+  "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING": "Post Natal Ward/Breastfeeding",
+  "FACILITY_HTS_TEST_SETTING_PREP_TESTING": "PrEP Testing",
+  "FACILITY_HTS_TEST_SETTING_RETESTING": "Retesting",
+  "FACILITY_HTS_TEST_SETTING_SNS": "SNS",
+  "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY": "Spoke health facility",
+  "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS": "Standalone HTS",
+  "FACILITY_HTS_TEST_SETTING_STI": "STI",
+  "FACILITY_HTS_TEST_SETTING_TB": "TB",
+  "FACILITY_HTS_TEST_SETTING_WARD_INPATIENT": "Ward/Inpatient",
+  // ENROLLMENT_SETTING
+  "ENROLLMENT_SETTING_COMMUNITY": "Community",
+  "ENROLLMENT_SETTING_FACILITY": "Facility",
+  // HTS_ENTRY_POINT
+  "HTS_ENTRY_POINT_COMMUNITY": "Community",
+  "HTS_ENTRY_POINT_FACILITY": "Facility",
+  "HTS_ENTRY_POINT_OTHERS": "Others",
+};
+
+/**
+ * Convert a result code to { display, color }
+ * @param {string} code - Raw code from API
+ * @param {object} customMap - Specific mapping object for this result type
+ * @returns {{ display: string, color: string }}
+ */
+const mapResultCode = (code, customMap) => {
+  if (!code || typeof code !== "string") {
+    return { display: "N/A", color: "grey" };
+  }
+  if (customMap && customMap[code]) {
+    return customMap[code];
+  }
+  const lowerCode = code.toLowerCase();
+  if (lowerCode.includes("positive") || lowerCode.includes("reactive")) {
+    return { display: code, color: "red" };
+  }
+  if (lowerCode.includes("negative") || lowerCode.includes("non-reactive")) {
+    return { display: code, color: "green" };
+  }
+  return { display: code, color: "grey" };
+};
+
+const formatHivResult = (rawCode) => {
+  const { display, color } = mapResultCode(rawCode, HIV_RESULT_MAP);
+  return <Label color={color} size="mini">{display}</Label>;
+};
+
+const formatSyphilisResult = (rawCode) => {
+  const { display, color } = mapResultCode(rawCode, SYPHILIS_RESULT_MAP);
+  return <Label color={color} size="mini">{display}</Label>;
+};
+
+// Format setting: return display text or fallback to original code
+const formatSetting = (rawSetting) => {
+  if (!rawSetting || typeof rawSetting !== "string") return "N/A";
+  return SETTING_MAP[rawSetting] || rawSetting;
+};
+
 const HTSEncounterHistory = (props) => {
   const [encounters, setEncounters] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const patientId =
-    props.patientObj?.patientId ?? props.patientObj?.id ?? null;
-
+    props.patientObj?.personId ?? props.patientObj?.id ?? null;
+  
   useEffect(() => {
     if (patientId) fetchEncounters();
   }, [patientId]);
@@ -229,18 +341,6 @@ const HTSEncounterHistory = (props) => {
     });
   };
 
-  const resolveHivTestLabel = (result) => {
-    if (!result) return <Label size="mini">N/A</Label>;
-    const lower = result.toLowerCase();
-    const color =
-      lower === "positive" ? "red" : lower === "negative" ? "green" : "grey";
-    return (
-      <Label color={color} size="mini">
-        {result}
-      </Label>
-    );
-  };
-
   return (
     <>
       <DeleteConfirmModal
@@ -257,23 +357,29 @@ const HTSEncounterHistory = (props) => {
         columns={[
           { title: "Date of Visit", field: "dateOfVisit", filtering: false },
           { title: "Client Code", field: "clientCode", filtering: false },
-          { title: "Setting", field: "setting", filtering: false },
+          {
+            title: "Setting",
+            field: "setting",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData.setting),
+          },
           {
             title: "Initial HIV Test",
             field: "initialHivTest",
             filtering: false,
-            render: (rowData) => resolveHivTestLabel(rowData.initialHivTest),
+            render: (rowData) => formatHivResult(rowData.initialHivTest),
           },
           {
             title: "Confirmatory HIV Test",
             field: "confirmatoryHivTest",
             filtering: false,
-            render: (rowData) => resolveHivTestLabel(rowData.confirmatoryHivTest),
+            render: (rowData) => formatHivResult(rowData.confirmatoryHivTest),
           },
           {
             title: "Syphilis Result",
             field: "syphilisTestResult",
             filtering: false,
+            render: (rowData) => formatSyphilisResult(rowData.syphilisTestResult),
           },
           {
             title: "Actions",

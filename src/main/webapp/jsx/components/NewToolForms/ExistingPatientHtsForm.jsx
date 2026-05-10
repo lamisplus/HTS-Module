@@ -109,7 +109,8 @@ const FIELD_CODESET_MAP = {
 };
 
 const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
-  const [formInitialValues, setFormInitialValues] = useState(null);
+  const formInitialValuecontruct = { ...fullRecord?.observation, clientCode: fullRecord?.clientCode, dateOfVisit: fullRecord?.dateOfVisit, facilityId: fullRecord?.facilityId, patientId: fullRecord?.patientId, id: fullRecord?.id, patientUuid: fullRecord?.patientUuid, person: fullRecord?.person, setting: fullRecord?.setting, uuid: fullRecord?.uuid }
+  const [formInitialValues, setFormInitialValues] = useState(formInitialValuecontruct);
   const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false);
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
@@ -135,19 +136,16 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     ).then(data => setCodesets(data)).catch(err => console.error("Failed to load codesets", err));
   }, []);
 
-  
+
 
   const refreshEncounterData = async () => {
     setIsRefreshingEncounter(true);
     try {
       const response = await getHtsEcounter(fullRecord?.id);
-      const rawData = response?.data;
 
-      // observation holds all clinical fields saved by the backend.
-      // Fall back to rawData itself in case an older record stored fields at root.
-      const clinicalData = rawData?.observation ?? rawData ?? {};
+      const formInitialValuecontruct = response?.observation ? { ...response?.observation, clientCode: response?.clientCode, dateOfVisit: response?.dateOfVisit, facilityId: response?.facilityId, patientId: response?.patientId, id: response?.id, patientUuid: response?.patientUuid, person: response?.person, setting: response?.setting, uuid: response?.uuid } : {}
 
-      if (codesets && Object.keys(clinicalData).length > 0) {
+      if (codesets && Object.keys(formInitialValuecontruct).length > 0) {
         const codesetLookup = {};
         Object.keys(FIELD_CODESET_MAP).forEach((field) => {
           const codesetName = FIELD_CODESET_MAP[field];
@@ -155,10 +153,10 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             codesetLookup[field] = codesets[codesetName];
           }
         });
-        const converted = convertFieldsToCodes(clinicalData, codesetLookup);
+        const converted = convertFieldsToCodes(formInitialValuecontruct, codesetLookup);
         setFormInitialValues(converted);
       } else {
-        setFormInitialValues(clinicalData);
+        setFormInitialValues(formInitialValuecontruct);
       }
     } catch (err) {
       console.error("Failed to refresh encounter", err);
@@ -190,7 +188,6 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   };
 
   const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
-
   const { errors, submitCount } = formik;
   const hasSubmitted = submitCount > 0;
 

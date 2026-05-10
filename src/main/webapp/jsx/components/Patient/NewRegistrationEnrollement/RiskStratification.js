@@ -162,7 +162,6 @@ const RiskStratification = props => {
     healthFacility: "",
   });
 
-  console.log("visit-date", objValues.visitDate);
   const [riskAssessment, setRiskAssessment] = useState({
     // everHadSexualIntercourse:"",
     // bloodtransInlastThreeMonths:"",

@@ -173,11 +173,11 @@ function PatientCard(props) {
           )}
 
 
-          {activePage.activePage === "view" && (
+          {activePage.actionType === "view" && (
             <ExistingPatientHtsForm
               readOnly
               initialValues={patientObj?.data}
-              fullRecord={patientObj}
+              fullRecord={activePage?.activeObject}
               backButtonAction={handleMoveToHome}
             />
           )}
@@ -188,7 +188,8 @@ function PatientCard(props) {
               readOnly={false}
               initialValues={patientObj?.data}
               backButtonAction={handleMoveToHome}
-              fullRecord={patientObj}
+              fullRecord={activePage?.activeObject}
+              
             />
           )}
 
@@ -204,7 +205,7 @@ function PatientCard(props) {
             )}
 
           {
-            activePage.activePage === "ict-edit" && (
+            activePage.activePage === "ict-update" && (
               <IctForm
                 initialValues={activePage.activeObject}
                 onBack={handleMoveToHome}

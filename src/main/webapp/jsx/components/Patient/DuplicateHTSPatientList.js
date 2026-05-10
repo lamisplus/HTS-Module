@@ -119,12 +119,9 @@ const DuplicateHTSPatientList = (props) => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        console.log("API Response:", response.data);
         const records = response.data || [];
-        console.log("Records count:", records.length);
 
         const groups = groupDuplicates(records);
-        console.log("Groups:", Object.keys(groups).length);
 
 
         const transformedData = [];

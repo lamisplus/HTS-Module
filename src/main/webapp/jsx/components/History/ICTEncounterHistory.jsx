@@ -148,6 +148,60 @@ const ICTEncounterHistory = (props) => {
     // Resolve personId from patientObj — same dual-path as HTSEncounterHistory
     const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? null;
 
+    const SETTING_MAP = {
+        // COMMUNITY_HTS_TEST_SETTING
+        "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
+        "COMMUNITY_HTS_TEST_SETTING_CT": "CT",
+        "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES": "Delivery homes",
+        "COMMUNITY_HTS_TEST_SETTING_INDEX": "Index",
+        "COMMUNITY_HTS_TEST_SETTING_OTHERS": "Others",
+        "COMMUNITY_HTS_TEST_SETTING_OUTREACH": "Outreach",
+        "COMMUNITY_HTS_TEST_SETTING_OVC": "OVC",
+        "COMMUNITY_HTS_TEST_SETTING_SNS": "SNS",
+        "COMMUNITY_HTS_TEST_SETTING_STANDALONE_HTS": "Standalone HTS",
+        "COMMUNITY_HTS_TEST_SETTING_TBA_ORTHODOX": "TBA Orthodox",
+        "COMMUNITY_HTS_TEST_SETTING_TBA_RT-HCW": "TBA rt-HCW",
+        // FACILITY_HTS_TEST_SETTING
+        "FACILITY_HTS_TEST_SETTING_ANC": "ANC",
+        "FACILITY_HTS_TEST_SETTING_BLOOD_BANK": "Blood Bank",
+        "FACILITY_HTS_TEST_SETTING_CT": "CT",
+        "FACILITY_HTS_TEST_SETTING_EMERGENCY": "Emergency",
+        "FACILITY_HTS_TEST_SETTING_INDEX": "Index",
+        "FACILITY_HTS_TEST_SETTING_L&D": "L&D",
+        "FACILITY_HTS_TEST_SETTING_MALNUTRITION": "Malnutrition",
+        "FACILITY_HTS_TEST_SETTING_OTHERS": "Others",
+        "FACILITY_HTS_TEST_SETTING_PEDIATRIC": "Pediatric",
+        "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING": "Post Natal Ward/Breastfeeding",
+        "FACILITY_HTS_TEST_SETTING_PREP_TESTING": "PrEP Testing",
+        "FACILITY_HTS_TEST_SETTING_RETESTING": "Retesting",
+        "FACILITY_HTS_TEST_SETTING_SNS": "SNS",
+        "FACILITY_HTS_TEST_SETTING_SPOKE_HEALTH_FACILITY": "Spoke health facility",
+        "FACILITY_HTS_TEST_SETTING_STANDALONE_HTS": "Standalone HTS",
+        "FACILITY_HTS_TEST_SETTING_STI": "STI",
+        "FACILITY_HTS_TEST_SETTING_TB": "TB",
+        "FACILITY_HTS_TEST_SETTING_WARD_INPATIENT": "Ward/Inpatient",
+        // ENROLLMENT_SETTING
+        "ENROLLMENT_SETTING_COMMUNITY": "Community",
+        "ENROLLMENT_SETTING_FACILITY": "Facility",
+        // HTS_ENTRY_POINT
+        "HTS_ENTRY_POINT_COMMUNITY": "Community",
+        "HTS_ENTRY_POINT_FACILITY": "Facility",
+        "HTS_ENTRY_POINT_OTHERS": "Others",
+    };
+
+    const CLIENT_CATEGORY_MAP = {
+        "INDEX_CLIENT_CATEGORY_NEWLY_DIAGNOSED": "Newly Diagnosed",
+        "INDEX_CLIENT_CATEGORY_OTHERS": "Others",
+        "INDEX_CLIENT_CATEGORY_RTT_(AFTER_BEING_IIT)": "RTT (after being IIT)",
+        "INDEX_CLIENT_CATEGORY_VIRALLY_UNSUPPRESSED": "Virally Unsuppressed"
+    }
+
+    const YES_NO_MAP = {
+        "YES_NO_YES": "Yes",
+        "YES_NO_NO": "No",
+    }
+
+
     useEffect(() => {
         if (patientId) fetchEncounters();
     }, [patientId]);
@@ -202,6 +256,17 @@ const ICTEncounterHistory = (props) => {
         return <Label color={color} size="mini">{value}</Label>;
     };
 
+    const formatSetting = (rawSetting) => {
+        if (!rawSetting || typeof rawSetting !== "string") return "N/A";
+        return SETTING_MAP[rawSetting] || rawSetting;
+    };
+
+    const formatYesNo = (rawSetting) => {
+        if (!rawSetting || typeof rawSetting !== "string") return "N/A";
+        return YES_NO_MAP[rawSetting] || rawSetting;
+    };
+
+
     return (
         <>
             <DeleteConfirmModal
@@ -225,23 +290,28 @@ const ICTEncounterHistory = (props) => {
                         title: "Setting",
                         field: "setting",
                         filtering: false,
+                        render: (rowData) => formatSetting(rowData.setting),
+
                     },
                     {
                         title: "Client Category",
                         field: "clientCategory",
                         filtering: false,
+                        render: (rowData) => formatSetting(rowData.setting),
+
+
                     },
                     {
                         title: "Offered Index Testing Services",
                         field: "offeredPns",
                         filtering: false,
-                        render: (rowData) => resolvePnsLabel(rowData.offeredPns),
+                        render: (rowData) => resolvePnsLabel(formatYesNo(rowData.offeredPns)),
                     },
                     {
                         title: "Accepted Index Testing Services",
                         field: "acceptedPns",
                         filtering: false,
-                        render: (rowData) => resolvePnsLabel(rowData.acceptedPns),
+                        render: (rowData) => resolvePnsLabel(formatYesNo(rowData.acceptedPns)),
                     },
                     {
                         title: "Contacts",

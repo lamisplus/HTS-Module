@@ -60,8 +60,6 @@ export const FormSelect = ({
   required,
 }) => (
   <FormGroup style={{ marginBottom: "16px" }}>
-
-    {console.log("formfields",options)}
     <Label style={labelStyle}>
       {label}
       {required && <span style={{ color: "red" }}> *</span>}

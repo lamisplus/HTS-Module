@@ -589,13 +589,11 @@ const PnsForm = (props) => {
 
     setErrors({ ...temp });
 
-    console.log(errors);
     return Object.values(temp).every((x) => x == "");
   };
 
 
   const handleSubmit = (e) => {
-    console.log("handle submit clicked");
     e.preventDefault();
     let age = calculate_age(
       props?.basicInfo?.personResponseDto?.dateOfBirth
@@ -620,7 +618,6 @@ const PnsForm = (props) => {
 
 
     if (validate()) {
-      console.log("PNS form saving reached after validation");
       setSaving(true);
       objValues.isDateOfBirthEstimated =
         objValues.isDateOfBirthEstimated == true ? 1 : 0;

@@ -14,7 +14,7 @@ import axios from "axios";
 import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { arrayToObject, generateClientCode } from "../utils/htsEncounterPayload";
-import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
+// import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
 import { capitalizeFirstLetter } from "../../utils";
 
 const today = new Date().toISOString().split("T")[0];
@@ -124,7 +124,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   useEffect(() => {
     fetchStates(1);
-    getAllHtsEncounter();
+    // getAllHtsEncounter();
   }, []);
 
   useEffect(() => {

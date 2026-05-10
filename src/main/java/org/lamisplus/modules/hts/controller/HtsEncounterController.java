@@ -15,7 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -78,4 +78,14 @@ public class HtsEncounterController {
         Page<PatientHtsSummaryDto> page = service.getPatientSummaries(facilityId, search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
     }
+
+    @GetMapping("/hts-patients")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
+    public ResponseEntity<PageDTO> getHtsPatients(
+            @RequestParam(required = false, defaultValue = "*") String search,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<HtsPatientSummaryDto> page = service.getHtsPatientSummaries(search, pageable);
+        return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
+    }
+
 }
