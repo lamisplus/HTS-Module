@@ -71,7 +71,7 @@
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="modified_by" type="VARCHAR(255)"/>
-            <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
         <createIndex indexName="idx_hts_ict_encounter_patient" tableName="hts_ict_encounter">
@@ -197,7 +197,7 @@
             <column name="created_by" type="VARCHAR(255)"/>
             <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="modified_by" type="VARCHAR(255)"/>
-            <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
         <createIndex indexName="idx_hts_ict_contact_encounter" tableName="hts_ict_contact">
@@ -206,6 +206,30 @@
         <createIndex indexName="idx_hts_ict_contact_known_hiv" tableName="hts_ict_contact">
             <column name="known_hiv_positive"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="rename_hts_ict_encounter_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="hts_ict_encounter" columnName="last_modified_date"/>
+            <not>
+                <columnExists tableName="hts_ict_encounter" columnName="date_modified"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_ict_encounter RENAME COLUMN last_modified_date TO date_modified;
+        </sql>
+    </changeSet>
+
+    <changeSet id="rename_hts_ict_contact_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="hts_ict_contact" columnName="last_modified_date"/>
+            <not>
+                <columnExists tableName="hts_ict_contact" columnName="date_modified"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_ict_contact RENAME COLUMN last_modified_date TO date_modified;
+        </sql>
     </changeSet>
 
 </databaseChangeLog>

@@ -8,14 +8,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long> {
 
     Optional<HtsEncounter> findByIdAndArchived(Long id, Boolean archived);
 
     List<HtsEncounter> findByPerson_IdAndArchivedOrderByDateOfVisitDesc(Long patientId, Boolean archived);
+
+    Optional<HtsEncounter> findFirstByPatientUuidAndDateOfVisitAndArchivedOrderByIdDesc(
+            UUID patientUuid, LocalDate dateOfVisit, Boolean archived);
 
     @Query("SELECT e FROM HtsEncounter e " +
             "JOIN e.person p " +

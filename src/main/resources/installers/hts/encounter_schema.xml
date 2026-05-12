@@ -74,7 +74,7 @@
             <column name="created_by" type="VARCHAR(50)"/>
             <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="modified_by" type="VARCHAR(50)"/>
-            <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE"/>
         </createTable>
 
         <createIndex indexName="idx_hts_encounter_patient" tableName="hts_encounter">
@@ -92,6 +92,18 @@
         <createIndex indexName="idx_hts_encounter_facility" tableName="hts_encounter">
             <column name="facility_id"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="rename_hts_encounter_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="hts_encounter" columnName="last_modified_date"/>
+            <not>
+                <columnExists tableName="hts_encounter" columnName="date_modified"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE hts_encounter RENAME COLUMN last_modified_date TO date_modified;
+        </sql>
     </changeSet>
 
 </databaseChangeLog>
