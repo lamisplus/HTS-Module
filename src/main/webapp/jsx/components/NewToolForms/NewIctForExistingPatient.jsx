@@ -28,11 +28,11 @@ const mapHtsRecordToIctValues = (htsRecord) => {
         state: d.clientState != null ? String(d.clientState) : "",
         lga: d.clientLga != null ? String(d.clientLga) : "",
         indexClientId: htsRecord.clientCode ?? "",
-        indexFirstName: d.firstName ?? p.firstName ?? "",
-        indexMiddleName: d.middleName ?? p.otherName ?? "",
-        indexSurname: d.surname ?? p.surname ?? "",
+        indexFirstName: p.firstName ?? d.firstName ?? "",
+        indexMiddleName: p.middleName ?? d.otherName ?? "",
+        indexSurname: p.surname ?? d.surname ?? "",
         indexSex: d.sex ?? p.sex ?? "",
-        indexDob: d.dateOfBirth ?? "",
+        indexDob: p.dateOfBirth ?? "",
         indexAge: d.age != null ? String(d.age) : "",
         indexPhone: d.phoneNumber ?? personPhone,
         indexAltPhone: "",
@@ -46,6 +46,8 @@ const mapHtsRecordToIctValues = (htsRecord) => {
         setting: htsRecord.setting ?? "",
         facilitySetting: d.facilitySetting ?? "",
         communityEntryPoint: d.communityEntryPoint ?? "",
+        indexDateOfRegistration: p.dateOfRegistration,
+        htsDateOfVisit: d.dateOfVisit
     };
 };
 
@@ -155,7 +157,7 @@ const NewIctForExistingPatient = ({
 
     return (
         <IctForm
-            htsValues={{...htsValuesForIct, ...positiveHtsRecord, ...positiveHtsRecord?.observation}}
+            htsValues={{ ...htsValuesForIct, ...positiveHtsRecord, ...positiveHtsRecord?.observation }}
             htsRecord={positiveHtsRecord}   // raw record — IctForm reads .id from this
             isOnArt={isOnArt}
             onSubmitSuccess={handleIctSuccess}

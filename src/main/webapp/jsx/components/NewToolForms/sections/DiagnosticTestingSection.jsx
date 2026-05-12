@@ -4,11 +4,6 @@ import { FormSelect, SectionSubheading } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 
-const HIV_EARLY_DETECT_RESULT_OPTIONS = [
-  { label: "Antigen Reactive", value: "Antigen Reactive" }, // these are not codesets, keep as is
-  { label: "Antigen + Antibody Reactive", value: "Antigen + Antibody Reactive" },
-  { label: "Antibody Reactive", value: "Antibody Reactive" },
-];
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -52,12 +47,12 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   const showConfirmatory =
     values.initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
-    values.hivEarlyDetectResult === "Antibody Reactive";
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
   const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
   const showEarlyDetectResult = values.hivEarlyDetectTestDone === "YES_NO_YES";
   const showAcuteInfectionBanner =
-    values.hivEarlyDetectResult === "Antigen Reactive" ||
-    values.hivEarlyDetectResult === "Antigen + Antibody Reactive";
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
 
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
@@ -82,6 +77,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       "PARTNER_SYPHILIS_STATUS",
       "RECENCY_TESTING",
       "SYPHILIS_RESULT",
+      "HIV_EARLY_DETECT_RESULT"
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
@@ -101,7 +97,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="HIV Early Detect Result"
-              {...sp("hivEarlyDetectResult", HIV_EARLY_DETECT_RESULT_OPTIONS)}
+              {...sp("hivEarlyDetectResult", transformOptions(codesets?.["HIV_EARLY_DETECT_RESULT"]))}
               onChange={readOnly ? undefined : handleEarlyDetectResultChange}
               required
             />

@@ -99,6 +99,7 @@ export const FormTextField = ({
   type = "text",
   rows,
   min,
+  max,
 }) => (
   <FormGroup style={{ marginBottom: "16px" }}>
     <Label style={labelStyle}>
@@ -114,7 +115,7 @@ export const FormTextField = ({
       disabled={disabled}
       rows={rows}
       min={min}
-      max={type === "date" ? today : undefined}
+      max={type === "date" ? (max ?? today) : undefined}
       onKeyPress={type === "date" ? (e) => e.preventDefault() : undefined}
       style={
         type === "textarea"

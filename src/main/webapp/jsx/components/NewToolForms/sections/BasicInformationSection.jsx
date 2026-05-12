@@ -79,7 +79,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     disabled: readOnly || extraDisabled,
   });
 
-  // ---------- Codeset to options (value = code) ----------
+
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
@@ -143,13 +143,13 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     // if (clientCode) return;
     const settingSubField =
       setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
-      setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
-      setting;
+        setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
+          setting;
     if (setting && settingSubField && dateOfVisit) {
       setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
     }
   }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]);
-  
+
 
   const handleFetchFacilityName = async () => {
     try {
@@ -347,8 +347,41 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       {/* Visit / Setting row */}
       <div className="row">
         <div className="col-md-4">
-          <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required />
+          <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required
+            min={values.dateOfBirth || today}
+          />
         </div>
+
+        <div className="col-md-4">
+          <FormSelect
+            label="Setting"
+            {...sp("setting", transformOptions(codesets?.["HTS_ENTRY_POINT"]))}
+            onChange={readOnly ? undefined : handleSettingChange}
+            required
+          />
+        </div>
+
+        {showFacilitySetting && (
+          <div className="col-md-4">
+            <FormSelect
+              label="Facility Setting"
+              {...sp("facilitySetting", transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]))}
+              required
+            />
+          </div>
+        )}
+
+        {showCommunityEntry && (
+          <div className="col-md-4">
+            <FormSelect
+              label="Community Setting"
+              {...sp("communityEntryPoint", transformOptions(codesets?.["COMMUNITY_HTS_TEST_SETTING"]))}
+              required
+            />
+          </div>
+        )}
+
+
 
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
@@ -384,34 +417,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </FormGroup>
         </div>
 
-        <div className="col-md-4">
-          <FormSelect
-            label="Setting"
-            {...sp("setting", transformOptions(codesets?.["HTS_ENTRY_POINT"]))}
-            onChange={readOnly ? undefined : handleSettingChange}
-            required
-          />
-        </div>
 
-        {showFacilitySetting && (
-          <div className="col-md-4">
-            <FormSelect
-              label="Facility Setting"
-              {...sp("facilitySetting", transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]))}
-              required
-            />
-          </div>
-        )}
-
-        {showCommunityEntry && (
-          <div className="col-md-4">
-            <FormSelect
-              label="Community Setting"
-              {...sp("communityEntryPoint", transformOptions(codesets?.["COMMUNITY_HTS_TEST_SETTING"]))}
-              required
-            />
-          </div>
-        )}
 
         <div className="col-md-4">
           <FormSelect

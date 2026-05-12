@@ -83,6 +83,7 @@ const mapIctResponseToFormValues = (response) => {
   if (!response) return {};
   const d = response.data ?? {};
 
+
   return {
     patientId:        response.patientId       ?? "",
     htsEncounterId:   response.htsEncounterId  ?? "",

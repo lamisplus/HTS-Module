@@ -179,12 +179,12 @@
             <column name="follow_up_location" type="VARCHAR(100)"/>
             <column name="attempts" type="INT" defaultValueNumeric="0"/>
             <column name="known_hiv_positive" type="VARCHAR(10)"/>
-            <column name="hiv_test_result" type="VARCHAR(20)"/>
+            <column name="hiv_test_result" type="VARCHAR(50)"/>
             <column name="date_tested_hiv" type="DATE"/>
             <column name="date_enrolled_art" type="DATE"/>
 
             <!-- Renamed: contact_on_art → on_art (item 6) -->
-            <column name="on_art" type="VARCHAR(20)"/>
+            <column name="on_art" type="VARCHAR(40)"/>
 
             <column name="enrolled_in_ovc" type="BOOLEAN" defaultValueBoolean="false"/>
             <column name="date_enrolled_ovc" type="DATE"/>

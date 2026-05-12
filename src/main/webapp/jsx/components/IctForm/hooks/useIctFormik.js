@@ -66,7 +66,8 @@ const buildInitialValues = (htsValues) => ({
   facilityId: htsValues?.currentOrganisationUnitId || htsValues?.facilityId || "",
   patientId: htsValues?.patientId || "",
   htsEncounterId: "",
-
+  indexDateOfRegistration: htsValues?.indexDateOfRegistration,
+  htsDateOfVisit: htsValues.dateOfVisit,
   dateOfService: "",
   setting: htsValues?.setting || "",
   facilitySetting: htsValues?.facilitySetting || "",
@@ -76,11 +77,12 @@ const buildInitialValues = (htsValues) => ({
   clientCategoryOther: "",
   offeredPns: "",
   acceptedPns: "",
-
   contacts: [],
 });
 
 export const useIctFormik = (onSubmit, htsValues) => {
+
+  console.log("htsvalues", htsValues)
   const formik = useFormik({
     initialValues: buildInitialValues(htsValues),
     validationSchema: buildIctValidationSchema(),

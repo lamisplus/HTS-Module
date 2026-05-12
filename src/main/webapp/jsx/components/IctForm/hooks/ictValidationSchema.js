@@ -3,7 +3,7 @@ import * as yup from "yup";
 const today = new Date();
 today.setHours(23, 59, 59, 999);
 
-const contactSchema = yup.object({
+const buildContactSchema  = (htsDateOfVisit) => yup.object({
   firstName: yup
     .string()
     .required("Contact First name is required")
@@ -27,7 +27,21 @@ const contactSchema = yup.object({
   followUpLocation: yup.string().required("Follow-up location is required"),
   attempts: yup.number().nullable().min(0, "Minimum 0").max(6, "Maximum 6").integer("Must be a whole number").typeError("Must be a number"),
   knownHivPositive: yup.string().required("Known HIV status is required"),
-  dateTestedHiv: yup.date(),
+  dateTestedHiv: yup.date()
+    .test(
+      "date-contact-tested",
+      "Date contact tested cannot be earlier than the HTS record's date of visit",
+      function (value) {
+        if (!value || !htsDateOfVisit) return true;
+        return new Date(value) >= new Date(htsDateOfVisit);
+      }
+    )
+    .when("knownHivPositive", {
+      is: "YES_NO_NO",
+      then: (schema) => schema.required("Date contact tested for HIV is required when Known HIV Positive is No"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+
   hivTestResult: yup.mixed().test("hiv-result-required", "HIV test result is required", function (val) {
     if (this.parent.knownHivPositive !== "YES_NO_NO") return true;
     return !!val || this.createError({ message: "HIV test result is required" });
@@ -51,11 +65,17 @@ export const buildIctValidationSchema = () =>
   yup.object({
     dateOfService: yup
       .date()
-      .max(today, "Date of service cannot be in the future")
-      .test("service-not-before-dob", "Date of service cannot be earlier than index client's date of birth", function (value) {
+      .max(today, "Visit Date cannot be in the future")
+      .test("service-not-before-dob", "Visit date cannot be earlier than index client's date of birth", function (value) {
         const { indexDob } = this.parent;
+        console.log("testt//", this.parent)
         if (!value || !indexDob) return true;
         return new Date(value) >= new Date(indexDob);
+      })
+      .test("service-not-before-dor", "Visit date cannot be earlier than index client's date of registration", function (value) {
+        const { indexDateOfRegistration } = this.parent;
+        if (!value || !indexDateOfRegistration) return true;
+        return new Date(value) >= new Date(indexDateOfRegistration);
       })
       .required("Date of service is required"),
     setting: yup.string().required("Setting is required"),
@@ -81,8 +101,12 @@ export const buildIctValidationSchema = () =>
       if (this.parent.acceptedPns !== "YES_NO_YES") return true;
       if (!Array.isArray(val) || val.length === 0)
         return this.createError({ message: "At least one contact must be added when Index Testing Services is accepted" });
+      const htsDateOfVisit = this.parent.htsDateOfVisit;
+
       try {
-        val.forEach((contact, i) => contactSchema.validateSync(contact, { abortEarly: false }));
+        val.forEach((contact) =>
+          buildContactSchema(htsDateOfVisit).validateSync(contact, { abortEarly: false })
+        );
         return true;
       } catch (err) {
         return this.createError({ message: err.errors?.[0] || "Contact validation failed" });
@@ -90,4 +114,4 @@ export const buildIctValidationSchema = () =>
     }),
   });
 
-export { contactSchema };
+export { buildContactSchema  };

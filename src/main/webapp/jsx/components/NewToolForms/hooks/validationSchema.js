@@ -37,91 +37,93 @@ const skipKnowledgeAndRisk = (ctx) => {
 export const buildValidationSchema = (isNewPatient) => {
   const demographicFields = isNewPatient
     ? {
-        surname: yup.string(),
-        firstName: yup.string(),
-        dobType: yup
-          .string()
-          .oneOf(["Actual", "Estimated"], "Please select Actual or Estimated")
-          .required("Please select Actual or Estimated"),
-        dateOfBirth: yup.mixed().test(
-          "dob-required-when-actual",
-          "Date of birth is required",
-          function (value) {
-            if (this.parent.dobType?.toLowerCase() !== "actual") return true;
-            if (!value) return false;
-            const d = new Date(value);
-            if (isNaN(d.getTime())) return this.createError({ message: "Enter a valid date" });
-            if (d > new Date()) return this.createError({ message: "Date of birth cannot be in the future" });
-            return true;
-          }
-        ),
-        facilityName: yup.string().required("Facility/Site name is required"),
-        age: yup.mixed().test(
-          "age-required-when-estimated",
-          "Age is required",
-          function (value) {
-            if (this.parent.dobType?.toLowerCase() !== "estimated") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Age is required" });
-            const n = Number(value);
-            if (isNaN(n) || n < 0) return this.createError({ message: "Age must be a non-negative number" });
-            if (n > 130) return this.createError({ message: "Age must be 130 or less" });
-            return true;
-          }
-        ),
-        sex: yup.string().required("Sex is required"),
-        phoneNumber: yup.string(),
-        maritalStatus: yup.string(),
-        numberOfWives: yup.mixed().test(
-          "num-wives-conditional",
-          "Number of wives is required and must be at least 1",
-          function (value) {
-            const { sex, maritalStatus } = this.parent;
-            if (sex !== "SEX_MALE" || maritalStatus !== "MARITAL_STATUS_MARRIED") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Number of wives is required" });
-            if (Number(value) < 1) return this.createError({ message: "Number of wives must be at least 1" });
-            return true;
-          }
-        ),
-        numberOfCoWives: yup.mixed().test(
-          "num-co-wives-conditional",
-          "Number of co-wives is required",
-          function (value) {
-            const { sex, maritalStatus } = this.parent;
-            if (sex !== "SEX_FEMALE" || maritalStatus !== "MARITAL_STATUS_MARRIED") return true;
-            if (value === "" || value === undefined || value === null)
-              return this.createError({ message: "Number of co-wives is required" });
-            if (Number(value) < 0) return this.createError({ message: "Must be 0 or more" });
-            return true;
-          }
-        ),
-        numberOfBiologicalChildren: yup.mixed().test(
-          "num-children-non-negative",
-          "Must be 0 or more",
-          (value) => value === "" || value === undefined || value === null || Number(value) >= 0
-        ),
-        pregnancyStatus: yup.mixed().test(
-          "pregnancy-required-for-female",
-          "Pregnancy status is required",
-          function (value) {
-            if (this.parent.sex !== "SEX_FEMALE") return true;
-            return !!value || this.createError({ message: "Pregnancy status is required for female clients" });
-          }
-        ),
-        breastfeedingDuration: yup.mixed().test(
-          "breastfeeding-duration-conditional",
-          "Duration of breastfeeding is required",
-          function (value) {
-            if (this.parent.pregnancyStatus !== "PREGANACY_STATUS_BREASTFEEDING") return true;
-            return !!value || this.createError({ message: "Duration of breastfeeding is required" });
-          }
-        ),
-        clientState: yup.string(),
-        clientLga: yup.string(),
-        address: yup.string(),
-        landmark: yup.string(),
-      }
+      surname: yup.string(),
+      firstName: yup.string(),
+      dobType: yup
+        .string()
+        .oneOf(["Actual", "Estimated"], "Please select Actual or Estimated")
+        .required("Please select Actual or Estimated"),
+      dateOfBirth: yup.mixed().test(
+        "dob-required-when-actual",
+        "Date of birth is required",
+        function (value) {
+          if (this.parent.dobType?.toLowerCase() !== "actual") return true;
+          if (!value) return false;
+          const d = new Date(value);
+          if (isNaN(d.getTime())) return this.createError({ message: "Enter a valid date" });
+          if (d > new Date()) return this.createError({ message: "Date of birth cannot be in the future" });
+          return true;
+        }
+      ),
+      facilityName: yup.string().required("Facility/Site name is required"),
+
+      age: yup.mixed().test(
+        "age-required-when-estimated",
+        "Age is required",
+        function (value) {
+          if (this.parent.dobType?.toLowerCase() !== "estimated") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Age is required" });
+          const n = Number(value);
+          if (isNaN(n) || n < 0) return this.createError({ message: "Age must be a non-negative number" });
+          if (n > 130) return this.createError({ message: "Age must be 130 or less" });
+          return true;
+        }
+      ),
+
+      sex: yup.string().required("Sex is required"),
+      phoneNumber: yup.string(),
+      maritalStatus: yup.string(),
+      numberOfWives: yup.mixed().test(
+        "num-wives-conditional",
+        "Number of wives is required and must be at least 1",
+        function (value) {
+          const { sex, maritalStatus } = this.parent;
+          if (sex !== "SEX_MALE" || maritalStatus !== "MARITAL_STATUS_MARRIED") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Number of wives is required" });
+          if (Number(value) < 1) return this.createError({ message: "Number of wives must be at least 1" });
+          return true;
+        }
+      ),
+      numberOfCoWives: yup.mixed().test(
+        "num-co-wives-conditional",
+        "Number of co-wives is required",
+        function (value) {
+          const { sex, maritalStatus } = this.parent;
+          if (sex !== "SEX_FEMALE" || maritalStatus !== "MARITAL_STATUS_MARRIED") return true;
+          if (value === "" || value === undefined || value === null)
+            return this.createError({ message: "Number of co-wives is required" });
+          if (Number(value) < 0) return this.createError({ message: "Must be 0 or more" });
+          return true;
+        }
+      ),
+      numberOfBiologicalChildren: yup.mixed().test(
+        "num-children-non-negative",
+        "Must be 0 or more",
+        (value) => value === "" || value === undefined || value === null || Number(value) >= 0
+      ),
+      pregnancyStatus: yup.mixed().test(
+        "pregnancy-required-for-female",
+        "Pregnancy status is required",
+        function (value) {
+          if (this.parent.sex !== "SEX_FEMALE") return true;
+          return !!value || this.createError({ message: "Pregnancy status is required for female clients" });
+        }
+      ),
+      breastfeedingDuration: yup.mixed().test(
+        "breastfeeding-duration-conditional",
+        "Duration of breastfeeding is required",
+        function (value) {
+          if (this.parent.pregnancyStatus !== "PREGANACY_STATUS_BREASTFEEDING") return true;
+          return !!value || this.createError({ message: "Duration of breastfeeding is required" });
+        }
+      ),
+      clientState: yup.string(),
+      clientLga: yup.string(),
+      address: yup.string(),
+      landmark: yup.string(),
+    }
     : {};
 
   return yup.object({
@@ -136,6 +138,15 @@ export const buildValidationSchema = (isNewPatient) => {
           const { dateOfBirth } = this.parent;
           if (!value || !dateOfBirth) return true;
           return new Date(value) >= new Date(dateOfBirth);
+        }
+      )
+      .test(
+        "visit-not-before-registration",
+        "Date of visit cannot be earlier than date of registration",
+        function (value) {
+          const { dateOfRegistration } = this.parent;
+          if (!value || !dateOfRegistration) return true;
+          return new Date(value) >= new Date(dateOfRegistration);
         }
       )
       .required("Date of visit is required"),

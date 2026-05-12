@@ -43,6 +43,8 @@ const resolvePersonId = (p) =>
 
 // ── Map personResponseDto → flat Formik values (display strings, not codes) ──
 const mapPersonToFormValues = (dto) => {
+
+  
   if (!dto) return {};
 
   const addressArr = dto?.address?.address ?? [];
@@ -87,6 +89,7 @@ const mapPersonToFormValues = (dto) => {
     currentOrganisationUnitId: dto?.facilityId != null ? String(dto.facilityId) : "",
     sexCode: dto?.gender?.id != null ? String(dto.gender.id) : "",
     maritalStatusCode: dto?.maritalStatus?.id != null ? String(dto.maritalStatus.id) : "",
+    dateOfRegistration: dto?.dateOfRegistration
   };
 };
 
