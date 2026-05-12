@@ -11,7 +11,6 @@ import { usePermissions } from "../../../hooks/usePermissions";
 import { useRoles } from "../../../hooks/useRoles";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { toast } from "react-toastify";
-import { useHtsEligibility } from "../NewToolForms/hooks/useHtsEligibility";
 import IctForm from "../IctForm/IctForm";
 
 const NewEncounterHtsIctOrchestrator = lazy(() =>
@@ -54,8 +53,6 @@ const Home = (props) => {
   const { hasPermission, hasAnyPermission } = usePermissions();
 
   const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
-
-  console.log(patientId, props)
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
@@ -198,31 +195,6 @@ const Home = (props) => {
                   }}
                   className="mb-3"
                 >
-                  <Tab eventKey="home" title="HTS HISTORY">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "home" && (
-                        <HTSEncounterHistory
-                          patientObj={props.patientObj}
-                          activePage={props.activePage}
-                          setActivePage={props.setActivePage}
-                          clientCode={props.clientCode}
-                          patientAge={props.patientAge}
-                        />
-                      )}
-                    </Suspense>
-                  </Tab>
-
-                  <Tab eventKey="ict-history" title="ICT HISTORY">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "ict-history" && (
-                        <ICTEncounterHistory
-                          patientObj={props.patientObj}
-                          activePage={props.activePage}
-                          setActivePage={props.setActivePage}
-                        />
-                      )}
-                    </Suspense>
-                  </Tab>
 
                   {props?.clientEligibility?.isPatientEligibleForHts && (
                     <Tab
@@ -255,6 +227,34 @@ const Home = (props) => {
                       )}
                     </Suspense>
                   </Tab>
+
+
+                  <Tab eventKey="home" title="HTS HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "home" && (
+                        <HTSEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                          clientCode={props.clientCode}
+                          patientAge={props.patientAge}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
+                  <Tab eventKey="ict-history" title="ICT HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "ict-history" && (
+                        <ICTEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
 
                 </Tabs>
               </div>

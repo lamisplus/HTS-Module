@@ -98,7 +98,7 @@ const ContactCard = ({
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: capitalizeFirstLetter(item.display),
+      label: item.display.toLowerCase() === 'yes' || item.display.toLowerCase() === 'no' ? capitalizeFirstLetter(item.display) : item.display,
       value: item.code,
     }));
   };
@@ -113,7 +113,7 @@ const ContactCard = ({
     name,
     value: val(name),
     onChange: (e) => set(name, e.target.value),
-    onBlur: () => {},
+    onBlur: () => { },
     error: touched[name] && !!errors[name],
     helperText: touched[name] && errors[name],
     disabled: readOnly,
@@ -122,7 +122,7 @@ const ContactCard = ({
   const sp = (name, options, extraDisabled = false) => ({
     name,
     value: val(name),
-    onBlur: () => {},
+    onBlur: () => { },
     error: touched[name] && !!errors[name],
     helperText: touched[name] && errors[name],
     disabled: readOnly || extraDisabled,
@@ -180,9 +180,9 @@ const ContactCard = ({
   };
 
   const handlePhoneKeyDown = (e) => {
-    const allowed = ["Backspace","Delete","Tab","Escape","Enter","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"];
+    const allowed = ["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"];
     if (allowed.includes(e.key)) return;
-    if ((e.ctrlKey || e.metaKey) && ["a","c","v","x"].includes(e.key.toLowerCase())) return;
+    if ((e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
     if (!/^\d$/.test(e.key)) e.preventDefault();
   };
 

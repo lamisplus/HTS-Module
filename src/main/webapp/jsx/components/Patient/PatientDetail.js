@@ -61,6 +61,10 @@ function PatientCard(props) {
   let history = useHistory();
 
 
+  const [personInfo, setPersonInfo] = useState(null)
+  const [encounters, setEncounters] = useState(null);
+  const [isLoadingEncounters, setIsLoadingEncounters] = useState(false);
+//fetch full patient record here
   const patientObject =
     history.location && history.location.state
       ? history.location.state.patientObject
@@ -78,11 +82,6 @@ function PatientCard(props) {
       : "";
 
 
-
-
-  const [personInfo, setPersonInfo] = useState({})
-  const [encounters, setEncounters] = useState(null);
-  const [isLoadingEncounters, setIsLoadingEncounters] = useState(false);
   const patientId = patientObj?.personId || patientObject?.personId || patientObj?.person?.id || patientObject?.person?.id
 
   const [activePage, setActivePage] = useState({
@@ -90,6 +89,8 @@ function PatientCard(props) {
     activeObject: {},
     actionType: "",
   });
+
+  
 
   const handleMoveToHome = () => {
     setActivePage({
@@ -105,6 +106,7 @@ function PatientCard(props) {
     try {
       const data = await getHtsEcounterForAPatient(patientId);
       setEncounters(Array.isArray(data) ? data : []);
+      setPersonInfo(Array.isArray(data) ? data?.[0]?.person : null)
     } catch {
       toast.error("Failed to load HTS encounter history.");
     } finally {
@@ -145,9 +147,9 @@ function PatientCard(props) {
       <Card>
         <CardContent>
           <PatientCardDetail
-            patientObj={patientObj}
-            clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
-            patientObject={patientObject}
+            patientObj={personInfo || patientObj || patientObject}
+            clientCode={patientObject?.clientCode || patientObj?.clientCode || encounters?.[0]?.observation?.clientCode || ""}
+            patientObject={personInfo || patientObject || patientObj}
             setPersonInfo={setPersonInfo}
             clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
           />
@@ -189,7 +191,7 @@ function PatientCard(props) {
               initialValues={patientObj?.data}
               backButtonAction={handleMoveToHome}
               fullRecord={activePage?.activeObject}
-              
+
             />
           )}
 

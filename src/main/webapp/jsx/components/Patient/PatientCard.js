@@ -70,7 +70,7 @@ function PatientCard(props) {
   const [htscount, setHtscount] = useState(0);
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
-
+  const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult.toLowerCase()
   useEffect(() => {
     PatientCurrentObject();
   }, []);
@@ -248,36 +248,19 @@ function PatientCard(props) {
                       <Col md={4}>
                         <div>
                           <Typography variant="caption">
-                            {/* {htscount < 1 || (!htsResult && !htsResult2) ? (
-                              <Label color="blue" size={"mini"}>
-                                STATUS : Not Tested
-                              </Label>
-                            ) : patientObj &&
-                              (htsResult === "Positive" ||
-                                htsResult2 === "Positive") ? (
-                              <Label color={"red"} size={"mini"}>
-                                STATUS : Positive
-                              </Label>
-                            ) : (
-                              <Label color="teal" size={"mini"}>
-                                STATUS : Negative
-                              </Label>
-                            )} */}
                             {
-                              props?.clientEligibility?.confirmatoryResult === "positive" ?
-                                (<Label color={"red"} size={"mini"}>
-                                  STATUS : Positive
+                              clientConfirmatoryResult === "sti_hiv_result_positive" ?
+                                (<Label color={"red"} size={"small"}>
+                                  Status : Positive
                                 </Label>) :
-
-                                props?.clientEligibility?.confirmatoryResult === "negative" ?
+                                clientConfirmatoryResult === "sti_hiv_result_negative" ?
                                   (
-                                    <Label color="teal" size={"mini"}>
-                                      STATUS : Negative
+                                    <Label color="teal" size={"small"}>
+                                      Status: Negative
                                     </Label>
                                   ) : (
-
-                                    <Label color="blue" size={"mini"}>
-                                      STATUS : Not Tested
+                                    <Label color="blue" size={"small"}>
+                                      Status: Not Tested
                                     </Label>
                                   )
                             }
@@ -285,21 +268,11 @@ function PatientCard(props) {
                         </div>
                       </Col>
 
-                      <Col md={4}>
-                        <div>
-                          <Typography variant="caption">
-                            <Label color={"teal"} size={"mini"}>
-                              ELigible for HTS : {String(props?.clientEligibility?.isPatientEligibleForHts)}
-                            </Label>
-                          </Typography>
-                        </div>
-                      </Col>
-
                       <Col md={12} style={{ marginTop: 10 }}>
                         <div>
                           <Typography variant="caption">
-                            <Label color={"teal"} size={"large"}>
-                              Reason for HTS eligibility : {String(props?.clientEligibility?.eligibilityReason)}
+                            <Label color={"teal"} size={"small"}>
+                              Reason for HTS {props?.clientEligibility?.isPatientEligibleForHts ? "eligibility" : "ineligibility"} : {String(props?.clientEligibility?.eligibilityReason)}
                             </Label>
                           </Typography>
                         </div>

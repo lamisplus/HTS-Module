@@ -40,8 +40,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display?.toLowerCase() === "yes" || item.display?.toLowerCase() === "no" ? capitalizeFirstLetter(item.display) : capitalizeFirstLetter(item.display),
-      // value: item?.code || item?.display
+      label: item.display.toLowerCase() === 'yes' || item.display.toLowerCase() === 'no' ? capitalizeFirstLetter(item.display) : item.display,
       value: item?.code
     }));
   };
@@ -60,10 +59,10 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
-  
+
   const showCategoryOfClient = values.hivTestKitsProvided === "YES_NO_YES";
   const showAcceptedIndexTesting = values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
-  
+
   return (
     <div style={{ width: "100%" }}>
       <div className="row">

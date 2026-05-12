@@ -42,7 +42,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: capitalizeFirstLetter(item.display),
+      label: item.display.toLowerCase() === 'yes' || item.display.toLowerCase() === 'no' ? capitalizeFirstLetter(item.display) : item.display,
       value: item.code,
     }));
   };
