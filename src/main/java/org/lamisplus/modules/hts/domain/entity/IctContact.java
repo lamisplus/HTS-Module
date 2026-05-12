@@ -4,17 +4,12 @@ package org.lamisplus.modules.hts.domain.entity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.lamisplus.modules.base.domain.entities.Audit;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -22,8 +17,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-@EntityListeners(AuditingEntityListener.class)
-public class IctContact {
+public class IctContact extends Audit<IctContact> implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,20 +116,4 @@ public class IctContact {
     /** BOOLEAN — false = active, true = soft-deleted. */
     @Column(nullable = false)
     private Boolean archived = false;
-
-    @CreatedBy
-    @Column(name = "created_by")
-    private String createdBy;
-
-    @CreatedDate
-    @Column(name = "date_created")
-    private LocalDateTime dateCreated;
-
-    @LastModifiedBy
-    @Column(name = "modified_by")
-    private String modifiedBy;
-
-    @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
 }

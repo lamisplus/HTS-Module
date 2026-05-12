@@ -102,6 +102,16 @@ public class HtsEncounterService {
         return repository.search(facilityId, searchParam, pageable).map(this::toResponse);
     }
 
+    public HtsEncounterResponse getForProphylaxis(LocalDate screeningDate, UUID patientUuid) {
+        HtsEncounter encounter = repository
+                .findFirstByPatientUuidAndDateOfVisitAndArchivedOrderByIdDesc(patientUuid, screeningDate, false)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        HtsEncounter.class,
+                        "patientUuid/dateOfVisit",
+                        patientUuid + "/" + screeningDate));
+        return toResponse(encounter);
+    }
+
     public List<HtsEncounterResponse> getEncountersByPatientId(Long patientId) {
         personRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException(

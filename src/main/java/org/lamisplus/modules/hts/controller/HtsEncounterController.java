@@ -14,10 +14,13 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/hts-encounter")
@@ -77,6 +80,14 @@ public class HtsEncounterController {
             @PageableDefault(sort = "surname", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<PatientHtsSummaryDto> page = service.getPatientSummaries(facilityId, search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
+    }
+
+    @GetMapping("/htsForProphylaxis/{screening-date}/{patient-uuid}")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
+    public ResponseEntity<HtsEncounterResponse> getForProphylaxis(
+            @PathVariable("screening-date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate screeningDate,
+            @PathVariable("patient-uuid") UUID patientUuid) {
+        return ResponseEntity.ok(service.getForProphylaxis(screeningDate, patientUuid));
     }
 
     @GetMapping("/hts-patients")
