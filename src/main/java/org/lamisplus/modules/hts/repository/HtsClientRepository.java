@@ -34,27 +34,30 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
     Optional<HtsClient> findFirstByRiskStratificationCode(String riskStratificationCode);
 
 
-    @Query(value =  "SELECT p.hospital_number AS hospitalNumber,  p.id AS personId, p.uuid as personUuid, p.first_name AS firstName, p.surname AS surname,  p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  " +
-            "FROM patient_person p  " +
-            "WHERE  p.archived =  ?1 \n" +
-            "and ( p.first_name ILIKE ?3 \n" +
-            "OR p.surname ILIKE ?3 OR p.other_name ILIKE ?3 \n" +
-            "OR p.hospital_number ILIKE ?3 )\n" +
-            "AND NOT EXISTS (\n" +
-            "SELECT 1 \n" +
-            "FROM hts_client hs\n" +
-            "WHERE hs.client_code = p.hospital_number\n" +
-            "AND hs.archived = ?1 \n" +
-            "AND hs.person_uuid is not null AND hs.person_uuid != ''\n" +
-            "AND hs.facility_id =  ?2 \n" +
-            ")AND NOT EXISTS(\n" +
-            "            SELECT 1\n" +
-            "            FROM hts_client hs \n" +
-            "            WHERE  hs.person_uuid = p.uuid \n" +
-            "            AND hs.archived = ?1 \n" +
-            "            AND hs.person_uuid is not null AND hs.person_uuid != '' \n" +
-            "            AND hs.facility_id =  ?2 \n" +
-            "            )\n", nativeQuery = true)
+    @Query(value =  "SELECT \n" +
+            "    p.hospital_number AS hospitalNumber,\n" +
+            "    p.id AS personId,\n" +
+            "    p.uuid AS personUuid,\n" +
+            "    p.first_name AS firstName,\n" +
+            "    p.surname AS surname,\n" +
+            "    p.other_name AS otherName,\n" +
+            "    CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "    INITCAP(p.sex) AS gender\n" +
+            "FROM patient_person p\n" +
+            "WHERE p.archived = ?1\n" +
+            "AND (\n" +
+            "       p.first_name ILIKE ?3\n" +
+            "    OR p.surname ILIKE ?3\n" +
+            "    OR p.other_name ILIKE ?3\n" +
+            "    OR p.hospital_number ILIKE ?3\n" +
+            ")\n" +
+            "AND NOT EXISTS \n" +
+            "(SELECT 1\n" +
+            " FROM hts_encounter htse\n" +
+            " WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
+            " AND htse.facility_id = ?2\n" +
+            " AND htse.archived = false\n" +
+            ")", nativeQuery = true)
 
     Page<HtsPerson> findAllPersonHtsBySearchParam(Integer archived, Long facilityId, String search, Pageable pageable);
 
