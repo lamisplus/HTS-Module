@@ -1,9 +1,8 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState } from "react";
-import { FormSelect, SectionSubheading } from "./FormFields";
+import { FormSelect, SectionSubheading, ReadOnlyField } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
-
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -21,79 +20,165 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   const sp = (name, options) => ({ ...fp(name), options });
 
-  const handleInitialTestChange = (e) => {
-    const val = e.target.value;
-    setFieldValue("initialHivTest", val);
-    if (val !== "STI_HIV_RESULT_POSITIVE") {
-      setFieldValue("confirmatoryHivTest", "");
-      setFieldValue("recencyTest", "");
-    }
-  };
-
-  const handleEarlyDetectResultChange = (e) => {
-    const val = e.target.value;
-    setFieldValue("hivEarlyDetectResult", val);
-    if (val === "Antigen Reactive" || val === "Antigen + Antibody Reactive") {
-      setFieldValue("suspectedAcuteInfection", "YES_NO_YES");
-    } else {
-      setFieldValue("suspectedAcuteInfection", "");
-    }
-    if (val === "Antibody Reactive") {
-      // keep existing confirmatory, do nothing
-    } else {
-      setFieldValue("confirmatoryHivTest", "");
-    }
-  };
-
-  const showConfirmatory =
-    values.initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
-    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
-  const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
-  const showEarlyDetectResult = values.hivEarlyDetectTestDone === "YES_NO_YES";
-  const showAcuteInfectionBanner =
-    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
-    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
-
   const transformOptions = (items) => {
     if (!Array.isArray(items)) return [];
-    return items.map(item => ({
+    return items.map((item) => ({
       id: item.id,
-      label: item.display.toLowerCase() === 'yes' || item.display.toLowerCase() === 'no' ? capitalizeFirstLetter(item.display) : item.display,
+      label:
+        item.display.toLowerCase() === "yes" || item.display.toLowerCase() === "no"
+          ? capitalizeFirstLetter(item.display)
+          : item.display,
       value: item.code,
     }));
   };
 
-  const loadCodesets = (data) => {
-    setCodesets(data);
-  };
+  const loadCodesets = (data) => setCodesets(data);
 
   useGetCodesets({
     codesetsKeys: [
       "YES_NO",
-      "RECENT_HIV_TEST",
-      "HIV_TEST_RESULT",
-      "TEST_RESULT_COMMON",
       "STI_HIV_RESULT",
-      "PARTNER_SYPHILIS_STATUS",
-      "RECENCY_TESTING",
       "SYPHILIS_RESULT",
-      "HIV_EARLY_DETECT_RESULT"
+      "HIV_EARLY_DETECT_RESULT",
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
   });
 
+  // ── Path flags ────────────────────────────────────────────────────────────
+  const earlyDetectDone = values.hivEarlyDetectTestDone === "YES_NO_YES";
+  const earlyDetectNo   = values.hivEarlyDetectTestDone === "YES_NO_NO";
+  const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
+
+  const isAcutePath =
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
+
+  const isAntibodyReactivePath =
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
+
+  // Show confirmatory when:
+  //   Path A - Antibody Reactive, OR
+  //   Path B - Initial HIV Test is Positive
+  const showConfirmatory =
+    isAntibodyReactivePath ||
+    (earlyDetectNo && values.initialHivTest === "STI_HIV_RESULT_POSITIVE");
+
+  // ── Derived Final HIV Test Result ─────────────────────────────────────────
+  const getFinalResult = () => {
+    if (earlyDetectDone) {
+      if (isAcutePath) return "Suspected Acute Infection";
+      if (isAntibodyReactivePath) {
+        if (values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE") return "Positive";
+        if (values.confirmatoryHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
+      }
+      return null;
+    }
+    if (earlyDetectNo) {
+      if (values.initialHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
+      if (values.initialHivTest === "STI_HIV_RESULT_POSITIVE") {
+        if (values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE") return "Positive";
+        if (values.confirmatoryHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
+      }
+    }
+    return null;
+  };
+
+  const finalResult = getFinalResult();
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  // When Early Detect Done changes, clear downstream fields
+  const handleEarlyDetectDoneChange = (e) => {
+    const val = e.target.value;
+    setFieldValue("hivEarlyDetectTestDone", val);
+    // Clear all downstream on path switch
+    setFieldValue("hivEarlyDetectResult", "");
+    setFieldValue("suspectedAcuteInfection", "");
+    setFieldValue("initialHivTest", "");
+    setFieldValue("confirmatoryHivTest", "");
+    setFieldValue("recencyTest", ""); 
+  };
+
+  // When Early Detect Result changes
+  const handleEarlyDetectResultChange = (e) => {
+    const val = e.target.value;
+    setFieldValue("hivEarlyDetectResult", val);
+
+    const acute =
+      val === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
+      val === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
+
+    if (acute) {
+      // Lock suspected acute infection to YES and clear confirmatory
+      setFieldValue("suspectedAcuteInfection", "YES_NO_YES");
+      setFieldValue("confirmatoryHivTest", "");
+    } else {
+      // Antibody Reactive — clear suspected acute
+      setFieldValue("suspectedAcuteInfection", "");
+      setFieldValue("confirmatoryHivTest", "");
+    }
+  };
+
+  // When Initial HIV Test changes (Path B)
+  const handleInitialTestChange = (e) => {
+    const val = e.target.value;
+    setFieldValue("initialHivTest", val);
+    if (val !== "STI_HIV_RESULT_POSITIVE") {
+      setFieldValue("confirmatoryHivTest", "");
+    }
+  };
+
+  // ── Styles ────────────────────────────────────────────────────────────────
+  const warningBannerStyle = {
+    background: "#fff3e0",
+    border: "1px solid #ff9800",
+    borderRadius: 4,
+    padding: "10px 14px",
+    marginBottom: 16,
+    color: "#e65100",
+    fontWeight: 600,
+    fontSize: 14,
+  };
+
+  const finalResultBoxStyle = (result) => ({
+    display: "inline-block",
+    padding: "6px 18px",
+    borderRadius: 6,
+    fontWeight: 700,
+    fontSize: 15,
+    marginTop: 4,
+    marginBottom: 16,
+    background:
+      result === "Positive" ? "#fdecea" :
+      result === "Negative" ? "#e8f5e9" :
+      "#fff3e0",
+    color:
+      result === "Positive" ? "#c62828" :
+      result === "Negative" ? "#2e7d32" :
+      "#e65100",
+    border:
+      result === "Positive" ? "1px solid #ef9a9a" :
+      result === "Negative" ? "1px solid #a5d6a7" :
+      "1px solid #ff9800",
+  });
+
   return (
     <div style={{ width: "100%" }}>
       <SectionSubheading>HIV Testing</SectionSubheading>
+
       <div className="row">
+        {/* Always shown */}
         <div className="col-md-6">
           <FormSelect
-            label="HIV Early Detect Test Done ?"
+            label="HIV Early Detect Test Done?"
             {...sp("hivEarlyDetectTestDone", transformOptions(codesets?.["YES_NO"]))}
+            onChange={readOnly ? undefined : handleEarlyDetectDoneChange}
           />
         </div>
-        {showEarlyDetectResult && (
+
+        {/* PATH A — Early Detect = YES */}
+        {earlyDetectDone && (
           <div className="col-md-6">
             <FormSelect
               label="HIV Early Detect Result"
@@ -103,39 +188,40 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
-        {showEarlyDetectResult && (
+
+        {/* PATH A — Acute sub-path: Suspected Acute Infection (locked YES) */}
+        {earlyDetectDone && isAcutePath && (
+          <>
+            <div className="col-md-12">
+              <div style={warningBannerStyle}>
+                ⚠️ Suspected Acute HIV Infection — This client should be enrolled in
+                PrEP/PEP and have access to the HIV Module for laboratory tests only.
+              </div>
+            </div>
+            <div className="col-md-6">
+              <FormSelect
+                label="Suspected Acute HIV Infection?"
+                {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
+                disabled // always locked to YES on this path
+              />
+            </div>
+          </>
+        )}
+
+        {/* PATH B — Early Detect = NO → show Initial HIV Test */}
+        {earlyDetectNo && (
           <div className="col-md-6">
             <FormSelect
-              label="Suspected Acute HIV Infection?"
-              {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
+              label="Initial HIV Test"
+              {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+              onChange={readOnly ? undefined : handleInitialTestChange}
               required
             />
           </div>
         )}
-        {showAcuteInfectionBanner && (
-          <div className="col-md-12">
-            <div style={{
-              background: "#fff3e0",
-              border: "1px solid #ff9800",
-              borderRadius: 4,
-              padding: "10px 14px",
-              marginBottom: 16,
-              color: "#e65100",
-              fontWeight: 600,
-              fontSize: 14,
-            }}>
-              ⚠️ Suspected Acute HIV Infection — This client should be enrolled in PrEP/PEP and have access to the HIV Module for laboratory tests only.
-            </div>
-          </div>
-        )}
-        <div className="col-md-6">
-          <FormSelect
-            label="Initial HIV Test"
-            {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
-            onChange={readOnly ? undefined : handleInitialTestChange}
-            required
-          />
-        </div>
+
+        {/* SHARED — Confirmatory: shown for Antibody Reactive (Path A) 
+                     OR Initial Positive (Path B) */}
         {showConfirmatory && (
           <div className="col-md-6">
             <FormSelect
@@ -144,15 +230,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
-      </div>
-      <SectionSubheading>Syphilis / Recency Testing</SectionSubheading>
-      <div className="row">
-        <div className="col-md-6">
-          <FormSelect
-            label="Syphilis Test Result"
-            {...sp("syphilisTestResult", transformOptions(codesets?.["SYPHILIS_RESULT"]))}
-          />
-        </div>
+
+        {/* Recency — commented out per requirement */}
         {showRecency && (
           <div className="col-md-6">
             <FormSelect
@@ -161,6 +240,35 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
+
+        {/* Final HIV Test Result — derived, read-only display */}
+        {finalResult && (
+          <div className="col-md-12">
+            <div style={{ marginBottom: 16 }}>
+              <label style={{
+                fontSize: "14px",
+                color: "#014d88",
+                fontWeight: "bold",
+                marginBottom: "6px",
+                display: "block",
+              }}>
+                Final HIV Test Result
+              </label>
+              <span style={finalResultBoxStyle(finalResult)}>{finalResult}</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Syphilis — always shown */}
+      <SectionSubheading>Syphilis Testing</SectionSubheading>
+      <div className="row">
+        <div className="col-md-6">
+          <FormSelect
+            label="Syphilis Test Result"
+            {...sp("syphilisTestResult", transformOptions(codesets?.["SYPHILIS_RESULT"]))}
+          />
+        </div>
       </div>
     </div>
   );

@@ -465,15 +465,29 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "HIV Early Detect Result is required" });
       }
     ),
-    initialHivTest: yup.string().required("Initial HIV test result is required"),
+    initialHivTest: yup.mixed().test(
+      "initialHivTest-conditional",
+      "Initial HIV test result is required",
+      function (value) {
+        // Only required on Path B (Early Detect = NO)
+        if (this.parent.hivEarlyDetectTestDone !== "YES_NO_NO") return true;
+        return !!value || this.createError({ message: "Initial HIV test result is required" });
+      }
+    ),
+
     suspectedAcuteInfection: yup.mixed().test(
       "acute-infection-conditional",
       "This field is required",
       function (value) {
-        if (this.parent.hivEarlyDetectTestDone !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required when HIV Early Detect Test Done is yes" });
+        const { hivEarlyDetectResult } = this.parent;
+        const isAcutePath =
+          hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
+          hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
+        if (!isAcutePath) return true;
+        return !!value || this.createError({ message: "Suspected Acute Infection is required" });
       }
     ),
+
     confirmatoryHivTest: yup.mixed().test(
       "confirmatory-conditional",
       "Confirmatory HIV test is required",
@@ -481,11 +495,13 @@ export const buildValidationSchema = (isNewPatient) => {
         const { initialHivTest, hivEarlyDetectResult } = this.parent;
         const needsConfirmatory =
           initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
-          hivEarlyDetectResult === "Antibody Reactive";
+          hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE"; // ← fixed to use code
         if (!needsConfirmatory) return true;
         return !!value || this.createError({ message: "Confirmatory HIV test is required" });
       }
     ),
+
+
     recencyTest: yup.string(),
     previouslyTestedThisYear: yup.string().required("This field is required"),
     clientReceivedTestResult: yup.string().required("This field is required"),

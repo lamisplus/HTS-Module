@@ -67,7 +67,7 @@ const buildInitialValues = (htsValues) => ({
   patientId: htsValues?.patientId || "",
   htsEncounterId: "",
   indexDateOfRegistration: htsValues?.indexDateOfRegistration,
-  htsDateOfVisit: htsValues.dateOfVisit,
+  htsDateOfVisit: htsValues?.dateOfVisit,
   dateOfService: "",
   setting: htsValues?.setting || "",
   facilitySetting: htsValues?.facilitySetting || "",

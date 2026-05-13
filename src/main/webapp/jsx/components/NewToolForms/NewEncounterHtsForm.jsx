@@ -231,6 +231,9 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     onSubmit,
   });
 
+
+  console.log(formik)
+
   useEffect(() => {
     onValuesChange?.(formik.values);
   }, [formik.values]); // eslint-disable-line react-hooks/exhaustive-deps
