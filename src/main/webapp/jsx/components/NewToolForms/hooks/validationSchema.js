@@ -137,7 +137,7 @@ export const buildValidationSchema = (isNewPatient) => {
         function (value) {
           const { dateOfBirth } = this.parent;
           if (!value || !dateOfBirth) return true;
-          return new Date(value) >= new Date(dateOfBirth);
+          return new Date(value) > new Date(dateOfBirth);
         }
       )
       .test(
@@ -146,7 +146,7 @@ export const buildValidationSchema = (isNewPatient) => {
         function (value) {
           const { dateOfRegistration } = this.parent;
           if (!value || !dateOfRegistration) return true;
-          return new Date(value) >= new Date(dateOfRegistration);
+          return new Date(value) > new Date(dateOfRegistration);
         }
       )
       .required("Date of visit is required"),

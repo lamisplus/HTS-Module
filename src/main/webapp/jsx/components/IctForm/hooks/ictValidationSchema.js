@@ -33,7 +33,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
       "Date contact tested cannot be earlier than the HTS record's date of visit",
       function (value) {
         if (!value || !htsDateOfVisit) return true;
-        return new Date(value) >= new Date(htsDateOfVisit);
+        return new Date(value) > new Date(htsDateOfVisit);
       }
     )
     .when("knownHivPositive", {
@@ -59,7 +59,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
             function (value) {
               const { dateTestedHiv } = this.parent;
               if (!value || !dateTestedHiv) return true;
-              return new Date(value) >= new Date(dateTestedHiv);
+              return new Date(value) > new Date(dateTestedHiv);
             }
           ),
       otherwise: (schema) => schema.nullable(),
@@ -92,12 +92,17 @@ export const buildIctValidationSchema = () =>
         const { indexDob } = this.parent;
         console.log("testt//", this.parent)
         if (!value || !indexDob) return true;
-        return new Date(value) >= new Date(indexDob);
+        return new Date(value) > new Date(indexDob);
       })
       .test("service-not-before-dor", "Visit date cannot be earlier than index client's date of registration", function (value) {
         const { indexDateOfRegistration } = this.parent;
         if (!value || !indexDateOfRegistration) return true;
-        return new Date(value) >= new Date(indexDateOfRegistration);
+        return new Date(value) > new Date(indexDateOfRegistration);
+      })
+      .test("service-not-before-hts-dov", "Visit date cannot be earlier than index client's HTS record date of visit", function (value) {
+        const { htsDateOfVisit } = this.parent;
+        if (!value || !htsDateOfVisit) return true;
+        return new Date(value) > new Date(htsDateOfVisit);
       })
       .required("Date of service is required"),
     setting: yup.string().required("Setting is required"),
