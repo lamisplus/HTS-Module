@@ -603,7 +603,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <Label style={labelStyle}>State of Residence <span style={{ color: "red" }}>*</span></Label>
             <select className="form-control" name="clientState" value={values.clientState || ""}
               onChange={readOnly ? undefined : handleStateChange} onBlur={handleBlur}
-              disabled={readOnly || loadingStates} style={selectStyle}>
+              // disabled={readOnly || loadingStates} style={selectStyle}
+              disabled
+              
+              >
               <option value="">{loadingStates ? "Loading states..." : "Select option"}</option>
               {statesList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -615,13 +618,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             label="LGA of Residence"
             {...sp("clientLga", lgaOptions, !values.clientState || loadingLgas)}
             required
+            disabled
           />
         </div>
         <div className="col-md-4">
-          <FormTextField label="Landmark" type="text" {...fp("landmark")} />
+          <FormTextField label="Landmark" type="text" {...fp("landmark")} disabled/>
         </div>
         <div className="col-md-12">
-          <FormTextField label="Address" type="textarea" {...fp("address")} />
+          <FormTextField label="Address" type="textarea" {...fp("address")} disabled/>
         </div>
       </div>
     </div>
