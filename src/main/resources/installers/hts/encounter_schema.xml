@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet id="create_hts_encounter_V3_051126" author="Emmanuel Nnajiofor">
+    <changeSet id="create_hts_encounter_V3_051226" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_encounter" schemaName="public"/>
@@ -17,8 +17,11 @@
             - patient_uuid: new UUID column (no FK because patient_person.uuid may be varchar)
             - facility_id: now BIGINT, FK → base_organisation_unit(id)
             - data:        renamed to observation (no longer stores patient demographics)
-            - PMTCT_HTS:   kept as-is (not in scope)
+            - pmtct_hts:   JSONB → BOOLEAN with default false
             - archived:    INT → BOOLEAN
+            - source:      new VARCHAR(50) column with default 'web'
+            - longitude:   new NUMERIC(11,8) column
+            - latitude:    new NUMERIC(10,8) column
         </comment>
 
         <createTable tableName="hts_encounter">
@@ -64,11 +67,27 @@
             <!-- Renamed from 'data'. Stores clinical observations only — NOT patient demographics. -->
             <column name="observation" type="JSONB"/>
 
-            <column name="pmtct_hts" type="JSONB"/>
+            <!-- Changed from JSONB to BOOLEAN -->
+            <column name="pmtct_hts" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
 
             <!-- BOOLEAN instead of INT -->
             <column name="archived" type="BOOLEAN" defaultValueBoolean="false">
                 <constraints nullable="false"/>
+            </column>
+
+            <!-- Entry source channel; defaults to 'web' -->
+            <column name="source" type="VARCHAR(50)" defaultValue="web">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Geolocation of the encounter -->
+            <column name="longitude" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="latitude" type="VARCHAR(50)">
+                <constraints nullable="true"/>
             </column>
 
             <column name="created_by" type="VARCHAR(50)"/>
@@ -92,18 +111,6 @@
         <createIndex indexName="idx_hts_encounter_facility" tableName="hts_encounter">
             <column name="facility_id"/>
         </createIndex>
-    </changeSet>
-
-    <changeSet id="rename_hts_encounter_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="hts_encounter" columnName="last_modified_date"/>
-            <not>
-                <columnExists tableName="hts_encounter" columnName="date_modified"/>
-            </not>
-        </preConditions>
-        <sql>
-            ALTER TABLE hts_encounter RENAME COLUMN last_modified_date TO date_modified;
-        </sql>
     </changeSet>
 
 </databaseChangeLog>

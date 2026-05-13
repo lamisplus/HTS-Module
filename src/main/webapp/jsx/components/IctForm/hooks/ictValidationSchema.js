@@ -3,7 +3,7 @@ import * as yup from "yup";
 const today = new Date();
 today.setHours(23, 59, 59, 999);
 
-const buildContactSchema  = (htsDateOfVisit) => yup.object({
+const buildContactSchema = (htsDateOfVisit) => yup.object({
   firstName: yup
     .string()
     .required("Contact First name is required")
@@ -47,8 +47,30 @@ const buildContactSchema  = (htsDateOfVisit) => yup.object({
     return !!val || this.createError({ message: "HIV test result is required" });
   }),
   onArt: yup.string(),
-  dateEnrolledArt: yup.string(),
-  artClinic: yup.string(),
+  dateEnrolledArt: yup.date()
+    .when("onArt", {
+      is: "YES_NO_YES",
+      then: (schema) =>
+        schema
+          .required("Date enrolled on ART is required")
+          .test(
+            "art-not-before-tested",
+            "Date enrolled on ART cannot be earlier than date contact was tested",
+            function (value) {
+              const { dateTestedHiv } = this.parent;
+              if (!value || !dateTestedHiv) return true;
+              return new Date(value) >= new Date(dateTestedHiv);
+            }
+          ),
+      otherwise: (schema) => schema.nullable(),
+    }),
+  artClinic: yup.string()
+    .when("onArt", {
+      is: "YES_NO_YES",
+      then: (schema) => schema.required("ART clinic is required"),
+      otherwise: (schema) => schema.nullable(),
+    }),
+
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
     if (!this.parent.enrolledInOvc) return true;
     if (!val) return this.createError({ message: "Date enrolled in OVC is required" });
@@ -114,4 +136,4 @@ export const buildIctValidationSchema = () =>
     }),
   });
 
-export { buildContactSchema  };
+export { buildContactSchema };

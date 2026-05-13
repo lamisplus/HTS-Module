@@ -454,6 +454,16 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </>
         )}
 
+        <div className="col-md-4">
+          <FormSelect
+            label="Marital Status"
+            {...sp("maritalStatus", transformOptions(codesets?.["MARITAL_STATUS"]))}
+            readonly
+            disabled
+          />
+        </div>
+
+
         {/* Marital sub fields */}
         {showNumberOfWives && (
           <div className="col-md-4">
@@ -499,7 +509,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         </div>
 
         {showPregnancy && (
-          <div className={`col-md-4 ${formik.values.maritalStatus === "MARITAL_STATUS_MARRIED" ? "mt-4" : ""}`}>
+          <div className={`col-md-4`}>
             <FormSelect
               label="Pregnancy Status"
               {...sp("pregnancyStatus", transformOptions(codesets?.["PREGNANCY_STATUS"]))}
@@ -519,6 +529,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
       </div>
+
 
       {/* Demographics (new patient only) */}
       {!isExistingPatient && (

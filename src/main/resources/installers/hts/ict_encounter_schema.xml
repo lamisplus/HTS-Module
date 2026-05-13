@@ -6,7 +6,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_encounter                                            -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_encounter_v3_051126" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_encounter_v3_051226" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_encounter" schemaName="public"/>
@@ -94,7 +94,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_contact                                              -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_contact_v3_051126" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_contact_v3_051226" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_contact" schemaName="public"/>
@@ -207,29 +207,4 @@
             <column name="known_hiv_positive"/>
         </createIndex>
     </changeSet>
-
-    <changeSet id="rename_hts_ict_encounter_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="hts_ict_encounter" columnName="last_modified_date"/>
-            <not>
-                <columnExists tableName="hts_ict_encounter" columnName="date_modified"/>
-            </not>
-        </preConditions>
-        <sql>
-            ALTER TABLE hts_ict_encounter RENAME COLUMN last_modified_date TO date_modified;
-        </sql>
-    </changeSet>
-
-    <changeSet id="rename_hts_ict_contact_last_modified_date_2026_05_12" author="Gamaliel-Emmanuel">
-        <preConditions onFail="MARK_RAN">
-            <columnExists tableName="hts_ict_contact" columnName="last_modified_date"/>
-            <not>
-                <columnExists tableName="hts_ict_contact" columnName="date_modified"/>
-            </not>
-        </preConditions>
-        <sql>
-            ALTER TABLE hts_ict_contact RENAME COLUMN last_modified_date TO date_modified;
-        </sql>
-    </changeSet>
-
 </databaseChangeLog>

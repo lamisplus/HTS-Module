@@ -85,60 +85,60 @@ const mapIctResponseToFormValues = (response) => {
 
 
   return {
-    patientId:        response.patientId       ?? "",
-    htsEncounterId:   response.htsEncounterId  ?? "",
-    facilityId:       response.facilityId      ?? "",
-    dateOfService:    response.dateOfService   ?? "",
-    setting:          response.setting         ?? "",
-    clientCategory:   response.clientCategory  ?? "",
-    offeredPns:       response.offeredPns      ?? "",
-    acceptedPns:      response.acceptedPns     ?? "",
+    patientId: response.patientId ?? "",
+    htsEncounterId: response.htsEncounterId ?? "",
+    facilityId: response.facilityId ?? "",
+    dateOfService: response.dateOfService ?? "",
+    setting: response.setting ?? "",
+    clientCategory: response.clientCategory ?? "",
+    offeredPns: response.offeredPns ?? "",
+    acceptedPns: response.acceptedPns ?? "",
 
     // These are stored in the encounter's data JSONB
-    facilityName:         d.facilityName        ?? "",
-    state:                d.state               ?? "",   // numeric id string
-    lga:                  d.lga                 ?? "",   // numeric id string
-    facilitySetting:      d.facilitySetting     ?? "",
-    communityEntryPoint:  d.communityEntryPoint ?? "",
-    artClinic:            d.artClinic           ?? "",
-    clientCategoryOther:  d.clientCategoryOther ?? "",
+    facilityName: d.facilityName ?? "",
+    state: d.state ?? "",   // numeric id string
+    lga: d.lga ?? "",   // numeric id string
+    facilitySetting: d.facilitySetting ?? "",
+    communityEntryPoint: d.communityEntryPoint ?? "",
+    artClinic: d.artClinic ?? "",
+    clientCategoryOther: d.clientCategoryOther ?? "",
 
-    indexClientId:    d.indexClientId   ?? "",
-    artUniqueId:      d.artUniqueId     ?? "",
-    indexFirstName:   d.indexFirstName  ?? "",
-    indexMiddleName:  d.indexMiddleName ?? "",
-    indexSurname:     d.indexSurname    ?? "",
-    indexSex:         d.indexSex        ?? "",   // codeset code — display resolved in Section A
-    indexDob:         d.indexDob        ?? "",
-    indexAge:         d.indexAge        != null ? String(d.indexAge) : "",
-    indexPhone:       d.indexPhone      ?? "",
-    indexAltPhone:    d.indexAltPhone   ?? "",
-    indexAddress:     d.indexAddress    ?? "",
+    indexClientId: d.indexClientId ?? "",
+    artUniqueId: d.artUniqueId ?? "",
+    indexFirstName: d.indexFirstName ?? "",
+    indexMiddleName: d.indexMiddleName ?? "",
+    indexSurname: d.indexSurname ?? "",
+    indexSex: d.indexSex ?? "",   // codeset code — display resolved in Section A
+    indexDob: d.indexDob ?? "",
+    indexAge: d.indexAge != null ? String(d.indexAge) : "",
+    indexPhone: d.indexPhone ?? "",
+    indexAltPhone: d.indexAltPhone ?? "",
+    indexAddress: d.indexAddress ?? "",
 
     contacts: Array.isArray(response.contacts)
       ? response.contacts.map((c) => ({
-          contactCode:         c.contactCode         ?? "",
-          firstName:           c.firstName           ?? "",
-          middleName:          c.middleName          ?? "",
-          surname:             c.surname             ?? "",
-          relationshipToIndex: c.relationshipToIndex ?? "",
-          sex:                 c.sex                 ?? "",
-          phone:               c.phone               ?? "",
-          address:             c.address             ?? "",
-          sameAddressAsIndex:  !!c.sameAddressAsIndex,
-          notificationMethod:  c.notificationMethod  ?? "",
-          followUpLocation:    c.followUpLocation    ?? "",
-          attempts:            c.attempts            != null ? String(c.attempts) : "",
-          knownHivPositive:    c.knownHivPositive    ?? "",
-          hivTestResult:       c.hivTestResult       ?? "",
-          dateTestedHiv:       c.dateTestedHiv       ?? "",
-          dateEnrolledArt:     c.dateEnrolledArt     ?? "",
-          onArt:               c.onArt               ?? "",
-          artClinic:           c.artClinic           ?? "",
-          enrolledInOvc:       !!c.enrolledInOvc,
-          dateEnrolledOvc:     c.dateEnrolledOvc     ?? "",
-          ovcId:               c.ovcId               ?? "",
-        }))
+        contactCode: c.contactCode ?? "",
+        firstName: c.firstName ?? "",
+        middleName: c.middleName ?? "",
+        surname: c.surname ?? "",
+        relationshipToIndex: c.relationshipToIndex ?? "",
+        sex: c.sex ?? "",
+        phone: c.phone ?? "",
+        address: c.address ?? "",
+        sameAddressAsIndex: !!c.sameAddressAsIndex,
+        notificationMethod: c.notificationMethod ?? "",
+        followUpLocation: c.followUpLocation ?? "",
+        attempts: c.attempts != null ? String(c.attempts) : "",
+        knownHivPositive: c.knownHivPositive ?? "",
+        hivTestResult: c.hivTestResult ?? "",
+        dateTestedHiv: c.dateTestedHiv ?? "",
+        dateEnrolledArt: c.dateEnrolledArt ?? "",
+        onArt: c.onArt ?? "",
+        artClinic: c.artClinic ?? "",
+        enrolledInOvc: !!c.enrolledInOvc,
+        dateEnrolledOvc: c.dateEnrolledOvc ?? "",
+        ovcId: c.ovcId ?? "",
+      }))
       : [],
   };
 };
@@ -204,13 +204,19 @@ const IctForm = ({
       if (isEditMode) {
         response = await updateIctEncounter(existingId, payload);
         toast.success("ICT record updated successfully");
+        setIsLoading(false);
+        onSubmitSuccess?.();
+        return
       } else {
         response = await createIctEncounter(payload);
         toast.success("ICT record saved successfully");
+        setIsLoading(false);
+        onSubmitSuccess?.();
+        return
       }
 
-      onSubmitSuccess?.(response);
     } catch (err) {
+      setIsLoading(false);
       const serverMessage =
         err?.response?.data?.message ||
         err?.response?.data?.errors?.[0]?.defaultMessage ||
@@ -218,8 +224,7 @@ const IctForm = ({
         "Unknown error";
       console.error("ICT submission failed:", serverMessage);
       toast.error(`Failed to save ICT record: ${serverMessage}`);
-    } finally {
-      setIsLoading(false);
+      return
     }
   };
 
@@ -236,7 +241,7 @@ const IctForm = ({
       formik.setFieldValue(k, v, false)
     );
 
-    
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
