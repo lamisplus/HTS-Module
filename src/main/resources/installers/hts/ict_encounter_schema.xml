@@ -94,7 +94,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_contact                                              -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_contact_v3_051226" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_contact_v3_051327" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_contact" schemaName="public"/>

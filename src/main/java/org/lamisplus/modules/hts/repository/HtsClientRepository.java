@@ -34,7 +34,7 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
     Optional<HtsClient> findFirstByRiskStratificationCode(String riskStratificationCode);
 
 
-    @Query(value =  "SELECT \n" +
+    @Query(value = "SELECT \n" +
             "    p.hospital_number AS hospitalNumber,\n" +
             "    p.id AS personId,\n" +
             "    p.uuid AS personUuid,\n" +
@@ -91,25 +91,25 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
 
 
-    @Query(value = "SELECT p.hospital_number AS hospitalNumber, p.uuid as personUuid, p.id AS personId,  p.first_name AS firstName, p.surname AS surname,  p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  " +
-            "FROM patient_person p  " +
-            "WHERE  p.archived =  ?1 \n" +
-            "AND NOT EXISTS (\n" +
-            "SELECT 1 \n" +
-            "FROM hts_client hs\n" +
-            "WHERE hs.client_code = p.hospital_number\n" +
-            "AND hs.archived = ?1 \n" +
-            "AND hs.person_uuid is not null AND hs.person_uuid != ''\n" +
-            "AND hs.facility_id =  ?2 \n" +
-            ")" +
-            " AND NOT EXISTS( \n" +
+    @Query(value = "SELECT p.hospital_number AS hospitalNumber, p.uuid as personUuid, p.id AS personId,  p.first_name AS firstName, p.surname AS surname,  \n" +
+            "p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  \n" +
+            "            FROM patient_person p  \n" +
+            "            WHERE  p.archived = ?1 \n" +
+            "            AND NOT EXISTS (\n" +
             "            SELECT 1 \n" +
-            "            FROM hts_client hs \n" +
-            "            WHERE  hs.person_uuid = p.uuid \n" +
-            "            AND hs.archived = ?1 \n" +
-            "            AND hs.person_uuid is not null AND hs.person_uuid != ''\n" +
-            "            AND hs.facility_id =  ?2  \n" +
-            "            ) " , nativeQuery = true)
+            "            FROM hts_encounter hs\n" +
+            "            WHERE hs.client_code = p.hospital_number\n" +
+            "            AND hs.archived = false \n" +
+            "            AND CAST(hs.patient_uuid AS TEXT) is not null AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
+            "            AND hs.facility_id = ?2 \n" +
+            "            )\n" +
+            "            AND NOT EXISTS \n" +
+            "\t\t\t(SELECT 1\n" +
+            "\t\t\t FROM hts_encounter htse\n" +
+            "\t\t\t WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
+            "\t\t\t AND htse.facility_id = ?2\n" +
+            "\t\t\t AND htse.archived = false\n" +
+            "\t\t\t)" , nativeQuery = true)
 
     Page<HtsPerson> findAllPersonHts(Integer archived, Long facilityId, Pageable pageable);
 
