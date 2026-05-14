@@ -107,7 +107,7 @@ const blankClinicalValues = {
   complaintsScroralSwelling: "", complaintsGenitalSores: "", complaintsSwollenLymphNodes: "",
   partnerNewlyDiagnosed: "", partnerPregnantOnArv: "", adolescentHivPositive: "",
   partnerNotRegularlyOnDrugs: "", partnerRecentlyReturnedToTreatment: "",
-  hadSexWithHivPositivePartnerInRiskGroup: "", hivEarlyDetectTestDone: "", hivEarlyDetectResult: "",
+  hadSexWithHivPositivePartnerInRiskGroup: "", typeOfHivTestDone: "", hivEarlyDetectResult: "",
   initialHivTest: "", suspectedAcuteInfection: "", confirmatoryHivTest: "", syphilisTestResult: "",
   recencyTest: "", previouslyTestedThisYear: "", clientReceivedTestResult: "",
   hivTestKitsProvided: "", categoryOfClients: "", acceptedIndexTesting: "", providedFpInfo: "",
@@ -261,7 +261,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup",
   ];
   const diagnosticFields = [
-    "hivEarlyDetectTestDone", "hivEarlyDetectResult", "initialHivTest",
+    "typeOfHivTestDone", "hivEarlyDetectResult", "initialHivTest",
     "suspectedAcuteInfection", "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
   const postTestFields = [

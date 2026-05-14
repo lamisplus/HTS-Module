@@ -464,12 +464,12 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
-    hivEarlyDetectTestDone: yup.string().required("This field is required"),
+    typeOfHivTestDone: yup.string().required("This field is required"),
     hivEarlyDetectResult: yup.mixed().test(
       "earlyDetectResult-conditional",
       "HIV Early Detect Result is required",
       function (value) {
-        if (this.parent.hivEarlyDetectTestDone !== "YES_NO_YES") return true;
+        if (this.parent.typeOfHivTestDone !== "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT") return true;
         return !!value || this.createError({ message: "HIV Early Detect Result is required" });
       }
     ),
@@ -478,7 +478,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Initial HIV test result is required",
       function (value) {
         // Only required on Path B (Early Detect = NO)
-        if (this.parent.hivEarlyDetectTestDone !== "YES_NO_NO") return true;
+        if (this.parent.typeOfHivTestDone !== "TYPE_OF_HIV_TEST_RAPID_ANTIBODY") return true;
         return !!value || this.createError({ message: "Initial HIV test result is required" });
       }
     ),

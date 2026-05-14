@@ -93,7 +93,7 @@ const FIELD_CODESET_MAP = {
   confirmatoryHivTest: "HIV_CONFIRMATORY_TEST_RESULT",
   recencyTest: "RECENCY_TESTING",
   syphilisTestResult: "SYPHILIS_RESULT",
-  hivEarlyDetectTestDone: "YES_NO",
+  typeOfHivTestDone: "TYPE_OF_HIV_TEST",
   suspectedAcuteInfection: "YES_NO",
   hivTestKitsProvided: "YES_NO",
   categoryOfClients: "TARGET_GROUP",
@@ -133,6 +133,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       "HIV_CONFIRMATORY_TEST_RESULT",
       "RECENCY_TESTING",
       "SYPHILIS_RESULT",
+      "TYPE_OF_HIV_TEST",
       "TARGET_GROUP"
     ).then(data => setCodesets(data)).catch(err => console.error("Failed to load codesets", err));
   }, []);
@@ -222,7 +223,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   ];
 
   const diagnosticFields = [
-    "hivEarlyDetectTestDone", "initialHivTest", "suspectedAcuteInfection",
+    "typeOfHivTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
   ];
 

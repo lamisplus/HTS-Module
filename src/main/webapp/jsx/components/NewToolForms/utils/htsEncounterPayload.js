@@ -130,7 +130,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     hadSexWithHivPositivePartnerInRiskGroup,
 
     // Diagnostic Testing
-    hivEarlyDetectTestDone,
+    typeOfHivTestDone,
     hivEarlyDetectResult,
     initialHivTest,
     suspectedAcuteInfection,
@@ -229,7 +229,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     partnerNotRegularlyOnDrugs,
     partnerRecentlyReturnedToTreatment,
     hadSexWithHivPositivePartnerInRiskGroup,
-    hivEarlyDetectTestDone,
+    typeOfHivTestDone,
     hivEarlyDetectResult,
     initialHivTest,
     suspectedAcuteInfection,

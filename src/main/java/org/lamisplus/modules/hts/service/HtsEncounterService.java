@@ -304,7 +304,7 @@ public class HtsEncounterService {
         putStr(obs, "hadSexWithHivPositivePartnerInRiskGroup", r.getHadSexWithHivPositivePartnerInRiskGroup());
 
         // Diagnostic Testing
-        putStr(obs, "hivEarlyDetectTestDone",  r.getHivEarlyDetectTestDone());
+        putStr(obs, "typeOfHivTestDone",  r.getTypeOfHivTestDone());
         putStr(obs, "hivEarlyDetectResult",    r.getHivEarlyDetectResult());
         putStr(obs, "initialHivTest",          r.getInitialHivTest());
         putStr(obs, "suspectedAcuteInfection", r.getSuspectedAcuteInfection());

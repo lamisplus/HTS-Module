@@ -61,7 +61,7 @@ const initialValues = {
   partnerNotRegularlyOnDrugs: "",
   partnerRecentlyReturnedToTreatment: "",
   hadSexWithHivPositivePartnerInRiskGroup: "",
-  hivEarlyDetectTestDone: "",
+  typeOfHivTestDone: "",
   initialHivTest: "",
   suspectedAcuteInfection: "",
   confirmatoryHivTest: "",

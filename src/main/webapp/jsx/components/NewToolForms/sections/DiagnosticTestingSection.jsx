@@ -40,15 +40,17 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       "STI_HIV_RESULT",
       "SYPHILIS_RESULT",
       "HIV_EARLY_DETECT_RESULT",
-      "HIV_CONFIRMATORY_TEST_RESULT"
+      "HIV_CONFIRMATORY_TEST_RESULT",
+      "TYPE_OF_HIV_TEST",
+      "RECENCY_TESTING"
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
   });
 
   // ── Path flags ────────────────────────────────────────────────────────────
-  const earlyDetectDone = values.hivEarlyDetectTestDone === "YES_NO_YES";
-  const earlyDetectNo = values.hivEarlyDetectTestDone === "YES_NO_NO";
+  const earlyDetectDone = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT";
+  const earlyDetectNo = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_RAPID_ANTIBODY";
   const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
 
   const isAcutePath =
@@ -92,7 +94,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   // When Early Detect Done changes, clear downstream fields
   const handleEarlyDetectDoneChange = (e) => {
     const val = e.target.value;
-    setFieldValue("hivEarlyDetectTestDone", val);
+    setFieldValue("typeOfHivTestDone", val);
     // Clear all downstream on path switch
     setFieldValue("hivEarlyDetectResult", "");
     setFieldValue("suspectedAcuteInfection", "");
@@ -172,8 +174,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         {/* Always shown */}
         <div className="col-md-6">
           <FormSelect
-            label="HIV Early Detect Test Done?"
-            {...sp("hivEarlyDetectTestDone", transformOptions(codesets?.["YES_NO"]))}
+            label="Type of HIV Test ?"
+            {...sp("typeOfHivTestDone", transformOptions(codesets?.["TYPE_OF_HIV_TEST"]))}
             onChange={readOnly ? undefined : handleEarlyDetectDoneChange}
           />
         </div>
