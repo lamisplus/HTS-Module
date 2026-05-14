@@ -45,7 +45,7 @@ public class IctEncounterService {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             JsonNode obs = hts.getObservation();
             if (obs == null || !obs.has("confirmatoryHivTest") ||
-                    !"STI_HIV_RESULT_POSITIVE".equals(obs.get("confirmatoryHivTest").asText())) {
+                    !"HIV_CONFIRMATORY_TEST_RESULT_POSITIVE".equals(obs.get("confirmatoryHivTest").asText())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "ICT encounter can only be created for a client with a confirmed positive HIV test result.");
             }

@@ -109,8 +109,8 @@ const useStyles = makeStyles(() => ({
 //   if (!htsValues) return false;
 //   // const sessionMatch = htsValues.typeOfSession.toLowerCase() === "index contact testing";
 //   const positiveResult =
-//     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
-//     // || htsValues.initialHivTest?.toLowerCase() === "positive";
+//     htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
+//     // || htsValues.initialHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 //     // return sessionMatch && positiveResult;
 //     // return true
 //   return positiveResult
@@ -119,7 +119,7 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  return htsValues.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
+  return htsValues.confirmatoryHivTest === "hiv_confirmatory_test_result_positive";
 };
 
 const HtsIctOrchestrator = ({

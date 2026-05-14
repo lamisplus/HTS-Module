@@ -75,8 +75,9 @@ const Home = (props) => {
   const isRDE = hasRole("RDE");
 
   const isEligibleForNewIct = useMemo(() => {
-    return patientInfo?.confirmatoryHivTest?.toLowerCase() === "sti_hiv_result_positive";
+    return patientInfo?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
   }, [patientInfo]);
+  
 
   const calculateLastVisitDate = (visitDate) => {
     if (!visitDate) return 0;

@@ -96,7 +96,7 @@ const NewIctForExistingPatient = ({
 
 
                 const positiveRecord = sortedEncounters.find(
-                    (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "sti_hiv_result_positive"
+                    (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
                 );
 
                 if (!positiveRecord) {

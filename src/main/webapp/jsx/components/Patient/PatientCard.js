@@ -249,11 +249,11 @@ function PatientCard(props) {
                         <div>
                           <Typography variant="caption">
                             {
-                              clientConfirmatoryResult === "sti_hiv_result_positive" ?
+                              clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" ?
                                 (<Label color={"red"} size={"small"}>
                                   Status : Positive
                                 </Label>) :
-                                clientConfirmatoryResult === "sti_hiv_result_negative" ?
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" ?
                                   (
                                     <Label color="teal" size={"small"}>
                                       Status: Negative

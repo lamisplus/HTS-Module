@@ -61,7 +61,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
 
 
   const showCategoryOfClient = values.hivTestKitsProvided === "YES_NO_YES";
-  const showAcceptedIndexTesting = values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
+  const showAcceptedIndexTesting = values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 
   return (
     <div style={{ width: "100%" }}>

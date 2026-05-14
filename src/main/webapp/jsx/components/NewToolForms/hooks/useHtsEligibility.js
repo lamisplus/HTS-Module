@@ -11,7 +11,7 @@ export function checkHtsEligibility(encounters) {
 
   const confirmatoryResult = latest?.observation?.confirmatoryHivTest?.trim().toLowerCase();
 
-  if (confirmatoryResult === "sti_hiv_result_positive") {
+  if (confirmatoryResult === "hiv_confirmatory_test_result_positive") {
     return {
       isEligible: false,
       reason: "Client has a previously documented HIV Positive result and cannot have a new HTS form.",
@@ -19,7 +19,7 @@ export function checkHtsEligibility(encounters) {
     };
   }
 
-  if (confirmatoryResult === "sti_hiv_result_negative") {
+  if (confirmatoryResult === "hiv_confirmatory_test_result_negative") {
     const visitDate = new Date(latest.dateOfVisit);
     const today = new Date();
     const monthsDiff =

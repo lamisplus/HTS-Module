@@ -146,8 +146,8 @@ const useStyles = makeStyles(() => ({
 //   //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
 //   //   htsValues.typeOfSession?.toLowerCase().includes("index");
 //   const positiveResult =
-//     htsValues.confirmatoryHivTest?.toLowerCase() === "positive"
-//   // || htsValues.initialHivTest?.toLowerCase() === "positive";
+//     htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
+//   // || htsValues.initialHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 //   // return sessionMatch && positiveResult;
 //   return positiveResult
 // };
@@ -155,7 +155,7 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  return htsValues.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE";
+  return htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

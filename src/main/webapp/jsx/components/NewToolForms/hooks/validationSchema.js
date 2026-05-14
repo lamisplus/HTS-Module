@@ -503,7 +503,7 @@ export const buildValidationSchema = (isNewPatient) => {
         const { initialHivTest, hivEarlyDetectResult } = this.parent;
         const needsConfirmatory =
           initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
-          hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE"; // ← fixed to use code
+          hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
         if (!needsConfirmatory) return true;
         return !!value || this.createError({ message: "Confirmatory HIV test is required" });
       }
@@ -526,7 +526,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "acceptedIndextesting-conditional",
       "Accepted Index testing is required",
       function (value) {
-        if (this.parent.confirmatoryHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
+        if (this.parent.confirmatoryHivTest?.toLowerCase() !== "hiv_confirmatory_test_result_positive") return true;
         return !!value || this.createError({ message: "Accepted Index testing is required when confirmatory HIV test is positive" });
       }
     ),

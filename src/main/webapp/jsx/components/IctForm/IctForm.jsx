@@ -169,7 +169,7 @@ const IctForm = ({
       try {
         const res = await getHtsEcounter(htsId);
         const obs = res?.data?.observation ?? res?.observation ?? {};
-        if (obs.confirmatoryHivTest !== "STI_HIV_RESULT_POSITIVE") {
+        if (obs.confirmatoryHivTest !== "hiv_confirmatory_test_result_positive") {
           toast.error(
             "ICT can only be created for a client with a confirmed positive HIV test result."
           );

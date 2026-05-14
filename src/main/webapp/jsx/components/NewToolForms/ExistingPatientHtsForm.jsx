@@ -90,7 +90,7 @@ const FIELD_CODESET_MAP = {
   previouslyTestedNegative: "YES_NO",
   timeOfLastNegativeTest: "RECENT_HIV_TEST",
   initialHivTest: "STI_HIV_RESULT",
-  confirmatoryHivTest: "STI_HIV_RESULT",
+  confirmatoryHivTest: "HIV_CONFIRMATORY_TEST_RESULT",
   recencyTest: "RECENCY_TESTING",
   syphilisTestResult: "SYPHILIS_RESULT",
   hivEarlyDetectTestDone: "YES_NO",
@@ -130,6 +130,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       "DURATION_OF_BREASTFEEDING",
       "RECENT_HIV_TEST",
       "STI_HIV_RESULT",
+      "HIV_CONFIRMATORY_TEST_RESULT",
       "RECENCY_TESTING",
       "SYPHILIS_RESULT",
       "TARGET_GROUP"

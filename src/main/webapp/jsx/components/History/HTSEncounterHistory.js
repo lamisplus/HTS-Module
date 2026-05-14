@@ -187,6 +187,9 @@ const HIV_RESULT_MAP = {
   // STI_HIV_RESULT
   "STI_HIV_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "STI_HIV_RESULT_NEGATIVE": { display: "Negative", color: "green" },
+  
+  "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
+  "HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
   // HIV_TEST_RESULT
   "HIV_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "HIV_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },

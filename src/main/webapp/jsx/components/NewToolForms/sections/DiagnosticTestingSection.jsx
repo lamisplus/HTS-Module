@@ -40,6 +40,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       "STI_HIV_RESULT",
       "SYPHILIS_RESULT",
       "HIV_EARLY_DETECT_RESULT",
+      "HIV_CONFIRMATORY_TEST_RESULT"
     ],
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
@@ -47,7 +48,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   // ── Path flags ────────────────────────────────────────────────────────────
   const earlyDetectDone = values.hivEarlyDetectTestDone === "YES_NO_YES";
-  const earlyDetectNo   = values.hivEarlyDetectTestDone === "YES_NO_NO";
+  const earlyDetectNo = values.hivEarlyDetectTestDone === "YES_NO_NO";
   const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
 
   const isAcutePath =
@@ -69,16 +70,16 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     if (earlyDetectDone) {
       if (isAcutePath) return "Suspected Acute Infection";
       if (isAntibodyReactivePath) {
-        if (values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE") return "Positive";
-        if (values.confirmatoryHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
+        if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
+        if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_negative") return "Negative";
       }
       return null;
     }
     if (earlyDetectNo) {
       if (values.initialHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
       if (values.initialHivTest === "STI_HIV_RESULT_POSITIVE") {
-        if (values.confirmatoryHivTest === "STI_HIV_RESULT_POSITIVE") return "Positive";
-        if (values.confirmatoryHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
+        if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
+        if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_negative") return "Negative";
       }
     }
     return null;
@@ -97,7 +98,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     setFieldValue("suspectedAcuteInfection", "");
     setFieldValue("initialHivTest", "");
     setFieldValue("confirmatoryHivTest", "");
-    setFieldValue("recencyTest", ""); 
+    setFieldValue("recencyTest", "");
   };
 
   // When Early Detect Result changes
@@ -151,16 +152,16 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     marginBottom: 16,
     background:
       result === "Positive" ? "#fdecea" :
-      result === "Negative" ? "#e8f5e9" :
-      "#fff3e0",
+        result === "Negative" ? "#e8f5e9" :
+          "#fff3e0",
     color:
       result === "Positive" ? "#c62828" :
-      result === "Negative" ? "#2e7d32" :
-      "#e65100",
+        result === "Negative" ? "#2e7d32" :
+          "#e65100",
     border:
       result === "Positive" ? "1px solid #ef9a9a" :
-      result === "Negative" ? "1px solid #a5d6a7" :
-      "1px solid #ff9800",
+        result === "Negative" ? "1px solid #a5d6a7" :
+          "1px solid #ff9800",
   });
 
   return (
@@ -226,7 +227,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="Confirmatory HIV Test"
-              {...sp("confirmatoryHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+              {...sp("confirmatoryHivTest", transformOptions(codesets?.["HIV_CONFIRMATORY_TEST_RESULT"]))}
             />
           </div>
         )}
