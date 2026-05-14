@@ -70,7 +70,7 @@ const Home = (props) => {
   const isRDE = hasRole("RDE");
 
   const isEligibleForNewIct = useMemo(() => {
-    return patientInfo?.confirmatoryHivTest?.toLowerCase() === "positive";
+    return patientInfo?.confirmatoryHivTest?.toLowerCase() === "sti_hiv_result_positive";
   }, [patientInfo]);
 
   const calculateLastVisitDate = (visitDate) => {
@@ -113,7 +113,7 @@ const Home = (props) => {
 
   useEffect(() => {
     patients();
-    patientsCurrentHts();
+    // patientsCurrentHts();
 
     if (props.activePage.activePage === "home") {
       setKey("home");
@@ -198,11 +198,11 @@ const Home = (props) => {
 
                   {props?.clientEligibility?.isPatientEligibleForHts && (
                     <Tab
-                      eventKey="new-hts-encounter-existing-patient"
+                      eventKey="new"
                       title="NEW HTS"
                     >
                       <Suspense fallback={<LoadingSpinner />}>
-                        {key === "new-hts-encounter-existing-patient" && (
+                        {key === "new" && (
 
                           <NewEncounterHtsIctOrchestrator
                             person={props?.patientObj}   // full object: { personId, personResponseDto, ... }

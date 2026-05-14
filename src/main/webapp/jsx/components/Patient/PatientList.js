@@ -144,7 +144,7 @@ const Patients = (props) => {
                                   },
                                 }}
                               >
-                                <ButtonGroup
+                                {/* <ButtonGroup
                                   variant="contained"
                                   aria-label="split button"
                                   style={{
@@ -153,8 +153,8 @@ const Patients = (props) => {
                                     width: "215px",
                                   }}
                                   size="large"
-                                >
-                                  <Button
+                                > */}
+                                  {/* <Button
                                     color="primary"
                                     size="small"
                                     aria-label="select merge strategy"
@@ -164,7 +164,7 @@ const Patients = (props) => {
                                     }}
                                   >
                                     <MdDashboard />
-                                  </Button>
+                                  </Button> */}
                                   <Button
                                     style={{
                                       backgroundColor: "rgb(153, 46, 98)",
@@ -180,7 +180,7 @@ const Patients = (props) => {
                                       New HTS
                                     </span>
                                   </Button>
-                                </ButtonGroup>
+                                {/* </ButtonGroup> */}
                               </Link>
                             </>
                           )}
