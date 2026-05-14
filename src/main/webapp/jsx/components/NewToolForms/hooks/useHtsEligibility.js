@@ -14,7 +14,7 @@ export function checkHtsEligibility(encounters) {
   if (confirmatoryResult === "hiv_confirmatory_test_result_positive") {
     return {
       isEligible: false,
-      reason: "Client has a previously documented HIV Positive result and cannot have a new HTS form.",
+      reason: "Client has a previously documented HIV Positive result and cannot have a new HTS record.",
       confirmatoryResult
     };
   }
