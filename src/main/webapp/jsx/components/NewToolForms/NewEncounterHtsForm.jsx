@@ -82,7 +82,7 @@ const mapPersonToFormValues = (dto) => {
     phoneNumber: phone,
     clientState: addr?.stateId != null ? String(addr.stateId) : "",
     clientLga: addr?.district != null ? String(addr.district) : "",
-    address: addr?.line?.[0] ?? "",
+    address: addr?.city ?? "",
     landmark: addr?.line?.[0] ?? "",
     clientCode: "",
     patientId: dto?.id != null ? String(dto.id) : "",
