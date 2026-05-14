@@ -113,4 +113,9 @@ public class HtsEncounterRequest {
     private String clientReferredToOtherServices;
     private String completedBy;
     private String designation;
+    private Boolean pmtctHts = false;
+
+    private String source;
+    private String longitude;
+    private String latitude;
 }

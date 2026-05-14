@@ -47,9 +47,23 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
     @Column(name = "setting", length = 50)
     private String setting;
 
+    @Column(name = "pmtct_hts", nullable = false)
+    private Boolean pmtctHts = false;
+
+
+    @Column(name = "source", length = 50, nullable = false)
+    private String source = "web";
+
+    @Column(name = "longitude", length = 50)
+    private String longitude;
+
+    @Column(name = "latitude", length = 50)
+    private String latitude;
     @Type(type = "jsonb")
     @Column(name = "observation", columnDefinition = "jsonb")
     private JsonNode observation;
+
+
 
     @Column(nullable = false)
     private Boolean archived = false;

@@ -65,6 +65,10 @@ public class HtsEncounterService {
         encounter.setDateOfVisit(request.getDateOfVisit());
         encounter.setSetting(request.getSetting());
         encounter.setFacilityId(request.getFacilityId());
+        encounter.setPmtctHts(request.getPmtctHts() != null ? request.getPmtctHts() : false);
+        encounter.setSource(request.getSource() != null ? request.getSource() : "web");
+        encounter.setLongitude(request.getLongitude());
+        encounter.setLatitude(request.getLatitude());
         encounter.setObservation(buildObservation(request));
 
         encounter = repository.save(encounter);
@@ -82,6 +86,10 @@ public class HtsEncounterService {
         if (request.getDateOfVisit() != null) existing.setDateOfVisit(request.getDateOfVisit());
         if (request.getSetting() != null) existing.setSetting(request.getSetting());
         if (request.getFacilityId() != null) existing.setFacilityId(request.getFacilityId());
+        if (request.getPmtctHts() != null) existing.setPmtctHts(request.getPmtctHts());
+        if (request.getSource() != null) existing.setSource(request.getSource());
+        if (request.getLongitude() != null) existing.setLongitude(request.getLongitude());
+        if (request.getLatitude() != null) existing.setLatitude(request.getLatitude());
         existing.setObservation(buildObservation(request));
 
         existing = repository.save(existing);
@@ -355,6 +363,10 @@ public class HtsEncounterService {
         response.setSetting(entity.getSetting());
         response.setObservation(entity.getObservation());
         response.setFacilityId(entity.getFacilityId());
+        response.setPmtctHts(entity.getPmtctHts());
+        response.setSource(entity.getSource());
+        response.setLongitude(entity.getLongitude());
+        response.setLatitude(entity.getLatitude());
         return response;
     }
 }

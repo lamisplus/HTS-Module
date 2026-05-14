@@ -19,4 +19,9 @@ public class HtsEncounterResponse {
     private String setting;
     private JsonNode observation;
     private Long facilityId;
+    private Boolean pmtctHts;
+
+    private String source;
+    private String longitude;
+    private String latitude;
 }

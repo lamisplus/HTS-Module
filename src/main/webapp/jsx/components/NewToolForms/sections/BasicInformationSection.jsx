@@ -603,7 +603,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <Label style={labelStyle}>State of Residence <span style={{ color: "red" }}>*</span></Label>
             <select className="form-control" name="clientState" value={values.clientState || ""}
               onChange={readOnly ? undefined : handleStateChange} onBlur={handleBlur}
-              // disabled={readOnly || loadingStates} style={selectStyle}
+              // disabled={readOnly || loadingStates} 
+              style={selectStyle}
               disabled
               
               >

@@ -249,6 +249,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     clientReferredToOtherServices,
     completedBy,
     designation,
+    pmtctHts: false,
   };
 
   if (!isNewPatient) {
