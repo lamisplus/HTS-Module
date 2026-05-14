@@ -3,6 +3,15 @@ import * as yup from "yup";
 const today = new Date();
 today.setHours(23, 59, 59, 999);
 
+
+const toLocalDateString = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const buildContactSchema = (htsDateOfVisit) => yup.object({
   firstName: yup
     .string()
@@ -33,7 +42,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
       "Date contact tested cannot be earlier than the HTS record's date of visit",
       function (value) {
         if (!value || !htsDateOfVisit) return true;
-        return new Date(value) > new Date(htsDateOfVisit);
+        return toLocalDateString(value) >= toLocalDateString(htsDateOfVisit);
       }
     )
     .when("knownHivPositive", {
@@ -59,7 +68,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
             function (value) {
               const { dateTestedHiv } = this.parent;
               if (!value || !dateTestedHiv) return true;
-              return new Date(value) > new Date(dateTestedHiv);
+              return toLocalDateString(value) >= toLocalDateString(dateTestedHiv);
             }
           ),
       otherwise: (schema) => schema.nullable(),
@@ -92,17 +101,18 @@ export const buildIctValidationSchema = () =>
         const { indexDob } = this.parent;
         console.log("testt//", this.parent)
         if (!value || !indexDob) return true;
-        return new Date(value) > new Date(indexDob);
+        return toLocalDateString(value) >= toLocalDateString(indexDob);
+
       })
       .test("service-not-before-dor", "Visit date cannot be earlier than index client's date of registration", function (value) {
         const { indexDateOfRegistration } = this.parent;
         if (!value || !indexDateOfRegistration) return true;
-        return new Date(value) > new Date(indexDateOfRegistration);
+        return toLocalDateString(value) >= toLocalDateString(indexDateOfRegistration);
       })
       .test("service-not-before-hts-dov", "Visit date cannot be earlier than index client's HTS record date of visit", function (value) {
         const { htsDateOfVisit } = this.parent;
         if (!value || !htsDateOfVisit) return true;
-        return new Date(value) > new Date(htsDateOfVisit);
+        return toLocalDateString(value) >= toLocalDateString(htsDateOfVisit);
       })
       .required("Date of service is required"),
     setting: yup.string().required("Setting is required"),

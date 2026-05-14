@@ -11,6 +11,14 @@ const nonBlankMin2 = (label) =>
       (val) => !!val && val.replace(/\s/g, "").length >= 2
     );
 
+const toLocalDateString = (date) => {
+  const d = date instanceof Date ? date : new Date(date);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 const resolveAge = (parent) => {
   const { dobType, dateOfBirth, age } = parent;
   if (dobType?.toLowerCase() === "estimated") {
@@ -137,7 +145,7 @@ export const buildValidationSchema = (isNewPatient) => {
         function (value) {
           const { dateOfBirth } = this.parent;
           if (!value || !dateOfBirth) return true;
-          return new Date(value) > new Date(dateOfBirth);
+          return toLocalDateString(value) >= toLocalDateString(dateOfBirth);
         }
       )
       .test(
@@ -146,7 +154,7 @@ export const buildValidationSchema = (isNewPatient) => {
         function (value) {
           const { dateOfRegistration } = this.parent;
           if (!value || !dateOfRegistration) return true;
-          return new Date(value) > new Date(dateOfRegistration);
+          return toLocalDateString(value) >= toLocalDateString(dateOfRegistration);
         }
       )
       .required("Date of visit is required"),
