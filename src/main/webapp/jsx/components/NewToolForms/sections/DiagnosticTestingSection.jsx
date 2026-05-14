@@ -1,5 +1,5 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FormSelect, SectionSubheading, ReadOnlyField } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
@@ -89,9 +89,13 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   const finalResult = getFinalResult();
 
+  // 🔁 Update Formik field whenever finalResult changes
+  useEffect(() => {
+    setFieldValue("finalHivTestResult", finalResult || "");
+  }, [finalResult, setFieldValue]);
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  // When Early Detect Done changes, clear downstream fields
   const handleEarlyDetectDoneChange = (e) => {
     const val = e.target.value;
     setFieldValue("typeOfHivTestDone", val);
@@ -103,7 +107,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     setFieldValue("recencyTest", "");
   };
 
-  // When Early Detect Result changes
   const handleEarlyDetectResultChange = (e) => {
     const val = e.target.value;
     setFieldValue("hivEarlyDetectResult", val);
@@ -113,17 +116,14 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       val === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE";
 
     if (acute) {
-      // Lock suspected acute infection to YES and clear confirmatory
       setFieldValue("suspectedAcuteInfection", "YES_NO_YES");
       setFieldValue("confirmatoryHivTest", "");
     } else {
-      // Antibody Reactive — clear suspected acute
       setFieldValue("suspectedAcuteInfection", "");
       setFieldValue("confirmatoryHivTest", "");
     }
   };
 
-  // When Initial HIV Test changes (Path B)
   const handleInitialTestChange = (e) => {
     const val = e.target.value;
     setFieldValue("initialHivTest", val);

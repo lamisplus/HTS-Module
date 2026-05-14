@@ -8,7 +8,6 @@ const initialValues = {
   facilitySetting: "",
   facilityName: "",
   communityEntryPoint: "",
-  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",
@@ -30,7 +29,7 @@ const initialValues = {
   clientState: "",
   clientLga: "",
   address: "",
-  landmark:"",
+  landmark: "",
   previouslyTestedNegative: "",
   timeOfLastNegativeTest: "",
   clientInformedTransmissionRoutes: "",
@@ -67,6 +66,7 @@ const initialValues = {
   confirmatoryHivTest: "",
   syphilisTestResult: "",
   recencyTest: "",
+  finalHivTestResult: "",           // 🆕
   previouslyTestedThisYear: "",
   clientReceivedTestResult: "",
   hivTestKitsProvided: "",
@@ -81,9 +81,9 @@ const initialValues = {
   completedBy: "",
   designation: "",
   sexCode: "",
-  maritalStatusCode:"",
+  maritalStatusCode: "",
   currentOrganisationUnitId: "",
-  patientId: "",   // renamed from personId
+  patientId: "",
 };
 
 export const useNewPatientFormik = (onSubmit) => {

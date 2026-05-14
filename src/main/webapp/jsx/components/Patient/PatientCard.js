@@ -71,6 +71,7 @@ function PatientCard(props) {
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
   const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult.toLowerCase()
+  const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase()
   useEffect(() => {
     PatientCurrentObject();
   }, []);
@@ -249,20 +250,28 @@ function PatientCard(props) {
                         <div>
                           <Typography variant="caption">
                             {
-                              clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" ?
+                              clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
                                 (<Label color={"red"} size={"small"}>
                                   Status : Positive
                                 </Label>) :
-                                clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" ?
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
                                   (
                                     <Label color="teal" size={"small"}>
                                       Status: Negative
                                     </Label>
-                                  ) : (
-                                    <Label color="blue" size={"small"}>
-                                      Status: Not Tested
-                                    </Label>
-                                  )
+                                  ) :
+                                  finalHivTestResult === "suspected acute infection" ?
+                                    (
+                                      <Label color="orange" size={"small"}>
+                                        Status: {finalHivTestResult}
+                                      </Label>
+                                    ) :
+
+                                    (
+                                      <Label color="blue" size={"small"}>
+                                        Status: Not Tested
+                                      </Label>
+                                    )
                             }
                           </Typography>
                         </div>

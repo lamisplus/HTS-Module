@@ -61,7 +61,6 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     facilitySetting,
     facilityName,
     communityEntryPoint,
-    // modality,
     typeOfSession,
     indexTesting,
     indexRelationship,
@@ -137,6 +136,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     confirmatoryHivTest,
     syphilisTestResult,
     recencyTest,
+    finalHivTestResult, 
 
     // Post-Test Counselling
     previouslyTestedThisYear,
@@ -155,7 +155,6 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     currentOrganisationUnitId
   } = formValues;
 
-
   const payload = {
     dateOfVisit,
     clientCode,
@@ -164,7 +163,6 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     facilitySetting,
     facilityName,
     communityEntryPoint,
-    // modality,
     typeOfSession,
     indexTesting,
     indexRelationship,
@@ -178,14 +176,14 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
       ? parseInt(age, 10)
       : dateOfBirth
         ? (() => {
-          const birth = new Date(dateOfBirth);
-          if (isNaN(birth.getTime())) return null;
-          const now = new Date();
-          let years = now.getFullYear() - birth.getFullYear();
-          const m = now.getMonth() - birth.getMonth();
-          if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
-          return years >= 0 ? years : null;
-        })()
+            const birth = new Date(dateOfBirth);
+            if (isNaN(birth.getTime())) return null;
+            const now = new Date();
+            let years = now.getFullYear() - birth.getFullYear();
+            const m = now.getMonth() - birth.getMonth();
+            if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
+            return years >= 0 ? years : null;
+          })()
         : null,
     sex,
     phoneNumber,
@@ -236,6 +234,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     confirmatoryHivTest,
     syphilisTestResult,
     recencyTest,
+    finalHivTestResult,                     // 🆕 included in payload
     previouslyTestedThisYear,
     clientReceivedTestResult,
     hivTestKitsProvided,

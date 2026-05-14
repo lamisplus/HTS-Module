@@ -7,7 +7,6 @@ const defaultValues = {
   setting: "",
   facilitySetting: "",
   communityEntryPoint: "",
-  // modality: "",
   typeOfSession: "",
   indexTesting: "",
   indexRelationship: "",
@@ -66,6 +65,7 @@ const defaultValues = {
   confirmatoryHivTest: "",
   syphilisTestResult: "",
   recencyTest: "",
+  finalHivTestResult: "",           // 🆕
   previouslyTestedThisYear: "",
   clientReceivedTestResult: "",
   hivTestKitsProvided: "",
@@ -82,7 +82,7 @@ const defaultValues = {
   sexCode: "",
   maritalStatusCode: "",
   currentOrganisationUnitId: "",
-  patientId: ""   // renamed from personId
+  patientId: ""
 };
 
 /**

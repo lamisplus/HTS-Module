@@ -309,6 +309,7 @@ public class HtsEncounterService {
         putStr(obs, "initialHivTest",          r.getInitialHivTest());
         putStr(obs, "suspectedAcuteInfection", r.getSuspectedAcuteInfection());
         putStr(obs, "confirmatoryHivTest",     r.getConfirmatoryHivTest());
+        putStr(obs, "finalHivTestResult",     r.getFinalHivTestResult());
         putStr(obs, "syphilisTestResult",      r.getSyphilisTestResult());
         putStr(obs, "recencyTest",             r.getRecencyTest());
 

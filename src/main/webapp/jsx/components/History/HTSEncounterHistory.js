@@ -187,6 +187,9 @@ const HIV_RESULT_MAP = {
   // STI_HIV_RESULT
   "STI_HIV_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "STI_HIV_RESULT_NEGATIVE": { display: "Negative", color: "green" },
+
+  "Positive": { display: "Positive", color: "red" },
+  "Negative": { display: "Negative", color: "red" },
   
   "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
@@ -216,7 +219,12 @@ const SYPHILIS_RESULT_MAP = {
 const SETTING_MAP = {
   // COMMUNITY_HTS_TEST_SETTING
   "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
+  "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE": "Antigen Reactive",
+  "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE": "Antigen + Antibody Reactive",
+  "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE": "Antibody Reactive",
   "COMMUNITY_HTS_TEST_SETTING_CT": "CT",
+  "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT": "Early Detect",
+  "TYPE_OF_HIV_TEST_RAPID_ANTIBODY": "Rapid Antibody",
   "COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES": "Delivery homes",
   "COMMUNITY_HTS_TEST_SETTING_INDEX": "Index",
   "COMMUNITY_HTS_TEST_SETTING_OTHERS": "Others",
@@ -250,8 +258,12 @@ const SETTING_MAP = {
   "ENROLLMENT_SETTING_FACILITY": "Facility",
   // HTS_ENTRY_POINT
   "HTS_ENTRY_POINT_COMMUNITY": "Community",
+  
   "HTS_ENTRY_POINT_FACILITY": "Facility",
   "HTS_ENTRY_POINT_OTHERS": "Others",
+
+  "YES_NO_YES": "Yes",
+  "YES_NO_NO": "No",
 };
 
 /**
@@ -367,16 +379,40 @@ const HTSEncounterHistory = (props) => {
             render: (rowData) => formatSetting(rowData.setting),
           },
           {
+            title: "Type of HIV Test Done",
+            field: "typeOfHivTestDone",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData?.typeOfHivTestDone),
+          },
+          {
+            title: "HIV Early Detect Result",
+            field: "hivEarlyDetectResult",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData?.hivEarlyDetectResult),
+          },
+          {
             title: "Initial HIV Test",
             field: "initialHivTest",
             filtering: false,
-            render: (rowData) => formatHivResult(rowData.initialHivTest),
+            render: (rowData) => formatHivResult(rowData?.initialHivTest),
           },
           {
             title: "Confirmatory HIV Test",
             field: "confirmatoryHivTest",
             filtering: false,
-            render: (rowData) => formatHivResult(rowData.confirmatoryHivTest),
+            render: (rowData) => formatHivResult(rowData?.confirmatoryHivTest),
+          },
+          {
+            title: "Final HIV Test",
+            field: "finalHivTestResult",
+            filtering: false,
+            render: (rowData) => formatHivResult(rowData?.finalHivTestResult),
+          },
+          {
+            title: "Suspected Acute Infection",
+            field: "suspectedAcuteInfection",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData?.suspectedAcuteInfection),
           },
           {
             title: "Syphilis Result",
@@ -428,7 +464,11 @@ const HTSEncounterHistory = (props) => {
           setting: record.setting ?? "",
           initialHivTest: record.observation?.initialHivTest ?? "",
           confirmatoryHivTest: record.observation?.confirmatoryHivTest ?? "",
+          finalHivTestResult: record.observation?.finalHivTestResult ?? "",
           syphilisTestResult: record.observation?.syphilisTestResult ?? "",
+          suspectedAcuteInfection: record.observation?.suspectedAcuteInfection ?? "",
+          hivEarlyDetectResult: record.observation?.hivEarlyDetectResult ?? "",
+          typeOfHivTestDone: record.observation?.typeOfHivTestDone ?? "",
           _raw: record,
         }))}
         options={{
