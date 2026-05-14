@@ -92,24 +92,25 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
 
     @Query(value = "SELECT p.hospital_number AS hospitalNumber, p.uuid as personUuid, p.id AS personId,  p.first_name AS firstName, p.surname AS surname,  \n" +
-            "p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  \n" +
-            "            FROM patient_person p  \n" +
-            "            WHERE  p.archived = ?1 \n" +
-            "            AND NOT EXISTS (\n" +
-            "            SELECT 1 \n" +
-            "            FROM hts_encounter hs\n" +
-            "            WHERE hs.client_code = p.hospital_number\n" +
-            "            AND hs.archived = false \n" +
-            "            AND CAST(hs.patient_uuid AS TEXT) is not null AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
-            "            AND hs.facility_id = ?2 \n" +
+            "   p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  \n" +
+            "\tFROM patient_person p  \n" +
+            "\tWHERE  p.archived = ?1 AND p.facility_id = ?2 \n" +
+            "\t\t\t\tAND NOT EXISTS (\n" +
+            "\t\t\t\t\tSELECT 1 \n" +
+            "\t\t\t\t\tFROM hts_encounter hs\n" +
+            "\t\t\t\t\tWHERE hs.client_code = p.hospital_number\n" +
+            "\t\t\t\t\tAND hs.archived = false \n" +
+            "\t\t\t\t\tAND CAST(hs.patient_uuid AS TEXT) is not null AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
+            "\t\t\t\t\tAND hs.facility_id = ?2 \n" +
+            "\t\t\t\t)\n" +
+            "             AND NOT EXISTS (\n" +
+            "\t\t\t\t SELECT 1\n" +
+            "\t\t\t\t FROM hts_encounter htse\n" +
+            "\t\t\t\t WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
+            "\t\t\t\t AND htse.facility_id = ?2\n" +
+            "\t\t\t\t AND htse.archived = false\n" +
             "            )\n" +
-            "            AND NOT EXISTS \n" +
-            "\t\t\t(SELECT 1\n" +
-            "\t\t\t FROM hts_encounter htse\n" +
-            "\t\t\t WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
-            "\t\t\t AND htse.facility_id = ?2\n" +
-            "\t\t\t AND htse.archived = false\n" +
-            "\t\t\t)" , nativeQuery = true)
+            "\t\t\tORDER BY p.created_date DESC" , nativeQuery = true)
 
     Page<HtsPerson> findAllPersonHts(Integer archived, Long facilityId, Pageable pageable);
 
