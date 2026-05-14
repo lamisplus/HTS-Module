@@ -101,7 +101,7 @@ const Patients = (props) => {
           { title: "Age", field: "age", filtering: false },
 
           //{ title: "ART Number", field: "v_status", filtering: false },
-          { title: "HTS Count", field: "count", filtering: false },
+          // { title: "HTS Count", field: "count", filtering: false },
           { title: "Actions", field: "actions", filtering: false },
         ]}
         data={(query) =>
@@ -125,28 +125,26 @@ const Patients = (props) => {
                       clientCode: row.hospitalNumber,
                       gender: row.gender,
                       age: row.age,
-                      count: (
-                        <Label color="blue" size="mini">
-                          {0}
-                        </Label>
-                      ),
+                      // count: (
+                      //   <Label color="blue" size="mini">
+                      //     {0}
+                      //   </Label>
+                      // ),
                       actions: (
                         <div>
-                          {row.htsCount >= 0 && (
-                            <>
-                              <Link
-                                to={{
-                                  pathname: "/patient-history",
-                                  state: {
-                                    patientObject: row,
-                                    patientObj: row,
-                                    clientCode: row.clientCode,
-                                    activepage: "NEW HTS",
-                                    skipEligibility: true,
-                                  },
-                                }}
-                              >
-                                {/* <ButtonGroup
+                          <Link
+                            to={{
+                              pathname: "/patient-history",
+                              state: {
+                                patientObject: row,
+                                patientObj: row,
+                                clientCode: row.clientCode,
+                                activepage: "NEW HTS",
+                                skipEligibility: true,
+                              },
+                            }}
+                          >
+                            {/* <ButtonGroup
                                   variant="contained"
                                   aria-label="split button"
                                   style={{
@@ -156,7 +154,7 @@ const Patients = (props) => {
                                   }}
                                   size="large"
                                 > */}
-                                {/* <Button
+                            {/* <Button
                                     color="primary"
                                     size="small"
                                     aria-label="select merge strategy"
@@ -167,25 +165,23 @@ const Patients = (props) => {
                                   >
                                     <MdDashboard />
                                   </Button> */}
-                                <Button
-                                  style={{
-                                    backgroundColor: "rgb(153, 46, 98)",
-                                  }}
-                                >
-                                  <span
-                                    style={{
-                                      fontSize: "12px",
-                                      color: "#fff",
-                                      fontWeight: "bolder",
-                                    }}
-                                  >
-                                    New HTS
-                                  </span>
-                                </Button>
-                                {/* </ButtonGroup> */}
-                              </Link>
-                            </>
-                          )}
+                            <Button
+                              style={{
+                                backgroundColor: "rgb(153, 46, 98)",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#fff",
+                                  fontWeight: "bolder",
+                                }}
+                              >
+                                New HTS
+                              </span>
+                            </Button>
+                            {/* </ButtonGroup> */}
+                          </Link>
                         </div>
                       ),
                     })),
