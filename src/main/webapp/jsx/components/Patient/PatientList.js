@@ -141,6 +141,8 @@ const Patients = (props) => {
                                     patientObject: row,
                                     patientObj: row,
                                     clientCode: row.clientCode,
+                                    activepage: "NEW HTS",
+                                    skipEligibility: true,
                                   },
                                 }}
                               >
@@ -154,7 +156,7 @@ const Patients = (props) => {
                                   }}
                                   size="large"
                                 > */}
-                                  {/* <Button
+                                {/* <Button
                                     color="primary"
                                     size="small"
                                     aria-label="select merge strategy"
@@ -165,21 +167,21 @@ const Patients = (props) => {
                                   >
                                     <MdDashboard />
                                   </Button> */}
-                                  <Button
+                                <Button
+                                  style={{
+                                    backgroundColor: "rgb(153, 46, 98)",
+                                  }}
+                                >
+                                  <span
                                     style={{
-                                      backgroundColor: "rgb(153, 46, 98)",
+                                      fontSize: "12px",
+                                      color: "#fff",
+                                      fontWeight: "bolder",
                                     }}
                                   >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        color: "#fff",
-                                        fontWeight: "bolder",
-                                      }}
-                                    >
-                                      New HTS
-                                    </span>
-                                  </Button>
+                                    New HTS
+                                  </span>
+                                </Button>
                                 {/* </ButtonGroup> */}
                               </Link>
                             </>

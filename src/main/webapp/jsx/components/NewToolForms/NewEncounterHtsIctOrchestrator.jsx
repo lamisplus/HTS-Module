@@ -206,7 +206,7 @@ const NewEncounterHtsIctOrchestrator = ({
     if (isIctEligible(formValues)) {
       setIctEligible(true);
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
-      toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+      // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
     }
     // If not eligible, HTS is done and the user can navigate back via onDone.
   };

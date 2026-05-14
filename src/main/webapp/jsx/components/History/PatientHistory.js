@@ -12,6 +12,8 @@ import { useRoles } from "../../../hooks/useRoles";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { toast } from "react-toastify";
 import IctForm from "../IctForm/IctForm";
+import { useLocation } from "react-router-dom";
+
 
 const NewEncounterHtsIctOrchestrator = lazy(() =>
   import("../NewToolForms/NewEncounterHtsIctOrchestrator")
@@ -53,6 +55,9 @@ const Home = (props) => {
   const { hasPermission, hasAnyPermission } = usePermissions();
 
   const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
+  const location = useLocation();
+  const skipEligibility = location?.state?.skipEligibility ?? false;
+
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
@@ -196,11 +201,9 @@ const Home = (props) => {
                   className="mb-3"
                 >
 
-                  {props?.clientEligibility?.isPatientEligibleForHts && (
-                    <Tab
-                      eventKey="new"
-                      title="NEW HTS"
-                    >
+                  {(skipEligibility || props?.clientEligibility?.isPatientEligibleForHts) && (
+                    <Tab eventKey="new" title="NEW HTS">
+
                       <Suspense fallback={<LoadingSpinner />}>
                         {key === "new" && (
 
