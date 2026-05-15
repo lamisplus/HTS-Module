@@ -90,14 +90,22 @@ function PatientCard(props) {
     actionType: "",
   });
 
-  
+  // Controls which tab PatientHistory opens on.
+  // Starts from router state (e.g. "NEW HTS" from PatientList),
+  // but resets to "home" after any update/view action so we never
+  // bounce back to the NEW HTS tab after saving an edit.
+  const [patientHistoryDefaultTab, setPatientHistoryDefaultTab] = useState(
+    history?.location?.state?.activepage ?? "home"
+  );
 
   const handleMoveToHome = () => {
     setActivePage({
       activePage: "home",
       activeObject: {},
       actionType: "",
-    })
+    });
+    // After returning from view/update, land on HTS History — not NEW HTS
+    setPatientHistoryDefaultTab("home");
   }
 
 
@@ -157,11 +165,7 @@ function PatientCard(props) {
           {activePage.activePage === "home" && (
             <PatientHistory
               patientObj={patientObj}
-              activePage={
-                history?.location?.state?.activepage
-                  ? history?.location?.state?.activepage
-                  : "home"
-              }
+              activePage={patientHistoryDefaultTab}
               checkedInPatient={
                 history?.location?.state?.checkedInPatient
                   ? history?.location?.state?.checkedInPatient

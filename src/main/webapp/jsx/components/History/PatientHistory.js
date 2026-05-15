@@ -121,12 +121,9 @@ const Home = (props) => {
     patients();
     // patientsCurrentHts();
 
-    if (props.activePage.activePage === "home") {
-      setKey("home");
-    }
-    if (props.activePage.activePage === "NEW HTS") {
-      setKey("new");
-    }
+    // key is already initialised correctly from props.activePage in useState above.
+    // Do NOT re-derive it here — doing so caused the tab to jump back to "new"
+    // after returning from an update when the router state still held "NEW HTS".
   }, []);
 
   async function patients() {

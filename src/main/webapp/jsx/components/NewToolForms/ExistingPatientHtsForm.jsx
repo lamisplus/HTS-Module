@@ -14,6 +14,7 @@ import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
 import { updateHtsEncounter } from "../../services/updateHtsEncounter";
 import { toast } from "react-toastify";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { getCodesets } from "../../services/getCodesets.service";
 import { convertFieldsToCodes } from "../../../utils";
 
@@ -175,6 +176,40 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   }, [fullRecord?.id, codesets]);
 
   const onSubmit = async (values) => {
+    const isBeingSetToPositive =
+      values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
+
+    // Guard: if this record is being saved as HIV Positive, ensure no OTHER
+    // encounter for the same patient already carries a positive result.
+    // A patient cannot have two HIV-positive records.
+    if (isBeingSetToPositive) {
+      try {
+        const patientId = fullRecord?.patientId;
+        const allEncounters = await getHtsEcounterForAPatient(patientId);
+
+        const conflictingRecord = Array.isArray(allEncounters)
+          ? allEncounters.find(
+              (enc) =>
+                enc.id !== fullRecord?.id && // exclude the record being edited
+                enc?.observation?.confirmatoryHivTest?.toLowerCase() ===
+                  "hiv_confirmatory_test_result_positive"
+            )
+          : null;
+
+        if (conflictingRecord) {
+          toast.error(
+            `Cannot save: another HTS record for this patient (visited ${conflictingRecord.dateOfVisit}) already has an HIV Positive result. A patient cannot have two HIV-positive records.`,
+            { autoClose: 8000 }
+          );
+          return; // abort — do not call the API
+        }
+      } catch (err) {
+        console.error("Failed to validate existing encounters before update:", err);
+        toast.error("Could not verify patient's existing HIV test results. Please try again.");
+        return;
+      }
+    }
+
     const payload = buildHtsEncounterPayload(values, true);
     try {
       setIsLoading(true);
