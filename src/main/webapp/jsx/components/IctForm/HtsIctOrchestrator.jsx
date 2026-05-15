@@ -119,7 +119,7 @@ const useStyles = makeStyles(() => ({
 
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
-  return htsValues.confirmatoryHivTest === "hiv_confirmatory_test_result_positive";
+  return htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 };
 
 const HtsIctOrchestrator = ({
