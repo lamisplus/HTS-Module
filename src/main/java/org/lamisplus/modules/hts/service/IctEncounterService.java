@@ -173,6 +173,7 @@ public class IctEncounterService {
         c.setRelationshipToIndex(cr.getRelationshipToIndex());
         c.setSex(cr.getSex());
         c.setPhone(cr.getPhone());
+        c.setAge(cr.getAge());
         c.setAddress(cr.getAddress());
         c.setSameAddressAsIndex(Boolean.TRUE.equals(cr.getSameAddressAsIndex()));
         c.setNotificationMethod(cr.getNotificationMethod());
@@ -225,6 +226,7 @@ public class IctEncounterService {
         r.setRelationshipToIndex(c.getRelationshipToIndex());
         r.setSex(c.getSex());
         r.setPhone(c.getPhone());
+        r.setAge(c.getAge());
         r.setAddress(c.getAddress());
         r.setSameAddressAsIndex(c.getSameAddressAsIndex());
         r.setNotificationMethod(c.getNotificationMethod());

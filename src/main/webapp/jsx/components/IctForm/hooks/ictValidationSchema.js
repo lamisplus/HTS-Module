@@ -80,6 +80,15 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
       otherwise: (schema) => schema.nullable(),
     }),
 
+  age: yup
+    .number()
+    .typeError("Age must be a number")
+    .required("Age is required")
+    .min(0, "Age cannot be less than 0")
+    .max(130, "Age cannot be greater than 130")
+    .integer("Age must be a whole number"),
+
+
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
     if (!this.parent.enrolledInOvc) return true;
     if (!val) return this.createError({ message: "Date enrolled in OVC is required" });

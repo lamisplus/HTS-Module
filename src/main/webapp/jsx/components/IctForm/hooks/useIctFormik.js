@@ -17,6 +17,7 @@ export const makeBlankContact = (indexClientId, existingCount) => ({
   firstName: "",
   middleName: "",
   surname: "",
+  age: "",
   relationshipToIndex: "",
   sex: "",
   phone: "",

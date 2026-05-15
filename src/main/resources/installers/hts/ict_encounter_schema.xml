@@ -6,7 +6,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_encounter                                            -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_encounter_v3_05152602" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_encounter_v3_05152605" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_encounter" schemaName="public"/>
@@ -26,6 +26,7 @@
             <column name="id" type="BIGSERIAL" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+
 
             <column name="uuid" type="UUID" defaultValueComputed="gen_random_uuid()">
                 <constraints nullable="false" unique="true"/>
@@ -94,36 +95,13 @@
     <!-- ============================================================ -->
     <!-- hts_ict_contact                                              -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_contact_v3_05152602" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_contact_v3_05152605" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_contact" schemaName="public"/>
             </not>
         </preConditions>
-        <comment>
-            V3 — Fresh install only.
-            Changes from V2:
-            - uuid:               VARCHAR(36) → UUID with gen_random_uuid() default (DB-generated)
-            - contact_id:         renamed to contact_code
-            - contact_age:        REMOVED (item 5)
-            - contact_age_group:  REMOVED (item 5)
-            - archived:           INT → BOOLEAN
-            - contact_* prefix/suffix columns renamed (item 6):
-            firstname_of_contact  → first_name
-            middlename_of_contact → middle_name
-            surname_of_contact    → surname
-            contact_sex           → sex
-            contact_phone         → phone
-            contact_address       → address
-            contact_art_clinic    → art_clinic
-            contact_on_art        → on_art
-            - contact_id kept as contact_code (item 7)
-            - relationship_to_index, same_address_as_index,
-            notification_method, follow_up_location, attempts,
-            known_hiv_positive, hiv_test_result, date_tested_hiv,
-            date_enrolled_art, enrolled_in_ovc, date_enrolled_ovc,
-            ovc_id — unchanged (no contact prefix/suffix)
-        </comment>
+
 
         <createTable tableName="hts_ict_contact">
             <column name="id" type="BIGSERIAL" autoIncrement="true">
@@ -161,19 +139,20 @@
             <!-- Renamed: contact_sex → sex (item 6) -->
             <column name="sex" type="VARCHAR(20)"/>
 
-            <!-- contact_age_group REMOVED (item 5) -->
-            <!-- contact_age       REMOVED (item 5) -->
 
-            <!-- Renamed: contact_phone → phone (item 6) -->
+
             <column name="phone" type="VARCHAR(20)"/>
 
             <column name="same_address_as_index" type="BOOLEAN" defaultValueBoolean="false"/>
 
-            <!-- Renamed: contact_art_clinic → art_clinic (item 6) -->
             <column name="art_clinic" type="TEXT"/>
 
-            <!-- Renamed: contact_address → address (item 6) -->
             <column name="address" type="TEXT"/>
+
+            <column name="age" type="INT">
+                <constraints nullable="true"/>
+            </column>
+
 
             <column name="notification_method" type="VARCHAR(100)"/>
             <column name="follow_up_location" type="VARCHAR(100)"/>
@@ -183,7 +162,6 @@
             <column name="date_tested_hiv" type="DATE"/>
             <column name="date_enrolled_art" type="DATE"/>
 
-            <!-- Renamed: contact_on_art → on_art (item 6) -->
             <column name="on_art" type="VARCHAR(40)"/>
 
             <column name="enrolled_in_ovc" type="BOOLEAN" defaultValueBoolean="false"/>

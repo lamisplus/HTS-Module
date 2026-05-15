@@ -228,6 +228,55 @@ const ContactCard = ({
         <div className="col-md-4"><FormTextField label="Middle Name of Contact" {...fp("middleName")} /></div>
         <div className="col-md-4"><FormTextField label="Surname of Contact" {...fp("surname")} required /></div>
         <div className="col-md-4">
+          <FormGroup style={{ marginBottom: "16px" }}>
+            <Label style={labelStyle}>
+              Age <span style={{ color: "red" }}>*</span>
+            </Label>
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="\d*"
+              value={val("age")}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const digitsOnly = raw.replace(/\D/g, "");
+                if (digitsOnly === "") {
+                  set("age", "");
+                } else {
+                  const intVal = parseInt(digitsOnly, 10);
+                  set("age", intVal.toString());
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "." || e.key === "e" || e.key === "E") {
+                  e.preventDefault();
+                }
+                if (e.key === "-") {
+                  e.preventDefault();
+                }
+              }}
+              onBlur={() => {
+                const current = val("age");
+                if (current !== "") {
+                  let num = parseInt(current, 10);
+                  if (isNaN(num)) {
+                    set("age", "");
+                  } else {
+                    if (num < 0) num = 0;
+                    if (num > 120) num = 120;
+                    set("age", num.toString());
+                  }
+                }
+              }}
+              placeholder="0 - 120"
+              disabled={readOnly}
+              style={readOnly ? disabledInputStyle : inputStyle}
+            />
+            {touched.age && errors.age && <span style={errorStyle}>{errors.age}</span>}
+          </FormGroup>
+        </div>
+
+        <div className="col-md-4">
           <FormSelect
             label="Relationship to Index Client"
             {...sp("relationshipToIndex", transformOptions(codesets?.["RELATIONSHIP_CONTACT"]))}

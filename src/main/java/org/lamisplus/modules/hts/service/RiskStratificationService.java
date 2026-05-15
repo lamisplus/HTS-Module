@@ -53,7 +53,8 @@ public class RiskStratificationService {
 
     public String getFacilityShortCode(){
         String query = "select code from base_organisation_unit_identifier " +
-                "where organisation_unit_id = ? and name = 'SHORT_CODE' ";
+                "where organisation_unit_id = ? " +
+                "and name IN ('SHORT_CODE', 'DATIM_ID')";
         return jdbcTemplate.queryForObject(
                 query, new Object[] {currentFacility.getCurrentUserOrganization()}, String.class
         );

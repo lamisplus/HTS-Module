@@ -89,6 +89,9 @@ public class IctContact extends Audit<IctContact> implements Serializable {
     @Column(name = "hiv_test_result", length = 20)
     private String hivTestResult;
 
+    @Column(name = "age")
+    private Integer age;
+
     @Column(name = "date_tested_hiv")
     private LocalDate dateTestedHiv;
 

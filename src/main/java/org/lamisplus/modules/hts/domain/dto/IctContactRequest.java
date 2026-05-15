@@ -3,6 +3,8 @@ package org.lamisplus.modules.hts.domain.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
@@ -32,7 +34,10 @@ public class IctContactRequest {
     private String sex;
 
     // contactAgeGroup REMOVED (item 5)
-    // contactAge      REMOVED (item 5)
+    // contactAge REMOVED (item 5)
+    @Min(0)
+    @Max(130)
+    private Integer age;
 
     // Renamed from contactPhone → phone (item 6)
     private String phone;

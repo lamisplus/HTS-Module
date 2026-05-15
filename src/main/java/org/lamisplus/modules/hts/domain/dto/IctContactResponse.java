@@ -36,6 +36,7 @@ public class IctContactResponse {
     private LocalDate dateEnrolledArt;
     // Renamed from contactOnArt → onArt (item 6)
     private String onArt;
+    private Integer age;
     // Renamed from contactArtClinic → artClinic (item 6)
     private String artClinic;
     private Boolean enrolledInOvc;

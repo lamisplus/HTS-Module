@@ -28,6 +28,7 @@ const IctSectionB = ({
   lockReason,
   readOnly = false,
 }) => {
+  console.log(formik)
   const { values, setFieldValue, errors, touched } = formik;
   const contacts = values.contacts || [];
 

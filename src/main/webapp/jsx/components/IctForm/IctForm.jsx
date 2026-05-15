@@ -93,6 +93,7 @@ const mapIctResponseToFormValues = (response) => {
     clientCategory: response.clientCategory ?? "",
     offeredPns: response.offeredPns ?? "",
     acceptedPns: response.acceptedPns ?? "",
+    
 
     // These are stored in the encounter's data JSONB
     facilityName: d.facilityName ?? "",
@@ -134,6 +135,7 @@ const mapIctResponseToFormValues = (response) => {
         dateTestedHiv: c.dateTestedHiv ?? "",
         dateEnrolledArt: c.dateEnrolledArt ?? "",
         onArt: c.onArt ?? "",
+        age: c.age != null ? String(c.age) : "",
         artClinic: c.artClinic ?? "",
         enrolledInOvc: !!c.enrolledInOvc,
         dateEnrolledOvc: c.dateEnrolledOvc ?? "",
