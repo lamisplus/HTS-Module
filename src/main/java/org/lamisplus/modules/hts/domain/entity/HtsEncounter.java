@@ -52,7 +52,7 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
 
 
     @Column(name = "source", length = 50, nullable = false)
-    private String source = "web";
+    private String source = "Web";
 
     @Column(name = "longitude", length = 50)
     private String longitude;

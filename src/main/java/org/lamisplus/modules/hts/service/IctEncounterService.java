@@ -181,6 +181,7 @@ public class IctEncounterService {
         c.setKnownHivPositive(cr.getKnownHivPositive());
         c.setHivTestResult(cr.getHivTestResult());
         c.setDateTestedHiv(cr.getDateTestedHiv());
+        c.setDateEnrolledArt(cr.getDateEnrolledArt());
         c.setArtClinic(cr.getArtClinic());
         c.setOnArt(cr.getOnArt());
         c.setEnrolledInOvc(Boolean.TRUE.equals(cr.getEnrolledInOvc()));
