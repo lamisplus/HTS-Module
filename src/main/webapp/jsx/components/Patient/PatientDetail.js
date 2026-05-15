@@ -13,6 +13,13 @@ import PatientHtsEnrollment from "./PatientHtsEnrollment";
 import ViewEditHivst from "../Patient/HIVST/ViewEditHivst";
 import { calculate_age } from "../utils";
 import moment from "moment";
+import ExistingPatientHtsForm from "../NewToolForms/ExistingPatientHtsForm";
+import HtsIctOrchestrator from "../IctForm/HtsIctOrchestrator";
+import IctForm from "../IctForm/IctForm";
+import { useHtsEligibility } from "../NewToolForms/hooks/useHtsEligibility";
+import { toast } from "react-toastify";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+
 
 const styles = (theme) => ({
   root: {
@@ -54,31 +61,79 @@ function PatientCard(props) {
   let history = useHistory();
 
 
+  const [personInfo, setPersonInfo] = useState(null)
+  const [encounters, setEncounters] = useState(null);
+  const [isLoadingEncounters, setIsLoadingEncounters] = useState(false);
+//fetch full patient record here
   const patientObject =
     history.location && history.location.state
       ? history.location.state.patientObject
       : {};
+
   const patientObj =
     history.location && history.location.state
       ? history.location.state.patientObj
       : {};
 
-   
+
   const clientCode =
     history.location && history.location.state
       ? history.location.state.clientCode
       : "";
 
 
-      const [personInfo, setPersonInfo]=useState({})
+  const patientId = patientObj?.personId || patientObject?.personId || patientObj?.person?.id || patientObject?.person?.id
+
   const [activePage, setActivePage] = useState({
     activePage: "home",
     activeObject: {},
     actionType: "",
   });
-  useEffect(() => {}, [activePage]);
+
+  // Controls which tab PatientHistory opens on.
+  // Starts from router state (e.g. "NEW HTS" from PatientList),
+  // but resets to "home" after any update/view action so we never
+  // bounce back to the NEW HTS tab after saving an edit.
+  const [patientHistoryDefaultTab, setPatientHistoryDefaultTab] = useState(
+    history?.location?.state?.activepage ?? "home"
+  );
+
+  const handleMoveToHome = () => {
+    setActivePage({
+      activePage: "home",
+      activeObject: {},
+      actionType: "",
+    });
+    // After returning from view/update, land on HTS History — not NEW HTS
+    setPatientHistoryDefaultTab("home");
+  }
+
+
+  const fetchEncounters = async () => {
+    setIsLoadingEncounters(true);
+    try {
+      const data = await getHtsEcounterForAPatient(patientId);
+      setEncounters(Array.isArray(data) ? data : []);
+      setPersonInfo(Array.isArray(data) ? data?.[0]?.person : null)
+    } catch {
+      toast.error("Failed to load HTS encounter history.");
+    } finally {
+      setIsLoadingEncounters(false);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchEncounters()
+
+  }, [activePage]);
   const patientAge = calculate_age(
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
+  );
+
+  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult } = useHtsEligibility(
+    encounters,
+    isLoadingEncounters
   );
 
   return (
@@ -96,51 +151,82 @@ function PatientCard(props) {
           </li>
         </ol>
       </div>
+
       <Card>
         <CardContent>
           <PatientCardDetail
-            patientObj={patientObj}
-            clientCode={clientCode}
-            patientObject={patientObject}
+            patientObj={personInfo || patientObj || patientObject}
+            clientCode={patientObject?.clientCode || patientObj?.clientCode || encounters?.[0]?.observation?.clientCode || ""}
+            patientObject={personInfo || patientObject || patientObj}
             setPersonInfo={setPersonInfo}
+            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult }}
           />
+
           {activePage.activePage === "home" && (
             <PatientHistory
               patientObj={patientObj}
-              activePage={
-                history?.location?.state?.activepage
-                  ? history?.location?.state?.activepage
-                  : "home"
-              }
+              activePage={patientHistoryDefaultTab}
               checkedInPatient={
                 history?.location?.state?.checkedInPatient
                   ? history?.location?.state?.checkedInPatient
                   : ""
               }
               setActivePage={setActivePage}
-              clientCode={clientCode}
-              patientAge={patientObj.age}
-              patientObject={patientObject}
-              personInfo={personInfo}
+              clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
+              patientAge={patientObj?.data?.age}
+              clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
             />
           )}
-          {activePage.activePage === "view" && (
-            <PatientHtsEnrollment
-              patientObj={patientObj}
-              activePage={activePage}
-              setActivePage={setActivePage}
-              clientCode={clientCode}
-              patientAge={patientObj.age}
-              patientObject={patientObject}
+
+
+          {activePage.actionType === "view" && (
+            <ExistingPatientHtsForm
+              readOnly
+              initialValues={patientObj?.data}
+              fullRecord={activePage?.activeObject}
+              backButtonAction={handleMoveToHome}
             />
           )}
+
+
+          {activePage.activePage === "update" && (
+            <ExistingPatientHtsForm
+              readOnly={false}
+              initialValues={patientObj?.data}
+              backButtonAction={handleMoveToHome}
+              fullRecord={activePage?.activeObject}
+
+            />
+          )}
+
+          {
+            activePage.activePage === "ict-view" && (
+              <IctForm
+                initialValues={activePage.activeObject}
+                onBack={handleMoveToHome}
+                onSubmitSuccess={handleMoveToHome}
+                existingId={activePage.activeObject?.id}
+                readOnly
+              />
+            )}
+
+          {
+            activePage.activePage === "ict-update" && (
+              <IctForm
+                initialValues={activePage.activeObject}
+                onBack={handleMoveToHome}
+                onSubmitSuccess={handleMoveToHome}
+                existingId={activePage.activeObject?.id}
+              />
+            )}
 
           {activePage.activePage === "hivst_view" && (
             <ViewEditHivst
               patientObj={patientObj}
               activePage={activePage}
               setActivePage={setActivePage}
-              clientCode={clientCode}
+              // clientCode={clientCode}
+              clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
               patientAge={patientAge}
               patientObject={patientObject}
             />

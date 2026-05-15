@@ -103,7 +103,7 @@ const ClientRefferalForm = (props) => {
   const [errors, setErrors] = useState({});
   const [ageDisabled, setAgeDisabled] = useState(true);
   const [saving, setSaving] = useState(false);
-  let temp = {...errors};
+  let temp = { ...errors };
   const [open, setOpen] = React.useState(false);
   const toggle = () => setOpen(!open);
   const [setting, setSetting] = useState([]);
@@ -115,60 +115,7 @@ const ClientRefferalForm = (props) => {
 
 
   const [contentDropDown, setContentDropDown] = useState("");
-  // const [formInfo, setFormInfo] = useState({
-  //   dateVisit: "",
-  //   firstName: props?.patientObj?.personResponseDto?.firstName,
-  //   middleName:  props?.patientObj?.personResponseDto?.otherName,
-  //   lastName:  props?.patientObj?.personResponseDto?.surname,
-  //   hospitalNumber:props.patientObj?.personResponseDto?.identifier?.identifier[0]?.value,
-  //   countryId: "1",
-  //   stateId: props?.patientObj?.personResponseDto?.address?.address[0]?.stateId,
-  //   province: Number(props?.patientObj?.personResponseDto?.address?.address[0]?.district) ,
-  //   address: props?.patientObj?.personResponseDto?.address?.address[0]?.city,
-  //   landmark: "",
-  //   phoneNumber:  props?.patientObj?.personResponseDto?.contactPoint?.contactPoint[0]?.value,
-  //   sexId:  props?.patientObj?.personResponseDto?.gender?.id,
-  //   dob: props?.patientObj.personResponseDto?.dateOfBirth,
-  //   age:  "",
-  //   dateOfBirth:props?.patientObj.personResponseDto?.dateOfBirth,
-  //   hivStatus:props?.patientObj?.hivTestResult2 ? props?.patientObj?.hivTestResult2 :
-  //       props?.patientObj?.hivTestResult ? props?.patientObj?.hivTestResult : "",
-  //   referredFromFacility: "",
-  //   nameOfPersonReferringClient: "",
-  //   nameOfReferringFacility: Cookies.get("facilityName"),
-  //   addressOfReferringFacility: "",
-  //   phoneNoOfReferringFacility: "",
-  //   referredTo: "",
-  //   nameOfContactPerson: "",
-  //   nameOfReceivingFacility: "",
-  //   addressOfReceivingFacility: "",
-  //   phoneNoOfReceivingFacility: "",
-  //   isDateOfBirthEstimated: false,
-  //   serviceNeeded: "",
-  //   comments: "",
-  //   receivingStateFacility: "",
-  //   receivingLgaFacility: "",
-  //   htsClientId: props && props.patientObj ? props.patientObj?.id : "",
-  //   htsClientUuid:props && props.patientObj ? props.patientObj?.uuid : ""
-  // });
-  // const viewReferralInfo = () => {
-  //   axios
-  //       .get(`${baseUrl}hts-client-referral/${props.row.row.id}`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       })
-  //       .then((response) => {
-  //         // setObjValues(response.data);
-  //         console.log(" form information", response.data);
-  //         // setFormInfo(response.data);
-  //         // setReceivingOrganization(response.data.receivingOrganization);
-  //       })
-  //       .catch((error) => {
-  //         //console.log(error);
-  //       });
-  // };
-  // useEffect(() => {
-  //   viewReferralInfo();
-  // }, []);
+ 
 
   const handleContentChange = (e) => {
     setContentDropDown(e.target.value);
@@ -188,77 +135,77 @@ const ClientRefferalForm = (props) => {
   };
 
   return (
-      <>
-        <div>
-          <div className="form-group  col-md-8">
-            <FormGroup>
-              <Label>
-                Referral Type <span style={{ color: "red" }}> *</span>
-              </Label>
-              <select
-                  className="form-control"
-                  name="contentDropDown"
-                  id="contentDropDown"
-                  onChange={handleContentChange}
-                  style={{
-                    border: "1px solid #014D88",
-                    borderRadius: "0.2rem",
-                  }}
-              >
-                <option value={""}>Select Refarral form type</option>
-                <option value={"showReferringUnit"}>Referral form</option>
-                <option value={"showServiceProviderUnit"}>
-                  Service Provider form
-                </option>
-              </select>
-            </FormGroup>
-          </div>
-        </div>
-        <Card className={classes.root}>
-          {content.showReferringUnit
-              && <RefferralUnit
-                  patientObj={patientObj}
-                  // formInfo={formInfo}
-                  // row={props.row}
-                  handleClicked={props.handleClicked}
-              />}
-          {content.showServiceProviderUnit && (
-              <CardBody>
-                <ServicesProvided
-                    patientObj = {patientObj}
-                    // formInfo={props.formInfo}
-                    // row={props.row}
-                />
-              </CardBody>
-          )}
-          {/* recieving facility  */}
-        </Card>
-        <Modal
-            show={open}
-            toggle={toggle}
-            className="fade"
-            size="lg"
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-        >
-          <Modal.Header>
-            <Modal.Title id="contained-modal-title-vcenter">
-              Notification!
-            </Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <h4>Are you Sure of the Age entered?</h4>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-                onClick={toggle}
-                style={{ backgroundColor: "#014d88", color: "#fff" }}
+    <>
+      <div>
+        <div className="form-group  col-md-8">
+          <FormGroup>
+            <Label>
+              Referral Type <span style={{ color: "red" }}> *</span>
+            </Label>
+            <select
+              className="form-control"
+              name="contentDropDown"
+              id="contentDropDown"
+              onChange={handleContentChange}
+              style={{
+                border: "1px solid #014D88",
+                borderRadius: "0.2rem",
+              }}
             >
-              Yes
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      </>
+              <option value={""}>Select Refarral form type</option>
+              <option value={"showReferringUnit"}>Referral form</option>
+              <option value={"showServiceProviderUnit"}>
+                Service Provider form
+              </option>
+            </select>
+          </FormGroup>
+        </div>
+      </div>
+      <Card className={classes.root}>
+        {content.showReferringUnit
+          && <RefferralUnit
+            patientObj={patientObj}
+            // formInfo={formInfo}
+            // row={props.row}
+            handleClicked={props.handleClicked}
+          />}
+        {content.showServiceProviderUnit && (
+          <CardBody>
+            <ServicesProvided
+              patientObj={patientObj}
+            // formInfo={props.formInfo}
+            // row={props.row}
+            />
+          </CardBody>
+        )}
+        {/* recieving facility  */}
+      </Card>
+      <Modal
+        show={open}
+        toggle={toggle}
+        className="fade"
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Notification!
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h4>Are you Sure of the Age entered?</h4>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            onClick={toggle}
+            style={{ backgroundColor: "#014d88", color: "#fff" }}
+          >
+            Yes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 

@@ -25,7 +25,8 @@ import { Modal } from "react-bootstrap";
 //import { objectValues } from "react-toastify/dist/utils";
 import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
-const useStyles = makeStyles((theme) => ({
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
+const useStyles = makeStyles(theme => ({
   card: {
     margin: theme.spacing(20),
     display: "flex",
@@ -90,24 +91,27 @@ const useStyles = makeStyles((theme) => ({
     fontSize: "12.8px",
   },
 }));
+const indexSettingGroup = new Set([
+  "FACILITY_HTS_TEST_SETTING_INDEX",
+  "COMMUNITY_HTS_TEST_SETTING_INDEX",
+]);
 // THIS IS THE VIEW AND UPDATE PAGE
-const BasicInfo = (props) => {
+const BasicInfo = props => {
   const classes = useStyles();
   const history = useHistory();
-  //console.log("enr", props.activePage.activeObject);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
-  //const [hideNumChild, setHideNumChild] = useState(false);
   const [kP, setKP] = useState([]);
   const [enrollSetting, setEnrollSetting] = useState([]);
- 
+
   const [sourceReferral, setSourceReferral] = useState([]);
   const [gender, setGender] = useState([]);
   const [counselingType, setCounselingType] = useState([]);
   const [pregnancyStatus, setPregnancyStatus] = useState([]);
   const [indexTesting, setIndexTesting] = useState([]);
   let temp = { ...errors };
-  //console.log(props?.patientObj?.dateVisit)
+
+  const [, setCodsets] = useState({});
   const [modalityCheck, setModalityCheck] = useState("");
   const [objValues, setObjValues] = useState({
     active: true,
@@ -155,172 +159,21 @@ const BasicInfo = (props) => {
   });
 
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    CounselingType();
-    PregnancyStatus();
-    IndexTesting();
     setObjValues({
       ...props.activePage.activeObject,
       testingSetting:
-        props.activePage.activeObject.riskStratificationResponseDto
-          .testingSetting,
+        props.activePage.activeObject?.testingSetting ||
+        props.activePage.activeObject?.riskStratificationResponseDto
+          ?.testingSetting,
     });
-
-    // if(props.patientObj){
-    //     objValues.referredFrom=props.patientObj.referredFrom
-    // }
-    //setObjValues({...objectValues, genderId: props.patientObj.personResponseDto.gender.id})
-    //objValues.genderId = props.patientObj && props.patientObj.personResponseDto ? props.patientObj.personResponseDto.gender.id : ""
     setModalityCheck(
       getCheckModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
       )
     );
   }, [props.patientObj]);
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
 
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
-
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    if (
-      props.patientObj.riskStratificationResponseDto.entryPoint.includes(
-        "HTS_ENTRY_POINT_COMMUNITY"
-      )
-    ) {
-      HTS_ENTRY_POINT_COMMUNITY();
-    } else if (
-      props.patientObj.riskStratificationResponseDto.entryPoint.includes(
-        "HTS_ENTRY_POINT_FACILITY"
-      )
-    ) {
-      HTS_ENTRY_POINT_FACILITY();
-    } else {
-      setEnrollSetting([]);
-    }
-  };
-
-  //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setGender(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     if (e.target.name === "numChildren") {
       if (e.target.value >= 0) {
         setObjValues({ ...objValues, [e.target.name]: e.target.value });
@@ -357,20 +210,6 @@ const BasicInfo = (props) => {
     setErrors({ ...temp, [e.target.name]: "" });
   };
 
-  const handleClientCodeCheck = (e) => {
-    axios
-      .get(`${baseUrl}hts/clientCodeCheck`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setGender(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  /*****  Validation  */
   const validate = () => {
     //HTS FORM VALIDATION
 
@@ -387,8 +226,15 @@ const BasicInfo = (props) => {
       objValues.referredFrom !== "" ? "" : "This field is required.";
     temp.previouslyTested =
       objValues.previouslyTested !== "" ? "" : "This field is required.";
-    temp.indexClient =
-      objValues.indexClient !== "" ? "" : "This field is required.";
+
+    // Only validate indexClient field when testingSetting is INDEX setting
+    // Index fields are shown when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX
+    const shouldShowIndexFields = isIndexTestingSetting();
+    if (shouldShowIndexFields) {
+      temp.indexClient =
+        objValues.indexClient !== "" ? "" : "This field is required.";
+    }
+
     temp.firstTimeVisit =
       objValues.firstTimeVisit !== "" ? "" : "This field is required.";
     temp.dateVisit = objValues.dateVisit ? "" : "This field is required.";
@@ -398,18 +244,22 @@ const BasicInfo = (props) => {
       (temp.pregnant =
         objValues.pregnant !== "" ? "" : "This field is required.");
 
-    objValues.indexClient === "true" &&
+    // Only validate index client related fields when INDEX setting and indexClient is true
+    shouldShowIndexFields &&
+      (objValues.indexClient === "true" || objValues.indexClient === true) &&
       (temp.relationWithIndexClient =
         objValues.relationWithIndexClient !== ""
           ? ""
           : "This field is required.");
 
-    objValues.indexClient === "true" &&
+    shouldShowIndexFields &&
+      (objValues.indexClient === "true" || objValues.indexClient === true) &&
       (temp.indexClientCode =
         objValues.indexClientCode !== "" ? "" : "This field is required.");
     setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
+    return Object.values(temp).every(x => x == "");
   };
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -418,9 +268,7 @@ const BasicInfo = (props) => {
     }
   };
 
- 
   const shouldHideMaritalFields = () => {
-    
     const isPediatricAndUnder15 =
       objValues.testingSetting === "FACILITY_HTS_TEST_SETTING_PEDIATRIC" &&
       props.patientAge < 15;
@@ -432,7 +280,25 @@ const BasicInfo = (props) => {
     return isPediatricAndUnder15 || isTargetGroupPDorChildrenKP;
   };
 
-  const handleSubmit = (e) => {
+  // Helper function to check if testing setting is INDEX (show index testing fields for these settings)
+
+  const isIndexTestingSetting = () => {
+    const objSetting = objValues?.testingSetting;
+    const testingSetting =
+      props?.patientObj?.riskStratificationResponseDto?.testingSetting;
+
+    // If objSetting is not in the index group, return false immediately
+    if (!indexSettingGroup.has(objSetting)) {
+      return false;
+    }
+
+    // Otherwise check if either testingSetting or objSetting is in the index group
+    return (
+      indexSettingGroup.has(testingSetting) || indexSettingGroup.has(objSetting)
+    );
+  };
+
+  const handleSubmit = e => {
     e.preventDefault();
     let latestForm = getNextForm(
       "Client_intake_form",
@@ -449,7 +315,7 @@ const BasicInfo = (props) => {
         extra: {},
         id: objValues.id,
         firstTimeVisit: objValues.firstTimeVisit,
-        indexClient: objValues.indexClient,
+        indexClient: objValues.indexClient || "false",
         numChildren: objValues.numChildren,
         numWives: objValues.numWives,
         personId: props.patientObj.personId,
@@ -474,13 +340,13 @@ const BasicInfo = (props) => {
           .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
             headers: { Authorization: `Bearer ${token}` },
           })
-          .then((response) => {
+          .then(response => {
             setSaving(false);
             props.setPatientObj(response.data);
             toast.success("HTS Test successful");
             handleItemClick(latestForm[0], latestForm[1]);
           })
-          .catch((error) => {
+          .catch(error => {
             setSaving(false);
             if (error.response && error.response.data) {
               let errorMessage =
@@ -501,6 +367,56 @@ const BasicInfo = (props) => {
       handleItemClick(latestForm[0], latestForm[1]);
     }
   };
+
+  const loadCodesets = data => {
+    setCodsets(data);
+    setKP(data["TARGET_GROUP"]);
+    setIndexTesting(data["INDEX_TESTING"]);
+    setPregnancyStatus(data["PREGNANCY_STATUS"]);
+    setCounselingType(data["COUNSELING_TYPE"]);
+    setSourceReferral(data["SOURCE_REFERRAL"]);
+    setGender(data["GENDER"]);
+
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "hts_entry_point_community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        .includes("community")
+    ) {
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"]);
+    }
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "hts_entry_point_facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        .includes("facility")
+    ) {
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"]);
+    }
+  };
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "SOURCE_REFERRAL",
+      "GENDER",
+
+      "TEST_SETTING", //just in case
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets,
+  });
 
   return (
     <>
@@ -528,7 +444,7 @@ const BasicInfo = (props) => {
                   >
                     <option value={""}>Select</option>
                     {kP
-                      .filter((value) => {
+                      .filter(value => {
                         if (
                           props.patientAge > 14 &&
                           (value.id === 961 || value.id === 475)
@@ -537,7 +453,7 @@ const BasicInfo = (props) => {
                         }
                         return true;
                       })
-                      .map((value) => {
+                      .map(value => {
                         return (
                           <option key={value.id} value={value.code}>
                             {value.display}
@@ -597,7 +513,7 @@ const BasicInfo = (props) => {
                     disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
-                    {sourceReferral.map((value) => (
+                    {sourceReferral.map(value => (
                       <option key={value.id} value={value.id}>
                         {value.display}
                       </option>
@@ -628,7 +544,7 @@ const BasicInfo = (props) => {
                     disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
-                    {enrollSetting.map((value) => (
+                    {enrollSetting.map(value => (
                       <option key={value.id} value={value.code}>
                         {value.display}
                       </option>
@@ -650,7 +566,7 @@ const BasicInfo = (props) => {
                   </Label>
                   <Input
                     type="date"
-                    onKeyPress={(e) => {
+                    onKeyPress={e => {
                       e.preventDefault();
                     }}
                     name="dateVisit"
@@ -743,42 +659,17 @@ const BasicInfo = (props) => {
                 </div>
               )}
 
-              <div className="form-group  col-md-4">
-                <FormGroup>
-                  <Label>Index Testing</Label>
-                  <select
-                    className="form-control"
-                    name="indexClient"
-                    id="indexClient"
-                    value={objValues.indexClient}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.2rem",
-                    }}
-                    disabled={props.activePage.actionType === "view"}
-                  >
-                    <option value={""}></option>
-                    <option value="true">YES</option>
-                    <option value="false">NO</option>
-                  </select>
-                  {errors.indexClient !== "" ? (
-                    <span className={classes.error}>{errors.indexClient}</span>
-                  ) : (
-                    ""
-                  )}
-                </FormGroup>
-              </div>
-              {objValues.indexClient === "true" && (
+              {/* Show Index Testing fields when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX */}
+              {isIndexTestingSetting() && (
                 <>
                   <div className="form-group  col-md-4">
                     <FormGroup>
-                      <Label>Relationship of the index client</Label>
+                      <Label>Index Testing</Label>
                       <select
                         className="form-control"
-                        name="relationWithIndexClient"
-                        id="relationWithIndexClient"
-                        value={objValues.relationWithIndexClient}
+                        name="indexClient"
+                        id="indexClient"
+                        value={objValues.indexClient}
                         onChange={handleInputChange}
                         style={{
                           border: "1px solid #014D88",
@@ -787,48 +678,81 @@ const BasicInfo = (props) => {
                         disabled={props.activePage.actionType === "view"}
                       >
                         <option value={""}></option>
-                        {indexTesting.map((value) => (
-                          <option key={value.id} value={value.id}>
-                            {value.display}
-                          </option>
-                        ))}
+                        <option value="true">YES</option>
+                        <option value="false">NO</option>
                       </select>
-                      {errors.relationWithIndexClient !== "" ? (
+                      {errors.indexClient !== "" ? (
                         <span className={classes.error}>
-                          {errors.relationWithIndexClient}
+                          {errors.indexClient}
                         </span>
                       ) : (
                         ""
                       )}
                     </FormGroup>
                   </div>
-                  <div className="form-group  col-md-4">
-                    <FormGroup>
-                      <Label>
-                        Index Client Code/ID
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <Input
-                        type="text"
-                        name="indexClientCode"
-                        id="indexClientCode"
-                        value={objValues.indexClientCode}
-                        onChange={handleInputChange}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                        readOnly={props.activePage.actionType === "view"}
-                      />
-                    </FormGroup>
-                    {errors.indexClientCode !== "" ? (
-                      <span className={classes.error}>
-                        {errors.indexClientCode}
-                      </span>
-                    ) : (
-                      ""
-                    )}
-                  </div>
+                  {(objValues.indexClient === "true" ||
+                    objValues.indexClient === true) && (
+                    <>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>Relationship of the index client</Label>
+                          <select
+                            className="form-control"
+                            name="relationWithIndexClient"
+                            id="relationWithIndexClient"
+                            value={objValues.relationWithIndexClient}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                            }}
+                            disabled={props.activePage.actionType === "view"}
+                          >
+                            <option value={""}></option>
+                            {indexTesting.map(value => (
+                              <option key={value.id} value={value.id}>
+                                {value.display}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.relationWithIndexClient !== "" ? (
+                            <span className={classes.error}>
+                              {errors.relationWithIndexClient}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </FormGroup>
+                      </div>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>
+                            Index Client Code/ID
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
+                          <Input
+                            type="text"
+                            name="indexClientCode"
+                            id="indexClientCode"
+                            value={objValues.indexClientCode}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                            readOnly={props.activePage.actionType === "view"}
+                          />
+                        </FormGroup>
+                        {errors.indexClientCode !== "" ? (
+                          <span className={classes.error}>
+                            {errors.indexClientCode}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    </>
+                  )}
                 </>
               )}
               {props.patientObj.personResponseDto.sex &&
@@ -852,8 +776,8 @@ const BasicInfo = (props) => {
                             borderRadius: "0.2rem",
                           }}
                           disabled={
-                            props.patientObj.riskStratificationResponseDto
-                              .testingSetting ===
+                            props?.patientObj?.riskStratificationResponseDto
+                              ?.testingSetting ===
                             "FACILITY_HTS_TEST_SETTING_ANC"
                               ? true
                               : props.activePage.actionType === "view"
@@ -862,9 +786,9 @@ const BasicInfo = (props) => {
                           }
                         >
                           <option value={""}></option>
-                          {pregnancyStatus.map((value) =>
-                            props.patientObj.riskStratificationResponseDto
-                              .testingSetting ===
+                          {pregnancyStatus?.map(value =>
+                            props?.patientObj?.riskStratificationResponseDto
+                              ?.testingSetting ===
                               "FACILITY_HTS_TEST_SETTING_ANC" &&
                             value.code === "PREGANACY_STATUS_NOT_PREGNANT" ? (
                               <></>
@@ -979,7 +903,7 @@ const BasicInfo = (props) => {
                     disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
-                    {counselingType.map((value) => (
+                    {counselingType.map(value => (
                       <option key={value.id} value={value.id}>
                         {value.display}
                       </option>

@@ -93,7 +93,7 @@ const HivTestResult = (props) => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   let temp = { ...errors };
-  //console.log("data3", props.patientObj);
+  
   const patientID =
     props.patientObj && props.patientObj.personResponseDto
       ? props.patientObj.personResponseDto.id
@@ -632,7 +632,7 @@ const HivTestResult = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(errors);
+    
 
     let latestForm = getNextForm(
       "Request_and_Result_Form",
@@ -716,7 +716,6 @@ const HivTestResult = (props) => {
         objValues.cd4 = cd4Count;
         objValues.others = others;
 
-        //console.log(clientId, objValues)
         axios
           .put(`${baseUrl}hts/${clientId}/request-result`, objValues, {
             headers: { Authorization: `Bearer ${token}` },

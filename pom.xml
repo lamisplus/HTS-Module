@@ -12,7 +12,7 @@
 
 	<groupId>org.lamisplus.modules</groupId>
 	<artifactId>hts</artifactId>
-	<version>2.2.3</version>
+	<version>2.5.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>Hts</name>
@@ -210,7 +210,7 @@
 		<dependency>
 			<groupId>org.lamisplus.modules</groupId>
 			<artifactId>patient</artifactId>
-			<version>1.0.0</version>
+			<version>2.2.0.1</version>
 		</dependency>
 
 

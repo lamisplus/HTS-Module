@@ -28,8 +28,9 @@ import {
   generateDobFromAge,
   validateVisitDateWithDOB,
 } from "../../utils";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   card: {
     margin: theme.spacing(20),
     display: "flex",
@@ -100,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const BasicInfo = (props) => {
+const BasicInfo = props => {
   const classes = useStyles();
 
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -128,6 +129,7 @@ const BasicInfo = (props) => {
 
   const [nextForm, setNextForm] = useState([]);
   const [targetGroupValue, setTargetGroupValue] = useState(null);
+  const [codesets, setCodesets] = useState({});
 
   const [objValues, setObjValues] = useState({
     age: "",
@@ -162,21 +164,24 @@ const BasicInfo = (props) => {
     lastHivTestVaginalOral: "",
     lastHivTestBasedOnRequest: "",
   });
+
   useEffect(() => {
     if (objValues.age !== "") {
       props.setPatientObjAge(objValues.age);
     }
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
       if (
-        props?.activePage?.activeObject?.riskStratificationResponseDto
-          ?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() ===
+          "community" ||
+        "hts_entry_point_community"
       ) {
-        HTS_ENTRY_POINT_COMMUNITY();
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"]);
       } else if (
-        props?.activePage?.activeObject?.riskStratificationResponseDto
-          ?.entryPoint === "HTS_ENTRY_POINT_FACILITY"
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() ===
+          "facility" ||
+        "hts_entry_point_facility"
       ) {
-        HTS_ENTRY_POINT_FACILITY();
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"]);
       }
       setObjValues(props.patientObj.riskStratificationResponseDto);
 
@@ -187,66 +192,8 @@ const BasicInfo = (props) => {
   }, [objValues.age]);
 
   useEffect(() => {
-    KP();
     TargetGroupSetup();
-    PregnancyStatus();
-    EntryPoint();
   }, []);
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        let pregnancyUsed = "";
-        if (response.data.length > 0) {
-          response.data.map((each, index) => {
-            if (each.code === "PREGANACY_STATUS_PREGNANT") {
-              pregnancyUsed = each.id;
-            }
-          });
-        }
-        localStorage.setItem("pregnancyCode", pregnancyUsed);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEntryPoint(response.data);
-        if (
-          props?.patientObj?.riskStratificationResponseDto?.entryPoint ===
-          "HTS_ENTRY_POINT_COMMUNITY"
-        ) {
-          HTS_ENTRY_POINT_COMMUNITY();
-        } else if (
-          props?.patientObj?.riskStratificationResponseDto?.entryPoint ===
-          "HTS_ENTRY_POINT_FACILITY"
-        ) {
-          HTS_ENTRY_POINT_FACILITY();
-        } else {
-          setEntryPointSetting([]);
-        }
-      })
-      .catch((error) => {});
-  };
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");
@@ -254,38 +201,10 @@ const BasicInfo = (props) => {
       .get(`${baseUrl}hts/spoke-site?hubSite=${facility}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((response) => {
+      .then(response => {
         setSpokeFacList(response.data);
       })
-      .catch((error) => {});
-  };
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        let facilityList = [];
-
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {});
+      .catch(error => {});
   };
 
   const TargetGroupSetup = () => {
@@ -293,23 +212,12 @@ const BasicInfo = (props) => {
       .get(`${baseUrl}account`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((response) => {
+      .then(response => {
         setTargetGroupValue(response.data);
 
         props.setOrganizationInfo(response.data);
       })
-      .catch((error) => {});
-  };
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {});
+      .catch(error => {});
   };
 
   //Set HTS menu registration
@@ -317,7 +225,7 @@ const BasicInfo = (props) => {
     props.setHideOtherMenu(false);
   };
 
-  const checkPMTCTModality = (setting) => {
+  const checkPMTCTModality = setting => {
     if (
       setting === "FACILITY_HTS_TEST_SETTING_ANC" ||
       setting === "FACILITY_HTS_TEST_SETTING_L&D" ||
@@ -349,7 +257,7 @@ const BasicInfo = (props) => {
     "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING",
   ];
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
 
     if (name === "targetGroup") {
@@ -373,7 +281,6 @@ const BasicInfo = (props) => {
     if (name === "testingSetting" && value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(value);
       setObjValues({ ...objValues, [name]: value });
       let ans = checkPMTCTModality(value);
 
@@ -430,19 +337,34 @@ const BasicInfo = (props) => {
     }
 
     if (name === "entryPoint") {
-      if (value === "HTS_ENTRY_POINT_COMMUNITY") {
-        HTS_ENTRY_POINT_COMMUNITY();
-      } else if (value === "HTS_ENTRY_POINT_FACILITY") {
-        HTS_ENTRY_POINT_FACILITY();
+      // clear settings anytime entryPoint is changed so user can reselect settings
+      setObjValues(prev => ({
+        ...prev,
+        testingSetting: "",
+        spokeFacility: "",
+        healthFacility: "",
+      }));
+
+      if (
+        value.toLowerCase() === "community" ||
+        value.toLowerCase() === "hts_entry_point_community"
+      ) {
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"]);
+      } else if (
+        value.toLowerCase() === "facility" ||
+        value.toLowerCase() === "hts_entry_point_facility"
+      ) {
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"]);
       } else {
         setEntryPointSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [name]: value });
+    setObjValues(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
-
-  // display risk assement function
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {
     let SecAge = age !== "" ? age : 0;
@@ -485,9 +407,8 @@ const BasicInfo = (props) => {
       ans = false;
     }
   };
-  //Date of Birth and Age handle
 
-  const validateAgeRestriction = (formData) => {
+  const validateAgeRestriction = formData => {
     // Check if we have a restricted target group with age > 14
     if (
       formData &&
@@ -500,7 +421,7 @@ const BasicInfo = (props) => {
     return true;
   };
 
-  const handleDobChange = (e) => {
+  const handleDobChange = e => {
     const dobValue = e.target.value;
 
     if (dobValue) {
@@ -523,7 +444,7 @@ const BasicInfo = (props) => {
         age: "",
       });
 
-      setObjValues((prevState) => ({
+      setObjValues(prevState => ({
         ...prevState,
         dob: dobValue,
         age: age_now,
@@ -535,7 +456,7 @@ const BasicInfo = (props) => {
         isPMTCTModality
       );
     } else {
-      setObjValues((prevState) => ({
+      setObjValues(prevState => ({
         ...prevState,
         dob: "",
         age: "",
@@ -543,7 +464,7 @@ const BasicInfo = (props) => {
     }
   };
 
-  const handleDateOfBirthChange = (e) => {
+  const handleDateOfBirthChange = e => {
     const dateType = e.target.value;
     const isEstimated = dateType === "Estimated";
 
@@ -551,7 +472,7 @@ const BasicInfo = (props) => {
     setAgeDisabled(!isEstimated);
 
     // Use setState with function to ensure we capture the latest state
-    setObjValues((prevState) => {
+    setObjValues(prevState => {
       let updatedState = {
         ...prevState,
         isDateOfBirthEstimated: isEstimated,
@@ -584,11 +505,11 @@ const BasicInfo = (props) => {
     });
   };
 
-  const handleAgeChange = (e) => {
+  const handleAgeChange = e => {
     let newAge = e.target.value === "" ? "" : parseInt(e.target.value);
 
     if (newAge === "" || !isNaN(newAge)) {
-      setObjValues((prevState) => {
+      setObjValues(prevState => {
         let updatedState = { ...prevState };
 
         if (newAge !== "" && !isNaN(newAge)) {
@@ -640,83 +561,10 @@ const BasicInfo = (props) => {
     }
   };
 
-  const handleTargetGroupChange = (e) => {
-    // Clear any errors
-    setErrors({ ...temp, [e.target.name]: "" });
-
-    // Get the new target group value
-    const newTargetGroup = e.target.value;
-
-    // First, let's get the current age
-    const currentAge = objValues.age;
-
-    // Update the target group immediately
-    // Important: Use a callback form of setState to ensure we're working with the latest state
-    setObjValues((prevState) => {
-      let updatedState = { ...prevState, targetGroup: newTargetGroup };
-
-      // If selecting a restricted group and age is over 14, clear the age and DOB
-      if (
-        (newTargetGroup === "TARGET_GROUP_CHILDREN_OF_KP" ||
-          newTargetGroup === "TARGET_GROUP_PD") &&
-        currentAge > 14
-      ) {
-        // Clear age and DOB instead of adjusting
-        updatedState.age = "";
-        updatedState.dob = "";
-
-        // Set error in state instead of showing toast
-        setErrors({
-          ...errors,
-          age: "The current age exceeds the limit of 14 for this target group",
-        });
-      } else if (newTargetGroup === "") {
-        // If target group is cleared, also clear age and DOB
-        updatedState.age = "";
-        updatedState.dob = "";
-      } else {
-        // For other target groups or valid age, keep existing values
-
-        // If age is not set but DOB is estimated, calculate a default DOB
-        // (maintaining your original logic for this case)
-        if (!updatedState.age && prevState.isDateOfBirthEstimated) {
-          const currentDate = new Date();
-          currentDate.setDate(15);
-          currentDate.setMonth(5);
-          const estDob = moment(currentDate.toISOString());
-          // Don't set a specific age since we want the user to enter it
-          updatedState.dob = moment(estDob).format("YYYY-MM-DD");
-        }
-
-        // Clear any existing age errors if group changes to non-restricted
-        setErrors({
-          ...errors,
-          age: "",
-        });
-      }
-
-      return updatedState;
-    });
-  };
   const isAgeValid = validateAgeRestriction(objValues);
-  //Get list of DSD Model Type
-  function SettingModality(settingId) {
-    const setting = settingId;
-    axios
-      .get(`${baseUrl}application-codesets/v2/${setting}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  }
-  //End of Date of Birth and Age handling
-  /*****  Validation  */
+
   const validate = () => {
-    //HTS FORM VALIDATION
+    // HTS FORM VALIDATION
     let temp = { ...errors };
 
     temp.visitDate = objValues.visitDate ? "" : "This field is required.";
@@ -760,54 +608,68 @@ const BasicInfo = (props) => {
         ? ""
         : "This field is required.");
 
-    //Risk Assement section
-    if (
-      objValues.age > 15 &&
-      riskAssessment.lastHivTestBasedOnRequest === "false" &&
-      showRiskAssessment
-    ) {
-      temp.lastHivTestDone = riskAssessment.lastHivTestDone
-        ? ""
-        : "This field is required.";
-      riskAssessment.lastHivTestDone !== "" &&
-        riskAssessment.lastHivTestDone !== "Never" &&
-        (temp.whatWasTheResult = riskAssessment.whatWasTheResult
-          ? ""
-          : "This field is required.");
-
-      temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
-        ? ""
-        : "This field is required.";
-
-      temp.lastHivTestBloodTransfusion =
-        riskAssessment.lastHivTestBloodTransfusion
+    // Risk Assessment section
+    if (showRiskAssessment) {
+      if (
+        objValues.age > 15 &&
+        riskAssessment.lastHivTestBasedOnRequest === "false"
+      ) {
+        temp.lastHivTestDone = riskAssessment.lastHivTestDone
           ? ""
           : "This field is required.";
 
-      temp.lastHivTestPainfulUrination =
-        riskAssessment.lastHivTestPainfulUrination
+        riskAssessment.lastHivTestDone !== "" &&
+          riskAssessment.lastHivTestDone !== "Never" &&
+          (temp.whatWasTheResult = riskAssessment.whatWasTheResult
+            ? ""
+            : "This field is required.");
+
+        temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
           ? ""
           : "This field is required.";
 
-      temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestBloodTransfusion =
+          riskAssessment.lastHivTestBloodTransfusion
+            ? ""
+            : "This field is required.";
 
-      temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestPainfulUrination =
+          riskAssessment.lastHivTestPainfulUrination
+            ? ""
+            : "This field is required.";
 
-      temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
-        ? ""
-        : "This field is required.";
+        temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
+          ? ""
+          : "This field is required.";
 
-      temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
+          ? ""
+          : "This field is required.";
+
+        temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
+          ? ""
+          : "This field is required.";
+
+        temp.lastHivTestForceToHaveSex =
+          riskAssessment.lastHivTestForceToHaveSex
+            ? ""
+            : "This field is required.";
+      }
+    } else {
+      // If showRiskAssessment is false, clear all risk assessment errors
+      temp.lastHivTestDone = "";
+      temp.whatWasTheResult = "";
+      temp.lastHivTestVaginalOral = "";
+      temp.lastHivTestBloodTransfusion = "";
+      temp.lastHivTestPainfulUrination = "";
+      temp.diagnosedWithTb = "";
+      temp.lastHivTestInjectedDrugs = "";
+      temp.lastHivTestHadAnal = "";
+      temp.lastHivTestForceToHaveSex = "";
     }
 
     setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
+    return Object.values(temp).every(x => x == "");
   };
 
   const handleItemClick = (page, completedMenu) => {
@@ -819,9 +681,9 @@ const BasicInfo = (props) => {
   };
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
-  riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
+  riskCountQuestion = actualRiskCountTrue?.filter?.(x => x === "true");
 
-  const handleInputChangeRiskAssessment = (e) => {
+  const handleInputChangeRiskAssessment = e => {
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
@@ -831,12 +693,12 @@ const BasicInfo = (props) => {
     }
   };
 
-  const handleInputChangeRiskAssessment2 = (e) => {
+  const handleInputChangeRiskAssessment2 = e => {
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
 
     // Validate restricted setting + target group combo
@@ -927,7 +789,7 @@ const BasicInfo = (props) => {
             objValues,
             { headers: { Authorization: `Bearer ${token}` } }
           )
-          .then((response) => {
+          .then(response => {
             setSaving(false);
             props.patientObj.riskStratificationResponseDto = response.data;
             objValues.code = response.data.code;
@@ -936,7 +798,7 @@ const BasicInfo = (props) => {
 
             toast.success("Risk stratification save succesfully!");
           })
-          .catch((error) => {
+          .catch(error => {
             setSaving(false);
             if (error.response && error.response.data) {
               let errorMessage =
@@ -968,7 +830,7 @@ const BasicInfo = (props) => {
             .post(`${baseUrl}risk-stratification`, objValues, {
               headers: { Authorization: `Bearer ${token}` },
             })
-            .then((response) => {
+            .then(response => {
               setSaving(false);
               props.patientObj.riskStratificationResponseDto = response.data;
               objValues.code = response.data.code;
@@ -978,7 +840,7 @@ const BasicInfo = (props) => {
 
               toast.success("Risk stratification save succesfully!");
             })
-            .catch((error) => {
+            .catch(error => {
               setSaving(false);
               if (error.response && error.response.data) {
                 let errorMessage =
@@ -1007,7 +869,7 @@ const BasicInfo = (props) => {
             .post(`${baseUrl}risk-stratification`, objValues, {
               headers: { Authorization: `Bearer ${token}` },
             })
-            .then((response) => {
+            .then(response => {
               setSaving(false);
               props.patientObj.riskStratificationResponseDto = response.data;
               objValues.code = response.data.code;
@@ -1015,7 +877,7 @@ const BasicInfo = (props) => {
               handleItemClick(latestForm[0], latestForm[1]);
               //toast.success("Risk stratification save succesfully!");
             })
-            .catch((error) => {
+            .catch(error => {
               setSaving(false);
               if (error.response && error.response.data) {
                 let errorMessage =
@@ -1046,7 +908,7 @@ const BasicInfo = (props) => {
             .post(`${baseUrl}risk-stratification`, objValues, {
               headers: { Authorization: `Bearer ${token}` },
             })
-            .then((response) => {
+            .then(response => {
               setSaving(false);
               props.patientObj.riskStratificationResponseDto = response.data;
               objValues.code = response.data.code;
@@ -1054,7 +916,7 @@ const BasicInfo = (props) => {
               toast.success("Risk stratification save succesfully!");
               handleItemClick(latestForm[0], latestForm[1]);
             })
-            .catch((error) => {
+            .catch(error => {
               setSaving(false);
               if (error.response && error.response.data) {
                 let errorMessage =
@@ -1079,6 +941,63 @@ const BasicInfo = (props) => {
       }
     }
   };
+
+  const loadCodesets = data => {
+    setCodesets(data);
+    setKP(data["TARGET_GROUP"]);
+    setEntryPoint(data["HTS_ENTRY_POINT"]);
+
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "hts_entry_point_community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        .includes("community") ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "community_hts_test_setting_retesting"
+    ) {
+      setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"]);
+    }
+
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "hts_entry_point_facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        .includes("facility") ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+        "facility_hts_test_setting_retesting"
+    ) {
+      setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"]);
+    }
+
+    const pregnantStatus = data["PREGNANCY_STATUS"];
+    let pregnancyUsed = "";
+    if (pregnantStatus.length > 0) {
+      pregnantStatus.map((each, index) => {
+        if (each.code === "PREGANACY_STATUS_PREGNANT") {
+          pregnancyUsed = each.id;
+        }
+      });
+    }
+    localStorage.setItem("pregnancyCode", pregnancyUsed);
+  };
+
+  useGetCodesets({
+    codesetsKeys: [
+      "COMMUNITY_HTS_TEST_SETTING",
+      "TARGET_GROUP",
+      "FACILITY_HTS_TEST_SETTING",
+      "HTS_ENTRY_POINT",
+      "PREGNANCY_STATUS",
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets,
+  });
 
   return (
     <>
@@ -1118,7 +1037,7 @@ const BasicInfo = (props) => {
                       }}
                     >
                       <option value={""}>Select</option>
-                      {entryPoint.map((value) => (
+                      {entryPoint.map(value => (
                         <option key={value.id} value={value.code}>
                           {value.display}
                         </option>
@@ -1139,7 +1058,7 @@ const BasicInfo = (props) => {
                     </Label>
                     <Input
                       type="date"
-                      onKeyPress={(e) => {
+                      onKeyPress={e => {
                         e.preventDefault();
                       }}
                       name="visitDate"
@@ -1162,6 +1081,7 @@ const BasicInfo = (props) => {
                     )}
                   </FormGroup>
                 </div>
+
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
@@ -1183,7 +1103,7 @@ const BasicInfo = (props) => {
                         Select
                       </option>
                       {entryPointSetting &&
-                        entryPointSetting.map((value) => (
+                        entryPointSetting.map(value => (
                           <option key={value.id} value={value.code}>
                             {value.display}
                           </option>
@@ -1225,7 +1145,7 @@ const BasicInfo = (props) => {
                             }}
                           >
                             <option value={""}>Select</option>
-                            {spokeFacList.map((value) => (
+                            {spokeFacList.map(value => (
                               <option key={value.id} value={value.spokeSite}>
                                 {value.spokeSite}
                               </option>
@@ -1278,7 +1198,7 @@ const BasicInfo = (props) => {
                           }}
                         >
                           <option value={""}>Select</option>
-                          {spokeFacList.map((value) => (
+                          {spokeFacList.map(value => (
                             <option key={value.id} value={value.spokeSite}>
                               {value.spokeSite}
                             </option>
@@ -1328,10 +1248,10 @@ const BasicInfo = (props) => {
                   >
                     <option value={""}>Select</option>
                     {kP
-                      .filter((value) => {
+                      ?.filter?.(value => {
                         if (
-                          props.patientAge > 14 &&
-                          (value.id === 961 || value.id === 475)
+                          props?.patientAge > 14 &&
+                          (value?.id === 961 || value?.id === 475)
                         ) {
                           return false;
                         }
@@ -1354,7 +1274,7 @@ const BasicInfo = (props) => {
                         return true;
                       })
 
-                      .map((value) => {
+                      .map(value => {
                         return (
                           <option key={value.id} value={value.code}>
                             {value.display}
@@ -1381,7 +1301,7 @@ const BasicInfo = (props) => {
                         value="Actual"
                         name="dateOfBirth"
                         defaultChecked
-                        onChange={(e) => handleDateOfBirthChange(e)}
+                        onChange={e => handleDateOfBirthChange(e)}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.2rem",
@@ -1396,7 +1316,7 @@ const BasicInfo = (props) => {
                         type="radio"
                         value="Estimated"
                         name="dateOfBirth"
-                        onChange={(e) => handleDateOfBirthChange(e)}
+                        onChange={e => handleDateOfBirthChange(e)}
                         style={{
                           border: "1px solid #014D88",
                           borderRadius: "0.2rem",
@@ -1415,7 +1335,7 @@ const BasicInfo = (props) => {
                   <input
                     className="form-control"
                     type="date"
-                    onKeyPress={(e) => {
+                    onKeyPress={e => {
                       e.preventDefault();
                     }}
                     name="dob"

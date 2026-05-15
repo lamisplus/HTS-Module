@@ -6,6 +6,7 @@ import org.lamisplus.modules.base.domain.dto.PageDTO;
 import org.lamisplus.modules.base.util.PaginationUtil;
 import org.lamisplus.modules.hts.domain.dto.*;
 import org.lamisplus.modules.hts.domain.entity.HtsPerson;
+import org.lamisplus.modules.hts.domain.entity.HtsPersonPatientDuplicate;
 import org.lamisplus.modules.hts.service.HtsClientService;
 import org.lamisplus.modules.hts.service.IndexElicitationService;
 import org.lamisplus.modules.hts.service.RiskStratificationService;
@@ -138,4 +139,17 @@ public class HtsClientController {
         return ResponseEntity.ok(this.htsClientService.getLmpFromANC(personUuid));
     }
 
+
+    //get mapping for listing the duplicate HTS patients (with HTS records)
+    @GetMapping(HTS_URL_VERSION_ONE + "/duplicates/hts-patients")
+    public ResponseEntity<List<HtsPersonPatientDuplicate>> getDuplicateHtsPatients(@RequestParam (required = false, defaultValue = "*")  String searchValue) {
+        List<HtsPersonPatientDuplicate> duplicates = htsClientService.getAllDuplicateHtsPatients(searchValue);
+        return new ResponseEntity<>(duplicates, HttpStatus.OK);
+    }
+
+    //post mapping for merging the duplicate HTS patients (with HTS records)
+    @PostMapping(HTS_URL_VERSION_ONE + "/duplicates/hts-patients/merge")
+    public ResponseEntity<MergeDuplicateResponseDto> mergeDuplicateHtsPatients(@Valid @RequestBody MergeDuplicateRequestDto request) {
+        return ResponseEntity.ok(htsClientService.mergeDuplicateHtsPatients(request));
+    }
 }

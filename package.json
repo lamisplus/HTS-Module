@@ -93,6 +93,7 @@
     "react-overlay-loading": "^1.0.3",
     "react-perfect-scrollbar": "^1.5.8",
     "react-phone-input-2": "^2.15.1",
+    "react-query": "^3.39.3",
     "react-redux": "^7.2.4",
     "react-resize-detector": "^5.2.0",
     "react-router": "^6.22.3",
@@ -103,6 +104,7 @@
     "react-slick": "^0.27.13",
     "react-sparklines": "^1.7.0",
     "react-star-ratings-component": "^1.0.1",
+    "react-stomp": "^5.1.0",
     "react-summernote": "^2.0.2",
     "react-svg-map": "^2.1.2",
     "react-table": "^7.7.0",
@@ -127,9 +129,9 @@
     "yup": "^0.32.8"
   },
   "scripts": {
-    "start": "cross-env react-scripts --openssl-legacy-provider start",
+    "start": "react-scripts start",
     "jsreport": "jsreport-start",
-    "build": "cross-env react-scripts --openssl-legacy-provider build && cp -r build/* src/main/resources/views/static/hts/",
+    "build": "react-scripts build && xcopy /s /y build src\\main\\resources\\views\\static\\hts",
     "serve": "serve -s build",
     "run-build": "react-scripts build && serve",
     "test": "react-scripts test --env=jsdom",

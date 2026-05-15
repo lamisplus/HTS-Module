@@ -26,8 +26,9 @@ import { getCheckModality } from "../../../../utility";
 import { getNextForm } from "../../../../utility";
 import { error } from "highcharts";
 import Cookies from "js-cookie";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   card: {
     margin: theme.spacing(20),
     display: "flex",
@@ -97,8 +98,12 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
+const indexSettingGroup = new Set([
+  "FACILITY_HTS_TEST_SETTING_INDEX",
+  "COMMUNITY_HTS_TEST_SETTING_INDEX",
+]);
 // THIS IS THE CREATE FORM
-const BasicInfo = (props) => {
+const BasicInfo = props => {
   const classes = useStyles();
   const history = useHistory();
   const [errors, setErrors] = useState({});
@@ -122,7 +127,7 @@ const BasicInfo = (props) => {
   const [facilityCode, setFacilityCode] = useState("");
   const [serialNumber, setSerialNumber] = useState(null);
   // const [disableModality, setDisableModality] = useState(props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC" ? true: false);
-
+  const [codesets, setCodsets] = useState({});
   const [modalityCheck, setModality] = useState("");
   const [showPregancy, setShowPregnancy] = useState(false);
 
@@ -178,19 +183,16 @@ const BasicInfo = (props) => {
     familyIndex: "",
   });
 
-
   const CreateClientCode = () => {
     let facilityShortCode = "";
     axios
       .get(`${baseUrl}hts/get-facility-code`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((response) => {
+      .then(response => {
         setFacilityCode(response.data);
       })
-      .catch((error) => {
-        console.log(error);
-      });
+      .catch(error => { });
 
     let visitDate = new Date(props.patientObj.dateVisit);
 
@@ -270,20 +272,6 @@ const BasicInfo = (props) => {
   };
 
   const getSettingList = () => {
-    if (
-      props.patientObj.riskStratificationResponseDto.entryPoint ===
-      "HTS_ENTRY_POINT_COMMUNITY"
-    ) {
-      HTS_ENTRY_POINT_COMMUNITY();
-    } else if (
-      props.patientObj.riskStratificationResponseDto.entryPoint ===
-      "HTS_ENTRY_POINT_FACILITY"
-    ) {
-      HTS_ENTRY_POINT_FACILITY();
-    } else {
-      setEnrollSetting([]);
-    }
-
     setModality(
       getCheckModality(
         props?.patientObj?.riskStratificationResponseDto?.testingSetting
@@ -292,17 +280,9 @@ const BasicInfo = (props) => {
   };
 
   useEffect(() => {
-    KP();
-    EnrollmentSetting();
-    SourceReferral();
-    Genders();
-    CounselingType();
-    PregnancyStatus();
-    IndexTesting();
-
     CreateClientCode();
     getSettingList();
-  }, [props.patientObj, facilityCode]);
+  }, []);
 
   const handleSubmitCheckOut = () => {
     if (
@@ -315,157 +295,12 @@ const BasicInfo = (props) => {
           props.patientObject.visitId,
           { headers: { Authorization: `Bearer ${token}` } }
         )
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+        .then(response => { })
+        .catch(error => { });
     }
   };
 
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
-
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of KP
-  const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setKP(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of IndexTesting
-  const IndexTesting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/INDEX_TESTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setIndexTesting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of KP
-  const PregnancyStatus = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/PREGNANCY_STATUS`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setPregnancyStatus(response.data);
-        let pregnancyCode = response.data.filter((each, index) => {
-          return each.code === "PREGANACY_STATUS_PREGNANT";
-        });
-
-        if (props?.patientObject?.gender.toLowerCase() === "female") {
-          if (props.extra.testingSetting === "FACILITY_HTS_TEST_SETTING_ANC") {
-            setShowPregnancy(true);
-
-            setObjValues({ ...objValues, pregnant: pregnancyCode[0].id });
-          }
-        }
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of KP
-  const CounselingType = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/COUNSELING_TYPE`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setCounselingType(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //console.log(response.data);
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  //Get list of Source of Referral
-  const SourceReferral = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/SOURCE_REFERRAL`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSourceReferral(response.data);
-      })
-      .catch((error) => {});
-  };
-  //Get list of Genders from
-  const Genders = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/GENDER`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setGender(response.data);
-      })
-      .catch((error) => {});
-  };
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setErrors({ ...temp, [e.target.name]: "" });
     if (e.target.name === "indexClientCode" && e.target.value !== "") {
       async function getIndexClientCode() {
@@ -533,8 +368,6 @@ const BasicInfo = (props) => {
 
   /*****  Validation  */
   const validate = () => {
-    //HTS FORM VALIDATION
-
     temp.clientCode = objValues.clientCode ? "" : "This field is required.";
     temp.typeCounseling = objValues.typeCounseling
       ? ""
@@ -546,8 +379,15 @@ const BasicInfo = (props) => {
     temp.referredFrom = objValues.referredFrom ? "" : "This field is required.";
     temp.previouslyTested =
       objValues.previouslyTested !== "" ? "" : "This field is required.";
-    temp.indexClient =
-      objValues.indexClient !== "" ? "" : "This field is required.";
+
+    // Only validate index fields when NOT INDEX setting
+    // Index fields are shown when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX
+    const shouldShowIndexFields = isIndexTestingSetting();
+    if (shouldShowIndexFields) {
+      temp.indexClient =
+        objValues.indexClient !== "" ? "" : "This field is required.";
+    }
+
     temp.firstTimeVisit =
       objValues.firstTimeVisit !== "" ? "" : "This field is required.";
     temp.dateVisit = objValues.dateVisit ? "" : "This field is required.";
@@ -557,19 +397,23 @@ const BasicInfo = (props) => {
       (temp.pregnant =
         objValues.pregnant !== "" ? "" : "This field is required.");
 
-    objValues.indexClient === "true" &&
+    // Only validate index client related fields when NOT INDEX setting
+    shouldShowIndexFields &&
+      objValues.indexClient === "true" &&
       (temp.relationWithIndexClient =
         objValues.relationWithIndexClient !== ""
           ? ""
           : "This field is required.");
 
-    objValues.indexClient === "true" &&
+    shouldShowIndexFields &&
+      objValues.indexClient === "true" &&
       (temp.indexClientCode =
         objValues.indexClientCode !== "" ? "" : "This field is required.");
 
     setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
+    return Object.values(temp).every(x => x == "");
   };
+
   const handleItemClick = (page, completedMenu) => {
     props.handleItemClick(page);
     if (props.completed.includes(completedMenu)) {
@@ -577,29 +421,26 @@ const BasicInfo = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
-  //checkClientCode
-  //   const checkClientCode = (e) => {
-  //     async function getIndexClientCode() {
-  //       const indexClientCode = objValues.clientCode;
-  //       const response = await axios.get(
-  //         `${baseUrl}hts/client/${indexClientCode}`,
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //             "Content-Type": "text/plain",
-  //           },
-  //         }
-  //       );
-  //       // if(response.data!=='Record Not Found'){
-  //       //     setClientCodeCheck("Client code already exist")
-  //       // }else{
-  //       //     setClientCodeCheck("")
-  //       // }
-  //     }
-  //     getIndexClientCode();
-  //   };
-  //checkClientCode
-  const checkClientCode = (e) => {
+
+  // Helper function to check if testing setting is INDEX (hide index testing fields for these settings)
+
+  const isIndexTestingSetting = () => {
+    const objSetting = objValues?.testingSetting;
+    const testingSetting =
+      props?.patientObj?.riskStratificationResponseDto?.testingSetting;
+
+    // If objSetting is not in the index group, return false immediately
+    if (!indexSettingGroup.has(objSetting)) {
+      return false;
+    }
+
+    // Otherwise check if either testingSetting or objSetting is in the index group
+    return (
+      indexSettingGroup.has(testingSetting) || indexSettingGroup.has(objSetting)
+    );
+  };
+
+  const checkClientCode = e => {
     let code = "";
 
     if (e.target.name === "serialNumber") {
@@ -608,6 +449,7 @@ const BasicInfo = (props) => {
 
       setObjValues({ ...objValues, clientCode: code });
     }
+
     async function getIndexClientCode() {
       const response = await axios.get(
         `${baseUrl}hts/get-client-code?code=${code}`,
@@ -625,9 +467,11 @@ const BasicInfo = (props) => {
         setClientCodeCheck("");
       }
     }
+
     getIndexClientCode();
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = e => {
     e.preventDefault();
     // check next form
     let latestForm = getNextForm(
@@ -642,7 +486,7 @@ const BasicInfo = (props) => {
       dateVisit: objValues.dateVisit,
       extra: {},
       firstTimeVisit: objValues.firstTimeVisit,
-      indexClient: objValues.indexClient,
+      indexClient: objValues.indexClient || "false",
       numChildren: objValues.numChildren,
       numWives: objValues.numWives,
       personId: props?.patientObject?.personId
@@ -679,7 +523,7 @@ const BasicInfo = (props) => {
           .put(`${baseUrl}hts/${props.patientObj.id}`, patientForm, {
             headers: { Authorization: `Bearer ${token}` },
           })
-          .then((response) => {
+          .then(response => {
             setSaving(false);
             let obj = {
               uuid: "",
@@ -694,13 +538,13 @@ const BasicInfo = (props) => {
 
             handleItemClick(latestForm[0], latestForm[1]);
           })
-          .catch((error) => {
+          .catch(error => {
             setSaving(false);
-            console.log(error);
+
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -717,7 +561,7 @@ const BasicInfo = (props) => {
           .post(`${baseUrl}hts`, patientForm, {
             headers: { Authorization: `Bearer ${token}` },
           })
-          .then((response) => {
+          .then(response => {
             if (props.checkedInPatient) {
               handleSubmitCheckOut();
             }
@@ -732,12 +576,12 @@ const BasicInfo = (props) => {
             }
             handleItemClick(latestForm[0], latestForm[1]);
           })
-          .catch((error) => {
+          .catch(error => {
             setSaving(false);
             if (error.response && error.response.data) {
               let errorMessage =
                 error.response.data.apierror &&
-                error.response.data.apierror.message !== ""
+                  error.response.data.apierror.message !== ""
                   ? error.response.data.apierror.message
                   : "Something went wrong, please try again";
               toast.error(errorMessage, {
@@ -765,12 +609,66 @@ const BasicInfo = (props) => {
       testingSetting === "FACILITY_HTS_TEST_SETTING_L&D";
 
     if (shouldAutoFill && objValues.pregnant !== "73") {
-      setObjValues((prev) => ({
+      setObjValues(prev => ({
         ...prev,
         pregnant: "73",
       }));
     }
   }, [testingSetting]);
+
+  const loadCodesets = data => {
+    setCodsets(data);
+    setKP(data["TARGET_GROUP"]);
+    setIndexTesting(data["INDEX_TESTING"]);
+    setPregnancyStatus(data["PREGNANCY_STATUS"]);
+    setCounselingType(data["COUNSELING_TYPE"]);
+    setSourceReferral(data["SOURCE_REFERRAL"]);
+    setGender(data["GENDER"]);
+
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "hts_entry_point_community" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "community_hts_test_setting_retesting" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        .includes("community")
+    ) {
+      setEnrollSetting(data["COMMUNITY_HTS_TEST_SETTING"]);
+    }
+
+    if (
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "hts_entry_point_facility" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+      "facility_hts_test_setting_retesting" ||
+      props?.patientObj?.riskStratificationResponseDto?.entryPoint
+        ?.toLowerCase()
+        ?.includes("facility")
+    ) {
+      setEnrollSetting(data["FACILITY_HTS_TEST_SETTING"]);
+    }
+  };
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "INDEX_TESTING",
+      "PREGNANCY_STATUS",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "COUNSELING_TYPE",
+      "SOURCE_REFERRAL",
+      "GENDER",
+      "TEST_SETTING",
+    ],
+    patientId: props.patientObj?.id,
+    onSuccess: loadCodesets,
+  });
 
   return (
     <>
@@ -799,7 +697,7 @@ const BasicInfo = (props) => {
                   >
                     <option value={""}>Select</option>
                     {kP
-                      .filter((value) => {
+                      .filter(value => {
                         if (
                           props.patientAge > 14 &&
                           (value.id === 961 || value.id === 475)
@@ -808,7 +706,7 @@ const BasicInfo = (props) => {
                         }
                         return true;
                       })
-                      .map((value) => {
+                      .map(value => {
                         return (
                           <option key={value.id} value={value.code}>
                             {value.display}
@@ -891,7 +789,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {sourceReferral.map((value) => (
+                    {sourceReferral?.map?.(value => (
                       <option key={value.id} value={value.id}>
                         {value.display}
                       </option>
@@ -921,7 +819,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {enrollSetting.map((value) => (
+                    {enrollSetting?.map?.(value => (
                       <option key={value.id} value={value.code}>
                         {value.display}
                       </option>
@@ -943,7 +841,7 @@ const BasicInfo = (props) => {
                   </Label>
                   <Input
                     type="date"
-                    onKeyPress={(e) => {
+                    onKeyPress={e => {
                       e.preventDefault();
                     }}
                     name="dateVisit"
@@ -1029,46 +927,19 @@ const BasicInfo = (props) => {
                     </FormGroup>
                   </div>
                 )}
-              <div className="form-group  col-md-4">
-                <FormGroup>
-                  <Label>
-                    Index Testing <span style={{ color: "red" }}> *</span>
-                  </Label>
-                  <select
-                    className="form-control"
-                    name="indexClient"
-                    id="indexClient"
-                    value={objValues.indexClient}
-                    onChange={handleInputChange}
-                    style={{
-                      border: "1px solid #014D88",
-                      borderRadius: "0.2rem",
-                    }}
-                  >
-                    <option value={""}></option>
-                    <option value="true">YES</option>
-                    <option value="false">NO</option>
-                  </select>
-                  {errors.indexClient !== "" ? (
-                    <span className={classes.error}>{errors.indexClient}</span>
-                  ) : (
-                    ""
-                  )}
-                </FormGroup>
-              </div>
-              {objValues.indexClient === "true" && (
+              {/* Hide Index Testing fields when setting is FACILITY_HTS_TEST_SETTING_INDEX or COMMUNITY_HTS_TEST_SETTING_INDEX */}
+              {isIndexTestingSetting() && (
                 <>
                   <div className="form-group  col-md-4">
                     <FormGroup>
                       <Label>
-                        Relationship of the index client{" "}
-                        <span style={{ color: "red" }}> *</span>
+                        Index Testing <span style={{ color: "red" }}> *</span>
                       </Label>
                       <select
                         className="form-control"
-                        name="relationWithIndexClient"
-                        id="relationWithIndexClient"
-                        value={objValues.relationWithIndexClient}
+                        name="indexClient"
+                        id="indexClient"
+                        value={objValues.indexClient}
                         onChange={handleInputChange}
                         style={{
                           border: "1px solid #014D88",
@@ -1076,52 +947,86 @@ const BasicInfo = (props) => {
                         }}
                       >
                         <option value={""}></option>
-                        {indexTesting.map((value) => (
-                          <option key={value.id} value={value.id}>
-                            {value.display}
-                          </option>
-                        ))}
+                        <option value="true">YES</option>
+                        <option value="false">NO</option>
                       </select>
-                      {errors.relationWithIndexClient !== "" ? (
+                      {errors.indexClient !== "" ? (
                         <span className={classes.error}>
-                          {errors.relationWithIndexClient}
+                          {errors.indexClient}
                         </span>
                       ) : (
                         ""
                       )}
                     </FormGroup>
                   </div>
-                  <div className="form-group  col-md-4">
-                    <FormGroup>
-                      <Label>
-                        Index Client Code/ID{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <Input
-                        type="text"
-                        name="indexClientCode"
-                        id="indexClientCode"
-                        value={objValues.indexClientCode}
-                        onChange={handleInputChange}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.25rem",
-                        }}
-                      />
-                      {/* {clientCodeCheck !== "" ? (
-                        <span className={classes.error}>{clientCodeCheck}</span>
-                      ) : (
-                        ""
-                      )} */}
-                      {errors.indexClientCode !== "" ? (
-                        <span className={classes.error}>
-                          {errors.indexClientCode}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
+                  {objValues.indexClient === "true" && (
+                    <>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>
+                            Relationship of the index client{" "}
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
+                          <select
+                            className="form-control"
+                            name="relationWithIndexClient"
+                            id="relationWithIndexClient"
+                            value={objValues.relationWithIndexClient}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.2rem",
+                            }}
+                          >
+                            <option value={""}></option>
+                            {indexTesting.map(value => (
+                              <option key={value.id} value={value.id}>
+                                {value.display}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.relationWithIndexClient !== "" ? (
+                            <span className={classes.error}>
+                              {errors.relationWithIndexClient}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </FormGroup>
+                      </div>
+                      <div className="form-group  col-md-4">
+                        <FormGroup>
+                          <Label>
+                            Index Client Code/ID{" "}
+                            <span style={{ color: "red" }}> *</span>
+                          </Label>
+                          <Input
+                            type="text"
+                            name="indexClientCode"
+                            id="indexClientCode"
+                            value={objValues.indexClientCode}
+                            onChange={handleInputChange}
+                            style={{
+                              border: "1px solid #014D88",
+                              borderRadius: "0.25rem",
+                            }}
+                          />
+                          {/* {clientCodeCheck !== "" ? (
+                            <span className={classes.error}>{clientCodeCheck}</span>
+                          ) : (
+                            ""
+                          )} */}
+                          {errors.indexClientCode !== "" ? (
+                            <span className={classes.error}>
+                              {errors.indexClientCode}
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </FormGroup>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
               {props?.patientObject?.gender &&
@@ -1145,12 +1050,12 @@ const BasicInfo = (props) => {
                           }}
                           disabled={
                             testingSetting ===
-                              "FACILITY_HTS_TEST_SETTING_ANC" ||
+                            "FACILITY_HTS_TEST_SETTING_ANC" ||
                             testingSetting === "FACILITY_HTS_TEST_SETTING_L&D"
                           }
                         >
                           <option value={""}></option>
-                          {pregnancyStatus.map((value) => {
+                          {pregnancyStatus.map(value => {
                             return (
                               <option key={value.id} value={value.id}>
                                 {value.display}
@@ -1266,7 +1171,7 @@ const BasicInfo = (props) => {
                     }}
                   >
                     <option value={""}></option>
-                    {counselingType.map((value) => (
+                    {counselingType.map(value => (
                       <option key={value.id} value={value.id}>
                         {value.display}
                       </option>

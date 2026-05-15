@@ -25,8 +25,9 @@ import { Label as LabelRibbon, Message } from "semantic-ui-react";
 import { getNextForm } from "../../../../utility";
 import Cookies from "js-cookie";
 import { validateVisitDateWithDOB } from "../../utils";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   card: {
     margin: theme.spacing(20),
     display: "flex",
@@ -97,7 +98,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const RiskStratification = (props) => {
+const RiskStratification = props => {
   const classes = useStyles();
   const history = useHistory();
   const [enrollSetting, setEnrollSetting] = useState([]);
@@ -142,9 +143,10 @@ const RiskStratification = (props) => {
     spokeFacility: "",
     healthFacility: "",
   });
+
+  const [codesets, setCodsets] = useState({});
+
   const [riskAssessment, setRiskAssessment] = useState({
-    // soldPaidVaginalSex:"",
-    //New Question
     lastHivTestForceToHaveSex: "",
     lastHivTestHadAnal: "",
     lastHivTestInjectedDrugs: "",
@@ -169,60 +171,42 @@ const RiskStratification = (props) => {
       setDisableInput(true);
     }
   };
+
   useEffect(() => {
     KP();
-    EnrollmentSetting();
-    EntryPoint();
-    HTS_ENTRY_POINT_FACILITY();
+    setEnrollSetting(codesets?.["FACILITY_HTS_TEST_SETTING"]);
 
     if (props?.patientObj?.riskStratificationResponseDto !== null) {
       if (
-        props?.activePage?.activeObject?.riskStratificationResponseDto
-          ?.entryPoint === "HTS_ENTRY_POINT_COMMUNITY"
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+          "hts_entry_point_community" ||
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint?.toLowerCase() ===
+          "community"
       ) {
-        HTS_ENTRY_POINT_COMMUNITY();
-      } else if (
-        props?.activePage?.activeObject?.riskStratificationResponseDto
-          ?.entryPoint === "HTS_ENTRY_POINT_FACILITY"
-      ) {
-        HTS_ENTRY_POINT_FACILITY();
+        setEnrollSetting(codesets["COMMUNITY_HTS_TEST_SETTING"]);
       }
+
+      if (
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() ===
+          "hts_entry_point_facility" ||
+        props?.activePage?.activeObject?.riskStratificationResponseDto?.entryPoint.toLowerCase() ===
+          "facility"
+      ) {
+        setEnrollSetting(codesets["FACILITY_HTS_TEST_SETTING"]);
+      }
+
       setObjValues(props?.patientObj?.riskStratificationResponseDto);
-      SettingModality(
-        props?.patientObj?.riskStratificationResponseDto?.testingSetting
-      );
 
       setRiskAssessment(
         props.patientObj.riskStratificationResponseDto &&
           props.patientObj.riskStratificationResponseDto.riskAssessment
       );
     }
-  }, [props.patientObj]);
+  }, [props.patientObj, codesets]);
 
   useEffect(() => {
     retestingInfo();
   }, [entryPointSetting, entryPoint, props.newHTSType]);
-  //Get list of HIV STATUS ENROLLMENT
-  const EnrollmentSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEnrollSetting(response.data);
-      })
-      .catch((error) => {});
-  };
-  const EntryPoint = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/HTS_ENTRY_POINT`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setEntryPoint(response.data);
-      })
-      .catch((error) => {});
-  };
 
   const getSpokeFaclityByHubSite = () => {
     let facility = Cookies.get("facilityName");
@@ -230,83 +214,34 @@ const RiskStratification = (props) => {
       .get(`${baseUrl}hts/spoke-site?hubSite=${facility}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((response) => {
+      .then(response => {
         setSpokeFacList(response.data);
       })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_FACILITY = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/FACILITY_HTS_TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        //Remove retesting from the codeset
-        //   let facilityList = []
-        // response.data.map((each, index)=>{
-        //       if(each.code !=="FACILITY_HTS_TEST_SETTING_RETESTING"){
-        //         facilityList.push(each);
-        //       }
-
-        // })
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  };
-
-  const HTS_ENTRY_POINT_COMMUNITY = () => {
-    axios
-      .get(
-        `${baseUrl}application-codesets/v2/COMMUNITY_HTS_TEST_SETTING
- `,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      .then((response) => {
-        //console.log(response.data);
-        setEntryPointSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
+      .catch(error => {});
   };
 
   //Get list of KP
   const KP = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TARGET_GROUP`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        if (props.patientObject.gender) {
-          let kpList = [];
-          let gender = props.patientObject.gender.toLowerCase();
-          if (gender === "female") {
-            response.data.map((each, index) => {
-              if (each.code !== "TARGET_GROUP_MSM") {
-                kpList.push(each);
-              }
-            });
-          } else if (gender === "male") {
-            response.data.map((each, index) => {
-              if (each.code !== "TARGET_GROUP_FSW") {
-                kpList.push(each);
-              }
-            });
+    if (props.patientObject.gender) {
+      let kpList = [];
+      let gender = props.patientObject.gender.toLowerCase();
+      if (gender === "female") {
+        codesets?.["TARGET_GROUP"]?.map?.((each, index) => {
+          if (each.code !== "TARGET_GROUP_MSM") {
+            kpList.push(each);
           }
-
-          setKP(kpList);
-        } else {
-          setKP(response.data);
-        }
-      })
-      .catch((error) => {});
+        });
+      } else if (gender === "male") {
+        codesets?.["TARGET_GROUP"]?.map?.((each, index) => {
+          if (each.code !== "TARGET_GROUP_FSW") {
+            kpList.push(each);
+          }
+        });
+      }
+      setKP(kpList);
+    } else {
+      setKP(codesets["TARGET_GROUP"]);
+    }
   };
 
   const getMenuLogic = () => {
@@ -314,7 +249,7 @@ const RiskStratification = (props) => {
     props.setHideOtherMenu(false);
   };
 
-  const checkPMTCTModality = (modality) => {
+  const checkPMTCTModality = modality => {
     if (
       modality === "FACILITY_HTS_TEST_SETTING_ANC" ||
       modality === "FACILITY_HTS_TEST_SETTING_L&D" ||
@@ -347,7 +282,7 @@ const RiskStratification = (props) => {
     "FACILITY_HTS_TEST_SETTING_POST_NATAL_WARD_BREASTFEEDING",
   ];
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setErrors({ ...temp, [e.target.name]: "" });
 
     if (e.target.name === "targetGroup") {
@@ -371,8 +306,8 @@ const RiskStratification = (props) => {
     if (e.target.name === "testingSetting" && e.target.value !== "") {
       setErrors({ ...temp, spokeFacility: "", healthFacility: "" });
 
-      SettingModality(e.target.value);
       setObjValues({ ...objValues, [e.target.name]: e.target.value });
+
       let ans = checkPMTCTModality(e.target.value);
       displayRiskAssessment(
         riskAssessment.lastHivTestBasedOnRequest,
@@ -426,24 +361,38 @@ const RiskStratification = (props) => {
     }
 
     if (e.target.name === "entryPoint") {
-      if (e.target.value === "HTS_ENTRY_POINT_COMMUNITY") {
-        HTS_ENTRY_POINT_COMMUNITY();
-      } else if (e.target.value === "HTS_ENTRY_POINT_FACILITY") {
-        HTS_ENTRY_POINT_FACILITY();
+      setObjValues(prev => ({
+        ...prev,
+        testingSetting: "",
+        spokeFacility: "",
+        healthFacility: "",
+      }));
+
+      if (
+        e.target.value?.toLowerCase() === "hts_entry_point_community" ||
+        e.target.value?.toLowerCase() === "community"
+      ) {
+        setEntryPointSetting(codesets["COMMUNITY_HTS_TEST_SETTING"]);
+      } else if (
+        e.target.value?.toLowerCase() === "hts_entry_point_facility" ||
+        e.target.value.toLowerCase() === "facility"
+      ) {
+        setEntryPointSetting(codesets["FACILITY_HTS_TEST_SETTING"]);
       } else {
         setEntryPointSetting([]);
       }
     }
 
-    setObjValues({ ...objValues, [e.target.name]: e.target.value });
+    setObjValues(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const displayRiskAssessment = (lastVisit, age, isPMTCTModalityValue) => {
     let SecAge = age !== "" ? age : 0;
     let ans;
 
-    // for the section to show
-    //  Conditions are : age > 15, riskAssessment.lastHivTestBasedOnRequest === "false" and PMTCT Modality === true
     if (lastVisit === "false") {
       if (SecAge < 15 || isPMTCTModalityValue) {
         setShowRiskAssessment(false);
@@ -483,25 +432,10 @@ const RiskStratification = (props) => {
     }
   };
 
-  //Date of Birth and Age handle
-  //Get list of DSD Model Type
-  function SettingModality(settingId) {
-    const setting = settingId;
-    axios
-      .get(`${baseUrl}application-codesets/v2/${setting}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {
-        //console.log(error);
-      });
-  }
   //End of Date of Birth and Age handling
   /*****  Validation  */
   const validate = () => {
-    //HTS FORM VALIDATION
+    // HTS FORM VALIDATION
     temp.dateVisit = objValues.visitDate ? "" : "This field is required.";
 
     const minVisitDate = getMinVisitDateForRetesting(
@@ -542,56 +476,70 @@ const RiskStratification = (props) => {
       (temp.healthFacility = objValues.healthFacility
         ? ""
         : "This field is required.");
-    //
 
-    //Risk Assement section
-    if (
-      objValues.age > 15 &&
-      riskAssessment.lastHivTestBasedOnRequest === "false" &&
-      showRiskAssessment
-    ) {
-      temp.lastHivTestDone = riskAssessment.lastHivTestDone
-        ? ""
-        : "This field is required.";
-      riskAssessment.lastHivTestDone !== "" &&
-        riskAssessment.lastHivTestDone !== "Never" &&
-        (temp.whatWasTheResult = riskAssessment.whatWasTheResult
-          ? ""
-          : "This field is required.");
-
-      temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
-        ? ""
-        : "This field is required.";
-
-      temp.lastHivTestBloodTransfusion =
-        riskAssessment.lastHivTestBloodTransfusion
+    // Risk Assessment section
+    if (showRiskAssessment) {
+      if (
+        objValues.age > 15 &&
+        riskAssessment.lastHivTestBasedOnRequest === "false"
+      ) {
+        temp.lastHivTestDone = riskAssessment.lastHivTestDone
           ? ""
           : "This field is required.";
 
-      temp.lastHivTestPainfulUrination =
-        riskAssessment.lastHivTestPainfulUrination
+        riskAssessment.lastHivTestDone !== "" &&
+          riskAssessment.lastHivTestDone !== "Never" &&
+          (temp.whatWasTheResult = riskAssessment.whatWasTheResult
+            ? ""
+            : "This field is required.");
+
+        temp.lastHivTestVaginalOral = riskAssessment.lastHivTestVaginalOral
           ? ""
           : "This field is required.";
 
-      temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestBloodTransfusion =
+          riskAssessment.lastHivTestBloodTransfusion
+            ? ""
+            : "This field is required.";
 
-      temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestPainfulUrination =
+          riskAssessment.lastHivTestPainfulUrination
+            ? ""
+            : "This field is required.";
 
-      temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
-        ? ""
-        : "This field is required.";
+        temp.diagnosedWithTb = riskAssessment.diagnosedWithTb
+          ? ""
+          : "This field is required.";
 
-      temp.lastHivTestForceToHaveSex = riskAssessment.lastHivTestForceToHaveSex
-        ? ""
-        : "This field is required.";
+        temp.lastHivTestInjectedDrugs = riskAssessment.lastHivTestInjectedDrugs
+          ? ""
+          : "This field is required.";
+
+        temp.lastHivTestHadAnal = riskAssessment.lastHivTestHadAnal
+          ? ""
+          : "This field is required.";
+
+        temp.lastHivTestForceToHaveSex =
+          riskAssessment.lastHivTestForceToHaveSex
+            ? ""
+            : "This field is required.";
+      }
+    } else {
+      // If showRiskAssessment is false, clear all risk assessment errors
+      temp.lastHivTestDone = "";
+      temp.whatWasTheResult = "";
+      temp.lastHivTestVaginalOral = "";
+      temp.lastHivTestBloodTransfusion = "";
+      temp.lastHivTestPainfulUrination = "";
+      temp.diagnosedWithTb = "";
+      temp.lastHivTestInjectedDrugs = "";
+      temp.lastHivTestHadAnal = "";
+      temp.lastHivTestForceToHaveSex = "";
     }
-    //targetGroup
+
+    // targetGroup
     setErrors({ ...temp });
-    return Object.values(temp).every((x) => x == "");
+    return Object.values(temp).every(x => x == "");
   };
 
   const handleItemClick = (page, completedMenu) => {
@@ -601,11 +549,12 @@ const RiskStratification = (props) => {
       props.setCompleted([...props.completed, completedMenu]);
     }
   };
+
   // Getting the number count of riskAssessment True
   const actualRiskCountTrue = Object.values(riskAssessment);
-  riskCountQuestion = actualRiskCountTrue.filter((x) => x === "true");
+  riskCountQuestion = actualRiskCountTrue?.filter?.(x => x === "true");
 
-  const handleInputChangeRiskAssessment = (e) => {
+  const handleInputChangeRiskAssessment = e => {
     setErrors({ ...temp, [e.target.name]: "" });
     setRiskAssessment({ ...riskAssessment, [e.target.name]: e.target.value });
 
@@ -624,7 +573,7 @@ const RiskStratification = (props) => {
 
     // Find if any previous visit was an ANC testing setting
     const hasANCVisit = personInfo?.htsClientDtoList?.some(
-      (client) =>
+      client =>
         client?.riskStratificationResponseDto?.testingSetting ===
         "FACILITY_HTS_TEST_SETTING_ANC"
     );
@@ -636,7 +585,7 @@ const RiskStratification = (props) => {
     // Find the most recent visit date across all records
     let mostRecentVisitDate = null;
 
-    personInfo?.htsClientDtoList?.forEach((client) => {
+    personInfo?.htsClientDtoList?.forEach(client => {
       const visitDate = client?.riskStratificationResponseDto?.visitDate;
 
       if (visitDate) {
@@ -662,9 +611,7 @@ const RiskStratification = (props) => {
     return moment(nextEligibleDate).format("YYYY-MM-DD");
   };
 
-
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     // Check if testingSetting is restricted
@@ -753,7 +700,12 @@ const RiskStratification = (props) => {
       objValues.code = response.data.code;
       props.setExtra(objValues);
       props.setHideOtherMenu(false);
+      const latestFormFIltered = latestForm?.filter?.(
+        item => item !== "pre-test-counsel"
+      );
+
       handleItemClick(latestForm[0], latestForm[1]);
+
       toast.success("Risk stratification saved successfully!");
     } catch (error) {
       setSaving(false);
@@ -773,6 +725,26 @@ const RiskStratification = (props) => {
       }
     }
   };
+
+  const loadCodesets = data => {
+    setCodsets(data);
+    setEnrollSetting(data["TEST_SETTING"]);
+    setEntryPoint(data["HTS_ENTRY_POINT"]);
+    // setEntryPointSetting(data["FACILITY_HTS_TEST_SETTING"])
+  };
+
+  
+  useGetCodesets({
+    codesetsKeys: [
+      "TARGET_GROUP",
+      "HTS_ENTRY_POINT",
+      "COMMUNITY_HTS_TEST_SETTING",
+      "FACILITY_HTS_TEST_SETTING",
+      "TEST_SETTING",
+    ],
+    patientId: props.personInfo?.personId,
+    onSuccess: loadCodesets,
+  });
 
   return (
     <>
@@ -814,7 +786,7 @@ const RiskStratification = (props) => {
                       disabled={disableInput}
                     >
                       <option value={""}>Select</option>
-                      {entryPoint.map((value) => (
+                      {entryPoint.map(value => (
                         <option key={value.id} value={value.code}>
                           {value.display}
                         </option>
@@ -827,41 +799,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
-                {/* {objValues.entryPoint === "HTS_ENTRY_POINT_COMMUNITY" && (
-                  <div className="form-group  col-md-6">
-                    <FormGroup>
-                      <Label>
-                        Community Entry Point{" "}
-                        <span style={{ color: "red" }}> *</span>
-                      </Label>
-                      <select
-                        className="form-control"
-                        name="communityEntryPoint"
-                        id="communityEntryPoint"
-                        value={objValues.communityEntryPoint}
-                        onChange={handleInputChange}
-                        style={{
-                          border: "1px solid #014D88",
-                          borderRadius: "0.2rem",
-                        }}
-                      >
-                        <option value={""}>Select</option>
-                        {entryPointCommunity.map((value) => (
-                          <option key={value.id} value={value.code}>
-                            {value.display}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.communityEntryPoint !== "" ? (
-                        <span className={classes.error}>
-                          {errors.communityEntryPoint}
-                        </span>
-                      ) : (
-                        ""
-                      )}
-                    </FormGroup>
-                  </div>
-                )} */}
+
                 <div className="form-group mb-3 col-md-6">
                   <FormGroup>
                     <Label for="">
@@ -869,7 +807,7 @@ const RiskStratification = (props) => {
                     </Label>
                     <Input
                       type="date"
-                      onKeyPress={(e) => {
+                      onKeyPress={e => {
                         e.preventDefault();
                       }}
                       name="visitDate"
@@ -896,6 +834,7 @@ const RiskStratification = (props) => {
                     )}
                   </FormGroup>
                 </div>
+
                 <div className="form-group  col-md-6">
                   <FormGroup>
                     <Label>
@@ -925,11 +864,11 @@ const RiskStratification = (props) => {
                       <option value="">Select</option>
                       {entryPointSetting &&
                         entryPointSetting
-                          .filter((setting) => {
+                          ?.filter?.(setting => {
                             // Only filter if gender is Male
                             if (
-                              props.personInfo?.personResponseDto?.sex ===
-                              "Male"
+                              props.personInfo?.personResponseDto?.sex?.toLowerCase() ===
+                              "male"
                             ) {
                               return !RESTRICTED_SETTINGS.includes(
                                 setting.code
@@ -937,7 +876,7 @@ const RiskStratification = (props) => {
                             }
                             return true; // Show all if Female or unknown
                           })
-                          .map((value) => (
+                          .map(value => (
                             <option key={value.id} value={value.code}>
                               {value.display}
                             </option>
@@ -978,7 +917,7 @@ const RiskStratification = (props) => {
                             }}
                           >
                             <option value={""}>Select</option>
-                            {spokeFacList.map((value) => (
+                            {spokeFacList.map(value => (
                               <option key={value.id} value={value.spokeSite}>
                                 {value.spokeSite}
                               </option>
@@ -1031,7 +970,7 @@ const RiskStratification = (props) => {
                           }}
                         >
                           <option value={""}>Select</option>
-                          {spokeFacList.map((value) => (
+                          {spokeFacList.map(value => (
                             <option key={value.id} value={value.spokeSite}>
                               {value.spokeSite}
                             </option>
@@ -1080,7 +1019,7 @@ const RiskStratification = (props) => {
                     >
                       <option value={""}>Select</option>
                       {kP
-                        .filter((value) => {
+                        ?.filter?.(value => {
                           if (
                             props.patientAge > 14 &&
                             (value.id === 961 || value.id === 475)
@@ -1104,7 +1043,7 @@ const RiskStratification = (props) => {
 
                           return true;
                         })
-                        .map((value) => {
+                        .map(value => {
                           return (
                             <option key={value.id} value={value.code}>
                               {value.display}

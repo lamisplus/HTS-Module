@@ -11,6 +11,7 @@ import org.lamisplus.modules.base.util.PaginationUtil;
 import org.lamisplus.modules.hts.domain.dto.*;
 import org.lamisplus.modules.hts.domain.entity.HtsClient;
 import org.lamisplus.modules.hts.domain.entity.HtsPerson;
+import org.lamisplus.modules.hts.domain.entity.HtsPersonPatientDuplicate;
 import org.lamisplus.modules.hts.domain.entity.IndexElicitation;
 import org.lamisplus.modules.hts.domain.entity.RiskStratification;
 import org.lamisplus.modules.hts.domain.enums.Source;
@@ -696,4 +697,62 @@ public class HtsClientService {
         }
         return res;
     }
+
+
+    public List<HtsPersonPatientDuplicate> getAllDuplicateHtsPatients(String search) {
+        Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
+        String searchParam = null;
+        if (search != null && !search.equals("*") && !String.valueOf(search).equals("null")) {
+            searchParam = search.trim();
+        }
+
+        return htsClientRepository.findOnlyPersonDuplicateHts(UN_ARCHIVED, facilityId, searchParam);
+    }
+
+   
+    public MergeDuplicateResponseDto mergeDuplicateHtsPatients(MergeDuplicateRequestDto request) {
+        Long masterHtsClientId = request.getMasterPersonId();
+        List<Long> duplicateHtsClientIds = request.getDuplicatePersonIds(); 
+
+        Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
+
+      
+        htsClientRepository.findByIdAndArchivedAndFacilityId(masterHtsClientId, UN_ARCHIVED, facilityId)
+                .orElseThrow(() -> new EntityNotFoundException(HtsClient.class, "id", String.valueOf(masterHtsClientId)));
+
+      
+        duplicateHtsClientIds = duplicateHtsClientIds.stream()
+                .filter(id -> !id.equals(masterHtsClientId))
+                .collect(Collectors.toList());
+
+        if (duplicateHtsClientIds.isEmpty()) {
+            throw new IllegalTypeException(HtsClient.class, "Duplicate HTS client IDs", "cannot be empty or only contain master ID");
+        }
+
+        int archivedCount = 0;
+
+       
+        for (Long duplicateId : duplicateHtsClientIds) {
+            Optional<HtsClient> duplicateHtsClientOpt = htsClientRepository.findByIdAndArchivedAndFacilityId(duplicateId, UN_ARCHIVED, facilityId);
+            if (duplicateHtsClientOpt.isPresent()) {
+                HtsClient duplicateHtsClient = duplicateHtsClientOpt.get();
+                duplicateHtsClient.setArchived(ARCHIVED);
+                htsClientRepository.save(duplicateHtsClient);
+                archivedCount++;
+            }
+        }
+
+        MergeDuplicateResponseDto response = new MergeDuplicateResponseDto();
+        response.setMessage("Successfully archived " + archivedCount + " duplicate HTS client record(s)");
+        response.setMasterPersonId(masterHtsClientId);
+        response.setArchivedCount(archivedCount);
+
+        return response;
+    }
+
+   public HtsClientDto getClientById(Long clientId) {
+       return htsClientRepository.findClientById(clientId)
+               .map(this::htsClientToHtsClientDto)
+               .orElse(null);
+   }
 }

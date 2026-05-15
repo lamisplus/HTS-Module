@@ -1,40 +1,63 @@
-import React, { useState, Fragment, useEffect } from "react";
+// PatientHistory.js
+import React, { useState, Suspense, Fragment, useEffect, useMemo, lazy } from "react";
 import axios from "axios";
-import { url as baseUrl } from "./../../../api";
+import { url as baseUrl, url } from "./../../../api";
 import { token as token } from "./../../../api";
-//import { makeStyles } from "@material-ui/core/styles";
 import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
-import History from "./History";
-import ContineousRegistrationTesting from "./../Patient/ContineousRegistrationTesting";
-//import CheckedInPatients from './Patient/CheckedInPatients'
 import * as moment from "moment";
-import ExistenceClientHIVSTRegistration from "../Patient/HIVST/ExistenceClientHIVSTRegistration";
-import HIVSTPatientHistory from "../Patient/HIVST/HIVSTPatientHistory";
 import { getCheckModalityForHTS } from "../../../utility";
+import LoadingSpinner from "../../../reuseables/Loading";
+import { usePermissions } from "../../../hooks/usePermissions";
+import { useRoles } from "../../../hooks/useRoles";
+import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { toast } from "react-toastify";
+import IctForm from "../IctForm/IctForm";
+import { useLocation } from "react-router-dom";
+
+
+const NewEncounterHtsIctOrchestrator = lazy(() =>
+  import("../NewToolForms/NewEncounterHtsIctOrchestrator")
+);
+const ExistingPatientHtsForm = lazy(() =>
+  import("../NewToolForms/ExistingPatientHtsForm")
+);
+const NewEncounterHtsForm = lazy(() =>
+  import("../NewToolForms/NewEncounterHtsForm")
+);
+const HTSEncounterHistory = lazy(() => import("./HTSEncounterHistory"));
+const ICTEncounterHistory = lazy(() => import("./ICTEncounterHistory"));
+const PatientVisits = lazy(() => import("../Patient/PatientVisits"));
+const ContineousRegistrationTesting = lazy(() =>
+  import("./../Patient/ContineousRegistrationTesting")
+);
+const History = lazy(() => import("./History"));
+const HIVSTPatientHistory = lazy(() =>
+  import("../Patient/HIVST/HIVSTPatientHistory")
+);
+const ExistenceClientHIVSTRegistration = lazy(() =>
+  import("../Patient/HIVST/ExistenceClientHIVSTRegistration")
+);
+const NewIctForExistingPatient = lazy(() =>
+  import("../NewToolForms/NewIctForExistingPatient")
+);
 
 const divStyle = {
   borderRadius: "2px",
   fontSize: 14,
 };
 
-
-
 const Home = (props) => {
-
-  // State definitions
   const [patientList, setPatientList] = useState([]);
+  const [patientEncounterList, setPatientEncounterList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newHTSType, setNewHTSType] = useState("NEW HTS");
   const [LMP, setLMP] = useState("");
+  const { hasPermission, hasAnyPermission } = usePermissions();
 
-  const patientId =
-    props.patientObj && props.patientObj.personId
-      ? props.patientObj.personId
-      : props.patientObj.id
-      ? props.patientObj.id
-        : "";
-  
-  console.log("patientId", patientId);
+  const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
+  const location = useLocation();
+  const skipEligibility = location?.state?.skipEligibility ?? false;
+
 
   const [key, setKey] = useState(
     props.activePage === "NEW HTS" ? "new" : "home"
@@ -42,156 +65,122 @@ const Home = (props) => {
 
   const [lastHts, setLastHTS] = useState({});
   const [patientInfo, setPatientInfo] = useState(null);
-  const [permissions, setPermission] = useState(
-    JSON.parse(localStorage.getItem("stringifiedPermmision"))
-  );
   const [lastVisitCount, setLastVisitCount] = useState(null);
   const [checkModality, setCheckModality] = useState("");
   const [lastVistAndModality, setLastVistAndModality] = useState(false);
-  const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] = useState(false);
+  const [lastVisitModalityAndCheckedIn, setLastVisitModalityAndCheckedIn] =
+    useState(false);
 
+  const { hasRole } = useRoles();
+  const isRDE = hasRole("RDE");
 
+  const isEligibleForNewIct = useMemo(() => {
+    return patientInfo?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
+  }, [patientInfo]);
+  
 
   const calculateLastVisitDate = (visitDate) => {
     if (!visitDate) return 0;
-    
     const monthDifference = moment(
       new Date(moment(new Date()).format("YYYY-MM-DD"))
     ).diff(new Date(visitDate), "months", true);
-    
-  
-    
     return monthDifference;
   };
 
-
-  // Main function to determine retesting status
   const determineRetestingStatus = async (lastRecord) => {
-
     let htsType = "NEW HTS";
-
-   
     let hivResult = lastRecord?.hivTestResult || lastRecord?.hivTestResult2;
 
-
     if (lastRecord?.id && hivResult && hivResult.toLowerCase() === "negative") {
-     
-      
       try {
-     
         const response = await axios.get(
           `${baseUrl}hts/get-anc-lmp?personUuid=${props.patientObj.personUuid}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        
-        // If LMP data exists, calculate retesting date range
         if (response.data.result) {
           let lmpDate = moment(response.data.result);
           let retestingRangeDate = moment(lmpDate).add(40 + 52, "weeks");
           let today = moment();
-
-          // If today is within the retesting range (today is before the end date)
           if (retestingRangeDate.diff(today, "days") > 0) {
             htsType = "RETESTING";
-          } 
-        } 
-        // Set LMP data
+          }
+        }
         setLMP(response.data);
       } catch (error) {
-        console.error("Error fetching ANC LMP data:", error);
+        // Silent catch
       }
     } else {
-      setLastVisitModalityAndCheckedIn(true)
-      console.log(
-        "Patient either has no record, no HIV result, or result isn't negative. Keeping type as NEW HTS"
-      );
+      setLastVisitModalityAndCheckedIn(true);
     }
 
     setNewHTSType(htsType);
-
     return htsType;
   };
 
   useEffect(() => {
     patients();
-    patientsCurrentHts();
-    
-    if (props.activePage.activePage === "home") {
-      setKey("home");
-    }
-    if (props.activePage.activePage === "NEW HTS") {
-      setKey("new");
-    }
-  }, [props.patientObj, props.activePage]);
+    // patientsCurrentHts();
 
-  // Get list of patients
+    // key is already initialised correctly from props.activePage in useState above.
+    // Do NOT re-derive it here — doing so caused the tab to jump back to "new"
+    // after returning from an update when the router state still held "NEW HTS".
+  }, []);
+
   async function patients() {
     setLoading(true);
-    
     try {
-      const response = await axios.get(
-        `${baseUrl}hts/persons/${patientId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.get(`${baseUrl}hts/persons/${patientId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setPatientList(response.data.htsClientDtoList);
     } catch (error) {
-      console.error("Error fetching patient list:", error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }
   }
 
-
   async function patientsCurrentHts() {
-
     setLoading(true);
-    
     try {
       const response = await axios.get(
         `${baseUrl}hts/persons/${patientId}/current-hts`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // 
-      // Set patient info
       setPatientInfo(response.data);
-      
-      // Calculate visit metrics
-      const visitCount = Math.round(calculateLastVisitDate(response.data.dateVisit));
+      const visitCount = Math.round(
+        calculateLastVisitDate(response.data.dateVisit)
+      );
       setLastVisitCount(visitCount);
-      
-      
-      // Check modality
+
       const modality = getCheckModalityForHTS(
         response.data.riskStratificationResponseDto?.testingSetting
       );
       setCheckModality(modality);
 
-
-      // Calculate condition for showing tabs
-      const condition =
-        visitCount >= 3 || modality === "show"
-          ? true
-          : false;
-      
- 
+      const condition = visitCount >= 3 || modality === "show" ? true : false;
       setLastVistAndModality(condition);
-      
-      const finalCondition = condition || props.checkedInPatient;
-        setLastVisitModalityAndCheckedIn(finalCondition);
+
+      const finalCondition = condition || Boolean(props?.checkedInPatient);
+      setLastVisitModalityAndCheckedIn(finalCondition);
 
       await determineRetestingStatus(response.data);
-      
       setLastHTS(response.data);
-      
     } catch (error) {
-      console.error("Error fetching current HTS:", error);
+      // Handle error silently
     } finally {
       setLoading(false);
     }
   }
 
-
+  const permissions = useMemo(
+    () => ({
+      canSeePatientVisit:
+        !isRDE && hasAnyPermission("view_patient", "all_permissions"),
+    }),
+    [hasAnyPermission, props?.patientObj]
+  );
 
   return (
     <Fragment>
@@ -200,7 +189,6 @@ const Home = (props) => {
         <Col xl={12}>
           <Card style={divStyle}>
             <Card.Body>
-              {/* <!-- Nav tabs --> */}
               <div className="custom-tab-1">
                 <Tabs
                   id="controlled-tab-example"
@@ -210,67 +198,65 @@ const Home = (props) => {
                   }}
                   className="mb-3"
                 >
-                  <Tab eventKey="home" title="HTS HISTORY">
-                    <History
-                      patientObj={props.patientObj}
-                      setPatientObj={props.setPatientObj}
-                      activePage={props.activePage}
-                      setActivePage={props.setActivePage}
-                      clientCode={props.clientCode}
-                      patientAge={props.patientAge}
-                      patients={patients}
-                      patientList={patientList}
-                      loading={loading}
-                    />
-                  </Tab>
-                  
 
-                  {lastVisitModalityAndCheckedIn && (
-                    <Tab 
-                      eventKey="new" 
-                      title={newHTSType}
-                       tabClassName={newHTSType === "RETESTING" ? "retesting-tab" : ""}
-                    >
-                      <ContineousRegistrationTesting
-                        patientObj={patientInfo}
-                        activePage={props.activePage}
-                        setActivePage={props.setActivePage}
-                        patientInfo={props.patientInfo}
-                        clientCode={props.clientCode}
-                        patientAge={props.patientAge}
-                        patients={patients}
-                        patientList={patientList}
-                        checkedInPatient={props.checkedInPatient}
-                        personInfo={props.personInfo}
-                        newHTSType={newHTSType}
-                      />
+                  {(skipEligibility || props?.clientEligibility?.isPatientEligibleForHts) && (
+                    <Tab eventKey="new" title="NEW HTS">
+
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {key === "new" && (
+
+                          <NewEncounterHtsIctOrchestrator
+                            person={props?.patientObj}   // full object: { personId, personResponseDto, ... }
+                            onDone={() => setKey("home")}
+                            isOnArt={false}
+                          />
+                        )}
+                      </Suspense>
                     </Tab>
                   )}
-                  
-                  <Tab eventKey="hivst-history" title="HIVST HISTORY">
-                    <HIVSTPatientHistory
-                      patientObj={props.patientObj}
-                      setPatientObj={props.setPatientObj}
-                      activePage={props.activePage}
-                      setActivePage={props.setActivePage}
-                      clientCode={props.clientCode}
-                      patientAge={props.patientAge}
-                      patients={patients}
-                      patientList={patientList}
-                      loading={loading}
-                    />
+
+                  <Tab eventKey="new-ict-encounter-existing-patient" title="NEW ICT">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "new-ict-encounter-existing-patient" && (
+                        <NewIctForExistingPatient
+                          patientId={patientId}
+                          onDone={() => {
+                            setKey("ict-history");
+                          }}
+                          isOnArt={false}
+                        />
+                      )}
+                    </Suspense>
                   </Tab>
-                  
-                  <Tab eventKey="new-hivst" title="NEW HIVST">
-                    <ExistenceClientHIVSTRegistration
-                      patientObj={props.patientObj}
-                      activePage={props.activePage}
-                      setActivePage={props.setActivePage}
-                      clientCode={props.clientCode}
-                      patientAge={props.patientAge}
-                      patients={patients}
-                    />
+
+
+                  <Tab eventKey="home" title="HTS HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "home" && (
+                        <HTSEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                          clientCode={props.clientCode}
+                          patientAge={props.patientAge}
+                        />
+                      )}
+                    </Suspense>
                   </Tab>
+
+                  <Tab eventKey="ict-history" title="ICT HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "ict-history" && (
+                        <ICTEncounterHistory
+                          patientObj={props.patientObj}
+                          activePage={props.activePage}
+                          setActivePage={props.setActivePage}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
+
                 </Tabs>
               </div>
             </Card.Body>

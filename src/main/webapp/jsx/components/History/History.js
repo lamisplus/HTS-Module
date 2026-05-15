@@ -123,7 +123,7 @@ const PatientnHistory = (props) => {
         history.push("/");
       })
       .catch((err) => {
-        console.err(err);
+      
       });
   };
 

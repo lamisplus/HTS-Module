@@ -10,7 +10,6 @@ import 'semantic-ui-css/semantic.min.css';
 
 
 const Elicitation = (props) => {
-    //console.log(props.patientObj)
     const history = useHistory();
     const [activePage, setActivePage]= useState('list')
     const handleIClickPage =(activeItem)=>{

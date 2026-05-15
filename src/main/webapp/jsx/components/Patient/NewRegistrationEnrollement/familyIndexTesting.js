@@ -17,6 +17,7 @@ import { Label as LabelRibbon, Button, Message } from "semantic-ui-react";
 import "react-toastify/dist/ReactToastify.css";
 import "react-widgets/dist/css/react-widgets.css";
 import * as moment from "moment";
+import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -98,7 +99,8 @@ const FamilyIndexTesting = (props) => {
     props.patientObj && props.patientObj ? props.patientObj.id : "";
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
-  const [setting, setSetting] = useState([]); //[ 'Select setting',  'ART', 'CT', 'TB', 'STI', 'FP','OPD', 'WARD', 'Outreach', 'Standalone', 'HTS', 'Others' ]
+  const [, setCodesets] = useState({});
+  const [setting, setSetting] = useState([]);
   const familyIndexClient = [
     "Select family index client",
     "Mother",
@@ -166,6 +168,7 @@ const FamilyIndexTesting = (props) => {
     consistentWeightFeverNightCough: "",
     soldPaidVaginalSex: "",
   });
+
   const [stiScreening, setStiScreening] = useState({
     vaginalDischarge: "",
     lowerAbdominalPains: "",
@@ -192,20 +195,8 @@ const FamilyIndexTesting = (props) => {
     });
   };
 
-  const familyIndexSetting = () => {
-    axios
-      .get(`${baseUrl}application-codesets/v2/TEST_SETTING`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setSetting(response.data);
-      })
-      .catch((error) => {});
-  };
 
-  useEffect(() => {
-    familyIndexSetting();
-  }, [props.patientObj]);
+
 
   useEffect(() => {
     if (props.patientObj) {
@@ -248,8 +239,8 @@ const FamilyIndexTesting = (props) => {
         //setRiskAssessment({...riskAssessment, ...props.patientObj.riskStratificationResponseDto.riskAssessment})
         props.patientObj.riskStratificationResponseDto.riskAssessment
           .whatWasTheResult !== "" &&
-        props.patientObj.riskStratificationResponseDto.riskAssessment
-          .whatWasTheResult === "Positive"
+          props.patientObj.riskStratificationResponseDto.riskAssessment
+            .whatWasTheResult === "Positive"
           ? (knowledgeAssessment.previousTestedHIVNegative = "false")
           : (knowledgeAssessment.previousTestedHIVNegative = "true");
       } else {
@@ -403,7 +394,7 @@ const FamilyIndexTesting = (props) => {
           if (error.response && error.response.data) {
             let errorMessage =
               error.response.data.apierror &&
-              error.response.data.apierror.message !== ""
+                error.response.data.apierror.message !== ""
                 ? error.response.data.apierror.message
                 : "Something went wrong, please try again";
             toast.error(errorMessage);
@@ -417,6 +408,19 @@ const FamilyIndexTesting = (props) => {
       });
     }
   };
+
+  const loadCodesets = (data) => {
+    setCodesets(data)
+    setSetting(data["TEST_SETTING"])
+  }
+
+  useGetCodesets({
+    codesetsKeys: [
+      "TEST_SETTING"
+    ],
+    patientId: patientID || clientId,
+    onSuccess: loadCodesets
+  })
 
   return (
     <>
@@ -453,7 +457,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="true">Yes</option>
@@ -478,7 +482,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="<1"> {"< 1"} month</option>
@@ -506,7 +510,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -521,7 +525,8 @@ const FamilyIndexTesting = (props) => {
                     Date <span style={{ color: "red" }}> *</span>
                   </Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date"
+                    onKeyPress={(e) => { e.preventDefault() }}
 
                     // name="dateVisit"
                     // id="dateVisit"
@@ -533,7 +538,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -555,7 +560,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     {setting.map((value, index) => (
                       <option key={value.id} value={value.code}>
@@ -582,7 +587,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     {familyIndexClient.map((item, index) => (
                       <option key={index} value={"item"}>
@@ -611,7 +616,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -635,7 +640,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -658,7 +663,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -680,7 +685,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -702,7 +707,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -717,7 +722,7 @@ const FamilyIndexTesting = (props) => {
                     date of index client HIV-positive test results
                   </Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="indexClientConfirmedHivPositiveDate"
                     // id="dateVisit"
@@ -729,7 +734,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -777,7 +782,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="Result not yet confirmed">
@@ -807,7 +812,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="true">Yes</option>
@@ -826,7 +831,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date of treatemnt initiation</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="treatmentInitiationDate"
                     // id="dateVisit"
@@ -838,7 +843,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -860,7 +865,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="true">Yes</option>
@@ -899,8 +904,8 @@ const FamilyIndexTesting = (props) => {
                         <Input
                           type="text"
                           name="motherAge"
-                          // value={motherAge}
-                          // onChange={(e) => setMotherAge(e.target.value)}
+                        // value={motherAge}
+                        // onChange={(e) => setMotherAge(e.target.value)}
                         />
                       </FormGroup>
                       <FormGroup>
@@ -908,8 +913,8 @@ const FamilyIndexTesting = (props) => {
                         <Input
                           type="text"
                           name="uau"
-                          // value={uau}
-                          // onChange={(e) => setUau(e.target.value)}
+                        // value={uau}
+                        // onChange={(e) => setUau(e.target.value)}
                         />
                       </FormGroup>
                       <FormGroup>
@@ -917,18 +922,18 @@ const FamilyIndexTesting = (props) => {
                         <Input
                           type="text"
                           name="name"
-                          // value={name}
-                          // onChange={(e) => setName(e.target.value)}
+                        // value={name}
+                        // onChange={(e) => setName(e.target.value)}
                         />
                       </FormGroup>
                       <FormGroup>
                         <Label for="dateOfHTS">Date of HTS</Label>
                         <Input
-                          type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                          type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                           name="dateOfHTS"
-                          // value={dateOfHTS}
-                          // onChange={(e) => setDateOfHTS(e.target.value)}
+                        // value={dateOfHTS}
+                        // onChange={(e) => setDateOfHTS(e.target.value)}
                         />
                       </FormGroup>
                       <FormGroup>
@@ -936,8 +941,8 @@ const FamilyIndexTesting = (props) => {
                         <Input
                           type="text"
                           name="motherDeadYear"
-                          // value={motherDeadYear}
-                          // onChange={(e) => setMotherDeadYear(e.target.value)}
+                        // value={motherDeadYear}
+                        // onChange={(e) => setMotherDeadYear(e.target.value)}
                         />
                       </FormGroup>
                     </CardBody>
@@ -971,7 +976,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -993,7 +998,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.clientCode !== "" ? (
                     <span className={classes.error}>{errors.clientCode}</span>
@@ -1015,7 +1020,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="Family">Family</option>
@@ -1029,7 +1034,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">schedule visit date</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="scheduleVisitDate"
                     // id="dateVisit"
@@ -1041,7 +1046,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -1054,7 +1059,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date visited</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="dateVisited"
                     // id="dateVisit"
@@ -1066,7 +1071,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -1088,7 +1093,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="true">Yes</option>
@@ -1107,7 +1112,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">date tested</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="dateTested"
                     // id="dateVisit"
@@ -1119,7 +1124,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -1141,7 +1146,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.2rem",
                     }}
-                    // disabled={props.activePage.actionType === "view"}
+                  // disabled={props.activePage.actionType === "view"}
                   >
                     <option value={""}></option>
                     <option value="Tested Negative">Tested Negative</option>
@@ -1161,7 +1166,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">Date enrolled in OVC</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="ovcEnrolledDate"
                     // id="dateVisit"
@@ -1173,7 +1178,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>
@@ -1187,7 +1192,7 @@ const FamilyIndexTesting = (props) => {
                 <FormGroup>
                   <Label for="">Date enrolled\ on ART</Label>
                   <Input
-                    type="date"                       onKeyPress={(e)=>{e.preventDefault()}}
+                    type="date" onKeyPress={(e) => { e.preventDefault() }}
 
                     name="artEnrolledDate"
                     // id="dateVisit"
@@ -1199,7 +1204,7 @@ const FamilyIndexTesting = (props) => {
                       border: "1px solid #014D88",
                       borderRadius: "0.25rem",
                     }}
-                    // readOnly={props.activePage.actionType === "view"}
+                  // readOnly={props.activePage.actionType === "view"}
                   />
                   {/* {errors.dateVisit !== "" ? (
                     <span className={classes.error}>{errors.dateVisit}</span>

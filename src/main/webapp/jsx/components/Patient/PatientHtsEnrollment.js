@@ -295,60 +295,7 @@ const UserRegistration = (props) => {
                         </span>
                       </Menu.Item>
                     )}
-                  {/* 
-                  <Menu.Item
-                    name="spam"
-                    active={activeItem === "indexing"}
-                    onClick={() => handleItemClick("indexing")}
-                    style={{
-                      backgroundColor: activeItem === "indexing" ? "#000" : "",
-                    }}
-                  > */}
-                  {/* <Label>4</Label> */}
-                  {/* <span style={{ color: "#fff" }}>
-                      Index Notification Services - Elicitation
-                      {completed.includes("indexing") && (
-                        <Icon name="check" color="green" />
-                      )}
-                    </span>
-                  </Menu.Item> */}
-
-                  {/* <Menu.Item
-                    name="inbox"
-                    active={activeItem === "pns-history"}
-                    onClick={() => handleItemClick("pns-history")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "pns-history" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>
-                      {" "}
-                      Partner Notification Services
-                      {completed.includes("pns") && (
-                        <Icon name="check" color="green" />
-                      )}
-                    </span>
-                  </Menu.Item> */}
-                  {/* Family Index Testing form */}
-                  {/* {patientObj.hivTestResult && patientObj.hivTestResult.toLowerCase() ===
-                    "positive" &&  <Menu.Item
-                    name="inbox"
-                    active={activeItem === "fit-history"}
-                    onClick={() => handleItemClick("fit-history")}
-                    style={{
-                      backgroundColor:
-                        activeItem === "fit-history" ? "#000" : "",
-                    }}
-                  >
-                    <span style={{ color: "#fff" }}>
-                      {" "}
-                      Family Index Testing form
-                      {completed.includes("fit") && (
-                        <Icon name="check" color="green" />
-                      )}
-                    </span>
-                  </Menu.Item>}  */}
+                 
 
                   {permissions.includes("Nigeria_PNS_Form") &&
                     patientObj.hivTestResult &&

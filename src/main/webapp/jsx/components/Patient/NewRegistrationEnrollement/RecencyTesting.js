@@ -83,7 +83,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Recency = (props) => {
-  console.log("data1", props.patientObj);
+
   const classes = useStyles();
   const patientID =
     props.patientObj && props.patientObj.personResponseDto
@@ -193,7 +193,6 @@ const Recency = (props) => {
 
   useEffect(() => {
     if (props.patientObj && props.patientObj.recency !== null) {
-      // console.log(props.patientObj.recency);
       setRecency(props.patientObj.recency);
     }
     if (props.patientObj) {
@@ -455,7 +454,6 @@ const Recency = (props) => {
     objValues.htsClientId = clientId;
     objValues.recency = recency;
     objValues.personId = patientID;
-    //console.log(recency)
     if (validate() ) {
       setSaving(true);
       axios

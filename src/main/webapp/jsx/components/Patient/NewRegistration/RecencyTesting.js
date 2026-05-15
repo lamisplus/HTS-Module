@@ -203,7 +203,6 @@ const Recency = (props) => {
     handleItemClick(nextForm[2], nextForm[2]);
   };
   const loadOtherForm = (row) => {
-    console.log("loadOtherForm called - opening modal");
     setOpen(true);
   };
 
@@ -214,7 +213,6 @@ const Recency = (props) => {
   
   useEffect(() => {
     if (props.patientObj && props.patientObj.recency !== null) {
-      console.log(props.patientObj.recency);
       setRecency(props.patientObj.recency);
     }
     if (props.patientObj) {
@@ -303,7 +301,6 @@ const Recency = (props) => {
     recency.controlLine,
     props.patientObj,
   ]);
-  //console.log(props.patientObj)
   const handleInputChangeRecency = (e) => {
     setErrors({ ...errors, [e.target.name]: "" });
     if (e.target.name === "viralLoadConfirmationResult") {
@@ -456,8 +453,6 @@ const Recency = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("=== HANDLE SUBMIT CALLED ===");
-    console.log("Opt Out RTRI:", recency.optOutRTRI);
     
     let age = calculate_age(props?.patientObj?.personResponseDto?.dateOfBirth);
     let latestForm = getNextForm(
@@ -466,7 +461,6 @@ const Recency = (props) => {
       "",
       props?.patientObj?.hivTestResult
     );
-    console.log("Next form:", latestForm);
     setNextForm(latestForm);
     
     objValues.htsClientId = clientId;
@@ -474,41 +468,33 @@ const Recency = (props) => {
     objValues.personId = patientID;
     
     const validationResult = validate();
-    console.log("Validation result:", validationResult);
-    console.log("Errors:", errors);
     
     if (validationResult) {
-      console.log("Validation passed - making API call");
       setSaving(true);
       axios
         .put(`${baseUrl}hts/${clientId}/recency`, objValues, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          console.log("API call successful");
           setSaving(false);
           props.setPatientObj(response.data);
 
           // Check if user opted out of RTRI
           if (recency.optOutRTRI === "true") {
-            console.log("User opted out - calling loadOtherForm");
             loadOtherForm();
           } else if (
             latestForm[0] === "recency-testing" &&
             latestForm[1] === "recency-testing"
           ) {
             // if there are no other form then we should hide the save button
-            console.log("No other forms - hiding save button");
             setShowSaveButton(false);
           } else {
-            console.log("Other forms available - calling loadOtherForm");
             loadOtherForm();
           }
           //toast.success("Risk Assesment successful");
           // history.push('/')
         })
         .catch((error) => {
-          console.log("API call failed:", error);
           setSaving(false);
           if (error.response && error.response.data) {
             let errorMessage =
@@ -522,7 +508,6 @@ const Recency = (props) => {
           }
         });
     } else {
-      console.log("Validation failed - errors:", errors);
     }
   };
 

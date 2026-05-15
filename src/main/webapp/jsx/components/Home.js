@@ -1,60 +1,73 @@
-import React, { useState, Fragment, useEffect } from "react";
+import React, { useState, Fragment, lazy, Suspense } from "react";
+import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
+import LoadingSpinner from "../../reuseables/Loading";
+import { useEffect } from "react";
+import { getListOfPermission } from "../../utility";
+import { useRoles } from "../../hooks/useRoles";
+import { usePermissions } from "../../hooks/usePermissions";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import Button from "@material-ui/core/Button";
+import { FaUserPlus } from "react-icons/fa";
 import axios from "axios";
 import { url as baseUrl } from "./../../api";
 import { token as token } from "./../../api";
-import { makeStyles } from "@material-ui/core/styles";
-import { Row, Col, Card, Tab, Tabs } from "react-bootstrap";
-import Dashboard from "./Patient/PatientList";
-import HTSList from "./Patient/HTSList";
-import VisualisationHome from "./Visualisation/Index";
-import { FaUserPlus } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import Button from "@material-ui/core/Button";
-import HIVSTPatient from "./Patient/HIVST/HIVSTPatient";
-import CheckedInPatients from "./Patient/CheckedInPatients";
-import { getListOfPermission } from "../../utility";
 import { getAcount } from "../../utility";
-import HTSml from "./Patient/HTSML";
+
+const HTSEncounterList = lazy(() => import("./Patient/HtsEncounterList"));
+const PatientList = lazy(() => import("./Patient/PatientList"));
+const HTSList = lazy(() => import("./Patient/HTSList"));
+const HIVSTPatient = lazy(() => import("./Patient/HIVST/HIVSTPatient"));
+const CheckedInPatients = lazy(() => import("./Patient/CheckedInPatients"));
+
 const divStyle = {
   borderRadius: "2px",
   fontSize: 14,
 };
 
 const Home = () => {
-  const [key, setKey] = useState("home");
+  const { loading } = usePermissions();
+  const { hasRole, loading: rolesLoading } = useRoles();
+  const [key, setKey] = useState("patients");
+  const [, setActiveTab] = useState("patients");
+
+  const handleTabSelect = (k) => {
+    setKey(k);
+    setActiveTab(k);
+  };
+
+  const isRDE = hasRole("RDE");
+
+  useEffect(() => {
+    const permissionsHtsForm = JSON.parse(localStorage.getItem("currentUser_Permission")) || []
+    const lowerCaseArrayPermissions = permissionsHtsForm?.map(str => str.toLowerCase())
+    const htsApprovedForms = getListOfPermission(lowerCaseArrayPermissions)
+    localStorage.setItem("hts_permissions_forms", JSON.stringify(htsApprovedForms))
+  }, [])
+
 
   const getPermissions = async () => {
     await axios
       .get(`${baseUrl}account`, {
-        
+
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
-        
-        let staticPermission =[
+
+        let staticPermission = [
           "admin_read",
           "admin_delete",
           "all_permission",
           "admin_write"
-      ]
+        ]
 
-      localStorage.setItem("permissions", staticPermission);
-      localStorage.setItem("FacId", response.data.currentOrganisationUnitId);
+        localStorage.setItem("permissions", staticPermission);
+        localStorage.setItem("FacId", response.data.currentOrganisationUnitId);
 
-        //*** UNCOMMENT WHEN THE POC IS READY 
-        // let generatedPermission = getListOfPermission(
-        //   response.data.permissions
-        // );
-        // localStorage.setItem("permissions", response.data.permissions);
-            /********* THE END  */
-
-
-
-
-         let generatedPermission = getListOfPermission(
+        let generatedPermission = getListOfPermission(
           staticPermission
         );
-     
+
         localStorage.setItem(
           "generatedPermission",
           JSON.stringify(generatedPermission)
@@ -67,10 +80,8 @@ const Home = () => {
           "stringifiedPermmision",
           JSON.stringify(stringifiedPermmision)
         );
-
-     
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
 
@@ -78,7 +89,7 @@ const Home = () => {
     getAcount()
       .then((response) => {
       })
-      .catch(() => {});
+      .catch(() => { });
   };
 
 
@@ -94,6 +105,30 @@ const Home = () => {
     localStorage.setItem("index", JSON.stringify(obj));
   }, []);
 
+
+
+
+  useEffect(() => {
+    if (!rolesLoading) {
+      const defaultTab = isRDE ? "patients" : "checkedin";
+      setKey(defaultTab);
+      setActiveTab(defaultTab);
+    }
+  }, [rolesLoading, isRDE]);
+
+
+  const permissions = useMemo(
+    () => ({
+      canSeeCheckedInPatients: !isRDE, // POC users see this
+      canSeeFindPatients: isRDE, // RDE users see this
+    }),
+    [isRDE]
+  );
+
+  if (rolesLoading || loading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <Fragment>
       <div
@@ -106,7 +141,8 @@ const Home = () => {
           </li>
         </ol>
       </div>
-      <Link to={"register-patient"}>
+      {/* {permissions.canSeeFindPatients && ( */}
+      {/* <Link to={"register-patient"}>
         <Button
           variant="contained"
           color="primary"
@@ -116,7 +152,8 @@ const Home = () => {
         >
           <span style={{ textTransform: "capitalize" }}>New Patient</span>
         </Button>
-      </Link>
+      </Link> */}
+      {/* )} */}
       <br />
       <br /> <br />
       <Row>
@@ -127,26 +164,49 @@ const Home = () => {
                 <Tabs
                   id="controlled-tab-example"
                   activeKey={key}
-                  onSelect={(k) => setKey(k)}
+                  onSelect={handleTabSelect}
                   className="mb-3"
                 >
-                  <Tab eventKey="home" title="Patients">
-                    <Dashboard />
-                  </Tab>
-                  {/* <Tab eventKey="checkedin" title="Checked-In Patients">
-                    <CheckedInPatients />
-                  </Tab> */}
-                  <Tab eventKey="hts" title="HTS Patients">
-                    <HTSList />
+                  {permissions.canSeeFindPatients && (
+                    <Tab eventKey="patients" title="Patients">
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {key === "patients" && <PatientList />}
+                      </Suspense>
+                    </Tab>
+                  )}
+
+                  {permissions.canSeeCheckedInPatients && (
+                    <Tab eventKey="checkedin" title="Checked-In Patients">
+                      <Suspense fallback={<LoadingSpinner />}>
+                        {key === "checkedin" && <CheckedInPatients />}
+                      </Suspense>
+                    </Tab>
+                  )}
+
+                  <Tab eventKey="hts-encounter" title="HTS Patients">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hts-encounter" && <HTSEncounterList />}
+                    </Suspense>
                   </Tab>
 
-                  <Tab eventKey="hivst" title="HIVST Patients">
-                    <HIVSTPatient />
+
+                  {/* {permissions.canSeeFindPatients && ( */}
+                  <Tab eventKey="hts" title="HTS Patients Archived">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hts" && <HTSList />}
+                    </Suspense>
                   </Tab>
-{/* 
-                  <Tab eventKey="hts-ml" title="HTS ML">
-                    <HTSml />
-                  </Tab> */}
+                  {/* )} */}
+
+
+
+                  {/* {permissions.canSeeFindPatients && ( */}
+                  <Tab eventKey="hivst" title="HIVST Patients">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hivst" && <HIVSTPatient />}
+                    </Suspense>
+                  </Tab>
+                  {/* )} */}
                 </Tabs>
               </div>
             </Card.Body>

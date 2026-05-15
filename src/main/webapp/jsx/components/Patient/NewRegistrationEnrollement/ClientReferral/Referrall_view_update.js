@@ -96,7 +96,6 @@ const useStyles = makeStyles((theme) => ({
 
 const ViewClientReferral = (props) => {
   const classes = useStyles();
-  // console.log("props.patientObj", props.patientObj)
   const [content, setContent] = useState({
     showReferringUnit: false,
     showServiceProviderUnit: false,
@@ -141,8 +140,8 @@ const ViewClientReferral = (props) => {
     hivStatus: props?.patientObj?.hivTestResult2
       ? props?.patientObj?.hivTestResult2
       : props?.patientObj?.hivTestResult
-      ? props?.patientObj?.hivTestResult
-      : "",
+        ? props?.patientObj?.hivTestResult
+        : "",
     referredFromFacility: "",
     nameOfPersonReferringClient: "",
     nameOfReferringFacility: Cookies.get("facilityName"),
@@ -170,7 +169,7 @@ const ViewClientReferral = (props) => {
         setFormInfo(response.data);
       })
       .catch((error) => {
-        //console.log(error);
+
       });
   };
   useEffect(() => {

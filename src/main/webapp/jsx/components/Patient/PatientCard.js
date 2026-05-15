@@ -70,6 +70,9 @@ function PatientCard(props) {
   const [htscount, setHtscount] = useState(0);
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
+  const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
+  const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
+
 
   useEffect(() => {
     PatientCurrentObject();
@@ -79,8 +82,7 @@ function PatientCard(props) {
   async function PatientCurrentObject() {
     axios
       .get(
-        `${baseUrl}hts/persons/${
-          patientObjs.personId ? patientObjs.personId : patientObjs.id
+        `${baseUrl}hts/persons/${patientObjs.personId ? patientObjs.personId : patientObjs.id
         }`,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -102,8 +104,9 @@ function PatientCard(props) {
           ].hivTestResult2
         );
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }
+
 
   const getHospitalNumber = (identifier) => {
     const identifiers = identifier;
@@ -163,7 +166,7 @@ function PatientCard(props) {
                             }}
                           >
                             <span style={{ textTransform: "capitalize" }}>
-                              Back
+                              Home
                             </span>
                           </ButtonMui>
                         </Link>
@@ -207,7 +210,7 @@ function PatientCard(props) {
                           Gender :{" "}
                           <b style={{ color: "#0B72AA" }}>
                             {patientObj.personResponseDto &&
-                            patientObj.personResponseDto.sex !== null
+                              patientObj.personResponseDto.sex !== null
                               ? patientObj.personResponseDto.sex
                               : ""}
                           </b>
@@ -238,30 +241,50 @@ function PatientCard(props) {
                           {" "}
                           Client Code :{" "}
                           <b style={{ color: "#0B72AA" }}>
-                            {patientObj && patientObj?.clientCode
+                            {/* {patientObj && patientObj?.clientCode
                               ? patientObj?.clientCode
-                              : ""}{" "}
+                              : ""}{" "} */}
+                            {props?.clientCode}
                           </b>
                         </span>
                       </Col>
-                      <Col md={12}>
+                      <Col md={4}>
                         <div>
                           <Typography variant="caption">
-                            {htscount < 1 ? (
-                              <Label color="blue" size={"mini"}>
-                                STATUS : Not Tested
-                              </Label>
-                            ) : patientObj &&
-                              (htsResult === "Positive" ||
-                                htsResult === "Positive") ? (
-                              <Label color={"red"} size={"mini"}>
-                                STATUS : Positive
-                              </Label>
-                            ) : (
-                              <Label color="teal" size={"mini"}>
-                                STATUS : Negative
-                              </Label>
-                            )}
+                            {
+                              clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
+                                (<Label color={"red"} size={"small"}>
+                                  Status : Positive
+                                </Label>) :
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
+                                  (
+                                    <Label color="teal" size={"small"}>
+                                      Status: Negative
+                                    </Label>
+                                  ) :
+                                  finalHivTestResult === "suspected acute infection" ?
+                                    (
+                                      <Label color="orange" size={"small"}>
+                                        Status: {finalHivTestResult}
+                                      </Label>
+                                    ) :
+
+                                    (
+                                      <Label color="blue" size={"small"}>
+                                        Status: Not Tested
+                                      </Label>
+                                    )
+                            }
+                          </Typography>
+                        </div>
+                      </Col>
+
+                      <Col md={12} style={{ marginTop: 10 }}>
+                        <div>
+                          <Typography variant="caption">
+                            <Label color={"teal"} size={"small"}>
+                              Reason for HTS {props?.clientEligibility?.isPatientEligibleForHts ? "eligibility" : "ineligibility"} : {String(props?.clientEligibility?.eligibilityReason)}
+                            </Label>
                           </Typography>
                         </div>
                       </Col>

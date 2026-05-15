@@ -1,0 +1,102 @@
+import { useFormik } from "formik";
+import { buildValidationSchema } from "./validationSchema";
+
+const defaultValues = {
+  dateOfVisit: "",
+  clientCode: "",
+  setting: "",
+  facilitySetting: "",
+  communityEntryPoint: "",
+  typeOfSession: "",
+  indexTesting: "",
+  indexRelationship: "",
+  indexClientCode: "",
+  surname: "",
+  firstName: "",
+  middleName: "",
+  dobType: "Actual",
+  dateOfBirth: "",
+  age: "",
+  sex: "",
+  phoneNumber: "",
+  maritalStatus: "",
+  numberOfWives: "",
+  numberOfCoWives: "",
+  numberOfBiologicalChildren: "",
+  pregnancyStatus: "",
+  breastfeedingDuration: "",
+  clientState: "",
+  clientLga: "",
+  address: "",
+  landmark:"",
+  previouslyTestedNegative: "",
+  timeOfLastNegativeTest: "",
+  clientInformedTransmissionRoutes: "",
+  clientInformedRiskFactors: "",
+  clientInformedPreventionMethods: "",
+  clientInformedPossibleResults: "",
+  informedConsentGiven: "",
+  everHadSexualIntercourse: "",
+  moreThanOneSexPartner: "",
+  unprotectedVaginalSex: "",
+  unprotectedAnalSex: "",
+  bloodTransfusionLast3Months: "",
+  sexUnderInfluence: "",
+  historyOfSTI: "",
+  currentCough: "",
+  weightLoss: "",
+  fever: "",
+  nightSweats: "",
+  complaintsVaginalDischarge: "",
+  complaintsLowerAbdominalPain: "",
+  complaintsUrethralDischarge: "",
+  complaintsScroralSwelling: "",
+  complaintsGenitalSores: "",
+  complaintsSwollenLymphNodes: "",
+  partnerNewlyDiagnosed: "",
+  partnerPregnantOnArv: "",
+  adolescentHivPositive: "",
+  partnerNotRegularlyOnDrugs: "",
+  partnerRecentlyReturnedToTreatment: "",
+  hadSexWithHivPositivePartnerInRiskGroup: "",
+  typeOfHivTestDone: "",
+  initialHivTest: "",
+  suspectedAcuteInfection: "",
+  confirmatoryHivTest: "",
+  syphilisTestResult: "",
+  recencyTest: "",
+  finalHivTestResult: "",           // 🆕
+  previouslyTestedThisYear: "",
+  clientReceivedTestResult: "",
+  hivTestKitsProvided: "",
+  categoryOfClients: "",
+  acceptedIndexTesting: "",
+  providedFpInfo: "",
+  clientPartnerUseFpMethods: "",
+  clientPartnerUseCondoms: "",
+  correctCondomUseDemonstrated: "",
+  condomsProvided: "",
+  clientReferredToOtherServices: "",
+  completedBy: "",
+  designation: "",
+  sexCode: "",
+  maritalStatusCode: "",
+  currentOrganisationUnitId: "",
+  patientId: ""
+};
+
+/**
+ * isNewPatient=false → demographic block skipped in validation.
+ * Demographics are read-only for existing patients and pre-populated from record.
+ */
+export const useExistingPatientFormik = (onSubmit, externalInitialValues) => {
+  const formik = useFormik({
+    initialValues: externalInitialValues
+      ? { ...defaultValues, ...externalInitialValues }
+      : defaultValues,
+    validationSchema: buildValidationSchema(false),
+    enableReinitialize: true,
+    onSubmit,
+  });
+  return { formik };
+};

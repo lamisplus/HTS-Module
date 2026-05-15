@@ -29,6 +29,7 @@ import ButtonGroup from "@material-ui/core/ButtonGroup";
 import { MdDashboard } from "react-icons/md";
 import "@reach/menu-button/styles.css";
 import { Label } from "semantic-ui-react";
+import { useHistory } from "react-router-dom";
 import Moment from "moment";
 import momentLocalizer from "react-widgets-moment";
 //import moment from "moment";
@@ -65,6 +66,7 @@ const Patients = (props) => {
   //const [patientList, setPatientList] = useState([])
   //const [loading, setLoading] = useState(false)
   const [showPPI, setShowPPI] = useState(true);
+  const history = useHistory();
   //const baseUrl2 = "http://localhost:8282/api/v2/"
   useEffect(() => {
     //patients()
@@ -99,7 +101,7 @@ const Patients = (props) => {
           { title: "Age", field: "age", filtering: false },
 
           //{ title: "ART Number", field: "v_status", filtering: false },
-          { title: "HTS Count", field: "count", filtering: false },
+          // { title: "HTS Count", field: "count", filtering: false },
           { title: "Actions", field: "actions", filtering: false },
         ]}
         data={(query) =>
@@ -113,8 +115,8 @@ const Patients = (props) => {
               .then((result) => {
                 resolve({
                   data: result.data.records
-                    .filter((a) => {
-                      return a.personId !== null;
+                    ?.filter?.((a) => {
+                      return a?.personId !== null;
                     })
                     .map((row) => ({
                       name: row.firstName + " " + row.surname,
@@ -123,26 +125,26 @@ const Patients = (props) => {
                       clientCode: row.hospitalNumber,
                       gender: row.gender,
                       age: row.age,
-                      count: (
-                        <Label color="blue" size="mini">
-                          {0}
-                        </Label>
-                      ),
+                      // count: (
+                      //   <Label color="blue" size="mini">
+                      //     {0}
+                      //   </Label>
+                      // ),
                       actions: (
                         <div>
-                          {row.htsCount >= 0 && (
-                            <>
-                              <Link
-                                to={{
-                                  pathname: "/patient-history",
-                                  state: {
-                                    patientObject: row,
-                                    patientObj: row,
-                                    clientCode: row.clientCode,
-                                  },
-                                }}
-                              >
-                                <ButtonGroup
+                          <Link
+                            to={{
+                              pathname: "/patient-history",
+                              state: {
+                                patientObject: row,
+                                patientObj: row,
+                                clientCode: row.clientCode,
+                                activepage: "NEW HTS",
+                                skipEligibility: true,
+                              },
+                            }}
+                          >
+                            {/* <ButtonGroup
                                   variant="contained"
                                   aria-label="split button"
                                   style={{
@@ -151,8 +153,8 @@ const Patients = (props) => {
                                     width: "215px",
                                   }}
                                   size="large"
-                                >
-                                  <Button
+                                > */}
+                            {/* <Button
                                     color="primary"
                                     size="small"
                                     aria-label="select merge strategy"
@@ -162,26 +164,24 @@ const Patients = (props) => {
                                     }}
                                   >
                                     <MdDashboard />
-                                  </Button>
-                                  <Button
-                                    style={{
-                                      backgroundColor: "rgb(153, 46, 98)",
-                                    }}
-                                  >
-                                    <span
-                                      style={{
-                                        fontSize: "12px",
-                                        color: "#fff",
-                                        fontWeight: "bolder",
-                                      }}
-                                    >
-                                      Patient Dashboard
-                                    </span>
-                                  </Button>
-                                </ButtonGroup>
-                              </Link>
-                            </>
-                          )}
+                                  </Button> */}
+                            <Button
+                              style={{
+                                backgroundColor: "rgb(153, 46, 98)",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  color: "#fff",
+                                  fontWeight: "bolder",
+                                }}
+                              >
+                                New HTS
+                              </span>
+                            </Button>
+                            {/* </ButtonGroup> */}
+                          </Link>
                         </div>
                       ),
                     })),
