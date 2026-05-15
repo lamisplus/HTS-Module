@@ -70,8 +70,10 @@ function PatientCard(props) {
   const [htscount, setHtscount] = useState(0);
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
-  const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult.toLowerCase()
-  const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase()
+  const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
+  const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
+
+
   useEffect(() => {
     PatientCurrentObject();
   }, []);

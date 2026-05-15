@@ -6,7 +6,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_encounter                                            -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_encounter_v3_0514280" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_encounter_v3_051526" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_encounter" schemaName="public"/>
@@ -94,7 +94,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_contact                                              -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_contact_v3_0514280" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_contact_v3_051526" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_contact" schemaName="public"/>

@@ -286,6 +286,9 @@ const mapResultCode = (code, customMap) => {
   if (lowerCode.includes("negative") || lowerCode.includes("non-reactive")) {
     return { display: code, color: "green" };
   }
+  if (lowerCode.includes("suspected")) {
+    return { display: code, color: "orange" };
+  }
   return { display: code, color: "grey" };
 };
 
