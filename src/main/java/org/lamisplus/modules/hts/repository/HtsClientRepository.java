@@ -50,6 +50,7 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
             "    OR p.surname ILIKE ?3\n" +
             "    OR p.other_name ILIKE ?3\n" +
             "    OR p.hospital_number ILIKE ?3\n" +
+            "    OR p.contact_point#>>'{contactPoint,0,value}' ILIKE ?3\n" +
             ")\n" +
             "AND NOT EXISTS \n" +
             "(SELECT 1\n" +

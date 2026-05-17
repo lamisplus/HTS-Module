@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
 
-    <changeSet id="create_hts_encounter_V3_05152606" author="Emmanuel Nnajiofor">
+    <changeSet id="create_hts_encounter_V3_05172026" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_encounter" schemaName="public"/>
@@ -78,7 +78,7 @@
             </column>
 
             <!-- Entry source channel; defaults to 'web' -->
-            <column name="source" type="VARCHAR(50)" defaultValue="web">
+            <column name="source" type="VARCHAR(50)" defaultValue="Web">
                 <constraints nullable="false"/>
             </column>
 
