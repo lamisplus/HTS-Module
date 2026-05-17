@@ -41,6 +41,7 @@ import { toast } from "react-toastify";
 import NewEncounterHtsForm from "./NewEncounterHtsForm";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "./constants";
+import { useLocation, useHistory } from 'react-router-dom';
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
@@ -164,6 +165,7 @@ const NewEncounterHtsIctOrchestrator = ({
   person,
   onDone,
   isOnArt = false,
+  onEncounterMutated
 }) => {
   const classes = useStyles();
 
@@ -175,6 +177,16 @@ const NewEncounterHtsIctOrchestrator = ({
   const [htsRecord, setHtsRecord] = useState(null); // API response after HTS save
   const eligibilityToastFiredRef = useRef(false);
 
+  const location = useLocation();
+  const history = useHistory();
+  const skipEligibility = location?.state?.skipEligibility ?? false;
+ console.log(skipEligibility)
+  const updateSkipEligibility = (newValue) => {
+    history.replace({
+      pathname: location.pathname,
+      state: { ...location.state, skipEligibility: newValue },
+    });
+  };
   // ── Real-time eligibility — fired on every HTS formik change ─────────────
   const handleHtsValuesChange = (values) => {
     setHtsValues(values);
@@ -205,10 +217,12 @@ const NewEncounterHtsIctOrchestrator = ({
 
     if (isIctEligible(formValues)) {
       setIctEligible(true);
+      onEncounterMutated?.()
       setTimeout(() => setActiveView(VIEWS.ICT), 600);
       // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
     }
     else {
+      updateSkipEligibility(false)
       onDone?.()
     }
     // If not eligible, HTS is done and the user can navigate back via onDone.
@@ -217,6 +231,7 @@ const NewEncounterHtsIctOrchestrator = ({
   // ── ICT submit success ────────────────────────────────────────────────────
   const handleIctSubmitSuccess = (ictResponse) => {
     setIctSubmitted(true);
+    updateSkipEligibility(false)
     onDone?.(ictResponse);
   };
 

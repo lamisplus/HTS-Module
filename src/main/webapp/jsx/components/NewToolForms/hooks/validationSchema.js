@@ -158,7 +158,18 @@ export const buildValidationSchema = (isNewPatient) => {
         }
       )
       .required("Date of visit is required"),
-    clientCode: yup.string().required("Client code could not be generated"),
+
+    clientCode: yup.string().required("Client code could not be generated. Fill in Setting, sub-type, Date of Visit, and Serial Number"),
+    
+    serialNumber: yup
+      .string()
+      .required("Serial number is required to generate a client code")
+      .matches(
+        /^[a-zA-Z0-9]+$/,
+        "Serial number must contain only letters and numbers — no special characters"
+      ),
+
+
     setting: yup.string().required("Setting is required"),
     typeOfSession: yup.string().required("Type of session is required"),
     facilitySetting: yup.mixed().test(

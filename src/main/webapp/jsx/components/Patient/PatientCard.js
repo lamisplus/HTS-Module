@@ -72,6 +72,7 @@ function PatientCard(props) {
   const [htsResult2, setHtsResult2] = useState("");
   const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
   const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
+  const isLoadingEncounters = props?.isLoadingEncounters
 
 
   useEffect(() => {
@@ -250,30 +251,36 @@ function PatientCard(props) {
                       </Col>
                       <Col md={4}>
                         <div>
+
                           <Typography variant="caption">
                             {
-                              clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
-                                (<Label color={"red"} size={"small"}>
-                                  Status : Positive
-                                </Label>) :
-                                clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
-                                  (
-                                    <Label color="teal" size={"small"}>
-                                      Status: Negative
-                                    </Label>
-                                  ) :
-                                  finalHivTestResult === "suspected acute infection" ?
+                              isLoadingEncounters ? (
+                                <Label color={"gray"} size={"small"}>
+                                  Status : Checking current status ...
+                                </Label>
+                              ) :
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
+                                  (<Label color={"red"} size={"small"}>
+                                    Status : Positive
+                                  </Label>) :
+                                  clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
                                     (
-                                      <Label color="orange" size={"small"}>
-                                        Status: {finalHivTestResult}
+                                      <Label color="teal" size={"small"}>
+                                        Status: Negative
                                       </Label>
                                     ) :
+                                    finalHivTestResult === "suspected acute infection" ?
+                                      (
+                                        <Label color="orange" size={"small"}>
+                                          Status: {finalHivTestResult}
+                                        </Label>
+                                      ) :
 
-                                    (
-                                      <Label color="blue" size={"small"}>
-                                        Status: Not Tested
-                                      </Label>
-                                    )
+                                      (
+                                        <Label color="blue" size={"small"}>
+                                          Status: Not Tested
+                                        </Label>
+                                      )
                             }
                           </Typography>
                         </div>
@@ -282,9 +289,18 @@ function PatientCard(props) {
                       <Col md={12} style={{ marginTop: 10 }}>
                         <div>
                           <Typography variant="caption">
-                            <Label color={"teal"} size={"small"}>
-                              Reason for HTS {props?.clientEligibility?.isPatientEligibleForHts ? "eligibility" : "ineligibility"} : {String(props?.clientEligibility?.eligibilityReason)}
-                            </Label>
+                            {
+                              isLoadingEncounters ? (
+                                <Label color={"gray"} size={"small"}>
+                                  Checking eligibility...
+                                </Label>
+                              ) : (
+                                <Label color={"teal"} size={"small"}>
+                                  Reason for HTS {props?.clientEligibility?.isPatientEligibleForHts ? "eligibility" : "ineligibility"} : {String(props?.clientEligibility?.eligibilityReason)}
+                                </Label>
+                              )
+                            }
+
                           </Typography>
                         </div>
                       </Col>

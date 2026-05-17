@@ -53,7 +53,8 @@ const disabledInputStyle = {
 };
 
 const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
-  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue, setFieldError } = formik;
+
 
   const [accountDetail, setAccountDetail] = useState(null);
   const [codesets, setCodesets] = useState(null);
@@ -62,6 +63,34 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const [lgasList, setLgasList] = useState([]);
   const [loadingStates, setLoadingStates] = useState(false);
   const [loadingLgas, setLoadingLgas] = useState(false);
+  const [facilityCode, setFacilityCode] = useState("");
+  const [isCheckingUniqueness, setIsCheckingUniqueness] = useState(false);
+  const [clientCodeExists, setClientCodeExists] = useState(false);
+
+
+
+  const FACILITY_CODE_STORAGE_KEY = "__hts_facility_code_v1__";
+
+  useEffect(() => {
+    const cached = localStorage.getItem(FACILITY_CODE_STORAGE_KEY);
+    if (cached) {
+      setFacilityCode(cached);
+      return;
+    }
+    axios
+      .get(`${url}hts/get-facility-code`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        const code = response.data;
+        if (code) {
+          localStorage.setItem(FACILITY_CODE_STORAGE_KEY, code);
+          setFacilityCode(code);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch facility code:", err));
+  }, []);
+
 
   const fp = (name) => ({
     name,
@@ -137,18 +166,21 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   }, [statesList, values.clientState, readOnly]);
 
   useEffect(() => {
-    const { setting, facilitySetting, communityEntryPoint, dateOfVisit, clientCode } = values;
-    // Never overwrite an existing client code (guards against enableReinitialize
-    // briefly resetting to "" before external values arrive)
-    // if (clientCode) return;
-    const settingSubField =
-      setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
-        setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
-          setting;
-    if (setting && settingSubField && dateOfVisit) {
-      setFieldValue("clientCode", generateClientCode(setting, dateOfVisit));
-    }
-  }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit]);
+    if (readOnly) return; // never auto-generate in view mode
+    const { setting, facilitySetting, communityEntryPoint, dateOfVisit } = values;
+    const serialNumber = values.serialNumber;
+    if (!setting || !dateOfVisit || !facilityCode || !serialNumber) return;
+
+    const code = generateClientCode(
+      setting,
+      facilitySetting,
+      communityEntryPoint,
+      dateOfVisit,
+      facilityCode,
+      serialNumber
+    );
+    if (code) setFieldValue("clientCode", code);
+  }, [values.setting, values.facilitySetting, values.communityEntryPoint, values.dateOfVisit, values.serialNumber, facilityCode]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   const handleFetchFacilityName = async () => {
@@ -194,15 +226,15 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
-  // ---------- Event handlers ----------
   const handleSettingChange = (e) => {
     setFieldValue("setting", e.target.value);
     setFieldValue("facilitySetting", "");
     setFieldValue("communityEntryPoint", "");
-    if (!isExistingPatient) {
-      setFieldValue("clientCode", "");
-    }
+    setFieldValue("clientCode", "");
+    setFieldValue("serialNumber", "");
+    setClientCodeExists(false);
   };
+
 
   const handleSexChange = (e) => {
     const sex = e.target.value;
@@ -342,9 +374,61 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   const dobIsActual = values?.dobType?.toLowerCase() === "actual" || !values?.dobType;
 
+  const originalClientCodeRef = React.useRef(values.clientCode || "");
+  const clientCodeExistsRef = React.useRef(false);
+
+  useEffect(() => {
+    clientCodeExistsRef.current = clientCodeExists;
+  }, [clientCodeExists]);
+
+
+  useEffect(() => {
+    if (values.clientCode && !originalClientCodeRef.current) {
+      originalClientCodeRef.current = values.clientCode;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  
+  const checkClientCodeUniqueness = async (code) => {
+    if (!code) return;
+    if (code === originalClientCodeRef.current) return;
+    setIsCheckingUniqueness(true);
+    setClientCodeExists(false);
+    try {
+      const response = await axios.get(
+        `${url}hts-client-code/exists?clientCode=${encodeURIComponent(code)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data?.exists === true) {
+        setClientCodeExists(true);
+        setFieldValue("clientCode", values.clientCode);
+        setTimeout(() => {
+          setFieldError("clientCode", "This client code already exists. Change the serial number to generate a unique code.");
+        }, 0);
+      }
+    } catch (err) {
+      console.error("Client code uniqueness check failed:", err);
+    } finally {
+      setIsCheckingUniqueness(false);
+    }
+  };
+
+  const handleSerialNumberBlur = (e) => {
+    handleBlur(e);
+    const serial = e.target.value;
+    if (!serial) return;
+    const { setting, facilitySetting, communityEntryPoint, dateOfVisit } = values;
+    const code = generateClientCode(
+      setting, facilitySetting, communityEntryPoint, dateOfVisit, facilityCode, serial
+    );
+    if (code) {
+      setFieldValue("clientCode", code);
+      checkClientCodeUniqueness(code);
+    }
+  };
+
   return (
     <div style={{ width: "100%" }}>
-      {/* Visit / Setting row */}
       <div className="row">
         <div className="col-md-4">
           <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required
@@ -383,40 +467,112 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
 
 
-        <div className="col-md-4">
+        {!readOnly && (
+          <div className="col-md-6">
+            <FormGroup style={{ marginBottom: "16px" }}>
+              <Label style={labelStyle}>
+                Serial Number <span style={{ color: "red" }}>*</span>
+              </Label>
+              <Input
+                type="text"
+                name="serialNumber"
+                value={values.serialNumber || ""}
+                onChange={handleChange}
+                onBlur={handleSerialNumberBlur}
+                disabled={readOnly}
+                style={
+                  touched.serialNumber && errors.serialNumber
+                    ? { ...inputStyle, borderColor: "#f85032" }
+                    : inputStyle
+                }
+                placeholder="e.g. ABC123"
+              />
+              {touched.serialNumber && errors.serialNumber && (
+                <span style={errorStyle}>{errors.serialNumber}</span>
+              )}
+              <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
+                Letters and numbers only — no special characters
+              </small>
+            </FormGroup>
+          </div>
+        )}
+
+        <div className="col-md-6">
           <FormGroup style={{ marginBottom: "16px" }}>
-            <Label style={labelStyle}>Client Code <span style={{ color: "red" }}>*</span></Label>
+            <Label style={labelStyle}>
+              Client Code <span style={{ color: "red" }}>*</span>
+            </Label>
             <div style={{ position: "relative" }}>
               <Input
                 type="text"
                 name="clientCode"
                 value={values.clientCode || ""}
-                readOnly disabled
-                style={{ ...disabledInputStyle, fontFamily: "monospace", letterSpacing: "0.04em", paddingRight: "90px" }}
+                onChange={readOnly ? undefined : (e) => {
+                  handleChange(e);
+                  setClientCodeExists(false);
+                }}
+                onBlur={readOnly ? undefined : (e) => {
+                  handleBlur(e);
+                  checkClientCodeUniqueness(e.target.value);
+                }}
+                // readOnly={readOnly}
+                readOnly
+                // disabled={readOnly}
+                disabled
+                style={{
+                  ...(readOnly ? disabledInputStyle : inputStyle),
+                  fontFamily: "monospace",
+                  letterSpacing: "0.04em",
+                  paddingRight: "110px",
+                  borderColor: clientCodeExists ? "#f85032" : undefined,
+                }}
               />
               <span
                 style={{
-                  position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)",
+                  position: "absolute", right: "10px", top: "50%",
+                  transform: "translateY(-50%)",
                   fontSize: "10px", fontWeight: 700, textTransform: "uppercase",
-                  color: values.clientCode ? "#2e7d32" : "#8c959f",
-                  background: values.clientCode ? "#e8f5e9" : "#f0f0f0",
+                  color: isCheckingUniqueness
+                    ? "#e65100"
+                    : clientCodeExists
+                      ? "#d32f2f"
+                      : values.clientCode
+                        ? "#2e7d32"
+                        : "#8c959f",
+                  background: isCheckingUniqueness
+                    ? "#fff3e0"
+                    : clientCodeExists
+                      ? "#fdecea"
+                      : values.clientCode
+                        ? "#e8f5e9"
+                        : "#f0f0f0",
                   padding: "2px 7px", borderRadius: "8px", pointerEvents: "none",
                 }}
               >
-                {values.clientCode ? "Auto-generated" : "Pending…"}
+                {isCheckingUniqueness
+                  ? "Checking…"
+                  : clientCodeExists
+                    ? "Already used"
+                    : values.clientCode
+                      ? "Auto-generated"
+                      : "Pending…"}
               </span>
             </div>
-            {touched.clientCode && errors.clientCode && (
+            {clientCodeExists && (
+              <span style={{ ...errorStyle, display: "block", marginTop: 4 }}>
+                This client code already exists. Edit the serial number to generate a unique code.
+              </span>
+            )}
+            {touched.clientCode && errors.clientCode && !clientCodeExists && (
               <span style={errorStyle}>{errors.clientCode}</span>
             )}
-            {!values.clientCode && (
+            {!values.clientCode && !readOnly && (
               <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-                Fill in Setting, Setting sub-type, and Date of Visit to generate
+                Fill in Setting, sub-type, Date of Visit, and Serial Number to generate
               </small>
             )}
           </FormGroup>
         </div>
-
 
 
         <div className="col-md-4">
@@ -606,8 +762,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               // disabled={readOnly || loadingStates} 
               style={selectStyle}
               disabled
-              
-              >
+
+            >
               <option value="">{loadingStates ? "Loading states..." : "Select option"}</option>
               {statesList.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -623,10 +779,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           />
         </div>
         <div className="col-md-4">
-          <FormTextField label="Landmark" type="text" {...fp("landmark")} disabled/>
+          <FormTextField label="Landmark" type="text" {...fp("landmark")} disabled />
         </div>
         <div className="col-md-12">
-          <FormTextField label="Address" type="textarea" {...fp("address")} disabled/>
+          <FormTextField label="Address" type="textarea" {...fp("address")} disabled />
         </div>
       </div>
     </div>

@@ -64,7 +64,12 @@ function PatientCard(props) {
   const [personInfo, setPersonInfo] = useState(null)
   const [encounters, setEncounters] = useState(null);
   const [isLoadingEncounters, setIsLoadingEncounters] = useState(false);
-//fetch full patient record here
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleEncounterMutated = () => setRefreshKey((k) => k + 1);
+
+
+  //fetch full patient record here
   const patientObject =
     history.location && history.location.state
       ? history.location.state.patientObject
@@ -124,16 +129,18 @@ function PatientCard(props) {
 
 
   useEffect(() => {
-    fetchEncounters()
+    fetchEncounters();
+  }, [activePage, refreshKey]);
 
-  }, [activePage]);
+
+
   const patientAge = calculate_age(
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
 
   const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult } = useHtsEligibility(
     encounters,
-    isLoadingEncounters
+    isLoadingEncounters, refreshKey
   );
 
   return (
@@ -159,6 +166,7 @@ function PatientCard(props) {
             clientCode={patientObject?.clientCode || patientObj?.clientCode || encounters?.[0]?.observation?.clientCode || ""}
             patientObject={personInfo || patientObject || patientObj}
             setPersonInfo={setPersonInfo}
+            isLoadingEncounters={isLoadingEncounters}
             clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult }}
           />
 
@@ -175,6 +183,9 @@ function PatientCard(props) {
               clientCode={patientObject?.clientCode || patientObj?.clientCode || ""}
               patientAge={patientObj?.data?.age}
               clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult }}
+              onEncounterMutated={handleEncounterMutated}
+              refreshKey={refreshKey}
+
             />
           )}
 

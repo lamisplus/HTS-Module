@@ -148,6 +148,27 @@ const ICTEncounterHistory = (props) => {
     // Resolve personId from patientObj — same dual-path as HTSEncounterHistory
     const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? null;
 
+
+    const fetchEncounters = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(
+                `${baseUrl}ict-encounter/patient/${patientId}`,
+
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setEncounters(Array.isArray(response.data) ? response.data : []);
+        } catch {
+            toast.error("Failed to load ICT encounter history.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (patientId) fetchEncounters();
+    }, [patientId, props.refreshKey]);
+
     const SETTING_MAP = {
         // COMMUNITY_HTS_TEST_SETTING
         "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
@@ -202,24 +223,6 @@ const ICTEncounterHistory = (props) => {
     }
 
 
-    useEffect(() => {
-        if (patientId) fetchEncounters();
-    }, [patientId]);
-
-    const fetchEncounters = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get(
-                `${baseUrl}ict-encounter/patient/${patientId}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setEncounters(Array.isArray(response.data) ? response.data : []);
-        } catch {
-            toast.error("Failed to load ICT encounter history.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleDeleteConfirm = async () => {
         setDeleting(true);
@@ -231,6 +234,8 @@ const ICTEncounterHistory = (props) => {
             toast.success("ICT encounter deleted successfully.");
             setPendingDelete(null);
             fetchEncounters();
+            props.onEncounterMutated?.();
+
         } catch {
             toast.error("Failed to delete ICT encounter. Please try again.");
         } finally {

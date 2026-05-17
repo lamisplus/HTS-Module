@@ -4,6 +4,7 @@ import { buildValidationSchema } from "./validationSchema";
 const defaultValues = {
   dateOfVisit: "",
   clientCode: "",
+  serialNumber: "",
   setting: "",
   facilitySetting: "",
   communityEntryPoint: "",
@@ -28,7 +29,7 @@ const defaultValues = {
   clientState: "",
   clientLga: "",
   address: "",
-  landmark:"",
+  landmark: "",
   previouslyTestedNegative: "",
   timeOfLastNegativeTest: "",
   clientInformedTransmissionRoutes: "",
@@ -65,7 +66,7 @@ const defaultValues = {
   confirmatoryHivTest: "",
   syphilisTestResult: "",
   recencyTest: "",
-  finalHivTestResult: "",           // 🆕
+  finalHivTestResult: "",
   previouslyTestedThisYear: "",
   clientReceivedTestResult: "",
   hivTestKitsProvided: "",
@@ -85,14 +86,21 @@ const defaultValues = {
   patientId: ""
 };
 
-/**
- * isNewPatient=false → demographic block skipped in validation.
- * Demographics are read-only for existing patients and pre-populated from record.
- */
+
 export const useExistingPatientFormik = (onSubmit, externalInitialValues) => {
+  const deriveSerialNumber = (initialVals) => {
+    if (!initialVals?.clientCode) return "";
+    const parts = String(initialVals.clientCode).split("/");
+    return parts[parts.length - 1] || "";
+  };
+
   const formik = useFormik({
     initialValues: externalInitialValues
-      ? { ...defaultValues, ...externalInitialValues }
+      ? {
+        ...defaultValues,
+        ...externalInitialValues,
+        serialNumber: externalInitialValues.serialNumber || deriveSerialNumber(externalInitialValues),
+      }
       : defaultValues,
     validationSchema: buildValidationSchema(false),
     enableReinitialize: true,

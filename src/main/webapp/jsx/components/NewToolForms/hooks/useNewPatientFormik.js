@@ -4,6 +4,7 @@ import { buildValidationSchema } from "./validationSchema";
 const initialValues = {
   dateOfVisit: "",
   clientCode: "",
+  serialNumber: "",
   setting: "",
   facilitySetting: "",
   facilityName: "",
@@ -66,7 +67,7 @@ const initialValues = {
   confirmatoryHivTest: "",
   syphilisTestResult: "",
   recencyTest: "",
-  finalHivTestResult: "",           // 🆕
+  finalHivTestResult: "",
   previouslyTestedThisYear: "",
   clientReceivedTestResult: "",
   hivTestKitsProvided: "",
