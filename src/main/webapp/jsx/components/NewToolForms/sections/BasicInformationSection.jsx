@@ -208,7 +208,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   useGetCodesets({
     codesetsKeys: [
       "TARGET_GROUP",
-      "INDEX_TESTING",
+      "RELATIONSHIP_CONTACT",
       "PREGNANCY_STATUS",
       "COUNSELING_TYPE",
       "COMMUNITY_HTS_TEST_SETTING",
@@ -599,8 +599,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           <>
             <div className="col-md-4">
               <FormSelect
-                label="Relationship of Index Client"
-                {...sp("indexRelationship", transformOptions(codesets?.["INDEX_TESTING"]))}
+                label="Relationship to Index Client"
+                {...sp("indexRelationship", transformOptions(codesets?.["RELATIONSHIP_CONTACT"]))}
                 required
               />
             </div>
