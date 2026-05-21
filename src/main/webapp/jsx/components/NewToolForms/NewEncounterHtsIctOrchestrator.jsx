@@ -180,7 +180,7 @@ const NewEncounterHtsIctOrchestrator = ({
   const location = useLocation();
   const history = useHistory();
   const skipEligibility = location?.state?.skipEligibility ?? false;
- console.log(skipEligibility)
+ 
   const updateSkipEligibility = (newValue) => {
     history.replace({
       pathname: location.pathname,

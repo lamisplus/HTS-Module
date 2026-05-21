@@ -208,36 +208,36 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     indexTesting,
     indexRelationship,
     indexClientCode,
-    surname,
-    firstName,
-    middleName,
-    dobType,
-    dateOfBirth,
-    age: age
-      ? parseInt(age, 10)
-      : dateOfBirth
-        ? (() => {
-            const birth = new Date(dateOfBirth);
-            if (isNaN(birth.getTime())) return null;
-            const now = new Date();
-            let years = now.getFullYear() - birth.getFullYear();
-            const m = now.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
-            return years >= 0 ? years : null;
-          })()
-        : null,
-    sex,
-    phoneNumber,
-    maritalStatus,
+    // surname,
+    // firstName,
+    // middleName,
+    // dobType,
+    // dateOfBirth,
+    // age: age
+    //   ? parseInt(age, 10)
+    //   : dateOfBirth
+    //     ? (() => {
+    //         const birth = new Date(dateOfBirth);
+    //         if (isNaN(birth.getTime())) return null;
+    //         const now = new Date();
+    //         let years = now.getFullYear() - birth.getFullYear();
+    //         const m = now.getMonth() - birth.getMonth();
+    //         if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
+    //         return years >= 0 ? years : null;
+    //       })()
+    //     : null,
+    // sex,
+    // phoneNumber,
+    // maritalStatus,
     numberOfWives: numberOfWives ? parseInt(numberOfWives, 10) : null,
     numberOfCoWives: numberOfCoWives ? parseInt(numberOfCoWives, 10) : null,
     numberOfBiologicalChildren: numberOfBiologicalChildren ? parseInt(numberOfBiologicalChildren, 10) : null,
     pregnancyStatus,
     breastfeedingDuration,
-    clientState,
-    clientLga,
-    address,
-    landmark,
+    // clientState,
+    // clientLga,
+    // address,
+    // landmark,
     previouslyTestedNegative,
     timeOfLastNegativeTest,
     clientInformedTransmissionRoutes,

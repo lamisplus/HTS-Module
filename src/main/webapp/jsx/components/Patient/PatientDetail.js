@@ -206,7 +206,6 @@ function PatientCard(props) {
               initialValues={patientObj?.data}
               backButtonAction={handleMoveToHome}
               fullRecord={activePage?.activeObject}
-
             />
           )}
 

@@ -108,7 +108,6 @@ export const buildIctValidationSchema = () =>
       .max(today, "Visit Date cannot be in the future")
       .test("service-not-before-dob", "Visit date cannot be earlier than index client's date of birth", function (value) {
         const { indexDob } = this.parent;
-        console.log("testt//", this.parent)
         if (!value || !indexDob) return true;
         return toLocalDateString(value) >= toLocalDateString(indexDob);
 

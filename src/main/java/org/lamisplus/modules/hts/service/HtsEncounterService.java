@@ -242,24 +242,24 @@ public class HtsEncounterService {
         putStr(obs, "indexClientCode",     r.getIndexClientCode());
 
         // Demographics
-        putStr(obs, "surname",     r.getSurname());
-        putStr(obs, "firstName",   r.getFirstName());
-        putStr(obs, "middleName",  r.getMiddleName());
-        putStr(obs, "dobType",     r.getDobType());
-        if (r.getDateOfBirth() != null)              obs.put("dateOfBirth",              r.getDateOfBirth().toString());
-        if (r.getAge()         != null)              obs.put("age",                       r.getAge());
-        putStr(obs, "sex",              r.getSex());
-        putStr(obs, "phoneNumber",      r.getPhoneNumber());
-        putStr(obs, "maritalStatus",    r.getMaritalStatus());
+//        putStr(obs, "surname",     r.getSurname());
+//        putStr(obs, "firstName",   r.getFirstName());
+//        putStr(obs, "middleName",  r.getMiddleName());
+//        putStr(obs, "dobType",     r.getDobType());
+//        if (r.getDateOfBirth() != null)              obs.put("dateOfBirth",              r.getDateOfBirth().toString());
+//        if (r.getAge()         != null)              obs.put("age",                       r.getAge());
+//        putStr(obs, "sex",              r.getSex());
+//        putStr(obs, "phoneNumber",      r.getPhoneNumber());
+//        putStr(obs, "maritalStatus",    r.getMaritalStatus());
         if (r.getNumberOfWives()              != null) obs.put("numberOfWives",              r.getNumberOfWives());
         if (r.getNumberOfCoWives()            != null) obs.put("numberOfCoWives",            r.getNumberOfCoWives());
         if (r.getNumberOfBiologicalChildren() != null) obs.put("numberOfBiologicalChildren", r.getNumberOfBiologicalChildren());
         putStr(obs, "pregnancyStatus",      r.getPregnancyStatus());
         putStr(obs, "breastfeedingDuration", r.getBreastfeedingDuration());
-        putStr(obs, "clientState",           r.getClientState());
-        putStr(obs, "clientLga",             r.getClientLga());
-        putStr(obs, "address",               r.getAddress());
-        putStr(obs, "landmark", r.getLandmark());
+//        putStr(obs, "clientState",           r.getClientState());
+//        putStr(obs, "clientLga",             r.getClientLga());
+//        putStr(obs, "address",               r.getAddress());
+//        putStr(obs, "landmark", r.getLandmark());
         putStr(obs, "modality", r.getModality());
 
 

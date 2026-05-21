@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-// @ValidHtsEncounter  ← REMOVED
+
 public class HtsEncounterRequest {
 
     private Long patientId;
@@ -38,24 +38,24 @@ public class HtsEncounterRequest {
     private String indexRelationship;
     private String indexClientCode;
 
-    private String surname;
-    private String firstName;
-    private String middleName;
-    private String dobType;
-    private LocalDate dateOfBirth;
-    private Integer age;
-    private String sex;
-    private String phoneNumber;
-    private String maritalStatus;
+//    private String surname;
+//    private String firstName;
+//    private String middleName;
+//    private String dobType;
+//    private LocalDate dateOfBirth;
+//    private Integer age;
+//    private String sex;
+//    private String phoneNumber;
+//    private String maritalStatus;
     private Integer numberOfWives;
     private Integer numberOfCoWives;
     private Integer numberOfBiologicalChildren;
     private String pregnancyStatus;
     private String breastfeedingDuration;
-    private String clientState;
-    private String clientLga;
-    private String address;
-    private String landmark;
+//    private String clientState;
+//    private String clientLga;
+//    private String address;
+//    private String landmark;
 
     private String previouslyTestedNegative;
     private String timeOfLastNegativeTest;
@@ -116,7 +116,7 @@ public class HtsEncounterRequest {
     private String designation;
     private Boolean pmtctHts = false;
 
-    private String source;
+    private String source ="Web";
     private String longitude;
     private String latitude;
 }

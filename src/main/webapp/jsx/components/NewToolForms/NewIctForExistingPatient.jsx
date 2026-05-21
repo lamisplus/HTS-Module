@@ -11,6 +11,73 @@ import { COLORS } from "../NewToolForms/constants";
  * `htsValues` object that IctForm expects for pre‑populating Section A.
  * Updated to use observation, patientId.
  */
+
+/**
+ * Calculates the age in years as of today.
+ * @param {string} birthDateStr - Date of birth in "YYYY-MM-DD" format.
+ * @returns {number|null} Age in years, or null if input is invalid or birthdate is in the future.
+ */
+export const getAge =(birthDateStr)=> {
+    // 1. Validate input type and format
+    if (typeof birthDateStr !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(birthDateStr)) {
+        console.error('Invalid input: expected string in "YYYY-MM-DD" format');
+        return null;
+    }
+
+    // 2. Parse components
+    const [yearStr, monthStr, dayStr] = birthDateStr.split('-');
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
+
+    // 3. Basic range checks
+    if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+    if (month < 1 || month > 12) return null;
+    if (day < 1 || day > 31) return null;
+
+    // 4. Validate day against month (including leap year)
+    const daysInMonth = (y, m) => new Date(Date.UTC(y, m, 0)).getUTCDate();
+    if (day > daysInMonth(year, month)) {
+        console.error(`Invalid day ${day} for month ${month} in year ${year}`);
+        return null;
+    }
+    const birthDate = new Date(Date.UTC(year, month - 1, day));
+    const today = new Date();
+    const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+
+    // 6. Future birthdate check
+    if (birthDate > todayUTC) {
+        console.error('Birthdate cannot be in the future');
+        return null;
+    }
+
+    // 7. Calculate age
+    let age = todayUTC.getUTCFullYear() - birthDate.getUTCFullYear();
+    const monthDiff = todayUTC.getUTCMonth() - birthDate.getUTCMonth();
+    const dayDiff = todayUTC.getUTCDate() - birthDate.getUTCDate();
+
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+        age--;
+    }
+
+    return age;
+}
+
+const maritalStatusMap = {
+    cohabiting: "MARITAL_STATUS_COHABITING",
+    divorced: "MARITAL_STATUS_DIVORCED",
+    married: "MARITAL_STATUS_MARRIED",
+    separated: "MARITAL_STATUS_SEPARATED",
+    single: "MARITAL_STATUS_SINGLE",
+    widowed: "MARITAL_STATUS_WIDOWED"
+  };
+
+  const sexMap = {
+    female: "SEX_FEMALE",
+    male: "SEX_MALE"
+  }
+
+
 const mapHtsRecordToIctValues = (htsRecord) => {
     if (!htsRecord) return {};
 
@@ -25,18 +92,18 @@ const mapHtsRecordToIctValues = (htsRecord) => {
 
     return {
         facilityName: d.facilityName ?? "",
-        state: d.clientState != null ? String(d.clientState) : "",
-        lga: d.clientLga != null ? String(d.clientLga) : "",
+        state: personAddressObj?.stateId != null ? String(personAddressObj?.stateId) : "",
+        lga: personAddressObj?.district != null ? String(personAddressObj?.district) : "",
         indexClientId: htsRecord.clientCode ?? "",
         indexFirstName: p.firstName ?? d.firstName ?? "",
-        indexMiddleName: p.middleName ?? d.otherName ?? "",
+        indexMiddleName: p.otherName ?? d.otherName ?? d.middleName ?? "",
         indexSurname: p.surname ?? d.surname ?? "",
-        indexSex: d.sex ?? p.sex ?? "",
+        indexSex: sexMap[p.gender?.display?.toLowerCase() || ""] || "",
         indexDob: p.dateOfBirth ?? "",
-        indexAge: d.age != null ? String(d.age) : "",
-        indexPhone: d.phoneNumber ?? personPhone,
+        indexAge: p.dateOfBirth != null ? String(getAge(p?.dateOfBirth)) : "",
+        indexPhone: personPhone ?? d.phoneNumber,
         indexAltPhone: "",
-        indexAddress: d.address ?? personAddress,
+        indexAddress: personAddress ?? d.address,
         artUniqueId: d.artUniqueId ?? "",
         isOnArt: d.isOnArt ?? false,
         patientId: htsRecord.patientId != null ? String(htsRecord.patientId) : "",

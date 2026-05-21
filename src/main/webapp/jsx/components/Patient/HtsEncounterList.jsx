@@ -107,15 +107,14 @@ const HTSEncounterList = () => {
                 id:         row.id,
                 uuid:       row.uuid,
                 personId:   row.personId,
-                person:     row.person,       // full PersonResponseDto
+                person:     row.person,
                 clientCode: row.clientCode,
                 dateOfVisit: row.dateOfVisit,
                 setting:    row.setting,
-                observation: row.observation, // most-recent encounter observation
+                observation: row.observation, 
                 facilityId: row.facilityId,
                 htsCount:   row.htsCount,
                 ictCount:   row.ictCount,
-                // data alias — some older consumers read .data instead of .observation
                 data: row.observation,
               };
 
@@ -126,7 +125,7 @@ const HTSEncounterList = () => {
                 hospitalNumber: extractHospitalNumber(p),
                 phoneNumber:    extractPhone(p),
                 sex:            p.sex ?? p.gender?.display ?? "—",
-                age:            computeAge(row.observation?.dateOfBirth ?? p.dateOfBirth),
+                age:            computeAge(p.dateOfBirth ?? row.observation?.dateOfBirth),
                 htsCount:       row.htsCount ?? 0,
                 ictCount:       row.ictCount ?? 0,
                 // ── Raw record for route state ─────────────────────────

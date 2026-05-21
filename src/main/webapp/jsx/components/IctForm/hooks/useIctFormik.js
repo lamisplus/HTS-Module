@@ -83,7 +83,6 @@ const buildInitialValues = (htsValues) => ({
 
 export const useIctFormik = (onSubmit, htsValues) => {
 
-  console.log("htsvalues", htsValues)
   const formik = useFormik({
     initialValues: buildInitialValues(htsValues),
     validationSchema: buildIctValidationSchema(),
