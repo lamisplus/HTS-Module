@@ -255,7 +255,7 @@ function PatientCard(props) {
                           <Typography variant="caption">
                             {
                               isLoadingEncounters ? (
-                                <Label color={"gray"} size={"small"}>
+                                <Label color={"grey"} size={"small"}>
                                   Status : Checking current status ...
                                 </Label>
                               ) :
@@ -291,7 +291,7 @@ function PatientCard(props) {
                           <Typography variant="caption">
                             {
                               isLoadingEncounters ? (
-                                <Label color={"gray"} size={"small"}>
+                                <Label color={"grey"} size={"small"}>
                                   Checking eligibility...
                                 </Label>
                               ) : (
