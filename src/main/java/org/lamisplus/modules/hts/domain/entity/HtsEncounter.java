@@ -8,6 +8,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.lamisplus.modules.base.domain.entities.Audit;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -25,8 +28,9 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "uuid", insertable = false, updatable = false, unique = true, nullable = false)
-    private UUID uuid;
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "varchar(50)", insertable = false, updatable = false, unique = true, nullable = false)
+    private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)

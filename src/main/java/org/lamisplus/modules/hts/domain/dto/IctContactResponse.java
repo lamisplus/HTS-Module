@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class IctContactResponse {
     private Long id;
-    private UUID uuid;
+    private String uuid;
     // Renamed from contactId → contactCode (item 7)
     private String contactCode;
     // Renamed from firstnameOfContact → firstName (item 6)

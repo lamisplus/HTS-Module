@@ -10,7 +10,7 @@ import java.util.UUID;
 @Data
 public class HtsEncounterResponse {
     private Long id;
-    private UUID uuid;
+    private String uuid;
     private Long patientId;
     private UUID patientUuid;
     private PersonResponseDto person;

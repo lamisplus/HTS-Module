@@ -159,8 +159,10 @@ export const buildValidationSchema = (isNewPatient) => {
       )
       .required("Date of visit is required"),
 
-    clientCode: yup.string().required("Client code could not be generated. Fill in Setting, sub-type, Date of Visit, and Serial Number"),
-    
+    clientCode: yup.string()
+      .required("Client code could not be generated. Fill in Setting, sub-type, Date of Visit, and Serial Number")
+      .max(200, "Client code cannot exceed 200 characters"),
+      
     serialNumber: yup
       .string()
       .required("Serial number is required to generate a client code")
