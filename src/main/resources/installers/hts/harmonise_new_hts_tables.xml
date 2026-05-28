@@ -4,43 +4,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd"
                    >
 
-    <!--
-    ═══════════════════════════════════════════════════════════════════════════
-      V4 HARMONISATION — 26 May 2026
-      Author: Emmanuel Nnajiofor
-
-      PURPOSE:
-        Testers have divergent DB states because earlier changesets were
-        rewritten in place instead of appended. This single changeset
-        brings every tester's DB to an identical, canonical state.
-
-        Every change is guarded by a preCondition (MARK_RAN on failure) so
-        the changeset is fully idempotent — it is safe to run on a fresh DB,
-        a partially-migrated DB, or a fully up-to-date DB.
-
-      CHANGES COVERED
-      ───────────────
-      SECTION 1  — Ensure missing columns exist on hts_encounter
-      SECTION 2  — Ensure missing columns exist on hts_ict_encounter
-      SECTION 3  — Ensure missing columns exist on hts_ict_contact
-      SECTION 4  — Widen varchar columns to VARCHAR(200) on all three tables
-      SECTION 5  — Drop NOT NULL on hts_encounter.source and .patient_id
-      SECTION 6  — Convert all uuid / patient_uuid columns to VARCHAR(50)
-      SECTION 7  — Add hts_encounter_uuid FK column on hts_ict_encounter
-                   (if somehow still missing) and wire up the UUID-based FK
-      SECTION 8  — Add hts_ict_encounter_uuid FK column on hts_ict_contact
-                   (if somehow still missing) and wire up the UUID-based FK
-      SECTION 9  — Back-fill hts_ict_contact.hts_ict_encounter_uuid from
-                   the parent hts_ict_encounter row (fixes the null-populate bug)
-    ═══════════════════════════════════════════════════════════════════════════
-    -->
-
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 1 — Ensure all expected columns exist on hts_encounter
-         (some testers are missing source, longitude, latitude, date_modified,
-          patient_uuid depending on which rewrite their DB was created from)
-         ═══════════════════════════════════════════════════════════════════════ -->
 
     <changeSet id="harmonise_v4_hts_encounter_add_source" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
@@ -665,5 +628,54 @@
                       The back-fill UPDATE in Section 8 corrects all
                       historical rows that were saved with a NULL uuid.
          ═══════════════════════════════════════════════════════════════════════ -->
+
+
+         <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
+            <comment>
+                Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
+            </comment>
+            <sql>
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts TYPE boolean
+                    USING COALESCE((pmtct_hts::text)::boolean, false);
+
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts SET DEFAULT false;
+
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts SET NOT NULL;
+            </sql>
+            <rollback>
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
+            </rollback>
+        </changeSet>
+
+
+    <!-- Add client_category_other TEXT column to hts_ict_encounter -->
+    <changeSet id="harmonise_v4_add_client_category_other" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_encounter" columnName="client_category_other"/>
+            </not>
+        </preConditions>
+        <comment>
+            Add dedicated column for "Other" client category value.
+            Back-fill existing values from JSONB 'data' column.
+        </comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="client_category_other" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Back-fill existing values from JSONB 'data' column -->
+        <sql>
+            UPDATE hts_ict_encounter
+            SET client_category_other = data->>'clientCategoryOther'
+            WHERE data->>'clientCategoryOther' IS NOT NULL
+              AND client_category_other IS NULL;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

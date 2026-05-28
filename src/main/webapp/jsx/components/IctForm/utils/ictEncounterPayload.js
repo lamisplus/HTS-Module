@@ -54,9 +54,7 @@ export const buildIctEncounterPayload = (values) => {
     indexAddress: values.indexAddress || null,
 
     clientCategory: values.clientCategory || null,
-    clientCategoryOther: values.clientCategory === "INDEX_CLIENT_CATEGORY_OTHER"
-      ? values.clientCategoryOther || null
-      : null,
+    clientCategoryOther: values.clientCategoryOther || null,
 
     offeredPns: values.offeredPns || null,
     // Only send acceptedPns when PNS was offered

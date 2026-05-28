@@ -13,6 +13,8 @@ public class IctEncounterResponse {
     private String uuid;
     private Long patientId;
     private UUID patientUuid;
+
+    private String clientCategoryOther;
     private Long htsEncounterId;
     private Long facilityId;
     private LocalDate dateOfService;

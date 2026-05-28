@@ -30,6 +30,10 @@ public class IctEncounter extends Audit<IctEncounter> implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "client_category_other", columnDefinition = "TEXT")
+    private String clientCategoryOther;
+
+
     @Generated(GenerationTime.INSERT)
     @Column(columnDefinition = "varchar(50)", insertable = false, updatable = false, unique = true, nullable = false)
     private String uuid;

@@ -80,6 +80,7 @@ const modeBadgeStyle = (mode) => {
 
 
 const mapIctResponseToFormValues = (response) => {
+  console.log(response?.clientCategoryOther)
   if (!response) return {};
   const d = response.data ?? {};
 
@@ -91,6 +92,7 @@ const mapIctResponseToFormValues = (response) => {
     dateOfService: response.dateOfService ?? "",
     setting: response.setting ?? "",
     clientCategory: response.clientCategory ?? "",
+    clientCategoryOther: response?.clientCategoryOther ||  d?.clientCategoryOther | "",
     offeredPns: response.offeredPns ?? "",
     acceptedPns: response.acceptedPns ?? "",
     
@@ -102,7 +104,7 @@ const mapIctResponseToFormValues = (response) => {
     facilitySetting: d.facilitySetting ?? "",
     communityEntryPoint: d.communityEntryPoint ?? "",
     artClinic: d.artClinic ?? "",
-    clientCategoryOther: d.clientCategoryOther ?? "",
+    // clientCategoryOther: d.clientCategoryOther ?? "",
 
     indexClientId: d.indexClientId ?? "",
     artUniqueId: d.artUniqueId ?? "",
@@ -235,9 +237,10 @@ const IctForm = ({
     initialValues ? undefined : mergedHtsValues
   );
 
+  console.log(formik.values)
+
   React.useEffect(() => {
     if (!initialValues) return;
-
     const mapped = mapIctResponseToFormValues(initialValues);
     Object.entries(mapped).forEach(([k, v]) =>
       formik.setFieldValue(k, v, false)

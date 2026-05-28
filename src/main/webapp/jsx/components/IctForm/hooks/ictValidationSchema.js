@@ -133,10 +133,13 @@ export const buildIctValidationSchema = () =>
       return !!val || this.createError({ message: "Community entry point is required" });
     }),
     clientCategory: yup.string().required("Client category is required"),
-    clientCategoryOther: yup.mixed().test("category-other", "Please specify", function (val) {
-      if (this.parent.clientCategory !== "Other") return true;
-      return !!val || this.createError({ message: "Please specify the client category" });
-    }),
+    clientCategoryOther: yup.string()
+      .max(200, "Must be at most 200 characters")
+      .when("clientCategory", {
+        is: "INDEX_CLIENT_CATEGORY_OTHERS",
+        then: (schema) => schema.required("Please specify the client category"),
+        otherwise: (schema) => schema.nullable(),
+      }),
     offeredPns: yup.string().required("Offered Index Testing Services is required"),
     acceptedPns: yup.mixed().test("accepted-pns-conditional", "Accepted Index Testing Services is required", function (val) {
       if (this.parent.offeredPns !== "YES_NO_YES") return true;

@@ -95,7 +95,9 @@ public class IctEncounterService {
 
     public List<IctEncounterResponse> getByPatientId(Long patientId) {
         return ictEncounterRepository
-                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(patientId, false)
+                .findByPerson_IdAndArchivedOrderByIdDesc(patientId, false)
+
+//                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(patientId, false)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -152,6 +154,7 @@ public class IctEncounterService {
         e.setDateOfService(req.getDateOfService());
         e.setSetting(req.getSetting());
         e.setClientCategory(req.getClientCategory());
+        e.setClientCategoryOther(req.getClientCategoryOther());
         e.setOfferedPns(req.getOfferedPns());
         e.setAcceptedPns(req.getAcceptedPns());
 
@@ -159,7 +162,7 @@ public class IctEncounterService {
         putIfNotNull(data, "facilitySetting",     req.getFacilitySetting());
         putIfNotNull(data, "communityEntryPoint",  req.getCommunityEntryPoint());
         putIfNotNull(data, "artClinic",            req.getArtClinic());
-        putIfNotNull(data, "clientCategoryOther",  req.getClientCategoryOther());
+//        putIfNotNull(data, "clientCategoryOther",  req.getClientCategoryOther());
         putIfNotNull(data, "indexClientId",        req.getIndexClientId());
         putIfNotNull(data, "artUniqueId",          req.getArtUniqueId());
         putIfNotNull(data, "indexFirstName",       req.getIndexFirstName());
@@ -231,6 +234,7 @@ public class IctEncounterService {
         r.setDateOfService(e.getDateOfService());
         r.setSetting(e.getSetting());
         r.setClientCategory(e.getClientCategory());
+        r.setClientCategoryOther(e.getClientCategoryOther());
         r.setOfferedPns(e.getOfferedPns());
         r.setAcceptedPns(e.getAcceptedPns());
         r.setData(e.getData());
