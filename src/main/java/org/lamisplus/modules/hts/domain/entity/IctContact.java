@@ -90,7 +90,7 @@ public class IctContact extends Audit<IctContact> implements Serializable {
     @Column(name = "known_hiv_positive", length = 10)
     private String knownHivPositive;
 
-    @Column(name = "hiv_test_result", length = 20)
+    @Column(name = "hiv_test_result", length = 200)
     private String hivTestResult;
 
     @Column(name = "age")

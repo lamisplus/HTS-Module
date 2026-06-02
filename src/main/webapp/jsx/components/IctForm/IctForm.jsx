@@ -166,7 +166,10 @@ const IctForm = ({
 
   const mergedHtsValues = htsValues ? { ...htsValues, isOnArt, } : null;
 
+  
+
   const onSubmit = async (values) => {
+    setIsLoading(true);
 
     if (htsRecord?.id || values.htsEncounterId) {
       const htsId = htsRecord?.id || values.htsEncounterId;
@@ -209,14 +212,16 @@ const IctForm = ({
         response = await updateIctEncounter(existingId, payload);
         toast.success("ICT record updated successfully");
         setIsLoading(false);
+        formik.resetForm();
         onSubmitSuccess?.();
-        return
+        return;
       } else {
         response = await createIctEncounter(payload);
         toast.success("ICT record saved successfully");
         setIsLoading(false);
+        formik.resetForm();
         onSubmitSuccess?.();
-        return
+        return;
       }
 
     } catch (err) {
@@ -237,7 +242,6 @@ const IctForm = ({
     initialValues ? undefined : mergedHtsValues
   );
 
-  console.log(formik.values)
 
   React.useEffect(() => {
     if (!initialValues) return;

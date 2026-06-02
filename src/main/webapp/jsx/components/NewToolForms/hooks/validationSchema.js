@@ -107,9 +107,17 @@ export const buildValidationSchema = (isNewPatient) => {
         }
       ),
       numberOfBiologicalChildren: yup.mixed().test(
-        "num-children-non-negative",
+        "num-children-age-gated",
         "Must be 0 or more",
-        (value) => value === "" || value === undefined || value === null || Number(value) >= 0
+        function (value) {
+          const age = resolveAge(this.parent);
+          // Field is only applicable for clients >= 15; ignore entirely if younger
+          if (age !== null && age < 15) return true;
+          if (value === "" || value === undefined || value === null) return true;
+          if (Number(value) < 0)
+            return this.createError({ message: "Must be 0 or more" });
+          return true;
+        }
       ),
       pregnancyStatus: yup.mixed().test(
         "pregnancy-required-for-female",
@@ -162,7 +170,7 @@ export const buildValidationSchema = (isNewPatient) => {
     clientCode: yup.string()
       .required("Client code could not be generated. Fill in Setting, sub-type, Date of Visit, and Serial Number")
       .max(200, "Client code cannot exceed 200 characters"),
-      
+
     serialNumber: yup
       .string()
       .required("Serial number is required to generate a client code")
@@ -174,11 +182,19 @@ export const buildValidationSchema = (isNewPatient) => {
 
     setting: yup.string().required("Setting is required"),
     typeOfSession: yup.string().required("Type of session is required"),
+
     facilitySetting: yup.mixed().test(
       "facility-setting-conditional",
       "Facility setting is required",
       function (value) {
         if (this.parent.setting !== "HTS_ENTRY_POINT_FACILITY") return true;
+        // Reject female-only settings for male clients
+        const MALE_EXCLUDED = ["SETTING_ANC", "SETTING_L&D", "POST_NATAL_WARD_BREASTFEEDING"];
+        if (value && this.parent.sex === "SEX_MALE" && MALE_EXCLUDED.some((ex) => value.includes(ex))) {
+          return this.createError({
+            message: "Selected facility setting is not applicable for male clients",
+          });
+        }
         return !!value || this.createError({ message: "Facility setting is required" });
       }
     ),
@@ -527,14 +543,43 @@ export const buildValidationSchema = (isNewPatient) => {
     previouslyTestedThisYear: yup.string().required("This field is required"),
     clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
+
     categoryOfClients: yup.mixed().test(
       "categoryOfClients-conditional",
       "Category of client is required",
       function (value) {
         if (this.parent.hivTestKitsProvided !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "Category of client is required when HIV self test kit provided to client is yes" });
+        if (!value)
+          return this.createError({
+            message: "Category of client is required when HIV self test kit provided to client is yes",
+          });
+
+        const age = resolveAge(this.parent);
+        const sex = this.parent.sex;
+
+        // MSM is not applicable for female clients
+        if (value === "TARGET_GROUP_MSM" && sex === "SEX_FEMALE") {
+          return this.createError({
+            message: "MSM category is not applicable for female clients",
+          });
+        }
+        // FSW is not applicable for male clients
+        if (value === "TARGET_GROUP_FSW" && sex === "SEX_MALE") {
+          return this.createError({
+            message: "FSW category is not applicable for male clients",
+          });
+        }
+        // Children of KP is only applicable for clients under 15
+        if (value === "TARGET_GROUP_CHILDREN_OF_KP" && age !== null && age >= 15) {
+          return this.createError({
+            message: "Children of most-at-risk population category is only applicable for clients under 15 years",
+          });
+        }
+
+        return true;
       }
     ),
+
     acceptedIndexTesting: yup.mixed().test(
       "acceptedIndextesting-conditional",
       "Accepted Index testing is required",

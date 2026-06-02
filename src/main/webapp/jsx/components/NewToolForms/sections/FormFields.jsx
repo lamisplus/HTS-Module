@@ -74,11 +74,13 @@ export const FormSelect = ({
       style={selectStyle}
     >
       <option value="">Select option</option>
+
       {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
+        <option key={opt.value} value={opt.value} disabled={!!opt.disabled}>
           {opt.label}
         </option>
       ))}
+
     </select>
     {(error || helperText) && (
       <span style={errorStyle}>{helperText || error}</span>

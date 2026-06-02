@@ -236,15 +236,26 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   };
 
 
+ 
+
   const handleSexChange = (e) => {
     const sex = e.target.value;
     setFieldValue("sex", sex);
     const map = arrayToObject(codesets?.["SEX"]);
-    setFieldValue("sexCode", String(map[sex])); // still store numeric id separately
+    setFieldValue("sexCode", String(map[sex]));
     if (sex === "SEX_MALE") {
       setFieldValue("pregnancyStatus", "");
       setFieldValue("breastfeedingDuration", "");
       setFieldValue("numberOfCoWives", "");
+      // Clear biological children if client is under 15
+      if (clientAgeNum !== null && clientAgeNum < 15) {
+        setFieldValue("numberOfBiologicalChildren", "");
+      }
+      // Clear facility setting if a female-only option was selected
+      const maleForbidden = ["SETTING_ANC", "SETTING_L&D", "POST_NATAL_WARD_BREASTFEEDING"];
+      if (maleForbidden.some((ex) => values.facilitySetting?.includes(ex))) {
+        setFieldValue("facilitySetting", "");
+      }
     }
     if (sex === "SEX_FEMALE") {
       setFieldValue("numberOfWives", "");
@@ -332,9 +343,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       let years = now.getFullYear() - birth.getFullYear();
       const m = now.getMonth() - birth.getMonth();
       if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
-      setFieldValue("age", years >= 0 ? String(years) : "");
+      const calcAge = years >= 0 ? years : null;
+      setFieldValue("age", calcAge !== null ? String(calcAge) : "");
+      if (calcAge !== null && calcAge < 15) {
+        setFieldValue("numberOfBiologicalChildren", "");
+      }
     } else {
       setFieldValue("age", "");
+      setFieldValue("numberOfBiologicalChildren", "");
     }
   };
 
@@ -342,6 +358,9 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     const raw = e.target.value;
     const wholeOnly = raw.includes(".") ? raw.slice(0, raw.indexOf(".")) : raw;
     setFieldValue("age", wholeOnly);
+    if (parseInt(wholeOnly, 10) < 15) {
+      setFieldValue("numberOfBiologicalChildren", "");
+    }
     const n = parseInt(wholeOnly, 10);
     if (!isNaN(n) && n >= 0 && n <= 130) {
       const estimated = new Date();
@@ -374,6 +393,24 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
 
   const dobIsActual = values?.dobType?.toLowerCase() === "actual" || !values?.dobType;
 
+  // ── Age & sex helpers for conditional field rules ──────────────────────────
+  const clientAgeNum = values.age
+    ? parseInt(values.age, 10)
+    : values.dateOfBirth
+      ? (() => {
+        const birth = new Date(values.dateOfBirth);
+        if (isNaN(birth.getTime())) return null;
+        const now = new Date();
+        let y = now.getFullYear() - birth.getFullYear();
+        const m = now.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) y--;
+        return y;
+      })()
+      : null;
+
+  const clientIsOver15 = clientAgeNum !== null && clientAgeNum >= 15;
+  const isMaleClient = values.sex === "SEX_MALE";
+
   const originalClientCodeRef = React.useRef(values.clientCode || "");
   const clientCodeExistsRef = React.useRef(false);
 
@@ -388,7 +425,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  
+
   const checkClientCodeUniqueness = async (code) => {
     if (!code) return;
     if (code === originalClientCodeRef.current) return;
@@ -449,12 +486,24 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           <div className="col-md-4">
             <FormSelect
               label="Facility Setting"
-              {...sp("facilitySetting", transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]))}
+              {...sp("facilitySetting", (() => {
+                const MALE_EXCLUDED_FACILITY_CODES = [
+                  "SETTING_ANC",
+                  "SETTING_L&D",
+                  "POST_NATAL_WARD_BREASTFEEDING",
+                ];
+                return transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]).filter(
+                  (opt) => !isMaleClient || !MALE_EXCLUDED_FACILITY_CODES.some((ex) => opt.value.includes(ex))
+                );
+              })())}
+              onChange={readOnly ? undefined : (e) => {
+                // If a now-hidden option was previously selected, clear it
+                handleChange(e);
+              }}
               required
             />
           </div>
         )}
-
         {showCommunityEntry && (
           <div className="col-md-4">
             <FormSelect
@@ -651,18 +700,20 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           </div>
         )}
 
-        <div className="col-md-4">
-          <Label style={labelStyle}>No. of Biological Children &lt; 15 years</Label>
-          <Input type="number" name="numberOfBiologicalChildren" value={values.numberOfBiologicalChildren || ""}
-            onChange={readOnly ? undefined : handleNoOfBiologicalChildren} onBlur={handleBlur}
-            min="0" step="1" disabled={readOnly}
-            style={readOnly ? disabledInputStyle : inputStyle}
-            onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
-          />
-          {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
-            <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
-          )}
-        </div>
+        {clientIsOver15 && (
+          <div className="col-md-4">
+            <Label style={labelStyle}>No. of Biological Children &lt; 15 years</Label>
+            <Input type="number" name="numberOfBiologicalChildren" value={values.numberOfBiologicalChildren || ""}
+              onChange={readOnly ? undefined : handleNoOfBiologicalChildren} onBlur={handleBlur}
+              min="0" step="1" disabled={readOnly}
+              style={readOnly ? disabledInputStyle : inputStyle}
+              onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
+            />
+            {touched.numberOfBiologicalChildren && errors.numberOfBiologicalChildren && (
+              <span style={errorStyle}>{errors.numberOfBiologicalChildren}</span>
+            )}
+          </div>
+        )}
 
         {showPregnancy && (
           <div className={`col-md-4`}>

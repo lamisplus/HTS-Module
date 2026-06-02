@@ -678,4 +678,17 @@
         </sql>
     </changeSet>
 
+
+    <changeSet id="harmonise_v4_widen_ict_contact_hiv_test_result" author="Emmanuel Nnajiofor">
+        <comment>Widen hiv_test_result on hts_ict_contact from VARCHAR(20) to VARCHAR(200).</comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+            ALTER COLUMN hiv_test_result TYPE VARCHAR(200) USING hiv_test_result::VARCHAR(200);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+            ALTER COLUMN hiv_test_result TYPE VARCHAR(20) USING hiv_test_result::VARCHAR(20);
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

@@ -91,7 +91,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
   // skip if age <=15 or pregnancy status is pregnant or breastfeeding
   const skipSection =
-    (values.age && Number(values.age) <= 15) ||
+    (values?.age && Number(values?.age) <= 15) ||
     values.pregnancyStatus === "PREGANACY_STATUS_PREGNANT" ||
     values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING";
 

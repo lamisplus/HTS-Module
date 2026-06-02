@@ -249,6 +249,9 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     }
   }, [fullRecord?.id, codesets]);
 
+  const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
+
+
   const onSubmit = async (values) => {
     const isBeingSetToPositive =
       values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
@@ -298,7 +301,6 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     }
   };
 
-  const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
 
 
   const { errors, submitCount } = formik;
