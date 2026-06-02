@@ -89,6 +89,7 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                     "    SELECT patient_uuid, MAX(id) AS max_id \n" +
                     "    FROM hts_encounter \n" +
                     "    WHERE archived = false \n" +
+                    "\tAND facility_id=:facilityId\n" +
                     "    GROUP BY patient_uuid\n" +
                     ") latest ON latest.patient_uuid = p.uuid \n" +
                     "INNER JOIN hts_encounter e ON e.id = latest.max_id \n" +
@@ -96,15 +97,18 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                     "    SELECT patient_uuid, COUNT(*) AS hts_count \n" +
                     "    FROM hts_encounter \n" +
                     "    WHERE archived = false \n" +
+                    "\tAND facility_id=:facilityId\n" +
                     "    GROUP BY patient_uuid\n" +
                     ") hts_agg ON hts_agg.patient_uuid = p.uuid \n" +
                     "LEFT JOIN (\n" +
                     "    SELECT patient_uuid, COUNT(*) AS ict_count \n" +
                     "    FROM hts_ict_encounter \n" +
                     "    WHERE archived = false \n" +
+                    "\tAND facility_id=:facilityId\n" +
                     "    GROUP BY patient_uuid\n" +
                     ") ict_agg ON ict_agg.patient_uuid = p.uuid \n" +
                     "WHERE p.archived = 0 \n" +
+                    "\tAND p.facility_id=:facilityId\n" +
                     "    AND (:search IS NULL \n" +
                     "        OR p.first_name      ILIKE CAST(:search AS text) \n" +
                     "        OR p.surname         ILIKE CAST(:search AS text) \n" +
@@ -121,6 +125,7 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                             "    FROM patient_person p \n" +
                             "    INNER JOIN hts_encounter e ON e.patient_uuid = p.uuid AND e.archived = false \n" +
                             "    WHERE p.archived = 0 \n" +
+                            "    AND p.facility_id=:facilityId\n" +
                             "        AND (:search IS NULL \n" +
                             "            OR p.first_name      ILIKE CAST(:search AS text) \n" +
                             "            OR p.surname         ILIKE CAST(:search AS text) \n" +
@@ -133,6 +138,7 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                             "            ))",
             nativeQuery = true)
     Page<Object[]> findHtsPatientSummaries(
+            Long facilityId,
             @Param("search") String search,
             Pageable pageable);
 }

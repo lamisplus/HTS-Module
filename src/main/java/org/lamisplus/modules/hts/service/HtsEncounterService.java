@@ -38,6 +38,7 @@ public class HtsEncounterService {
     private final PersonRepository personRepository;
     private final PersonService personService;
     private final ObjectMapper objectMapper;
+    private final CurrentUserOrganizationService currentUserOrganizationService;
 
     // ── Create ────────────────────────────────────────────────────────────────
 
@@ -170,8 +171,9 @@ public class HtsEncounterService {
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
+        Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
 
-        Page<Object[]> raw = repository.findHtsPatientSummaries(searchParam, pageableWithoutSort);
+        Page<Object[]> raw = repository.findHtsPatientSummaries(facilityId, searchParam, pageableWithoutSort);
 
         return raw.map(row -> {
             HtsPatientSummaryDto dto = new HtsPatientSummaryDto();
