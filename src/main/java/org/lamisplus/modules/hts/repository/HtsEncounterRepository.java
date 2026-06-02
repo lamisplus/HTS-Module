@@ -73,64 +73,64 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
 
     // ─── FIX: cast both UUID and JSONB columns to text ─────────────────────────
     @Query(value =
-            "SELECT " +
-                    "    e.id, " +
-                    "    CAST(e.uuid AS text), " +                 // ✅ UUID → text
-                    "    p.id                    AS person_id, " +
-                    "    e.client_code, " +
-                    "    e.date_of_visit, " +
-                    "    e.setting, " +
-                    "    CAST(e.observation AS text), " +         // ✅ JSONB → text
-                    "    e.facility_id, " +
-                    "    hts_agg.hts_count, " +
-                    "    ict_agg.ict_count " +
-                    "FROM patient_person p " +
-                    "INNER JOIN (" +
-                    "    SELECT patient_id, MAX(id) AS max_id " +
-                    "    FROM hts_encounter " +
-                    "    WHERE archived = false " +
-                    "    GROUP BY patient_id" +
-                    ") latest ON latest.patient_id = p.id " +
-                    "INNER JOIN hts_encounter e ON e.id = latest.max_id " +
-                    "INNER JOIN (" +
-                    "    SELECT patient_id, COUNT(*) AS hts_count " +
-                    "    FROM hts_encounter " +
-                    "    WHERE archived = false " +
-                    "    GROUP BY patient_id" +
-                    ") hts_agg ON hts_agg.patient_id = p.id " +
-                    "LEFT JOIN (" +
-                    "    SELECT patient_id, COUNT(*) AS ict_count " +
-                    "    FROM hts_ict_encounter " +
-                    "    WHERE archived = false " +
-                    "    GROUP BY patient_id" +
-                    ") ict_agg ON ict_agg.patient_id = p.id " +
-                    "WHERE p.archived = 0 " +
-                    "  AND (:search IS NULL " +
-                    "       OR p.first_name      ILIKE CAST(:search AS text) " +
-                    "       OR p.surname         ILIKE CAST(:search AS text) " +
-                    "       OR p.other_name      ILIKE CAST(:search AS text) " +
-                    "       OR p.hospital_number ILIKE CAST(:search AS text) " +
-                    "       OR EXISTS (" +
-                    "           SELECT 1 " +
-                    "           FROM jsonb_array_elements(p.contact_point->'contactPoint') cp " +
-                    "           WHERE cp->>'value' ILIKE CAST(:search AS text)" +
-                    "       )) " +
+            "SELECT \n" +
+                    "    e.id, \n" +
+                    "    CAST(e.uuid AS text),                \n" +
+                    "    p.id                    AS person_id, \n" +
+                    "    e.client_code, \n" +
+                    "    e.date_of_visit, \n" +
+                    "    e.setting, \n" +
+                    "    CAST(e.observation AS text),          \n" +
+                    "    e.facility_id, \n" +
+                    "    hts_agg.hts_count, \n" +
+                    "    ict_agg.ict_count \n" +
+                    "FROM patient_person p \n" +
+                    "INNER JOIN (\n" +
+                    "    SELECT patient_uuid, MAX(id) AS max_id \n" +
+                    "    FROM hts_encounter \n" +
+                    "    WHERE archived = false \n" +
+                    "    GROUP BY patient_uuid\n" +
+                    ") latest ON latest.patient_uuid = p.uuid \n" +
+                    "INNER JOIN hts_encounter e ON e.id = latest.max_id \n" +
+                    "INNER JOIN (\n" +
+                    "    SELECT patient_uuid, COUNT(*) AS hts_count \n" +
+                    "    FROM hts_encounter \n" +
+                    "    WHERE archived = false \n" +
+                    "    GROUP BY patient_uuid\n" +
+                    ") hts_agg ON hts_agg.patient_uuid = p.uuid \n" +
+                    "LEFT JOIN (\n" +
+                    "    SELECT patient_uuid, COUNT(*) AS ict_count \n" +
+                    "    FROM hts_ict_encounter \n" +
+                    "    WHERE archived = false \n" +
+                    "    GROUP BY patient_uuid\n" +
+                    ") ict_agg ON ict_agg.patient_uuid = p.uuid \n" +
+                    "WHERE p.archived = 0 \n" +
+                    "    AND (:search IS NULL \n" +
+                    "        OR p.first_name      ILIKE CAST(:search AS text) \n" +
+                    "        OR p.surname         ILIKE CAST(:search AS text) \n" +
+                    "        OR p.other_name      ILIKE CAST(:search AS text) \n" +
+                    "        OR p.hospital_number ILIKE CAST(:search AS text) \n" +
+                    "        OR EXISTS (\n" +
+                    "            SELECT 1 \n" +
+                    "            FROM jsonb_array_elements(p.contact_point->'contactPoint') cp \n" +
+                    "            WHERE cp->>'value' ILIKE CAST(:search AS text)\n" +
+                    "        )) \n" +
                     "ORDER BY e.id DESC",
             countQuery =
-                    "SELECT COUNT(DISTINCT p.id) " +
-                            "FROM patient_person p " +
-                            "INNER JOIN hts_encounter e ON e.patient_id = p.id AND e.archived = false " +
-                            "WHERE p.archived = 0 " +
-                            "  AND (:search IS NULL " +
-                            "       OR p.first_name      ILIKE CAST(:search AS text) " +
-                            "       OR p.surname         ILIKE CAST(:search AS text) " +
-                            "       OR p.other_name      ILIKE CAST(:search AS text) " +
-                            "       OR p.hospital_number ILIKE CAST(:search AS text) " +
-                            "       OR EXISTS (" +
-                            "           SELECT 1 " +
-                            "           FROM jsonb_array_elements(p.contact_point->'contactPoint') cp " +
-                            "           WHERE cp->>'value' ILIKE CAST(:search AS text)" +
-                            "       ))",
+                    "SELECT COUNT(DISTINCT p.id) \n" +
+                            "    FROM patient_person p \n" +
+                            "    INNER JOIN hts_encounter e ON e.patient_uuid = p.uuid AND e.archived = false \n" +
+                            "    WHERE p.archived = 0 \n" +
+                            "        AND (:search IS NULL \n" +
+                            "            OR p.first_name      ILIKE CAST(:search AS text) \n" +
+                            "            OR p.surname         ILIKE CAST(:search AS text) \n" +
+                            "            OR p.other_name      ILIKE CAST(:search AS text) \n" +
+                            "            OR p.hospital_number ILIKE CAST(:search AS text) \n" +
+                            "            OR EXISTS (\n" +
+                            "                SELECT 1 \n" +
+                            "                FROM jsonb_array_elements(p.contact_point->'contactPoint') cp \n" +
+                            "                WHERE cp->>'value' ILIKE CAST(:search AS text)\n" +
+                            "            ))",
             nativeQuery = true)
     Page<Object[]> findHtsPatientSummaries(
             @Param("search") String search,
