@@ -190,7 +190,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <div className="col-md-6">
                 <FormSelect
                   label="Time of Last HIV Negative Test Result"
-                  {...sp("timeOfLastNegativeTest", transformOptions(codesets?.["RECENT_HIV_TEST"]))}
+                  {...sp("timeOfLastNegativeTest", transformOptions(codesets?.["TIME_LAST_NEGATIVE_TEST_RESULT"]))}
                   required
                 />
               </div>

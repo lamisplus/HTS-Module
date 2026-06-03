@@ -118,6 +118,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
                     // FSW: disabled for males (handled below via disabled prop) — here we keep it visible but see note
                     // MSM: hidden for females
                     if (isFemale && code === "TARGET_GROUP_MSM") return false;
+                    if (isMale && code === "TARGET_GROUP_FSW") return false;
                     // Children of KP: only show for clients < 15 years
                     if (code === "TARGET_GROUP_CHILDREN_OF_KP" && !isUnder15) return false;
                     return true;

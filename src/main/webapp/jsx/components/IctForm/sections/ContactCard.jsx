@@ -240,6 +240,9 @@ const ContactCard = ({
               onChange={(e) => {
                 const raw = e.target.value;
                 const digitsOnly = raw.replace(/\D/g, "");
+
+                patch({ enrolledInOvc: false, dateEnrolledOvc: "", ovcId: "" });
+
                 if (digitsOnly === "") {
                   set("age", "");
                 } else {
@@ -248,6 +251,7 @@ const ContactCard = ({
                 }
               }}
               onKeyDown={(e) => {
+                patch({ enrolledInOvc: false, dateEnrolledOvc: "", ovcId: "" });
                 if (e.key === "." || e.key === "e" || e.key === "E") {
                   e.preventDefault();
                 }
@@ -256,6 +260,7 @@ const ContactCard = ({
                 }
               }}
               onBlur={() => {
+                patch({ enrolledInOvc: false, dateEnrolledOvc: "", ovcId: "" });
                 const current = val("age");
                 if (current !== "") {
                   let num = parseInt(current, 10);
@@ -468,13 +473,23 @@ const ContactCard = ({
       </div>
 
       {/* OVC (now always visible) */}
+
+
       <div className="row" style={{ marginTop: 4 }}>
-        <div className="col-md-12">
-          <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
-            <input type="checkbox" checked={!!contact.enrolledInOvc} onChange={handleEnrolledOvcChange} disabled={readOnly} />
-            Contact is enrolled in OVC program
-          </label>
-        </div>
+
+        {
+          contact?.age && Number(contact.age) <= 17 && (
+            <div className="col-md-12">
+              <label style={{ ...checkboxRowStyle, cursor: readOnly ? "default" : "pointer" }}>
+                <input type="checkbox" checked={!!contact.enrolledInOvc} onChange={handleEnrolledOvcChange} disabled={readOnly} />
+                Contact is enrolled in OVC program
+              </label>
+            </div>
+
+          )
+        }
+
+
         {!!contact.enrolledInOvc && (
           <>
             <div className="col-md-4">

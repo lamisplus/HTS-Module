@@ -16,14 +16,14 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
   firstName: yup
     .string()
     .required("Contact First name is required")
-    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+    .test("min2", "Contact First name must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   middleName: yup.string(),
   surname: yup
     .string()
     .required("Contact Surname is required")
-    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+    .test("min2", "Contact Surname must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   relationshipToIndex: yup.string().required("Relationship is required"),
@@ -91,7 +91,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
 
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
     if (!this.parent.enrolledInOvc) return true;
-    if (!val) return this.createError({ message: "Date enrolled in OVC is required" });
+    if (!val) return this.createError({ message: "Date enrolled in OVC is required" }); 
     if (new Date(val) > today) return this.createError({ message: "Cannot be a future date" });
     return true;
   }),
