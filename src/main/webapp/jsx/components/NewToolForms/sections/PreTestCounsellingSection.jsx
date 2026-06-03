@@ -128,7 +128,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
   };
 
   useGetCodesets({
-    codesetsKeys: ["YES_NO", "RECENT_HIV_TEST"],
+    codesetsKeys: ["YES_NO", "TIME_LAST_NEGATIVE_TEST_RESULT"],
     patientId: "pretestingcounselling",
     onSuccess: loadCodesets,
   });
