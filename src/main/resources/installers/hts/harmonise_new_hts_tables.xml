@@ -691,4 +691,46 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="drop-age-from-hts-ict-encounter" author="your-name">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_ict_encounter"/>
+            <columnExists tableName="hts_ict_encounter" columnName="age"/>
+        </preConditions>
+        <dropColumn tableName="hts_ict_encounter" columnName="age"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 5b — Drop NOT NULL constraints on foreign key columns
+                    that may still be marked as NOT NULL in some databases
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_hts_encounter_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Ensure hts_ict_encounter.hts_encounter_id is nullable.
+            This column may have been created as NOT NULL in some older schemas.
+            Existing records with NULL values are preserved; only the constraint is dropped.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_contact_ict_encounter_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Ensure hts_ict_contact.ict_encounter_id is nullable.
+            This column is often created as NOT NULL, but may need to be nullable
+            for partial updates or data migration scenarios.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact ALTER COLUMN ict_encounter_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact ALTER COLUMN ict_encounter_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

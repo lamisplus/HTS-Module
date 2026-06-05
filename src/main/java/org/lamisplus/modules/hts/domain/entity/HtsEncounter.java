@@ -48,7 +48,7 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
     @Column(name = "facility_id", nullable = false)
     private Long facilityId;
 
-    @Column(name = "setting", length = 50)
+    @Column(name = "setting", length = 200)
     private String setting;
 
     @Column(name = "pmtct_hts", nullable = false)
