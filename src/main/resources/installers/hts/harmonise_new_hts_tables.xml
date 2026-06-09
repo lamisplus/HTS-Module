@@ -733,4 +733,138 @@
         </rollback>
     </changeSet>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 5c — Drop NOT NULL constraints on hts_ict_encounter.patient_id
+                     and hts_ict_encounter.date_of_service
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_patient_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Allow patient_id to be nullable on hts_ict_encounter.
+            The FK constraint to patient_person(id) is preserved; only the
+            NOT NULL constraint is lifted.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_date_of_service" author="Emmanuel Nnajiofor">
+        <comment>
+            Allow date_of_service to be nullable on hts_ict_encounter.
+            This allows encounters to be saved in a draft state before the
+            service date is finalized.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN date_of_service DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL (caution: will fail if any NULL values exist)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN date_of_service SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 10 — Update FK cascade rules for parent-child relationships
+                       hts_encounter → hts_ict_encounter → hts_ict_contact
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_fk_ict_encounter_cascade_on_hts_encounter" author="Emmanuel Nnajiofor">
+        <comment>
+            Re-create fk_ict_encounter_hts_uuid on hts_ict_encounter with CASCADE rules.
+            hts_encounter is a parent of hts_ict_encounter — deletes/updates on the
+            parent must propagate to child rows.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+
+            ALTER TABLE hts_ict_encounter
+                ADD CONSTRAINT fk_ict_encounter_hts_uuid
+                    FOREIGN KEY (hts_encounter_uuid)
+                        REFERENCES hts_encounter(uuid)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+
+            ALTER TABLE hts_ict_encounter
+            ADD CONSTRAINT fk_ict_encounter_hts_uuid
+            FOREIGN KEY (hts_encounter_uuid)
+            REFERENCES hts_encounter(uuid)
+            ON UPDATE NO ACTION
+            ON DELETE NO ACTION;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_fk_ict_contact_cascade_on_ict_encounter" author="Emmanuel Nnajiofor">
+        <comment>
+            Re-create fk_ict_contact_encounter_uuid on hts_ict_contact with CASCADE rules.
+            hts_ict_encounter is a parent of hts_ict_contact — deletes/updates on the
+            parent must propagate to child rows.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+
+            ALTER TABLE hts_ict_contact
+                ADD CONSTRAINT fk_ict_contact_encounter_uuid
+                    FOREIGN KEY (hts_ict_encounter_uuid)
+                        REFERENCES hts_ict_encounter(uuid)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+
+            ALTER TABLE hts_ict_contact
+            ADD CONSTRAINT fk_ict_contact_encounter_uuid
+            FOREIGN KEY (hts_ict_encounter_uuid)
+            REFERENCES hts_ict_encounter(uuid)
+            ON UPDATE NO ACTION
+            ON DELETE NO ACTION;
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="harmonise_v4_create_fn_is_pmtct_infant" author="Emmanuel Nnajiofor">
+        <comment>
+            Create a helper function to safely check if a hospital number belongs to
+            a PMTCT infant. Uses dynamic SQL internally so it degrades gracefully on
+            facilities where pmtct_infant_information does not exist.
+        </comment>
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION is_pmtct_infant(p_hospital_number TEXT)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        STABLE
+        AS $func$
+            BEGIN
+            IF to_regclass('public.pmtct_infant_information') IS NULL THEN
+                RETURN FALSE;
+            END IF;
+
+            PERFORM 1
+            FROM pmtct_infant_information
+            WHERE infant_hospital_number = p_hospital_number;
+
+            RETURN FOUND;
+
+            EXCEPTION WHEN undefined_table THEN
+            RETURN FALSE;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

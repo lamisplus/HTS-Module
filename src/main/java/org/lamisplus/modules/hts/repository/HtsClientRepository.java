@@ -52,16 +52,24 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
             "    OR p.hospital_number ILIKE ?3\n" +
             "    OR p.contact_point#>>'{contactPoint,0,value}' ILIKE ?3\n" +
             ")\n" +
-            "AND NOT EXISTS \n" +
-            "(SELECT 1\n" +
-            " FROM hts_encounter htse\n" +
-            " WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
-            " AND htse.facility_id = ?2\n" +
-            " AND htse.archived = false\n" +
-            ")", nativeQuery = true)
-
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1\n" +
+            "    FROM hts_encounter hs\n" +
+            "    WHERE hs.client_code = p.hospital_number\n" +
+            "    AND hs.archived = false\n" +
+            "    AND CAST(hs.patient_uuid AS TEXT) IS NOT NULL AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
+            "    AND hs.facility_id = ?2\n" +
+            ")\n" +
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1\n" +
+            "    FROM hts_encounter htse\n" +
+            "    WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
+            "    AND htse.facility_id = ?2\n" +
+            "    AND htse.archived = false\n" +
+            ")\n" +
+            "AND is_pmtct_infant(p.hospital_number) = FALSE\n" +
+            "", nativeQuery = true)
     Page<HtsPerson> findAllPersonHtsBySearchParam(Integer archived, Long facilityId, String search, Pageable pageable);
-
 
 
     @Query(value = "SELECT DISTINCT hc.client_code AS clientCode, p.id as personId,p.uuid as personUuid, p.first_name as firstName, p.surname as surname, p.other_name as otherName,  \n" +
@@ -111,10 +119,9 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
             "\t\t\t\t AND htse.facility_id = ?2\n" +
             "\t\t\t\t AND htse.archived = false\n" +
             "            )\n" +
+            "             AND is_pmtct_infant(p.hospital_number) = FALSE\n" +
             "\t\t\tORDER BY p.created_date DESC" , nativeQuery = true)
-
     Page<HtsPerson> findAllPersonHts(Integer archived, Long facilityId, Pageable pageable);
-
     @Query(value = "SELECT DISTINCT  hc.id, hc.client_code AS clientCode, p.id as personId,p.uuid as personUuid, p.first_name as firstName, p.surname as surname, p.other_name as otherName,  \n" +
             "p.hospital_number as hospitalNumber, CAST (EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) AS INTEGER) as age,  \n" +
             "INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth,mini.person_uuid,mini.hts_count htsCount\n" +
