@@ -867,4 +867,65 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="harmonise_v4_create_fn_is_pmtct_infant_v2" author="Emmanuel Nnajiofor">
+        <comment>
+            Recreate is_pmtct_infant() with full dynamic SQL execution.
+            Checks both table and column existence via information_schema before
+            executing the query, preventing parse-time failures on facilities
+            where pmtct_infant_information does not exist or has a different schema.
+        </comment>
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION is_pmtct_infant(p_hospital_number TEXT)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        STABLE
+        AS $func$
+            DECLARE
+            v_table_exists  BOOLEAN;
+            v_column_exists BOOLEAN;
+            v_found         BOOLEAN := FALSE;
+            BEGIN
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_name   = 'pmtct_infant_information'
+            ) INTO v_table_exists;
+
+            IF NOT v_table_exists THEN
+                RETURN FALSE;
+            END IF;
+
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name   = 'pmtct_infant_information'
+                  AND column_name  = 'infant_hospital_number'
+            ) INTO v_column_exists;
+
+            IF NOT v_column_exists THEN
+                RETURN FALSE;
+            END IF;
+
+            EXECUTE '
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM public.pmtct_infant_information
+                    WHERE infant_hospital_number = $1
+                )
+            ' INTO v_found USING p_hospital_number;
+
+            RETURN v_found;
+
+            EXCEPTION WHEN OTHERS THEN
+            RETURN FALSE;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>
