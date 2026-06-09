@@ -15,20 +15,15 @@ import java.util.UUID;
 @Data
 public class HtsPatientSummaryDto {
 
-    // ── Identity fields expected by existing consumers ────────────────────
-    private Long   id;           // id of the most recent HTS encounter
-    private UUID   uuid;         // uuid of the most recent HTS encounter
-    private Long   personId;     // patient_person.id   (PatientDetail reads this)
-    private PersonResponseDto person; // full person object  (PatientCardDetail reads this)
-
-    // ── HTS encounter fields ──────────────────────────────────────────────
-    private String    clientCode;   // most recent client code
-    private LocalDate dateOfVisit;  // most recent visit date
+    private Long   id;
+    private String uuid;
+    private Long   personId;
+    private PersonResponseDto person;
+    private String    clientCode;
+    private LocalDate dateOfVisit;
     private String    setting;
-    private JsonNode  observation;  // observation of the most recent encounter
+    private JsonNode  observation;
     private Long      facilityId;
-
-    // ── Aggregate counts ──────────────────────────────────────────────────
-    private long htsCount;   // total HTS encounters for this patient
-    private long ictCount;   // total ICT encounters for this patient
+    private long htsCount;
+    private long ictCount;
 }

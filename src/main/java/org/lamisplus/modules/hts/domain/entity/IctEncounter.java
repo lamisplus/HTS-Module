@@ -8,6 +8,9 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.lamisplus.modules.base.domain.entities.Audit;
 import org.lamisplus.modules.patient.domain.entity.Person;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
+
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -27,8 +30,13 @@ public class IctEncounter extends Audit<IctEncounter> implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "uuid", insertable = false, updatable = false, unique = true, nullable = false)
-    private UUID uuid;
+    @Column(name = "client_category_other", columnDefinition = "TEXT")
+    private String clientCategoryOther;
+
+
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "varchar(50)", insertable = false, updatable = false, unique = true, nullable = false)
+    private String uuid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
@@ -44,6 +52,8 @@ public class IctEncounter extends Audit<IctEncounter> implements Serializable {
     @Column(name = "facility_id", nullable = false)
     private Long facilityId;
 
+    @Column(name = "hts_encounter_uuid", length = 36)
+    private String htsEncounterUuid;
     @Column(name = "date_of_service", nullable = false)
     private LocalDate dateOfService;
 

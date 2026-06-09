@@ -47,6 +47,7 @@ const divStyle = {
 };
 
 const Home = (props) => {
+  const { onEncounterMutated, refreshKey } = props;
   const [patientList, setPatientList] = useState([]);
   const [patientEncounterList, setPatientEncounterList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +78,7 @@ const Home = (props) => {
   const isEligibleForNewIct = useMemo(() => {
     return patientInfo?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
   }, [patientInfo]);
-  
+
 
   const calculateLastVisitDate = (visitDate) => {
     if (!visitDate) return 0;
@@ -206,9 +207,13 @@ const Home = (props) => {
                         {key === "new" && (
 
                           <NewEncounterHtsIctOrchestrator
-                            person={props?.patientObj}   // full object: { personId, personResponseDto, ... }
-                            onDone={() => setKey("home")}
+                            person={props?.patientObj}
+                            onDone={() => {
+                              onEncounterMutated?.();
+                              setKey("home");
+                            }}
                             isOnArt={false}
+                            onEncounterMutated={onEncounterMutated}
                           />
                         )}
                       </Suspense>
@@ -221,6 +226,7 @@ const Home = (props) => {
                         <NewIctForExistingPatient
                           patientId={patientId}
                           onDone={() => {
+                            onEncounterMutated?.();
                             setKey("ict-history");
                           }}
                           isOnArt={false}
@@ -239,6 +245,8 @@ const Home = (props) => {
                           setActivePage={props.setActivePage}
                           clientCode={props.clientCode}
                           patientAge={props.patientAge}
+                          onEncounterMutated={onEncounterMutated}
+                          refreshKey={refreshKey}
                         />
                       )}
                     </Suspense>
@@ -251,6 +259,8 @@ const Home = (props) => {
                           patientObj={props.patientObj}
                           activePage={props.activePage}
                           setActivePage={props.setActivePage}
+                          onEncounterMutated={onEncounterMutated}
+                          refreshKey={refreshKey}
                         />
                       )}
                     </Suspense>

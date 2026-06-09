@@ -190,7 +190,7 @@ const HIV_RESULT_MAP = {
 
   "Positive": { display: "Positive", color: "red" },
   "Negative": { display: "Negative", color: "red" },
-  
+
   "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
   // HIV_TEST_RESULT
@@ -258,7 +258,7 @@ const SETTING_MAP = {
   "ENROLLMENT_SETTING_FACILITY": "Facility",
   // HTS_ENTRY_POINT
   "HTS_ENTRY_POINT_COMMUNITY": "Community",
-  
+
   "HTS_ENTRY_POINT_FACILITY": "Facility",
   "HTS_ENTRY_POINT_OTHERS": "Others",
 
@@ -315,10 +315,11 @@ const HTSEncounterHistory = (props) => {
   const [deleting, setDeleting] = useState(false);
   const patientId =
     props.patientObj?.personId ?? props.patientObj?.id ?? null;
-  
+
   useEffect(() => {
     if (patientId) fetchEncounters();
-  }, [patientId]);
+  }, [patientId, props.refreshKey]);
+
 
   const fetchEncounters = async () => {
     setLoading(true);
@@ -338,11 +339,10 @@ const HTSEncounterHistory = (props) => {
       await axios.delete(`${baseUrl}hts-encounter/${pendingDelete.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(
-        `Encounter for client ${pendingDelete.clientCode} deleted successfully.`
-      );
+      toast.success(`Encounter for client ${pendingDelete.clientCode} deleted successfully.`);
       setPendingDelete(null);
       fetchEncounters();
+      props?.onEncounterMutated?.();
     } catch {
       toast.error("Failed to delete encounter. Please try again.");
     } finally {

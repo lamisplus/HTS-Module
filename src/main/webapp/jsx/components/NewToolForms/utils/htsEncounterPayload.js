@@ -1,42 +1,82 @@
-// utils/htsEncounterPayload.js
-
-/**
- * Derives a short alphabetic abbreviation from a setting label.
- * e.g. "Facility" → "F", "Community" → "C", "Home Based" → "HB"
- */
-const toSettingAbbr = (setting) => {
-  if (!setting) return "HTS";
-  return setting
-    .trim()
-    .split(/\s+/)
-    .map((word) => word[0]?.toUpperCase() || "")
-    .join("");
+const SETTING_PREFIX_MAP = {
+  "HTS_ENTRY_POINT_FACILITY": "FC",
+  "HTS_ENTRY_POINT_COMMUNITY": "CM",
+  "HTS_ENTRY_POINT_OTHERS": "OT",
 };
 
-/**
- * Generates a unique HTS Client Code in the format:
- *   {SettingAbbr}01/{YY}/{MM}/{4-digit-random}{2-random-letters}
- *
- * Example: FC01/25/08/0047XR
- *
- * @param {string} setting      — value of the `setting` form field
- * @param {string} dateOfVisit  — ISO date string e.g. "2025-08-14"
- * @returns {string}
- */
-export const generateClientCode = (setting, dateOfVisit) => {
-  const abbr = toSettingAbbr(setting);
-  const FACILITY_CODE = "01";
+const getSubtypeCode = (setting, facilitySetting, communityEntryPoint) => {
+  // "Others" has no subtype segment
+  if (setting === "HTS_ENTRY_POINT_OTHERS") return null;
 
-  const date = dateOfVisit ? new Date(dateOfVisit) : new Date();
-  const yy = String(date.getFullYear()).slice(-2);
+  const subtype =
+    setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
+    setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
+    null;
+
+  if (!subtype) return null;
+
+  if (subtype.includes("SETTING_STI"))                       return "STI";
+  if (subtype.includes("EMERGENCY"))                         return "EME";
+  if (subtype.includes("SETTING_INDEX"))                     return "IND";
+  if (subtype.includes("INPATIENT") || subtype.includes("NPATIENT")) return "INP";
+  if (subtype.includes("PMTCT"))                             return "PMTCT";
+  if (subtype.includes("TB"))                                return "TB";
+  if (subtype.includes("VCT"))                               return "VCT";
+  if (subtype.includes("MOBILE"))                            return "MOB";
+  if (subtype.includes("SETTING_SNS"))                       return "SNS";
+  if (subtype.includes("SETTING_ANC"))                       return "ANC";
+  if (subtype.includes("RETESTING"))                         return "RET";
+  if (subtype.includes("SETTING_L&D"))                       return "L&D";
+  if (subtype.includes("POST_NATAL_WARD_BREASTFEEDING"))     return "PNWB";
+  if (subtype.includes("SETTING_CT"))                        return "CT";
+  if (subtype.includes("SETTING_FP"))                        return "FP";
+  if (subtype.includes("BLOOD_BANK"))                        return "BB";
+  if (subtype.includes("PEDIATRIC"))                         return "PED";
+  if (subtype.includes("MALNUTRITION"))                      return "MAL";
+  if (subtype.includes("PREP_TESTING"))                      return "PrEPT";
+  if (subtype.includes("SPOKE_HEALTH_FACILITY"))             return "SPHF";
+  if (subtype.includes("STANDALONE"))                        return "STAN";
+  if (subtype.includes("CONGREGATIONAL"))                    return "CON";
+  if (subtype.includes("DELIVERY_HOMES"))                    return "DEL";
+  if (subtype.includes("TBA_ORTHODOX"))                      return "TBAO";
+  if (subtype.includes("TBA_RT-HCW"))                        return "TBAH";
+  if (subtype.includes("SETTING_OVC"))                       return "OVC";
+  if (subtype.includes("OUTREACH"))                          return "OUT";
+  if (subtype.includes("OTHER"))                             return "OTH";
+
+  return null;
+};
+
+export const generateClientCode = (
+  setting,
+  facilitySetting,
+  communityEntryPoint,
+  dateOfVisit,
+  facilityCode,
+  serialNumber
+) => {
+  const settingPrefix = SETTING_PREFIX_MAP[setting];
+  if (!settingPrefix || !facilityCode || !serialNumber || !dateOfVisit) return null;
+
+  const date = new Date(dateOfVisit);
+  if (isNaN(date.getTime())) return null;
+
+  const yyyy = String(date.getFullYear());
   const mm = String(date.getMonth() + 1).padStart(2, "0");
 
-  const serial = String(Math.floor(Math.random() * 9000) + 1000); // 1000–9999
-  const letters = Array.from({ length: 2 }, () =>
-    String.fromCharCode(65 + Math.floor(Math.random() * 26))
-  ).join("");
+  const subtypeCode = getSubtypeCode(setting, facilitySetting, communityEntryPoint);
 
-  return `${abbr}${FACILITY_CODE}/${yy}/${mm}/${serial}${letters}`;
+  // "Others" has no subtype
+  const segments =
+    setting === "HTS_ENTRY_POINT_OTHERS"
+      ? [settingPrefix, facilityCode, yyyy, mm, serialNumber]
+      : subtypeCode
+        ? [settingPrefix, facilityCode, subtypeCode, yyyy, mm, serialNumber]
+        : null; // facility/community selected but subtype not yet chosen
+
+  if (!segments) return null;
+
+  return segments.join("/");
 };
 
 export function arrayToObject(arr) {
@@ -57,6 +97,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     patientId,
     dateOfVisit,
     clientCode,
+    serialNumber,
     setting,
     facilitySetting,
     facilityName,
@@ -167,36 +208,36 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     indexTesting,
     indexRelationship,
     indexClientCode,
-    surname,
-    firstName,
-    middleName,
-    dobType,
-    dateOfBirth,
-    age: age
-      ? parseInt(age, 10)
-      : dateOfBirth
-        ? (() => {
-            const birth = new Date(dateOfBirth);
-            if (isNaN(birth.getTime())) return null;
-            const now = new Date();
-            let years = now.getFullYear() - birth.getFullYear();
-            const m = now.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
-            return years >= 0 ? years : null;
-          })()
-        : null,
-    sex,
-    phoneNumber,
-    maritalStatus,
+    // surname,
+    // firstName,
+    // middleName,
+    // dobType,
+    // dateOfBirth,
+    // age: age
+    //   ? parseInt(age, 10)
+    //   : dateOfBirth
+    //     ? (() => {
+    //         const birth = new Date(dateOfBirth);
+    //         if (isNaN(birth.getTime())) return null;
+    //         const now = new Date();
+    //         let years = now.getFullYear() - birth.getFullYear();
+    //         const m = now.getMonth() - birth.getMonth();
+    //         if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) years -= 1;
+    //         return years >= 0 ? years : null;
+    //       })()
+    //     : null,
+    // sex,
+    // phoneNumber,
+    // maritalStatus,
     numberOfWives: numberOfWives ? parseInt(numberOfWives, 10) : null,
     numberOfCoWives: numberOfCoWives ? parseInt(numberOfCoWives, 10) : null,
     numberOfBiologicalChildren: numberOfBiologicalChildren ? parseInt(numberOfBiologicalChildren, 10) : null,
     pregnancyStatus,
     breastfeedingDuration,
-    clientState,
-    clientLga,
-    address,
-    landmark,
+    // clientState,
+    // clientLga,
+    // address,
+    // landmark,
     previouslyTestedNegative,
     timeOfLastNegativeTest,
     clientInformedTransmissionRoutes,

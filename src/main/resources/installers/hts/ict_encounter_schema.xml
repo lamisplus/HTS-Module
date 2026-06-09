@@ -6,7 +6,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_encounter                                            -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_encounter_v3_05152605" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_encounter_v3_05172026" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_encounter" schemaName="public"/>
@@ -95,7 +95,7 @@
     <!-- ============================================================ -->
     <!-- hts_ict_contact                                              -->
     <!-- ============================================================ -->
-    <changeSet id="create_ict_contact_v3_05152605" author="Emmanuel Nnajiofor">
+    <changeSet id="create_ict_contact_v3_05172026" author="Emmanuel Nnajiofor">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="hts_ict_contact" schemaName="public"/>
@@ -184,5 +184,56 @@
         <createIndex indexName="idx_hts_ict_contact_known_hiv" tableName="hts_ict_contact">
             <column name="known_hiv_positive"/>
         </createIndex>
+    </changeSet>
+
+
+
+    <!-- Add hts_encounter_uuid to hts_ict_encounter -->
+    <changeSet id="add_hts_encounter_uuid_to_ict_encounter" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_encounter" columnName="hts_encounter_uuid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="hts_encounter_uuid" type="VARCHAR(36)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_ict_encounter_hts_uuid" tableName="hts_ict_encounter">
+            <column name="hts_encounter_uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Add hts_ict_encounter_uuid to hts_ict_contact -->
+    <changeSet id="add_ict_encounter_uuid_to_ict_contact" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_contact" columnName="hts_ict_encounter_uuid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="hts_ict_contact">
+            <column name="hts_ict_encounter_uuid" type="VARCHAR(36)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_ict_contact_enc_uuid" tableName="hts_ict_contact">
+            <column name="hts_ict_encounter_uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Add age column to hts_ict_contact if missing -->
+    <changeSet id="add_age_to_hts_ict_contact" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_contact" columnName="age"/>
+            </not>
+        </preConditions>
+        <comment>Add age column to hts_ict_contact for older installations where it may be missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="age" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

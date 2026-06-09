@@ -34,16 +34,17 @@ public class RiskStratificationService {
 
     public RiskStratificationResponseDto save(RiskStratificationDto riskStratificationDTO) {
 
-        if(riskStratificationDTO.getSource().equalsIgnoreCase(Source.Mobile.toString())) {
+        if (riskStratificationDTO.getSource().equalsIgnoreCase(Source.Mobile.toString())) {
 
-            Optional<RiskStratification> riskStratificationExists = stratificationRepository.findByCode(riskStratificationDTO.getCode());
+            Optional<RiskStratification> riskStratificationExists = stratificationRepository
+                    .findByCode(riskStratificationDTO.getCode());
             if (riskStratificationExists.isPresent()) {
                 return toRiskStratificationResponseDTO(riskStratificationExists.get());
             }
         }
 
-        String personUuid=null;
-        if(riskStratificationDTO.getPersonId() != null){
+        String personUuid = null;
+        if (riskStratificationDTO.getPersonId() != null) {
             personUuid = getPerson(riskStratificationDTO.getPersonId()).getUuid();
         }
         RiskStratification riskStratification = toRiskStratification(riskStratificationDTO, personUuid);
@@ -51,29 +52,33 @@ public class RiskStratificationService {
         return this.toRiskStratificationResponseDTO(stratificationRepository.save(riskStratification));
     }
 
-    public String getFacilityShortCode(){
-        String query = "select code from base_organisation_unit_identifier " +
-                "where organisation_unit_id = ? " +
-                "and name IN ('SHORT_CODE', 'DATIM_ID')";
-        return jdbcTemplate.queryForObject(
-                query, new Object[] {currentFacility.getCurrentUserOrganization()}, String.class
-        );
+    public String getFacilityShortCode() {
+        String query = "SELECT code FROM base_organisation_unit_identifier " +
+                "WHERE organisation_unit_id = ? AND name IN ('DATIM_ID', 'SHORT_CODE') " +
+                "ORDER BY CASE name WHEN 'DATIM_ID' THEN 1 ELSE 2 END " +
+                "LIMIT 1";
+        return jdbcTemplate.queryForObject(query,
+                new Object[] { currentFacility.getCurrentUserOrganization() },
+                String.class);
     }
-    public RiskStratificationResponseDto getByCode(String code){
+
+    public RiskStratificationResponseDto getByCode(String code) {
         RiskStratification riskStratification = stratificationRepository.findByCode(code).orElse(null);
-        if(riskStratification != null){
+        if (riskStratification != null) {
             return this.toRiskStratificationResponseDTO(riskStratification);
         }
         return null;
     }
+
     public Person getPerson(Long personId) {
-        return personRepository.findById (personId)
-                .orElseThrow (() -> new EntityNotFoundException(Person.class, "id", String.valueOf (personId)));
+        return personRepository.findById(personId)
+                .orElseThrow(() -> new EntityNotFoundException(Person.class, "id", String.valueOf(personId)));
     }
-    public RiskStratificationDto update(Long id, RiskStratificationDto stratificationDto){
+
+    public RiskStratificationDto update(Long id, RiskStratificationDto stratificationDto) {
         RiskStratification stratification = stratificationRepository
                 .findByIdAndFacilityIdAndArchived(id, currentFacility.getCurrentUserOrganization(), UN_ARCHIVED)
-                .orElseThrow(()-> new EntityNotFoundException(RiskStratification.class, "id", String.valueOf(id)));
+                .orElseThrow(() -> new EntityNotFoundException(RiskStratification.class, "id", String.valueOf(id)));
         stratificationDto.setId(id);
         stratification = toRiskStratification(stratificationDto, stratification.getPersonUuid());
         stratification.setFacilityId(currentFacility.getCurrentUserOrganization());
@@ -81,77 +86,75 @@ public class RiskStratificationService {
     }
 
     private RiskStratificationDto toRiskStratificationDTO(RiskStratification riskStratification) {
-        if ( riskStratification == null ) {
+        if (riskStratification == null) {
             return null;
         }
 
         RiskStratificationDto riskStratificationDto = new RiskStratificationDto();
 
-        riskStratificationDto.setAge( riskStratification.getAge() );
+        riskStratificationDto.setAge(riskStratification.getAge());
         riskStratificationDto.setId(riskStratification.getId());
-        riskStratificationDto.setEntryPoint( riskStratification.getEntryPoint() );
+        riskStratificationDto.setEntryPoint(riskStratification.getEntryPoint());
 
-        riskStratificationDto.setTestingSetting( riskStratification.getTestingSetting() );
-        riskStratificationDto.setModality( riskStratification.getModality() );
-        riskStratificationDto.setTargetGroup( riskStratification.getTargetGroup() );
-        riskStratificationDto.setVisitDate( riskStratification.getVisitDate() );
+        riskStratificationDto.setTestingSetting(riskStratification.getTestingSetting());
+        riskStratificationDto.setModality(riskStratification.getModality());
+        riskStratificationDto.setTargetGroup(riskStratification.getTargetGroup());
+        riskStratificationDto.setVisitDate(riskStratification.getVisitDate());
         riskStratificationDto.setDob(riskStratification.getDob());
-        riskStratificationDto.setRiskAssessment( riskStratification.getRiskAssessment() );
-        riskStratificationDto.setCommunityEntryPoint( riskStratification.getCommunityEntryPoint() );
+        riskStratificationDto.setRiskAssessment(riskStratification.getRiskAssessment());
+        riskStratificationDto.setCommunityEntryPoint(riskStratification.getCommunityEntryPoint());
         riskStratificationDto.setCode(riskStratification.getCode());
-        riskStratificationDto.setSpokeFacility( riskStratification.getSpokeFacility() );
-        riskStratificationDto.setHealthFacility( riskStratification.getHealthFacility());
-
-
-
+        riskStratificationDto.setSpokeFacility(riskStratification.getSpokeFacility());
+        riskStratificationDto.setHealthFacility(riskStratification.getHealthFacility());
 
         return riskStratificationDto;
     }
+
     private RiskStratificationResponseDto toRiskStratificationResponseDTO(RiskStratification riskStratification) {
-        if ( riskStratification == null ) {
+        if (riskStratification == null) {
             return null;
         }
 
         RiskStratificationResponseDto responseDto = new RiskStratificationResponseDto();
         responseDto.setId(riskStratification.getId());
-        responseDto.setEntryPoint( riskStratification.getEntryPoint());
+        responseDto.setEntryPoint(riskStratification.getEntryPoint());
 
-        responseDto.setAge( riskStratification.getAge() != null ? riskStratification.getAge():0);
+        responseDto.setAge(riskStratification.getAge() != null ? riskStratification.getAge() : 0);
 
-        responseDto.setTestingSetting( riskStratification.getTestingSetting() );
-        responseDto.setModality( riskStratification.getModality() );
-        responseDto.setCode( riskStratification.getCode() );
-        responseDto.setTargetGroup( riskStratification.getTargetGroup() );
-        responseDto.setDob( riskStratification.getDob() );
-        responseDto.setVisitDate( riskStratification.getVisitDate() );
-        responseDto.setRiskAssessment( riskStratification.getRiskAssessment() );
-        responseDto.setCommunityEntryPoint( riskStratification.getCommunityEntryPoint() );
-        responseDto.setSpokeFacility( riskStratification.getSpokeFacility() );
-        responseDto.setHealthFacility( riskStratification.getHealthFacility() );
+        responseDto.setTestingSetting(riskStratification.getTestingSetting());
+        responseDto.setModality(riskStratification.getModality());
+        responseDto.setCode(riskStratification.getCode());
+        responseDto.setTargetGroup(riskStratification.getTargetGroup());
+        responseDto.setDob(riskStratification.getDob());
+        responseDto.setVisitDate(riskStratification.getVisitDate());
+        responseDto.setRiskAssessment(riskStratification.getRiskAssessment());
+        responseDto.setCommunityEntryPoint(riskStratification.getCommunityEntryPoint());
+        responseDto.setSpokeFacility(riskStratification.getSpokeFacility());
+        responseDto.setHealthFacility(riskStratification.getHealthFacility());
         return responseDto;
     }
+
     private RiskStratification toRiskStratification(RiskStratificationDto riskStratificationDTO, String personUuid) {
-        if ( riskStratificationDTO == null ) {
+        if (riskStratificationDTO == null) {
             return null;
         }
 
         RiskStratification riskStratification = new RiskStratification();
 
         riskStratification.setId(riskStratificationDTO.getId());
-        riskStratification.setAge( riskStratificationDTO.getAge() );
+        riskStratification.setAge(riskStratificationDTO.getAge());
         riskStratification.setPersonUuid(personUuid);
-        riskStratification.setTestingSetting( riskStratificationDTO.getTestingSetting() );
-        riskStratification.setModality( riskStratificationDTO.getModality() );
-        riskStratification.setCode( riskStratificationDTO.getCode() );
-        riskStratification.setTargetGroup( riskStratificationDTO.getTargetGroup() );
-        riskStratification.setVisitDate( riskStratificationDTO.getVisitDate() );
+        riskStratification.setTestingSetting(riskStratificationDTO.getTestingSetting());
+        riskStratification.setModality(riskStratificationDTO.getModality());
+        riskStratification.setCode(riskStratificationDTO.getCode());
+        riskStratification.setTargetGroup(riskStratificationDTO.getTargetGroup());
+        riskStratification.setVisitDate(riskStratificationDTO.getVisitDate());
         riskStratification.setDob(riskStratificationDTO.getDob());
-        riskStratification.setRiskAssessment( riskStratificationDTO.getRiskAssessment() );
-        riskStratification.setCommunityEntryPoint( riskStratificationDTO.getCommunityEntryPoint() );
-        riskStratification.setSpokeFacility( riskStratificationDTO.getSpokeFacility() );
-        riskStratification.setHealthFacility( riskStratificationDTO.getHealthFacility() );
-        riskStratification.setEntryPoint( riskStratificationDTO.getEntryPoint());
-
+        riskStratification.setRiskAssessment(riskStratificationDTO.getRiskAssessment());
+        riskStratification.setCommunityEntryPoint(riskStratificationDTO.getCommunityEntryPoint());
+        riskStratification.setSpokeFacility(riskStratificationDTO.getSpokeFacility());
+        riskStratification.setHealthFacility(riskStratificationDTO.getHealthFacility());
+        riskStratification.setEntryPoint(riskStratificationDTO.getEntryPoint());
 
         return riskStratification;
     }
@@ -167,8 +170,8 @@ public class RiskStratificationService {
     }
 
     public List<RiskStratificationResponseDto> getAllByPersonId(Long personId) {
-        Person person = personRepository.findById (personId).orElse(null);
-        if(person == null){
+        Person person = personRepository.findById(personId).orElse(null);
+        if (person == null) {
             return new ArrayList<>();
         }
         return stratificationRepository.findAllByPersonUuid(person.getUuid())
@@ -179,8 +182,10 @@ public class RiskStratificationService {
 
     public RiskStratificationResponseDto getStratificationByPersonId(Long personId) {
         RiskStratification stratification = stratificationRepository
-                .findByPersonUuidAndFacilityIdAndArchived(getPerson(personId).getUuid(), currentFacility.getCurrentUserOrganization(), UN_ARCHIVED)
-                .orElseThrow(()-> new EntityNotFoundException(RiskStratification.class, "personId", String.valueOf(personId)));
+                .findByPersonUuidAndFacilityIdAndArchived(getPerson(personId).getUuid(),
+                        currentFacility.getCurrentUserOrganization(), UN_ARCHIVED)
+                .orElseThrow(() -> new EntityNotFoundException(RiskStratification.class, "personId",
+                        String.valueOf(personId)));
 
         return toRiskStratificationResponseDTO(stratification);
     }

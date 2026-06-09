@@ -1,0 +1,931 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd"
+                   >
+
+
+    <changeSet id="harmonise_v4_hts_encounter_add_source" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="source"/></not>
+        </preConditions>
+        <comment>Add source column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="source" type="VARCHAR(200)" defaultValue="Web">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_longitude" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="longitude"/></not>
+        </preConditions>
+        <comment>Add longitude column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="longitude" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_latitude" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="latitude"/></not>
+        </preConditions>
+        <comment>Add latitude column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="latitude" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_date_modified" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="date_modified"/></not>
+        </preConditions>
+        <comment>Add date_modified column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_date_created" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="date_created"/></not>
+        </preConditions>
+        <comment>Add date_created column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_created_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="created_by"/></not>
+        </preConditions>
+        <comment>Add created_by column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="created_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_modified_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="modified_by"/></not>
+        </preConditions>
+        <comment>Add modified_by column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="modified_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_hts_encounter_add_patient_uuid" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_encounter" columnName="patient_uuid"/></not>
+        </preConditions>
+        <comment>Add patient_uuid column to hts_encounter if missing.</comment>
+        <addColumn tableName="hts_encounter">
+            <column name="patient_uuid" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 2 — Ensure all expected columns exist on hts_ict_encounter
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_ict_encounter_add_date_modified" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="date_modified"/></not>
+        </preConditions>
+        <comment>Add date_modified column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_encounter_add_date_created" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="date_created"/></not>
+        </preConditions>
+        <comment>Add date_created column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_encounter_add_created_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="created_by"/></not>
+        </preConditions>
+        <comment>Add created_by column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="created_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_encounter_add_modified_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="modified_by"/></not>
+        </preConditions>
+        <comment>Add modified_by column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="modified_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_encounter_add_patient_uuid" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="patient_uuid"/></not>
+        </preConditions>
+        <comment>Add patient_uuid column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="patient_uuid" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_encounter_add_hts_encounter_uuid" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_encounter" columnName="hts_encounter_uuid"/></not>
+        </preConditions>
+        <comment>Add hts_encounter_uuid column to hts_ict_encounter if missing.</comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="hts_encounter_uuid" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_ict_encounter_hts_uuid" tableName="hts_ict_encounter">
+            <column name="hts_encounter_uuid"/>
+        </createIndex>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 3 — Ensure all expected columns exist on hts_ict_contact
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_ict_contact_add_date_modified" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="date_modified"/></not>
+        </preConditions>
+        <comment>Add date_modified column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="date_modified" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_contact_add_date_created" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="date_created"/></not>
+        </preConditions>
+        <comment>Add date_created column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="date_created" type="TIMESTAMP WITHOUT TIME ZONE"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_contact_add_created_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="created_by"/></not>
+        </preConditions>
+        <comment>Add created_by column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="created_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_contact_add_modified_by" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="modified_by"/></not>
+        </preConditions>
+        <comment>Add modified_by column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="modified_by" type="VARCHAR(200)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_contact_add_hts_ict_encounter_uuid" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="hts_ict_encounter_uuid"/></not>
+        </preConditions>
+        <comment>Add hts_ict_encounter_uuid column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="hts_ict_encounter_uuid" type="VARCHAR(50)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <createIndex indexName="idx_ict_contact_enc_uuid" tableName="hts_ict_contact">
+            <column name="hts_ict_encounter_uuid"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_ict_contact_add_age" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not><columnExists tableName="hts_ict_contact" columnName="age"/></not>
+        </preConditions>
+        <comment>Add age column to hts_ict_contact if missing.</comment>
+        <addColumn tableName="hts_ict_contact">
+            <column name="age" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 4 — Widen varchar columns to VARCHAR(200) on all three tables.
+         Covers: client_code, setting, source (hts_encounter only),
+                 latitude, longitude (hts_encounter only),
+                 created_by, modified_by (all three tables).
+         Uses ALTER COLUMN via sql tag for maximum compatibility with
+         Liquibase 3.x which lacks a first-class modifyDataType preCondition.
+         Each statement is wrapped in its own changeSet so one failure does
+         not block the others.
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- hts_encounter widening -->
+    <changeSet id="harmonise_v4_widen_hts_encounter_columns" author="Emmanuel Nnajiofor">
+        <comment>
+            Widen client_code, setting, source, latitude, longitude,
+            created_by, modified_by to VARCHAR(200) on hts_encounter.
+            USING clause ensures safe cast for any existing data.
+        </comment>
+        <sql>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN client_code   TYPE VARCHAR(200) USING client_code::VARCHAR(200),
+                ALTER COLUMN setting       TYPE VARCHAR(200) USING setting::VARCHAR(200),
+                ALTER COLUMN source        TYPE VARCHAR(200) USING source::VARCHAR(200),
+                ALTER COLUMN latitude      TYPE VARCHAR(200) USING latitude::VARCHAR(200),
+                ALTER COLUMN longitude     TYPE VARCHAR(200) USING longitude::VARCHAR(200),
+                ALTER COLUMN created_by    TYPE VARCHAR(200) USING created_by::VARCHAR(200),
+                ALTER COLUMN modified_by   TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN client_code   TYPE VARCHAR(50),
+                ALTER COLUMN setting       TYPE VARCHAR(50),
+                ALTER COLUMN source        TYPE VARCHAR(50),
+                ALTER COLUMN latitude      TYPE VARCHAR(50),
+                ALTER COLUMN longitude     TYPE VARCHAR(50),
+                ALTER COLUMN created_by    TYPE VARCHAR(50),
+                ALTER COLUMN modified_by   TYPE VARCHAR(50);
+        </rollback>
+    </changeSet>
+
+    <!-- hts_ict_encounter widening -->
+    <changeSet id="harmonise_v4_widen_ict_encounter_columns" author="Emmanuel Nnajiofor">
+        <comment>
+            Widen setting, created_by, modified_by to VARCHAR(200)
+            on hts_ict_encounter.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN setting     TYPE VARCHAR(200) USING setting::VARCHAR(200),
+                ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
+                ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN setting     TYPE VARCHAR(100),
+                ALTER COLUMN created_by  TYPE VARCHAR(255),
+                ALTER COLUMN modified_by TYPE VARCHAR(255);
+        </rollback>
+    </changeSet>
+
+    <!-- hts_ict_contact widening -->
+    <changeSet id="harmonise_v4_widen_ict_contact_columns" author="Emmanuel Nnajiofor">
+        <comment>
+            Widen created_by, modified_by to VARCHAR(200) on hts_ict_contact.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+                ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
+                ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+                ALTER COLUMN created_by  TYPE VARCHAR(255),
+                ALTER COLUMN modified_by TYPE VARCHAR(255);
+        </rollback>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 5 — Drop NOT NULL constraints on hts_encounter.source
+                     and hts_encounter.patient_id
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_encounter_source" author="Emmanuel Nnajiofor">
+        <comment>Allow source to be nullable on hts_encounter.</comment>
+        <sql>
+            ALTER TABLE hts_encounter ALTER COLUMN source DROP NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter ALTER COLUMN source SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_encounter_patient_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Allow patient_id to be nullable on hts_encounter.
+            The FK constraint to patient_person(id) is preserved; only the
+            NOT NULL constraint is lifted.
+        </comment>
+        <sql>
+            ALTER TABLE hts_encounter ALTER COLUMN patient_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter ALTER COLUMN patient_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 6 — Convert all uuid and patient_uuid columns from the
+                     native UUID type to VARCHAR(50) on all three tables.
+
+         Strategy:
+           1. Drop unique constraint on old UUID column (name known from schema).
+           2. ALTER TYPE to VARCHAR(50) via USING clause.
+           3. Re-add the unique constraint on the now-varchar column.
+           4. For patient_uuid (no unique constraint) just retype it.
+
+         Note: The defaultValueComputed="gen_random_uuid()" is preserved by
+         adding a new column default after the type change because PostgreSQL
+         will not implicitly keep a function default across a type change.
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- hts_encounter.uuid -->
+    <changeSet id="harmonise_v4_uuid_to_varchar_hts_encounter_uuid" author="Emmanuel Nnajiofor">
+        <comment>Convert hts_encounter.uuid from UUID to VARCHAR(50).</comment>
+        <sql>
+            -- Drop the unique constraint that references this column
+            -- (constraint name from schema: unique constraint on uuid)
+            ALTER TABLE hts_encounter DROP CONSTRAINT IF EXISTS hts_encounter_uuid_key;
+
+            -- Retype the column
+            ALTER TABLE hts_encounter
+                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+
+            -- Restore the default and unique constraint
+            ALTER TABLE hts_encounter
+                ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
+
+            ALTER TABLE hts_encounter
+                ADD CONSTRAINT hts_encounter_uuid_key UNIQUE (uuid);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter DROP CONSTRAINT IF EXISTS hts_encounter_uuid_key;
+            ALTER TABLE hts_encounter ALTER COLUMN uuid TYPE UUID USING uuid::uuid;
+            ALTER TABLE hts_encounter ALTER COLUMN uuid SET DEFAULT gen_random_uuid();
+            ALTER TABLE hts_encounter ADD CONSTRAINT hts_encounter_uuid_key UNIQUE (uuid);
+        </rollback>
+    </changeSet>
+
+    <!-- hts_encounter.patient_uuid -->
+    <changeSet id="harmonise_v4_uuid_to_varchar_hts_encounter_patient_uuid" author="Emmanuel Nnajiofor">
+        <comment>Convert hts_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
+        <sql>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+        </rollback>
+    </changeSet>
+
+    <!-- hts_ict_encounter.uuid -->
+    <changeSet id="harmonise_v4_uuid_to_varchar_ict_encounter_uuid" author="Emmanuel Nnajiofor">
+        <comment>Convert hts_ict_encounter.uuid from UUID to VARCHAR(50).</comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter DROP CONSTRAINT IF EXISTS hts_ict_encounter_uuid_key;
+
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
+
+            ALTER TABLE hts_ict_encounter
+                ADD CONSTRAINT hts_ict_encounter_uuid_key UNIQUE (uuid);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter DROP CONSTRAINT IF EXISTS hts_ict_encounter_uuid_key;
+            ALTER TABLE hts_ict_encounter ALTER COLUMN uuid TYPE UUID USING uuid::uuid;
+            ALTER TABLE hts_ict_encounter ALTER COLUMN uuid SET DEFAULT gen_random_uuid();
+            ALTER TABLE hts_ict_encounter ADD CONSTRAINT hts_ict_encounter_uuid_key UNIQUE (uuid);
+        </rollback>
+    </changeSet>
+
+    <!-- hts_ict_encounter.patient_uuid -->
+    <changeSet id="harmonise_v4_uuid_to_varchar_ict_encounter_patient_uuid" author="Emmanuel Nnajiofor">
+        <comment>Convert hts_ict_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+        </rollback>
+    </changeSet>
+
+    <!-- hts_ict_contact.uuid -->
+    <changeSet id="harmonise_v4_uuid_to_varchar_ict_contact_uuid" author="Emmanuel Nnajiofor">
+        <comment>Convert hts_ict_contact.uuid from UUID to VARCHAR(50).</comment>
+        <sql>
+            ALTER TABLE hts_ict_contact DROP CONSTRAINT IF EXISTS hts_ict_contact_uuid_key;
+
+            ALTER TABLE hts_ict_contact
+                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+
+            ALTER TABLE hts_ict_contact
+                ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
+
+            ALTER TABLE hts_ict_contact
+                ADD CONSTRAINT hts_ict_contact_uuid_key UNIQUE (uuid);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact DROP CONSTRAINT IF EXISTS hts_ict_contact_uuid_key;
+            ALTER TABLE hts_ict_contact ALTER COLUMN uuid TYPE UUID USING uuid::uuid;
+            ALTER TABLE hts_ict_contact ALTER COLUMN uuid SET DEFAULT gen_random_uuid();
+            ALTER TABLE hts_ict_contact ADD CONSTRAINT hts_ict_contact_uuid_key UNIQUE (uuid);
+        </rollback>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 7 — Restructure FK: hts_encounter → hts_ict_encounter
+                     FROM: hts_ict_encounter.hts_encounter_id → hts_encounter(id)
+                     TO:   hts_ict_encounter.hts_encounter_uuid → hts_encounter(uuid)
+
+         Steps:
+           a) Back-fill hts_encounter_uuid from the existing id-based join
+              (so no live data is lost)
+           b) Drop the old id-based FK constraint
+           c) Add new UUID-based FK constraint
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_backfill_ict_encounter_hts_uuid" author="Emmanuel Nnajiofor">
+        <comment>
+            Back-fill hts_ict_encounter.hts_encounter_uuid from the
+            existing hts_encounter_id join before dropping the id-based FK.
+        </comment>
+        <sql>
+            UPDATE hts_ict_encounter ie
+            SET    hts_encounter_uuid = he.uuid::text
+            FROM   hts_encounter he
+            WHERE  ie.hts_encounter_id = he.id
+              AND  ie.hts_encounter_uuid IS NULL;
+        </sql>
+        <rollback><!-- back-fill is non-destructive; no rollback needed --></rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_fk_ict_encounter_hts_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Drop the old id-based FK from hts_ict_encounter to hts_encounter.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+                ADD CONSTRAINT fk_ict_encounter_hts
+                    FOREIGN KEY (hts_encounter_id) REFERENCES hts_encounter(id);
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_add_fk_ict_encounter_hts_uuid" author="Emmanuel Nnajiofor">
+        <comment>
+            Add new UUID-based FK: hts_ict_encounter.hts_encounter_uuid
+            references hts_encounter(uuid).
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+                ADD CONSTRAINT fk_ict_encounter_hts_uuid
+                    FOREIGN KEY (hts_encounter_uuid) REFERENCES hts_encounter(uuid);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+        </rollback>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 8 — Restructure FK: hts_ict_encounter → hts_ict_contact
+                     FROM: hts_ict_contact.ict_encounter_id → hts_ict_encounter(id)
+                     TO:   hts_ict_contact.hts_ict_encounter_uuid
+                               → hts_ict_encounter(uuid)
+
+         Steps:
+           a) Back-fill hts_ict_encounter_uuid from the existing id-based join
+           b) Drop the old id-based FK constraint
+           c) Add new UUID-based FK constraint
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_backfill_ict_contact_encounter_uuid" author="Emmanuel Nnajiofor">
+        <comment>
+            Back-fill hts_ict_contact.hts_ict_encounter_uuid from the
+            existing ict_encounter_id join before dropping the id-based FK.
+            This also fixes the bug where hts_ict_encounter_uuid was NULL
+            for contacts that were saved before the uuid column was populated
+            in the application layer.
+        </comment>
+        <sql>
+            UPDATE hts_ict_contact ic
+            SET    hts_ict_encounter_uuid = ie.uuid::text
+            FROM   hts_ict_encounter ie
+            WHERE  ic.ict_encounter_id = ie.id
+              AND  ic.hts_ict_encounter_uuid IS NULL;
+        </sql>
+        <rollback><!-- back-fill is non-destructive; no rollback needed --></rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_fk_ict_contact_encounter_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Drop the old id-based FK from hts_ict_contact to hts_ict_encounter.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+                ADD CONSTRAINT fk_ict_contact_encounter
+                    FOREIGN KEY (ict_encounter_id) REFERENCES hts_ict_encounter(id);
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_add_fk_ict_contact_encounter_uuid" author="Emmanuel Nnajiofor">
+        <comment>
+            Add new UUID-based FK: hts_ict_contact.hts_ict_encounter_uuid
+            references hts_ict_encounter(uuid).
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+                ADD CONSTRAINT fk_ict_contact_encounter_uuid
+                    FOREIGN KEY (hts_ict_encounter_uuid) REFERENCES hts_ict_encounter(uuid);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+        </rollback>
+    </changeSet>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 9 — Application-layer bug fix note
+         (handled above in the back-fill steps; documented here for clarity)
+
+         ROOT CAUSE:  In IctEncounterService.mapToContact(), the line
+                        c.setIctEncounterUuid(encounter.getUuid().toString())
+                      is only called if encounter.getUuid() != null.
+                      The encounter IS saved before buildContacts() is called,
+                      so the UUID should exist — HOWEVER on databases where
+                      the uuid column is still native UUID type, the entity's
+                      getUuid() may return a java.util.UUID object, while the
+                      setter expects a String. After this migration converts
+                      the column to VARCHAR(50), the application will write
+                      the UUID as a plain string and the null-populate issue
+                      will be resolved going forward.
+
+                      The back-fill UPDATE in Section 8 corrects all
+                      historical rows that were saved with a NULL uuid.
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+
+         <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
+            <comment>
+                Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
+            </comment>
+            <sql>
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts TYPE boolean
+                    USING COALESCE((pmtct_hts::text)::boolean, false);
+
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts SET DEFAULT false;
+
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts SET NOT NULL;
+            </sql>
+            <rollback>
+                ALTER TABLE hts_encounter
+                    ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
+            </rollback>
+        </changeSet>
+
+
+    <!-- Add client_category_other TEXT column to hts_ict_encounter -->
+    <changeSet id="harmonise_v4_add_client_category_other" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_encounter" columnName="client_category_other"/>
+            </not>
+        </preConditions>
+        <comment>
+            Add dedicated column for "Other" client category value.
+            Back-fill existing values from JSONB 'data' column.
+        </comment>
+        <addColumn tableName="hts_ict_encounter">
+            <column name="client_category_other" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Back-fill existing values from JSONB 'data' column -->
+        <sql>
+            UPDATE hts_ict_encounter
+            SET client_category_other = data->>'clientCategoryOther'
+            WHERE data->>'clientCategoryOther' IS NOT NULL
+              AND client_category_other IS NULL;
+        </sql>
+    </changeSet>
+
+
+    <changeSet id="harmonise_v4_widen_ict_contact_hiv_test_result" author="Emmanuel Nnajiofor">
+        <comment>Widen hiv_test_result on hts_ict_contact from VARCHAR(20) to VARCHAR(200).</comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+            ALTER COLUMN hiv_test_result TYPE VARCHAR(200) USING hiv_test_result::VARCHAR(200);
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+            ALTER COLUMN hiv_test_result TYPE VARCHAR(20) USING hiv_test_result::VARCHAR(20);
+        </rollback>
+    </changeSet>
+
+    <changeSet id="drop-age-from-hts-ict-encounter" author="your-name">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_ict_encounter"/>
+            <columnExists tableName="hts_ict_encounter" columnName="age"/>
+        </preConditions>
+        <dropColumn tableName="hts_ict_encounter" columnName="age"/>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 5b — Drop NOT NULL constraints on foreign key columns
+                    that may still be marked as NOT NULL in some databases
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_hts_encounter_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Ensure hts_ict_encounter.hts_encounter_id is nullable.
+            This column may have been created as NOT NULL in some older schemas.
+            Existing records with NULL values are preserved; only the constraint is dropped.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_contact_ict_encounter_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Ensure hts_ict_contact.ict_encounter_id is nullable.
+            This column is often created as NOT NULL, but may need to be nullable
+            for partial updates or data migration scenarios.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact ALTER COLUMN ict_encounter_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact ALTER COLUMN ict_encounter_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+     SECTION 5c — Drop NOT NULL constraints on hts_ict_encounter.patient_id
+                     and hts_ict_encounter.date_of_service
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_patient_id" author="Emmanuel Nnajiofor">
+        <comment>
+            Allow patient_id to be nullable on hts_ict_encounter.
+            The FK constraint to patient_person(id) is preserved; only the
+            NOT NULL constraint is lifted.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_drop_notnull_hts_ict_encounter_date_of_service" author="Emmanuel Nnajiofor">
+        <comment>
+            Allow date_of_service to be nullable on hts_ict_encounter.
+            This allows encounters to be saved in a draft state before the
+            service date is finalized.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter ALTER COLUMN date_of_service DROP NOT NULL;
+        </sql>
+        <rollback>
+            -- Reapply NOT NULL (caution: will fail if any NULL values exist)
+            ALTER TABLE hts_ict_encounter ALTER COLUMN date_of_service SET NOT NULL;
+        </rollback>
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         SECTION 10 — Update FK cascade rules for parent-child relationships
+                       hts_encounter → hts_ict_encounter → hts_ict_contact
+         ═══════════════════════════════════════════════════════════════════════ -->
+
+    <changeSet id="harmonise_v4_fk_ict_encounter_cascade_on_hts_encounter" author="Emmanuel Nnajiofor">
+        <comment>
+            Re-create fk_ict_encounter_hts_uuid on hts_ict_encounter with CASCADE rules.
+            hts_encounter is a parent of hts_ict_encounter — deletes/updates on the
+            parent must propagate to child rows.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_encounter
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+
+            ALTER TABLE hts_ict_encounter
+                ADD CONSTRAINT fk_ict_encounter_hts_uuid
+                    FOREIGN KEY (hts_encounter_uuid)
+                        REFERENCES hts_encounter(uuid)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_encounter
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+
+            ALTER TABLE hts_ict_encounter
+            ADD CONSTRAINT fk_ict_encounter_hts_uuid
+            FOREIGN KEY (hts_encounter_uuid)
+            REFERENCES hts_encounter(uuid)
+            ON UPDATE NO ACTION
+            ON DELETE NO ACTION;
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_fk_ict_contact_cascade_on_ict_encounter" author="Emmanuel Nnajiofor">
+        <comment>
+            Re-create fk_ict_contact_encounter_uuid on hts_ict_contact with CASCADE rules.
+            hts_ict_encounter is a parent of hts_ict_contact — deletes/updates on the
+            parent must propagate to child rows.
+        </comment>
+        <sql>
+            ALTER TABLE hts_ict_contact
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+
+            ALTER TABLE hts_ict_contact
+                ADD CONSTRAINT fk_ict_contact_encounter_uuid
+                    FOREIGN KEY (hts_ict_encounter_uuid)
+                        REFERENCES hts_ict_encounter(uuid)
+                        ON UPDATE CASCADE
+                        ON DELETE CASCADE;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_ict_contact
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+
+            ALTER TABLE hts_ict_contact
+            ADD CONSTRAINT fk_ict_contact_encounter_uuid
+            FOREIGN KEY (hts_ict_encounter_uuid)
+            REFERENCES hts_ict_encounter(uuid)
+            ON UPDATE NO ACTION
+            ON DELETE NO ACTION;
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="harmonise_v4_create_fn_is_pmtct_infant" author="Emmanuel Nnajiofor">
+        <comment>
+            Create a helper function to safely check if a hospital number belongs to
+            a PMTCT infant. Uses dynamic SQL internally so it degrades gracefully on
+            facilities where pmtct_infant_information does not exist.
+        </comment>
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION is_pmtct_infant(p_hospital_number TEXT)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        STABLE
+        AS $func$
+            BEGIN
+            IF to_regclass('public.pmtct_infant_information') IS NULL THEN
+                RETURN FALSE;
+            END IF;
+
+            PERFORM 1
+            FROM pmtct_infant_information
+            WHERE infant_hospital_number = p_hospital_number;
+
+            RETURN FOUND;
+
+            EXCEPTION WHEN undefined_table THEN
+            RETURN FALSE;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </rollback>
+    </changeSet>
+
+    <changeSet id="harmonise_v4_create_fn_is_pmtct_infant_v2" author="Emmanuel Nnajiofor">
+        <comment>
+            Recreate is_pmtct_infant() with full dynamic SQL execution.
+            Checks both table and column existence via information_schema before
+            executing the query, preventing parse-time failures on facilities
+            where pmtct_infant_information does not exist or has a different schema.
+        </comment>
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION is_pmtct_infant(p_hospital_number TEXT)
+        RETURNS BOOLEAN
+        LANGUAGE plpgsql
+        STABLE
+        AS $func$
+            DECLARE
+            v_table_exists  BOOLEAN;
+            v_column_exists BOOLEAN;
+            v_found         BOOLEAN := FALSE;
+            BEGIN
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                  AND table_name   = 'pmtct_infant_information'
+            ) INTO v_table_exists;
+
+            IF NOT v_table_exists THEN
+                RETURN FALSE;
+            END IF;
+
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name   = 'pmtct_infant_information'
+                  AND column_name  = 'infant_hospital_number'
+            ) INTO v_column_exists;
+
+            IF NOT v_column_exists THEN
+                RETURN FALSE;
+            END IF;
+
+            EXECUTE '
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM public.pmtct_infant_information
+                    WHERE infant_hospital_number = $1
+                )
+            ' INTO v_found USING p_hospital_number;
+
+            RETURN v_found;
+
+            EXCEPTION WHEN OTHERS THEN
+            RETURN FALSE;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

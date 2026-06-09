@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { Button } from "semantic-ui-react";
-import { useNewPatientFormik } from "../NewToolForms/hooks/useNewPatientFormik"; 
+import { useNewPatientFormik } from "../NewToolForms/hooks/useNewPatientFormik";
 import FormAccordion from "../NewToolForms/sections/FormAccordion";
 import BasicInformationSection from "../NewToolForms/sections/BasicInformationSection";
 import PreTestCounsellingSection from "../NewToolForms/sections/PreTestCounsellingSection";
@@ -62,6 +62,9 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   const [isLoading, setIsLoading] = useState(false)
 
 
+
+  const { formik } = useNewPatientFormik(onSubmit);
+
   const onSubmit = async (values) => {
     const payload = buildHtsEncounterPayload(values, true);
 
@@ -71,12 +74,11 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
       setIsLoading(false)
       toast.success("Encounter created successfully")
       if (onSubmitSuccess) {
-        // createEncounter service already unwraps axios response.data,
-        // so `response` IS the HTS encounter object — pass it directly.
         onSubmitSuccess(response, values);
       } else {
         history.push("/")
       }
+      formik.resetForm();
 
     } catch (error) {
       console.error("Failed to create encounter:", error.response?.data || error.message);
@@ -87,7 +89,6 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
     }
   };
-  const { formik } = useNewPatientFormik(onSubmit);
 
   // Real-time value forwarding for the orchestrator eligibility watcher
   React.useEffect(() => {

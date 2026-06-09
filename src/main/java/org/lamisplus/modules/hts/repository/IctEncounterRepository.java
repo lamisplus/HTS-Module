@@ -14,7 +14,10 @@ public interface IctEncounterRepository extends JpaRepository<IctEncounter, Long
 
     Optional<IctEncounter> findByIdAndArchived(Long id, Boolean archived);
 
-    List<IctEncounter> findByPerson_IdAndArchivedOrderByDateOfServiceDesc(Long patientId, Boolean archived);
+//    List<IctEncounter> findByPerson_IdAndArchivedOrderByDateOfServiceDesc(Long patientId, Boolean archived);
+
+    List<IctEncounter> findByPerson_IdAndArchivedOrderByIdDesc(Long patientId, Boolean archived);
+
 
     Optional<IctEncounter> findByHtsEncounter_IdAndArchived(Long htsEncounterId, Boolean archived);
 

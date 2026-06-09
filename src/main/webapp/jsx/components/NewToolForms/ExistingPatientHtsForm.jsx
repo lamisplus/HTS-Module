@@ -17,6 +17,7 @@ import { getHtsEcounter } from "../../services/getHtsEncounter";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { getCodesets } from "../../services/getCodesets.service";
 import { convertFieldsToCodes } from "../../../utils";
+import { getAge } from "./NewIctForExistingPatient";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -110,12 +111,58 @@ const FIELD_CODESET_MAP = {
 };
 
 const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, backButtonAction }) => {
-  const formInitialValuecontruct = { ...fullRecord?.observation, clientCode: fullRecord?.clientCode, dateOfVisit: fullRecord?.dateOfVisit, facilityId: fullRecord?.facilityId, patientId: fullRecord?.patientId, id: fullRecord?.id, patientUuid: fullRecord?.patientUuid, person: fullRecord?.person, setting: fullRecord?.setting, uuid: fullRecord?.uuid }
+
+  const maritalStatusMap = {
+    cohabiting: "MARITAL_STATUS_COHABITING",
+    divorced: "MARITAL_STATUS_DIVORCED",
+    married: "MARITAL_STATUS_MARRIED",
+    separated: "MARITAL_STATUS_SEPARATED",
+    single: "MARITAL_STATUS_SINGLE",
+    widowed: "MARITAL_STATUS_WIDOWED"
+  };
+
+  const sexMap = {
+    female: "SEX_FEMALE",
+    male: "SEX_MALE"
+  }
+
+  const formInitialValuecontruct = {
+    ...fullRecord?.observation,
+    clientCode: fullRecord?.clientCode,
+    dateOfVisit: fullRecord?.dateOfVisit,
+    facilityId: fullRecord?.facilityId,
+    patientId: fullRecord?.patientId,
+    id: fullRecord?.id,
+    patientUuid: fullRecord?.patientUuid,
+    person: fullRecord?.person,
+    setting: fullRecord?.setting,
+    uuid: fullRecord?.uuid,
+
+
+    surname: fullRecord?.person?.surname,
+    firstName: fullRecord?.person?.firstName,
+    middleName: fullRecord?.person?.otherName,
+    dateOfBirth: fullRecord?.person?.dateOfBirth,
+    age: getAge(fullRecord?.person?.dateOfBirth) || "",
+    sex: sexMap[fullRecord?.person?.gender?.display?.toLowerCase() || ""] || null,
+    // phoneNumber,
+
+    clientState: fullRecord?.person?.address?.address?.[0]?.stateId,
+    clientLga: fullRecord?.person?.address?.address?.[0]?.district,
+    address: fullRecord?.person?.address?.address?.[0]
+      ? [fullRecord?.person?.address?.address?.[0].city, ...(fullRecord?.person?.address?.address?.[0].line ?? [])].filter(Boolean).join(", ")
+      : "",
+    landmark: fullRecord?.person?.address?.address?.[0].line,
+    maritalStatus: maritalStatusMap[fullRecord?.person?.maritalStatus?.display?.toLowerCase() || ""] || null
+
+
+  }
   const [formInitialValues, setFormInitialValues] = useState(formInitialValuecontruct);
   const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false);
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
   const [codesets, setCodesets] = useState(null);
+
 
   useEffect(() => {
     getCodesets(
@@ -135,9 +182,11 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       "RECENCY_TESTING",
       "SYPHILIS_RESULT",
       "TYPE_OF_HIV_TEST",
-      "TARGET_GROUP"
+      "TARGET_GROUP",
+      "RELATIONSHIP_CONTACT"
     ).then(data => setCodesets(data)).catch(err => console.error("Failed to load codesets", err));
   }, []);
+
 
 
 
@@ -146,7 +195,31 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     try {
       const response = await getHtsEcounter(fullRecord?.id);
 
-      const formInitialValuecontruct = response?.observation ? { ...response?.observation, clientCode: response?.clientCode, dateOfVisit: response?.dateOfVisit, facilityId: response?.facilityId, patientId: response?.patientId, id: response?.id, patientUuid: response?.patientUuid, person: response?.person, setting: response?.setting, uuid: response?.uuid } : {}
+
+      const formInitialValuecontruct = response?.observation ? {
+        ...response?.observation,
+        clientCode:
+          response?.clientCode,
+        dateOfVisit:
+          response?.dateOfVisit,
+        facilityId:
+          response?.facilityId,
+        patientId: response?.patientId,
+        id: response?.id,
+        patientUuid: response?.patientUuid,
+        person: response?.person,
+        setting: response?.setting,
+        uuid: response?.uuid,
+        clientState: response?.person?.address?.address?.[0]?.stateId,
+        clientLga: response?.person?.address?.address?.[0]?.district,
+        landmark: response?.person?.address?.address?.[0].line,
+        address: response?.person?.address?.address?.[0].city,
+        maritalStatus: maritalStatusMap[response?.person?.maritalStatus?.display?.toLowerCase()] || null,
+        sex: sexMap[response?.person?.gender?.display?.toLowerCase() || ""] || null,
+
+      } : {}
+
+
 
       if (codesets && Object.keys(formInitialValuecontruct).length > 0) {
         const codesetLookup = {};
@@ -157,6 +230,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
           }
         });
         const converted = convertFieldsToCodes(formInitialValuecontruct, codesetLookup);
+
         setFormInitialValues(converted);
       } else {
         setFormInitialValues(formInitialValuecontruct);
@@ -175,6 +249,8 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     }
   }, [fullRecord?.id, codesets]);
 
+
+
   const onSubmit = async (values) => {
     const isBeingSetToPositive =
       values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
@@ -189,11 +265,11 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
         const conflictingRecord = Array.isArray(allEncounters)
           ? allEncounters.find(
-              (enc) =>
-                enc.id !== fullRecord?.id && // exclude the record being edited
-                enc?.observation?.confirmatoryHivTest?.toLowerCase() ===
-                  "hiv_confirmatory_test_result_positive"
-            )
+            (enc) =>
+              enc.id !== fullRecord?.id && // exclude the record being edited
+              enc?.observation?.confirmatoryHivTest?.toLowerCase() ===
+              "hiv_confirmatory_test_result_positive"
+          )
           : null;
 
         if (conflictingRecord) {
@@ -210,7 +286,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       }
     }
 
-    const payload = buildHtsEncounterPayload(values, true);
+    const payload = buildHtsEncounterPayload(values, false);
     try {
       setIsLoading(true);
       await updateHtsEncounter(fullRecord?.id, payload);
@@ -224,8 +300,8 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     }
   };
 
+
   const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
-  console.log(formik)
 
   const { errors, submitCount } = formik;
 

@@ -179,12 +179,11 @@ const HtsIctOrchestrator = ({
       if (!eligibilityToastFiredRef.current) {
         eligibilityToastFiredRef.current = true;
         toast.info(
-          "🔔 This client is eligible for Index Contact Testing (ICT) — the ICT form is now enabled.",
+          "This client is eligible for Index Contact Testing (ICT), the ICT form is now enabled.",
           { autoClose: 6000, position: "top-right" }
         );
       }
     } else if (!eligible && ictEligible) {
-      // Fields changed back — revoke eligibility
       setIctEligible(false);
       eligibilityToastFiredRef.current = false;
     }

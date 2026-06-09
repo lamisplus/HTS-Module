@@ -16,14 +16,14 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
   firstName: yup
     .string()
     .required("Contact First name is required")
-    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+    .test("min2", "Contact First name must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   middleName: yup.string(),
   surname: yup
     .string()
     .required("Contact Surname is required")
-    .test("min2", "Must contain at least 2 non-space characters", (v) =>
+    .test("min2", "Contact Surname must contain at least 2 non-space characters", (v) =>
       !!v && v.replace(/\s/g, "").length >= 2
     ),
   relationshipToIndex: yup.string().required("Relationship is required"),
@@ -91,7 +91,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
 
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
     if (!this.parent.enrolledInOvc) return true;
-    if (!val) return this.createError({ message: "Date enrolled in OVC is required" });
+    if (!val) return this.createError({ message: "Date enrolled in OVC is required" }); 
     if (new Date(val) > today) return this.createError({ message: "Cannot be a future date" });
     return true;
   }),
@@ -108,7 +108,6 @@ export const buildIctValidationSchema = () =>
       .max(today, "Visit Date cannot be in the future")
       .test("service-not-before-dob", "Visit date cannot be earlier than index client's date of birth", function (value) {
         const { indexDob } = this.parent;
-        console.log("testt//", this.parent)
         if (!value || !indexDob) return true;
         return toLocalDateString(value) >= toLocalDateString(indexDob);
 
@@ -134,10 +133,13 @@ export const buildIctValidationSchema = () =>
       return !!val || this.createError({ message: "Community entry point is required" });
     }),
     clientCategory: yup.string().required("Client category is required"),
-    clientCategoryOther: yup.mixed().test("category-other", "Please specify", function (val) {
-      if (this.parent.clientCategory !== "Other") return true;
-      return !!val || this.createError({ message: "Please specify the client category" });
-    }),
+    clientCategoryOther: yup.string()
+      .max(200, "Must be at most 200 characters")
+      .when("clientCategory", {
+        is: "INDEX_CLIENT_CATEGORY_OTHERS",
+        then: (schema) => schema.required("Please specify the client category"),
+        otherwise: (schema) => schema.nullable(),
+      }),
     offeredPns: yup.string().required("Offered Index Testing Services is required"),
     acceptedPns: yup.mixed().test("accepted-pns-conditional", "Accepted Index Testing Services is required", function (val) {
       if (this.parent.offeredPns !== "YES_NO_YES") return true;

@@ -53,13 +53,13 @@ export function checkHtsEligibility(encounters) {
   };
 }
 
-export function useHtsEligibility(encounters, isLoadingEncounters) {
+export function useHtsEligibility(encounters, isLoadingEncounters, refreshKey) {
   const { isEligible, reason, confirmatoryResult, finalHivTestResult } = useMemo(() => {
     if (isLoadingEncounters) {
       return { isEligible: false, reason: "Loading encounter history...", confirmatoryResult: "checking...", finalHivTestResult: "checking..." };
     }
     return checkHtsEligibility(encounters);
-  }, [encounters, isLoadingEncounters]);
+  }, [encounters, isLoadingEncounters, refreshKey]);
 
   return { isPatientEligibleForHts: isEligible, eligibilityReason: reason, confirmatoryResult, finalHivTestResult };
 }

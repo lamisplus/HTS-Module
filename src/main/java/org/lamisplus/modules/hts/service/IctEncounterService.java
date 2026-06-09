@@ -19,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,12 +35,9 @@ public class IctEncounterService {
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
 
-
-
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPatientId());
 
-        // ── Guard: linked HTS encounter must have a positive confirmatory result ──
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             JsonNode obs = hts.getObservation();
@@ -67,12 +64,29 @@ public class IctEncounterService {
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
+            if (hts.getUuid() != null) {
+                encounter.setHtsEncounterUuid(hts.getUuid().toString());
+            }
         }
 
-        addContactsToEncounter(request.getContacts(), encounter);
+        IctEncounter savedEncounter = ictEncounterRepository.save(encounter);
 
-        IctEncounter saved = ictEncounterRepository.save(encounter);
-        return toResponse(saved);
+        List<IctContact> contacts = buildContacts(request.getContacts(), savedEncounter);
+        if (!contacts.isEmpty()) {
+            ictContactRepository.saveAll(contacts);
+            savedEncounter.getContacts().addAll(contacts);
+        }
+
+        return toResponse(savedEncounter);
+    }
+
+    private List<IctContact> buildContacts(List<IctContactRequest> contactRequests, IctEncounter encounter) {
+        if (contactRequests == null || contactRequests.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return contactRequests.stream()
+                .map(cr -> mapToContact(cr, encounter))
+                .collect(Collectors.toList());
     }
 
     public IctEncounterResponse getById(Long id) {
@@ -81,7 +95,9 @@ public class IctEncounterService {
 
     public List<IctEncounterResponse> getByPatientId(Long patientId) {
         return ictEncounterRepository
-                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(patientId, false)
+                .findByPerson_IdAndArchivedOrderByIdDesc(patientId, false)
+
+//                .findByPerson_IdAndArchivedOrderByDateOfServiceDesc(patientId, false)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -108,6 +124,14 @@ public class IctEncounterService {
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
+            if (hts.getUuid() != null) {
+                encounter.setHtsEncounterUuid(hts.getUuid().toString());
+            } else {
+                encounter.setHtsEncounterUuid(null);
+            }
+        } else {
+            encounter.setHtsEncounter(null);
+            encounter.setHtsEncounterUuid(null);
         }
 
         encounter.getContacts().clear();
@@ -130,6 +154,7 @@ public class IctEncounterService {
         e.setDateOfService(req.getDateOfService());
         e.setSetting(req.getSetting());
         e.setClientCategory(req.getClientCategory());
+        e.setClientCategoryOther(req.getClientCategoryOther());
         e.setOfferedPns(req.getOfferedPns());
         e.setAcceptedPns(req.getAcceptedPns());
 
@@ -137,7 +162,7 @@ public class IctEncounterService {
         putIfNotNull(data, "facilitySetting",     req.getFacilitySetting());
         putIfNotNull(data, "communityEntryPoint",  req.getCommunityEntryPoint());
         putIfNotNull(data, "artClinic",            req.getArtClinic());
-        putIfNotNull(data, "clientCategoryOther",  req.getClientCategoryOther());
+//        putIfNotNull(data, "clientCategoryOther",  req.getClientCategoryOther());
         putIfNotNull(data, "indexClientId",        req.getIndexClientId());
         putIfNotNull(data, "artUniqueId",          req.getArtUniqueId());
         putIfNotNull(data, "indexFirstName",       req.getIndexFirstName());
@@ -188,8 +213,15 @@ public class IctEncounterService {
         c.setEnrolledInOvc(Boolean.TRUE.equals(cr.getEnrolledInOvc()));
         c.setDateEnrolledOvc(cr.getDateEnrolledOvc());
         c.setOvcId(cr.getOvcId());
+
+        if (encounter.getUuid() != null) {
+            c.setIctEncounterUuid(encounter.getUuid().toString());
+        }
+
         return c;
     }
+
+
 
     private IctEncounterResponse toResponse(IctEncounter e) {
         IctEncounterResponse r = new IctEncounterResponse();
@@ -202,6 +234,7 @@ public class IctEncounterService {
         r.setDateOfService(e.getDateOfService());
         r.setSetting(e.getSetting());
         r.setClientCategory(e.getClientCategory());
+        r.setClientCategoryOther(e.getClientCategoryOther());
         r.setOfferedPns(e.getOfferedPns());
         r.setAcceptedPns(e.getAcceptedPns());
         r.setData(e.getData());

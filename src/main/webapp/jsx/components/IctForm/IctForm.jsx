@@ -80,6 +80,7 @@ const modeBadgeStyle = (mode) => {
 
 
 const mapIctResponseToFormValues = (response) => {
+  console.log(response?.clientCategoryOther)
   if (!response) return {};
   const d = response.data ?? {};
 
@@ -91,6 +92,7 @@ const mapIctResponseToFormValues = (response) => {
     dateOfService: response.dateOfService ?? "",
     setting: response.setting ?? "",
     clientCategory: response.clientCategory ?? "",
+    clientCategoryOther: response?.clientCategoryOther ||  d?.clientCategoryOther | "",
     offeredPns: response.offeredPns ?? "",
     acceptedPns: response.acceptedPns ?? "",
     
@@ -102,7 +104,7 @@ const mapIctResponseToFormValues = (response) => {
     facilitySetting: d.facilitySetting ?? "",
     communityEntryPoint: d.communityEntryPoint ?? "",
     artClinic: d.artClinic ?? "",
-    clientCategoryOther: d.clientCategoryOther ?? "",
+    // clientCategoryOther: d.clientCategoryOther ?? "",
 
     indexClientId: d.indexClientId ?? "",
     artUniqueId: d.artUniqueId ?? "",
@@ -164,7 +166,10 @@ const IctForm = ({
 
   const mergedHtsValues = htsValues ? { ...htsValues, isOnArt, } : null;
 
+  
+
   const onSubmit = async (values) => {
+    setIsLoading(true);
 
     if (htsRecord?.id || values.htsEncounterId) {
       const htsId = htsRecord?.id || values.htsEncounterId;
@@ -173,7 +178,7 @@ const IctForm = ({
         const obs = res?.data?.observation ?? res?.observation ?? {};
         if (obs.confirmatoryHivTest?.toLowerCase() !== "hiv_confirmatory_test_result_positive") {
           toast.error(
-            "ICT can only be created for a client with a confirmed positive HIV test result."
+            "ICT can only be created for a client with a confirmed positive HIV test result." 
           );
           return;
         }
@@ -207,14 +212,16 @@ const IctForm = ({
         response = await updateIctEncounter(existingId, payload);
         toast.success("ICT record updated successfully");
         setIsLoading(false);
+        formik.resetForm();
         onSubmitSuccess?.();
-        return
+        return;
       } else {
         response = await createIctEncounter(payload);
         toast.success("ICT record saved successfully");
         setIsLoading(false);
+        formik.resetForm();
         onSubmitSuccess?.();
-        return
+        return;
       }
 
     } catch (err) {
@@ -235,9 +242,9 @@ const IctForm = ({
     initialValues ? undefined : mergedHtsValues
   );
 
+
   React.useEffect(() => {
     if (!initialValues) return;
-
     const mapped = mapIctResponseToFormValues(initialValues);
     Object.entries(mapped).forEach(([k, v]) =>
       formik.setFieldValue(k, v, false)

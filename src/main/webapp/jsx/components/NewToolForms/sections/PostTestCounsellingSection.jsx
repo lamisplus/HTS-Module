@@ -93,12 +93,47 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
             <div className="col-md-6">
               <FormSelect
                 label="Category of clients receiving HIV self test kit"
-                {...sp("categoryOfClients", transformOptions(codesets?.["TARGET_GROUP"]))}
+                {...sp("categoryOfClients", (() => {
+                  const rawOptions = transformOptions(codesets?.["TARGET_GROUP"]);
+                  const sexValue = values.sex?.toLowerCase();
+                  const isMale = sexValue === "sex_male" || sexValue === "male";
+                  const isFemale = sexValue === "sex_female" || sexValue === "female";
+                  const ageNum = values.age
+                    ? parseInt(values.age, 10)
+                    : values.dateOfBirth
+                      ? (() => {
+                        const birth = new Date(values.dateOfBirth);
+                        if (isNaN(birth.getTime())) return null;
+                        const now = new Date();
+                        let y = now.getFullYear() - birth.getFullYear();
+                        const m = now.getMonth() - birth.getMonth();
+                        if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) y--;
+                        return y;
+                      })()
+                      : null;
+                  const isUnder15 = ageNum !== null && ageNum < 15;
+
+                  return rawOptions.filter((opt) => {
+                    const code = opt.value; // e.g. "TARGET_GROUP_FSW"
+                    // FSW: disabled for males (handled below via disabled prop) — here we keep it visible but see note
+                    // MSM: hidden for females
+                    if (isFemale && code === "TARGET_GROUP_MSM") return false;
+                    if (isMale && code === "TARGET_GROUP_FSW") return false;
+                    // Children of KP: only show for clients < 15 years
+                    if (code === "TARGET_GROUP_CHILDREN_OF_KP" && !isUnder15) return false;
+                    return true;
+                  }).map((opt) => {
+                    // FSW: disable (not remove) for males
+                    if (isMale && opt.value === "TARGET_GROUP_FSW") {
+                      return { ...opt, disabled: true };
+                    }
+                    return opt;
+                  });
+                })())}
               />
             </div>
           )
         }
-
 
         {
           showAcceptedIndexTesting && (

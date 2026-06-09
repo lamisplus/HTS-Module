@@ -1,5 +1,5 @@
 // src/NewToolForms/sections/PreTestCounsellingSection.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FormSelect, SectionSubheading, ScoreDisplay } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
@@ -59,6 +59,8 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
 
+  
+
   const fp = (name) => ({
     name,
     value: values[name],
@@ -89,7 +91,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
 
   // skip if age <=15 or pregnancy status is pregnant or breastfeeding
   const skipSection =
-    (values.age && Number(values.age) <= 15) ||
+    (values?.age && Number(values?.age) <= 15) ||
     values.pregnancyStatus === "PREGANACY_STATUS_PREGNANT" ||
     values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING";
 
@@ -126,18 +128,53 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
   };
 
   useGetCodesets({
-    codesetsKeys: ["YES_NO", "RECENT_HIV_TEST"],
+    codesetsKeys: ["YES_NO", "TIME_LAST_NEGATIVE_TEST_RESULT"],
     patientId: "pretestingcounselling",
     onSuccess: loadCodesets,
   });
 
+  useEffect(() => {
+    if (skipSection) {
+      const resetFields = [
+        "previouslyTestedNegative", "timeOfLastNegativeTest",
+        "clientInformedTransmissionRoutes", "clientInformedRiskFactors",
+        "clientInformedPreventionMethods", "clientInformedPossibleResults",
+        "informedConsentGiven",
+        "everHadSexualIntercourse", "moreThanOneSexPartner",
+        "unprotectedVaginalSex", "unprotectedAnalSex",
+        "bloodTransfusionLast3Months", "sexUnderInfluence", "historyOfSTI",
+        "currentCough", "weightLoss", "fever", "nightSweats",
+        "complaintsVaginalDischarge", "complaintsLowerAbdominalPain",
+        "complaintsUrethralDischarge", "complaintsScroralSwelling",
+        "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+        "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
+        "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
+        "hadSexWithHivPositivePartnerInRiskGroup"
+      ];
+      resetFields.forEach(field => setFieldValue(field, ""));
+    }
+  }, [skipSection, setFieldValue]);
+
+  const getSkipMessage = () => {
+    if (values.age && Number(values.age) <= 15) {
+      return "Pre-test counselling is not applicable for clients aged 15 and below.";
+    }
+    if (values.pregnancyStatus === "PREGANACY_STATUS_PREGNANT") {
+      return "Pre-test counselling is not applicable for pregnant clients.";
+    }
+    if (values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING") {
+      return "Pre-test counselling is not applicable for breastfeeding clients.";
+    }
+    return "Pre-test counselling is not applicable.";
+  };
+  
   return (
     <div style={{ width: "100%" }}>
       <SectionSubheading>(A) Knowledge Assessment</SectionSubheading>
 
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          {getSkipMessage()}
         </div>
       ) : (
         <>
@@ -153,7 +190,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <div className="col-md-6">
                 <FormSelect
                   label="Time of Last HIV Negative Test Result"
-                  {...sp("timeOfLastNegativeTest", transformOptions(codesets?.["RECENT_HIV_TEST"]))}
+                  {...sp("timeOfLastNegativeTest", transformOptions(codesets?.["TIME_LAST_NEGATIVE_TEST_RESULT"]))}
                   required
                 />
               </div>
@@ -203,7 +240,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
       <SectionSubheading>(B) Personal HIV Risk Assessment (Last 3 months)</SectionSubheading>
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          {getSkipMessage()}
         </div>
       ) : (
         <>
@@ -277,7 +314,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
       <SectionSubheading>(C) TB and Syndromic STI Screening</SectionSubheading>
       {skipSection ? (
         <div style={skippedNoticeStyle}>
-          Pre-test counselling is not applicable for clients aged 15 and below, pregnant or breastfeeding clients.
+          {getSkipMessage()}
         </div>
       ) : (
         <div>

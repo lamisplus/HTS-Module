@@ -43,12 +43,11 @@ public class RiskStratification extends Audit implements Serializable {
 
     @Basic
     @Column(name = "age")
-    private Integer age=0;
+    private Integer age = 0;
 
     @Basic
     @Column(name = "entry_point")
     private String entryPoint;
-
 
     @Basic
     @Column(name = "dob")
@@ -62,8 +61,7 @@ public class RiskStratification extends Audit implements Serializable {
     private String modality;
 
     @Column(name = "spoke_facility")
-    private String  spokeFacility;
-
+    private String spokeFacility;
 
     @Column(name = "health_facility")
     private String healthFacility;
@@ -82,12 +80,12 @@ public class RiskStratification extends Audit implements Serializable {
 
     @Basic
     @Column(name = "archived")
-    private int archived=0;
+    private int archived = 0;
 
     @Type(type = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "risk_assessment", columnDefinition = "jsonb")
-    private  Object riskAssessment;
+    private Object riskAssessment;
 
     @Basic
     @Column(name = "person_uuid")
@@ -95,7 +93,7 @@ public class RiskStratification extends Audit implements Serializable {
 
     @Basic
     @Column(name = "community_entry_point ")
-    private String communityEntryPoint ;
+    private String communityEntryPoint;
 
     @Basic
     @Column(name = "facility_id ")
@@ -110,40 +108,42 @@ public class RiskStratification extends Audit implements Serializable {
 
     @Basic
     @Column(name = "latitude")
-    private  String latitude;
+    private String latitude;
 
     @PrePersist
-    public void setFields(){
-        if(StringUtils.isEmpty(code)){
+    public void setFields() {
+        if (StringUtils.isEmpty(code)) {
             code = UUID.randomUUID().toString();
         }
     }
 
-    public static RiskStratification toRiskStratification(RiskStratificationResponseDto riskStratificationDTO, String personUuid) {
-        if ( riskStratificationDTO == null ) {
+    public static RiskStratification toRiskStratification(RiskStratificationResponseDto riskStratificationDTO,
+            String personUuid) {
+        if (riskStratificationDTO == null) {
             return null;
         }
 
         RiskStratification riskStratification = new RiskStratification();
 
         riskStratification.setId(riskStratificationDTO.getId());
-        riskStratification.setAge( riskStratificationDTO.getAge() );
+        riskStratification.setAge(riskStratificationDTO.getAge());
         riskStratification.setPersonUuid(personUuid);
-        riskStratification.setTestingSetting( riskStratificationDTO.getTestingSetting() );
-        riskStratification.setModality( riskStratificationDTO.getModality() );
-        riskStratification.setCode( riskStratificationDTO.getCode() );
-        riskStratification.setTargetGroup( riskStratificationDTO.getTargetGroup() );
-        riskStratification.setVisitDate( riskStratificationDTO.getVisitDate() );
+        riskStratification.setTestingSetting(riskStratificationDTO.getTestingSetting());
+        riskStratification.setModality(riskStratificationDTO.getModality());
+        riskStratification.setCode(riskStratificationDTO.getCode());
+        riskStratification.setTargetGroup(riskStratificationDTO.getTargetGroup());
+        riskStratification.setVisitDate(riskStratificationDTO.getVisitDate());
         riskStratification.setDob(riskStratificationDTO.getDob());
-        riskStratification.setRiskAssessment( riskStratificationDTO.getRiskAssessment() );
-        riskStratification.setCommunityEntryPoint( riskStratificationDTO.getCommunityEntryPoint() );
-        riskStratification.setLatitude(riskStratificationDTO.getLongitude());
+        riskStratification.setRiskAssessment(riskStratificationDTO.getRiskAssessment());
+        riskStratification.setCommunityEntryPoint(riskStratificationDTO.getCommunityEntryPoint());
+        riskStratification.setLongitude(riskStratificationDTO.getLongitude());
         riskStratification.setLatitude(riskStratificationDTO.getLatitude());
-        String sourceSupport = riskStratificationDTO.getSource() == null || riskStratificationDTO.getSource().isEmpty() ? Constants.WEB_SOURCE : Constants.MOBILE_SOURCE;
+        String sourceSupport = riskStratificationDTO.getSource() == null || riskStratificationDTO.getSource().isEmpty()
+                ? Constants.WEB_SOURCE
+                : Constants.MOBILE_SOURCE;
         riskStratificationDTO.setSource(sourceSupport);
 
-        riskStratification.setEntryPoint( riskStratificationDTO.getEntryPoint());
-
+        riskStratification.setEntryPoint(riskStratificationDTO.getEntryPoint());
 
         return riskStratification;
     }

@@ -182,7 +182,9 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   const handleCategoryChange = (e) => {
     setFieldValue("clientCategory", e.target.value);
-    if (e.target.value !== "Other") setFieldValue("clientCategoryOther", "");
+    if (e.target.value !== "INDEX_CLIENT_CATEGORY_OTHERS") {
+      setFieldValue("clientCategoryOther", "");
+    }
   };
 
   const handleOfferedPnsChange = (e) => {
@@ -200,7 +202,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
   const showFacilitySetting = values.setting === "HTS_ENTRY_POINT_FACILITY";
   const showCommunityEntry = values.setting === "HTS_ENTRY_POINT_COMMUNITY";
   const showArtClinic = !!values.isOnArt;
-  const showCategoryOther = values.clientCategory === "Other";
+  const showCategoryOther = values.clientCategory === "INDEX_CLIENT_CATEGORY_OTHERS";
   const showAcceptedPns = values.offeredPns === "YES_NO_YES";
 
 
@@ -283,6 +285,13 @@ const IctSectionA = ({ formik, readOnly = false }) => {
             required
           />
         </div>
+
+        {showCategoryOther && (
+          <div className="col-md-4">
+            <FormTextField label="Specify Other Category" {...fp("clientCategoryOther")} required />
+          </div>
+        )}
+
         <div className="col-md-4">
           <FormGroup style={{ marginBottom: "16px" }}>
             <Label style={labelStyle}>Phone Number <span style={{ color: "red" }}>*</span></Label>
@@ -322,11 +331,7 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
       <SectionSubheading>Index Services</SectionSubheading>
       <div className="row">
-        {showCategoryOther && (
-          <div className="col-md-4">
-            <FormTextField label="Specify Other Category" {...fp("clientCategoryOther")} required />
-          </div>
-        )}
+
         <div className="col-md-4">
           <FormSelect
             label="Offered Index Testing Services ?"
