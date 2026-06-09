@@ -71,7 +71,6 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
             @Param("search") String search,
             Pageable pageable);
 
-    // ─── FIX: cast both UUID and JSONB columns to text ─────────────────────────
     @Query(value =
             "SELECT \n" +
                     "    e.id, \n" +

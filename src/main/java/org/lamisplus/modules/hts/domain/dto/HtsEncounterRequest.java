@@ -37,26 +37,11 @@ public class HtsEncounterRequest {
     private String indexTesting;
     private String indexRelationship;
     private String indexClientCode;
-
-//    private String surname;
-//    private String firstName;
-//    private String middleName;
-//    private String dobType;
-//    private LocalDate dateOfBirth;
-//    private Integer age;
-//    private String sex;
-//    private String phoneNumber;
-//    private String maritalStatus;
     private Integer numberOfWives;
     private Integer numberOfCoWives;
     private Integer numberOfBiologicalChildren;
     private String pregnancyStatus;
     private String breastfeedingDuration;
-//    private String clientState;
-//    private String clientLga;
-//    private String address;
-//    private String landmark;
-
     private String previouslyTestedNegative;
     private String timeOfLastNegativeTest;
     private String clientInformedTransmissionRoutes;

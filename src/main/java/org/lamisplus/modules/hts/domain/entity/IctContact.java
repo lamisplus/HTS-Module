@@ -45,11 +45,9 @@ public class IctContact extends Audit<IctContact> implements Serializable {
     @Column(name = "contact_code", length = 100)
     private String contactCode;
 
-    /** Renamed: firstname_of_contact → first_name (item 6) */
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    /** Renamed: middlename_of_contact → middle_name (item 6) */
     @Column(name = "middle_name")
     private String middleName;
 

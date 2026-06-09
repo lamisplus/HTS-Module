@@ -40,7 +40,6 @@ public class HtsEncounterService {
     private final ObjectMapper objectMapper;
     private final CurrentUserOrganizationService currentUserOrganizationService;
 
-    // ── Create ────────────────────────────────────────────────────────────────
 
     public HtsEncounterResponse save(HtsEncounterRequest request) {
         Person person;
@@ -76,7 +75,6 @@ public class HtsEncounterService {
         return toResponse(encounter);
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
 
     public HtsEncounterResponse update(Long id, HtsEncounterRequest request) {
         HtsEncounter existing = repository.findByIdAndArchived(id, false)
@@ -97,7 +95,6 @@ public class HtsEncounterService {
         return toResponse(existing);
     }
 
-    // ── Read ──────────────────────────────────────────────────────────────────
 
     public HtsEncounterResponse getById(Long id) {
         HtsEncounter encounter = repository.findByIdAndArchived(id, false)
@@ -132,7 +129,7 @@ public class HtsEncounterService {
                 .collect(Collectors.toList());
     }
 
-    // ── Delete ────────────────────────────────────────────────────────────────
+
 
     public void delete(Long id) {
         HtsEncounter encounter = repository.findByIdAndArchived(id, false)
@@ -164,9 +161,7 @@ public class HtsEncounterService {
                 ? null
                 : "%" + search.trim() + "%";
 
-        // *** FIX: Strip any sort from the Pageable to prevent Spring Data from
-        // appending an invalid ORDER BY to the native query.
-        // The native query already has ORDER BY e.id DESC, which will be used.
+
         Pageable pageableWithoutSort = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize()
@@ -178,27 +173,22 @@ public class HtsEncounterService {
         return raw.map(row -> {
             HtsPatientSummaryDto dto = new HtsPatientSummaryDto();
 
-            // row[0] = e.id
             dto.setId(toLong(row[0]));
 
-            // row[1] = e.uuid
-            dto.setUuid(row[1] != null ? UUID.fromString(row[1].toString()) : null);
+            dto.setUuid(row[1].toString());
 
-            // row[2] = p.id  (person_id)
             Long personId = toLong(row[2]);
             dto.setPersonId(personId);
 
-            // row[3] = client_code
-            dto.setClientCode(row[3] != null ? row[3].toString() : null);
+            dto.setClientCode(row[3].toString());
 
-            // row[4] = date_of_visit
             if (row[4] != null) {
                 dto.setDateOfVisit(row[4] instanceof LocalDate
                         ? (LocalDate) row[4]
                         : LocalDate.parse(row[4].toString()));
             }
 
-            // row[5] = setting
+
             dto.setSetting(row[5] != null ? row[5].toString() : null);
 
             // row[6] = observation (Hibernate returns JSONB as String in native queries)
@@ -206,20 +196,15 @@ public class HtsEncounterService {
                 try {
                     dto.setObservation(objectMapper.readTree(row[6].toString()));
                 } catch (Exception e) {
-                    // log.warn("Failed to parse observation JSON for encounter id {}", dto.getId(), e);
                 }
             }
 
-            // row[7] = facility_id
             dto.setFacilityId(toLong(row[7]));
 
-            // row[8] = hts_count
             dto.setHtsCount(toLong(row[8]));
 
-            // row[9] = ict_count
             dto.setIctCount(toLong(row[9]));
 
-            // Hydrate full person object — keeps all existing consumers working
             if (personId != null && personId > 0) {
                 personRepository.findById(personId).ifPresent(person ->
                         dto.setPerson(personService.getDtoFromPerson(person)));
@@ -229,7 +214,6 @@ public class HtsEncounterService {
         });
     }
 
-    // ── Observation builder ───────────────────────────────────────────────────
 
     private ObjectNode buildObservation(HtsEncounterRequest r) {
         ObjectNode obs = objectMapper.createObjectNode();
@@ -243,25 +227,11 @@ public class HtsEncounterService {
         putStr(obs, "indexRelationship",   r.getIndexRelationship());
         putStr(obs, "indexClientCode",     r.getIndexClientCode());
 
-        // Demographics
-//        putStr(obs, "surname",     r.getSurname());
-//        putStr(obs, "firstName",   r.getFirstName());
-//        putStr(obs, "middleName",  r.getMiddleName());
-//        putStr(obs, "dobType",     r.getDobType());
-//        if (r.getDateOfBirth() != null)              obs.put("dateOfBirth",              r.getDateOfBirth().toString());
-//        if (r.getAge()         != null)              obs.put("age",                       r.getAge());
-//        putStr(obs, "sex",              r.getSex());
-//        putStr(obs, "phoneNumber",      r.getPhoneNumber());
-//        putStr(obs, "maritalStatus",    r.getMaritalStatus());
         if (r.getNumberOfWives()              != null) obs.put("numberOfWives",              r.getNumberOfWives());
         if (r.getNumberOfCoWives()            != null) obs.put("numberOfCoWives",            r.getNumberOfCoWives());
         if (r.getNumberOfBiologicalChildren() != null) obs.put("numberOfBiologicalChildren", r.getNumberOfBiologicalChildren());
         putStr(obs, "pregnancyStatus",      r.getPregnancyStatus());
         putStr(obs, "breastfeedingDuration", r.getBreastfeedingDuration());
-//        putStr(obs, "clientState",           r.getClientState());
-//        putStr(obs, "clientLga",             r.getClientLga());
-//        putStr(obs, "address",               r.getAddress());
-//        putStr(obs, "landmark", r.getLandmark());
         putStr(obs, "modality", r.getModality());
 
 
@@ -333,7 +303,6 @@ public class HtsEncounterService {
         return obs;
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
 
     private void putStr(ObjectNode node, String key, String value) {
         if (value != null) node.put(key, value);
