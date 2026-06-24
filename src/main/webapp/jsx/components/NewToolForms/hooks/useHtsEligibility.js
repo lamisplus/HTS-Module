@@ -1,4 +1,22 @@
 import { useMemo } from "react";
+
+export const POSITIVE_HIV_RESULT_CODES = new Set([
+  "hiv_confirmatory_test_result_positive",
+  "positive",
+]);
+
+function isPositiveValue(value) {
+  if (!value) return false;
+  return POSITIVE_HIV_RESULT_CODES.has(value.trim().toLowerCase());
+}
+
+function isPositiveEncounter(encounter) {
+  return (
+    isPositiveValue(encounter?.observation?.confirmatoryHivTest) ||
+    isPositiveValue(encounter?.observation?.finalHivTestResult)
+  );
+}
+
 export function checkHtsEligibility(encounters) {
   if (!encounters || !Array.isArray(encounters) || encounters.length === 0) {
     return { isEligible: true, reason: "No previous HTS records found.", confirmatoryResult: "No result found", finalHivTestResult: "No result found" };
@@ -12,12 +30,13 @@ export function checkHtsEligibility(encounters) {
   const confirmatoryResult = latest?.observation?.confirmatoryHivTest?.trim().toLowerCase();
   const finalHivTestResult = latest?.observation?.finalHivTestResult?.trim().toLowerCase();
 
-  if (confirmatoryResult === "hiv_confirmatory_test_result_positive") {
+  const positiveEncounter = sorted.find(isPositiveEncounter);
+  if (positiveEncounter) {
     return {
       isEligible: false,
       reason: "Client has a previously documented HIV Positive result and cannot have a new HTS record.",
-      confirmatoryResult,
-      finalHivTestResult
+      confirmatoryResult: positiveEncounter?.observation?.confirmatoryHivTest?.trim().toLowerCase() || confirmatoryResult,
+      finalHivTestResult: positiveEncounter?.observation?.finalHivTestResult?.trim().toLowerCase() || finalHivTestResult
     };
   }
 
