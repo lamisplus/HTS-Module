@@ -181,7 +181,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
           <div className="row">
             <div className="col-md-6">
               <FormSelect
-                label="Previously Tested HIV Negative?"
+                label="Previously Tested HIV Negative?" 
                 {...sp("previouslyTestedNegative", transformOptions(codesets?.["YES_NO"]))}
                 onChange={readOnly ? undefined : handlePreviouslyTestedChange}
               />

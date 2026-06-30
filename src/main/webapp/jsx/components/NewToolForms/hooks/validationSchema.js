@@ -232,14 +232,17 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Index client code/ID is required" });
       }
     ),
-    previouslyTestedNegative: yup.mixed().test(
-      "prev-tested-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
+    // previouslyTestedNegative: yup.mixed().test(
+    //   "prev-tested-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    previouslyTestedNegative: yup.string(),
+
     timeOfLastNegativeTest: yup.mixed().test(
       "time-last-negative-conditional",
       "Time of last negative test is required",
@@ -249,46 +252,54 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Time of last negative test is required" });
       }
     ),
-    clientInformedTransmissionRoutes: yup.mixed().test(
-      "transmission-routes-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedRiskFactors: yup.mixed().test(
-      "risk-factors-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedPreventionMethods: yup.mixed().test(
-      "prevention-methods-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedPossibleResults: yup.mixed().test(
-      "possible-results-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    informedConsentGiven: yup.mixed().test(
-      "consent-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
+    // clientInformedTransmissionRoutes: yup.mixed().test(
+    //   "transmission-routes-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    clientInformedTransmissionRoutes: yup.string(),
+    clientInformedRiskFactors: yup.string(),
+    clientInformedPreventionMethods: yup.string(),
+    clientInformedPossibleResults: yup.string(),
+    informedConsentGiven: yup.string(),
+    // clientInformedRiskFactors: yup.mixed().test(
+    //   "risk-factors-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // clientInformedPreventionMethods: yup.mixed().test(
+    //   "prevention-methods-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // clientInformedPossibleResults: yup.mixed().test(
+    //   "possible-results-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // informedConsentGiven: yup.mixed().test(
+    //   "consent-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
     everHadSexualIntercourse: yup.mixed().test(
       "ever-sex-conditional",
       "This field is required",
