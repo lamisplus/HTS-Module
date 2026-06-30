@@ -200,35 +200,35 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Client Informed About HIV Transmission Routes"
                 {...sp("clientInformedTransmissionRoutes", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Risk Factors for HIV Transmission"
                 {...sp("clientInformedRiskFactors", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed on Preventing HIV Transmission Methods"
                 {...sp("clientInformedPreventionMethods", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Possible Test Results"
                 {...sp("clientInformedPossibleResults", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Informed Consent for HIV Testing Given"
                 {...sp("informedConsentGiven", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
           </div>
