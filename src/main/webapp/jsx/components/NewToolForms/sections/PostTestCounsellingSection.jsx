@@ -70,14 +70,14 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
           <FormSelect
             label="Have You Been Tested for HIV Before Within This Year?"
             {...sp("previouslyTestedThisYear", PREVIOUSLY_TESTED_OPTIONS)}
-            required
+            // required
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Client Received Test Result?"
             {...sp("clientReceivedTestResult", transformOptions(codesets?.["YES_NO"]))}
-            required
+            // required
           />
         </div>
 
