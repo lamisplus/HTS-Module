@@ -240,6 +240,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             <FormSelect
               label="Recency Test Result"
               {...sp("recencyTest", transformOptions(codesets?.["RECENCY_TESTING"]))}
+              required
             />
           </div>
         )}
@@ -270,6 +271,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <FormSelect
             label="Syphilis Test Result"
             {...sp("syphilisTestResult", transformOptions(codesets?.["SYPHILIS_RESULT"]))}
+            required
           />
         </div>
       </div>

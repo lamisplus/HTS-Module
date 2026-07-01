@@ -594,7 +594,23 @@ export const buildValidationSchema = (isNewPatient) => {
     ),
 
 
-    recencyTest: yup.string(),
+    // recencyTest: yup.string(),
+
+    syphilisTestResult: yup.string().required("Syphilis Test Result is required"),
+
+    recencyTest: yup.mixed().test(
+      "recencyTest-conditional",
+      "Recency test result is required",
+      function (value) {
+        // Mirrors DiagnosticTestingSection's `showRecency` flag:
+        // the field is only rendered — and therefore only required —
+        // when the initial HIV test result is Positive.
+        if (this.parent.initialHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
+        return !!value || this.createError({ message: "Recency test result is required" });
+      }
+    ),
+
+
     // previouslyTestedThisYear: yup.string().required("This field is required"),
     previouslyTestedThisYear: yup.string(),
     clientReceivedTestResult: yup.string(),
