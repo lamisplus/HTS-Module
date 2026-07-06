@@ -297,6 +297,14 @@ const formatHivResult = (rawCode) => {
   return <Label color={color} size="mini">{display}</Label>;
 };
 
+const formatPmtct = (rawCode) => {
+  if (rawCode?.pmtctHts === true) {
+    return <span>TRUE</span>
+  }
+  return <span>FALSE</span>;
+};
+
+
 const formatSyphilisResult = (rawCode) => {
   const { display, color } = mapResultCode(rawCode, SYPHILIS_RESULT_MAP);
   return <Label color={color} size="mini">{display}</Label>;
@@ -412,6 +420,12 @@ const HTSEncounterHistory = (props) => {
             render: (rowData) => formatHivResult(rowData?.finalHivTestResult),
           },
           {
+            title: "PMTCT-HTS record",
+            field: "pmtctHts",
+            filtering: false,
+            render: (rowData) => formatPmtct(rowData),
+          },
+          {
             title: "Suspected Acute Infection",
             field: "suspectedAcuteInfection",
             filtering: false,
@@ -472,6 +486,7 @@ const HTSEncounterHistory = (props) => {
           suspectedAcuteInfection: record.observation?.suspectedAcuteInfection ?? "",
           hivEarlyDetectResult: record.observation?.hivEarlyDetectResult ?? "",
           typeOfHivTestDone: record.observation?.typeOfHivTestDone ?? "",
+          pmtctHts: record?.pmtctHts ?? "",
           _raw: record,
         }))}
         options={{

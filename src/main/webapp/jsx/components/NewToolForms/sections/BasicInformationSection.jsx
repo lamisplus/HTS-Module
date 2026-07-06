@@ -469,7 +469,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       <div className="row">
         <div className="col-md-4">
           <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required
-            min={values.dateOfBirth || today}
+            // min={values.dateOfBirth || today}
           />
         </div>
 
