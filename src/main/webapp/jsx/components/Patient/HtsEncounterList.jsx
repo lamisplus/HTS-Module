@@ -128,6 +128,7 @@ const HTSEncounterList = () => {
                 age:            computeAge(p.dateOfBirth ?? row.observation?.dateOfBirth),
                 htsCount:       row.htsCount ?? 0,
                 ictCount:       row.ictCount ?? 0,
+                clientCode:       row.clientCode ?? "",
                 // ── Raw record for route state ─────────────────────────
                 _raw,
               };
@@ -200,6 +201,11 @@ const HTSEncounterList = () => {
           {row.ictCount}
         </Label>
       ),
+    },
+    {
+      title: "Client Code",
+      field: "clientCode",
+      filtering: false,
     },
     {
       title: "Actions",
