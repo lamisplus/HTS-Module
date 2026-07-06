@@ -53,21 +53,37 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
       });
   }, [allUsers]);
 
-  // "Designation" options: unique, non-null designations across all users
+
   const designationOptions = useMemo(() => {
     if (!Array.isArray(allUsers)) return [];
-    const uniqueDesignations = [
-      ...new Set(
-        allUsers
-          .map((user) => user?.designation)
-          .filter((designation) => !!designation)
-      ),
-    ];
-    return uniqueDesignations.map((designation) => ({
-      label: designation,
-      value: designation,
-    }));
+
+    const toTitleCase = (str) =>
+      str
+        .toLowerCase()
+        .split(/\s+/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+    const seen = new Map(); // normalized key -> display label
+
+    allUsers.forEach((user) => {
+      const raw = user?.designation;
+      if (!raw || typeof raw !== "string") return;
+
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+
+      const key = trimmed.toLowerCase();
+      if (!seen.has(key)) {
+        seen.set(key, toTitleCase(trimmed));
+      }
+    });
+
+    return Array.from(seen.values())
+      .sort()
+      .map((designation) => ({ label: designation, value: designation }));
   }, [allUsers]);
+
 
   const fp = (name) => ({
     name,

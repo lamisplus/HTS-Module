@@ -87,6 +87,8 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   };
   const { formik } = useNewPatientFormik(onSubmit);
 
+  console.log(formik)
+
   // Real-time value forwarding for the orchestrator eligibility watcher
   React.useEffect(() => {
     onValuesChange?.(formik.values);

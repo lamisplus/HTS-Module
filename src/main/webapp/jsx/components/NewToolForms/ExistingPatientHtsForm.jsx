@@ -303,6 +303,9 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
 
+  console.log(formik)
+
+
   const { errors, submitCount } = formik;
 
   const hasSubmitted = submitCount > 0;
