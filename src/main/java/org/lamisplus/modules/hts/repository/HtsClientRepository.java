@@ -34,59 +34,6 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
     Optional<HtsClient> findFirstByRiskStratificationCode(String riskStratificationCode);
 
 
-    @Query(value = "SELECT \n" +
-            "    p.hospital_number AS hospitalNumber,\n" +
-            "    p.id AS personId,\n" +
-            "    p.uuid AS personUuid,\n" +
-            "    p.first_name AS firstName,\n" +
-            "    p.surname AS surname,\n" +
-            "    p.other_name AS otherName,\n" +
-            "    CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
-            "    INITCAP(p.sex) AS gender\n" +
-            "FROM patient_person p\n" +
-            "WHERE p.archived = ?1\n" +
-            "AND (\n" +
-            "       p.first_name ILIKE ?3\n" +
-            "    OR p.surname ILIKE ?3\n" +
-            "    OR p.other_name ILIKE ?3\n" +
-            "    OR p.hospital_number ILIKE ?3\n" +
-            "    OR p.contact_point#>>'{contactPoint,0,value}' ILIKE ?3\n" +
-            ")\n" +
-            "AND NOT EXISTS (\n" +
-            "    SELECT 1\n" +
-            "    FROM hts_encounter hs\n" +
-            "    WHERE hs.client_code = p.hospital_number\n" +
-            "    AND hs.archived = false\n" +
-            "    AND CAST(hs.patient_uuid AS TEXT) IS NOT NULL AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
-            "    AND hs.facility_id = ?2\n" +
-            ")\n" +
-            "AND NOT EXISTS (\n" +
-            "    SELECT 1\n" +
-            "    FROM hts_encounter htse\n" +
-            "    WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
-            "    AND htse.facility_id = ?2\n" +
-            "    AND htse.archived = false\n" +
-            ")\n" +
-            "AND is_pmtct_infant(p.hospital_number) = FALSE\n" +
-            "", nativeQuery = true)
-    Page<HtsPerson> findAllPersonHtsBySearchParam(Integer archived, Long facilityId, String search, Pageable pageable);
-
-
-    @Query(value = "SELECT DISTINCT hc.client_code AS clientCode, p.id as personId,p.uuid as personUuid, p.first_name as firstName, p.surname as surname, p.other_name as otherName,  \n" +
-            "p.hospital_number as hospitalNumber, CAST (EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) AS INTEGER) as age,  \n" +
-            "INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth,mini.person_uuid,mini.hts_count htsCount \n" +
-            "FROM patient_person p \n" +
-            "INNER JOIN hts_client hc ON hc.person_uuid = p.uuid AND hc.archived = ?1 \n" +
-            "INNER JOIN (SELECT person_uuid,MIN(date_created) first_hts_registration,COUNT(person_uuid) hts_count \n" +
-            "FROM hts_client \n" +
-            "WHERE person_uuid IS NOT NULL AND archived = ?1 AND facility_id=?2 " +
-            "GROUP BY 1) mini \n" +
-            "ON hc.person_uuid=mini.person_uuid AND hc.date_created=mini.first_hts_registration \n" +
-            "where  p.first_name ILIKE ?3 OR p.surname ILIKE ?3 OR p.other_name ILIKE ?3 \n" +
-            "OR p.hospital_number ILIKE ?3 OR hc.client_code ILIKE ?3 ", nativeQuery = true)
-    Page<HtsPerson> findOnlyPersonHtsBySearchParam(Integer archived, Long facilityId, String search, Pageable pageable);
-
-
     @Query(value = "SELECT hc.client_code as clientCode, p.id as personId, p.first_name as firstName, p.surname as surname, p.other_name as otherName, " +
             "p.hospital_number as hospitalNumber, CAST (EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) AS INTEGER) as age, " +
             "INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth, CAST (COUNT(hc.person_uuid) AS INTEGER) as htsCount " +
@@ -100,39 +47,157 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
 
 
 
-    @Query(value = "SELECT p.hospital_number AS hospitalNumber, p.uuid as personUuid, p.id AS personId,  p.first_name AS firstName, p.surname AS surname,  \n" +
-            "   p.other_name AS otherName, CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age, INITCAP(p.sex) AS gender  \n" +
-            "\tFROM patient_person p  \n" +
-            "\tWHERE  p.archived = ?1 AND p.facility_id = ?2 \n" +
-            "\t\t\t\tAND NOT EXISTS (\n" +
-            "\t\t\t\t\tSELECT 1 \n" +
-            "\t\t\t\t\tFROM hts_encounter hs\n" +
-            "\t\t\t\t\tWHERE hs.client_code = p.hospital_number\n" +
-            "\t\t\t\t\tAND hs.archived = false \n" +
-            "\t\t\t\t\tAND CAST(hs.patient_uuid AS TEXT) is not null AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
-            "\t\t\t\t\tAND hs.facility_id = ?2 \n" +
-            "\t\t\t\t)\n" +
-            "             AND NOT EXISTS (\n" +
-            "\t\t\t\t SELECT 1\n" +
-            "\t\t\t\t FROM hts_encounter htse\n" +
-            "\t\t\t\t WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
-            "\t\t\t\t AND htse.facility_id = ?2\n" +
-            "\t\t\t\t AND htse.archived = false\n" +
-            "            )\n" +
-            "             AND is_pmtct_infant(p.hospital_number) = FALSE\n" +
-            "\t\t\tORDER BY p.created_date DESC" , nativeQuery = true)
-    Page<HtsPerson> findAllPersonHts(Integer archived, Long facilityId, Pageable pageable);
-    @Query(value = "SELECT DISTINCT  hc.id, hc.client_code AS clientCode, p.id as personId,p.uuid as personUuid, p.first_name as firstName, p.surname as surname, p.other_name as otherName,  \n" +
-            "p.hospital_number as hospitalNumber, CAST (EXTRACT(YEAR from AGE(NOW(),  date_of_birth)) AS INTEGER) as age,  \n" +
-            "INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth,mini.person_uuid,mini.hts_count htsCount\n" +
-            "FROM patient_person p\n" +
-            "INNER JOIN hts_client hc ON hc.person_uuid = p.uuid AND hc.archived = ?1 \n" +
-            "INNER JOIN (SELECT person_uuid,MIN(date_created) first_hts_registration,COUNT(person_uuid) hts_count\n" +
-            "FROM hts_client\n" +
-            "WHERE person_uuid IS NOT NULL AND archived = ?1 AND facility_id=?2 \n" +
-            "GROUP BY 1) mini\n" +
-            "ON hc.person_uuid=mini.person_uuid AND hc.date_created=mini.first_hts_registration  ORDER BY hc.id DESC", nativeQuery = true)
-    Page<HtsPerson> findOnlyPersonHts(Integer archived, Long facilityId, Pageable pageable);
+    // ─────────────────────────────────────────────────────────────────────────
+    // OPTIMIZED equivalent of findAllPersonHts / findAllPersonHtsBySearchParam
+    // ("Patients" tab). Same result set + projection, faster.
+    //
+    // The originals call is_pmtct_infant(p.hospital_number) once PER ROW in the
+    // WHERE clause — a scalar function that runs a sub-query per invocation, for
+    // every candidate at the facility, on BOTH the data and the count query. This
+    // version materialises the full set of PMTCT infant hospital numbers ONCE in a
+    // CTE (via pmtct_infant_hospital_numbers()) and excludes them with a single
+    // hash NOT EXISTS anti-join — O(n) instead of n per-row function calls.
+    //
+    // The two hts_encounter NOT EXISTS blocks are kept byte-for-byte (the planner
+    // already anti-joins them, and the perf indexes back them). Explicit count
+    // queries keep totals exact and avoid Spring's count-derivation on a leading
+    // WITH. NULL / missing-table / differing-shape behaviour is identical to
+    // is_pmtct_infant, so the row set is unchanged.
+    //
+    // Revert by pointing the service back at findAllPersonHts / ...BySearchParam.
+    // ─────────────────────────────────────────────────────────────────────────
+    String PATIENTS_INFANT_CTE =
+            "WITH pmtct_infants AS (\n" +
+            "    SELECT DISTINCT hospital_number\n" +
+            "    FROM pmtct_infant_hospital_numbers() AS t(hospital_number)\n" +
+            ")\n";
+
+    String PATIENTS_SELECT_COLS =
+            "SELECT p.hospital_number AS hospitalNumber, p.uuid AS personUuid, p.id AS personId,\n" +
+            "       p.first_name AS firstName, p.surname AS surname, p.other_name AS otherName,\n" +
+            "       CAST(EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth)) AS INTEGER) AS age,\n" +
+            "       INITCAP(p.sex) AS gender\n" +
+            "FROM patient_person p\n";
+
+    // Two hts_encounter anti-joins — identical to findAllPersonHts — plus the
+    // set-based infant exclusion replacing is_pmtct_infant(p.hospital_number).
+    String PATIENTS_NOT_EXISTS =
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1\n" +
+            "    FROM hts_encounter hs\n" +
+            "    WHERE hs.client_code = p.hospital_number\n" +
+            "    AND hs.archived = false\n" +
+            "    AND CAST(hs.patient_uuid AS TEXT) is not null AND CAST(hs.patient_uuid AS TEXT) != ''\n" +
+            "    AND hs.facility_id = ?2\n" +
+            ")\n" +
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1\n" +
+            "    FROM hts_encounter htse\n" +
+            "    WHERE CAST(htse.patient_uuid AS TEXT) = p.uuid\n" +
+            "    AND htse.facility_id = ?2\n" +
+            "    AND htse.archived = false\n" +
+            ")\n" +
+            "AND NOT EXISTS (\n" +
+            "    SELECT 1 FROM pmtct_infants pin WHERE pin.hospital_number = p.hospital_number\n" +
+            ")\n";
+
+    @Query(value =
+            PATIENTS_INFANT_CTE + PATIENTS_SELECT_COLS +
+            "WHERE p.archived = ?1 AND p.facility_id = ?2\n" +
+            PATIENTS_NOT_EXISTS +
+            "ORDER BY p.created_date DESC",
+            countQuery =
+                    PATIENTS_INFANT_CTE +
+                    "SELECT COUNT(*) FROM patient_person p\n" +
+                    "WHERE p.archived = ?1 AND p.facility_id = ?2\n" +
+                    PATIENTS_NOT_EXISTS,
+            nativeQuery = true)
+    Page<HtsPerson> findAllPersonHtsOptimized(Integer archived, Long facilityId, Pageable pageable);
+
+    @Query(value =
+            PATIENTS_INFANT_CTE + PATIENTS_SELECT_COLS +
+            "WHERE p.archived = ?1\n" +
+            "AND (\n" +
+            "       p.first_name ILIKE ?3\n" +
+            "    OR p.surname ILIKE ?3\n" +
+            "    OR p.other_name ILIKE ?3\n" +
+            "    OR p.hospital_number ILIKE ?3\n" +
+            "    OR p.contact_point#>>'{contactPoint,0,value}' ILIKE ?3\n" +
+            ")\n" +
+            PATIENTS_NOT_EXISTS,
+            countQuery =
+                    PATIENTS_INFANT_CTE +
+                    "SELECT COUNT(*) FROM patient_person p\n" +
+                    "WHERE p.archived = ?1\n" +
+                    "AND (\n" +
+                    "       p.first_name ILIKE ?3\n" +
+                    "    OR p.surname ILIKE ?3\n" +
+                    "    OR p.other_name ILIKE ?3\n" +
+                    "    OR p.hospital_number ILIKE ?3\n" +
+                    "    OR p.contact_point#>>'{contactPoint,0,value}' ILIKE ?3\n" +
+                    ")\n" +
+                    PATIENTS_NOT_EXISTS,
+            nativeQuery = true)
+    Page<HtsPerson> findAllPersonHtsBySearchParamOptimized(Integer archived, Long facilityId, String search, Pageable pageable);
+    // ─────────────────────────────────────────────────────────────────────────
+    // OPTIMIZED equivalent of findOnlyPersonHts / findOnlyPersonHtsBySearchParam
+    // ("HTS Patients Archived" tab). Same result set + projection, faster.
+    //
+    // The originals scan hts_client TWICE — once for the MIN(date_created) +
+    // COUNT group-subquery ("mini"), then self-join hts_client back to it on
+    // (person_uuid, date_created) to fetch the first-registration row. This
+    // version scans hts_client ONCE: DISTINCT ON (person_uuid) ... ORDER BY
+    // person_uuid, date_created ASC, id ASC picks the earliest registration per
+    // person, and COUNT(*) OVER (PARTITION BY person_uuid) carries hts_count on
+    // the same pass. Explicit countQuery over the same CTE keeps totals exact
+    // (and avoids Spring's fragile count-derivation on a leading WITH).
+    //
+    // Revert by pointing the service back at findOnlyPersonHts / ...BySearchParam.
+    // ─────────────────────────────────────────────────────────────────────────
+    String ONLY_PERSON_HTS_CTE =
+            "WITH first_hc AS (\n" +
+            "    SELECT DISTINCT ON (hc.person_uuid)\n" +
+            "        hc.id, hc.client_code, hc.person_uuid, hc.date_created,\n" +
+            "        COUNT(*) OVER (PARTITION BY hc.person_uuid) AS hts_count\n" +
+            "    FROM hts_client hc\n" +
+            "    WHERE hc.person_uuid IS NOT NULL\n" +
+            "      AND hc.archived = ?1\n" +
+            "      AND hc.facility_id = ?2\n" +
+            "    ORDER BY hc.person_uuid, hc.date_created ASC, hc.id ASC\n" +
+            ")\n";
+
+    String ONLY_PERSON_HTS_SELECT =
+            "SELECT fc.id, fc.client_code AS clientCode, p.id as personId, p.uuid as personUuid,\n" +
+            "       p.first_name as firstName, p.surname as surname, p.other_name as otherName,\n" +
+            "       p.hospital_number as hospitalNumber,\n" +
+            "       CAST(EXTRACT(YEAR from AGE(NOW(), p.date_of_birth)) AS INTEGER) as age,\n" +
+            "       INITCAP(p.sex) as gender, p.date_of_birth as dateOfBirth,\n" +
+            "       fc.person_uuid, fc.hts_count htsCount\n" +
+            "FROM first_hc fc\n" +
+            "INNER JOIN patient_person p ON p.uuid = fc.person_uuid\n";
+
+    @Query(value =
+            ONLY_PERSON_HTS_CTE + ONLY_PERSON_HTS_SELECT + "ORDER BY fc.id DESC",
+            countQuery =
+                    ONLY_PERSON_HTS_CTE +
+                    "SELECT COUNT(*) FROM first_hc fc " +
+                    "INNER JOIN patient_person p ON p.uuid = fc.person_uuid",
+            nativeQuery = true)
+    Page<HtsPerson> findOnlyPersonHtsOptimized(Integer archived, Long facilityId, Pageable pageable);
+
+    @Query(value =
+            ONLY_PERSON_HTS_CTE + ONLY_PERSON_HTS_SELECT +
+            "WHERE p.first_name ILIKE ?3 OR p.surname ILIKE ?3 OR p.other_name ILIKE ?3\n" +
+            "   OR p.hospital_number ILIKE ?3 OR fc.client_code ILIKE ?3\n" +
+            "ORDER BY fc.id DESC",
+            countQuery =
+                    ONLY_PERSON_HTS_CTE +
+                    "SELECT COUNT(*) FROM first_hc fc " +
+                    "INNER JOIN patient_person p ON p.uuid = fc.person_uuid " +
+                    "WHERE p.first_name ILIKE ?3 OR p.surname ILIKE ?3 OR p.other_name ILIKE ?3 " +
+                    "   OR p.hospital_number ILIKE ?3 OR fc.client_code ILIKE ?3",
+            nativeQuery = true)
+    Page<HtsPerson> findOnlyPersonHtsBySearchParamOptimized(Integer archived, Long facilityId, String search, Pageable pageable);
 
     @Query(value = "WITH hts_patients AS ( \n" +
             "    SELECT DISTINCT \n" +

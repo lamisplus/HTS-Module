@@ -308,4 +308,95 @@
         </sql>
     </changeSet>
 
+    <!--
+      Drop is_pmtct_infant(): its only callers were the original "Patients" grid
+      queries (findAllPersonHts / ...BySearchParam), now replaced by the set-based
+      pmtct_infant_hospital_numbers() anti-join. The scalar per-row function is
+      dead. IF EXISTS + failOnError=false so a missing function (or any lingering
+      dependency) never blocks startup.
+    -->
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-drop-fn-is-pmtct-infant">
+        <sql splitStatements="false">
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </sql>
+        <rollback/>
+    </changeSet>
+
+    <!--
+      Covering indexes for the "Patients" tab (findAllPersonHtsOptimized / ...BySearchParamOptimized).
+      It filters patient_person by (facility_id, archived) then sorts by
+      created_date DESC, and excludes anyone already linked to an hts_encounter via
+      two NOT EXISTS probes: one on client_code = hospital_number, one on
+      CAST(patient_uuid AS TEXT) = uuid (patient_person.uuid is VARCHAR while
+      hts_encounter.patient_uuid is UUID, hence the cast). The expression index
+      matches that exact cast so the anti-join can use an index instead of a
+      seq-scan per row.
+    -->
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-hts-patients-tab-perf-indexes">
+        <sql splitStatements="true" endDelimiter=";">
+            -- patient_person driver + ORDER BY created_date DESC.
+            CREATE INDEX IF NOT EXISTS idx_patient_person_facility_arch_created
+                ON patient_person (facility_id, archived, created_date DESC);
+
+            -- NOT EXISTS #1: hts_encounter.client_code = patient_person.hospital_number.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_client_code
+                ON hts_encounter (facility_id, archived, client_code);
+
+            -- NOT EXISTS #2: CAST(hts_encounter.patient_uuid AS TEXT) = patient_person.uuid.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_uuid_text
+                ON hts_encounter (facility_id, archived, (CAST(patient_uuid AS text)));
+
+            -- "HTS Patients Archived" tab (findOnlyPersonHts): DISTINCT ON first
+            -- (earliest) registration per person + per-person count.
+            CREATE INDEX IF NOT EXISTS idx_hts_client_facility_arch_person_created
+                ON hts_client (facility_id, archived, person_uuid, date_created);
+
+            -- "HIVST Patients" tab (findAllPersonHivst): hivst ⋈ patient_person.
+            CREATE INDEX IF NOT EXISTS idx_hivst_patient_archived
+                ON hivst (patient_id, archived);
+            CREATE INDEX IF NOT EXISTS idx_patient_person_facility_arch_id
+                ON patient_person (facility_id, archived, id);
+        </sql>
+    </changeSet>
+
+    <!--
+      Set-based counterpart to is_pmtct_infant(): returns the full set of PMTCT
+      infant hospital numbers once, so the "Patients" grid can exclude infants
+      with a single materialised NOT EXISTS anti-join instead of a per-row scalar
+      function call (findAllPersonHtsOptimized / ...BySearchParamOptimized).
+      Same cross-facility safety as is_pmtct_infant: to_regclass() guards a
+      missing table (returns an empty set → excludes nobody), and EXCEPTION WHEN
+      OTHERS covers a differing column shape (also empty set). NULL hospital
+      numbers are dropped, matching the scalar function's NULL-in → not-an-infant
+      behaviour. STABLE so the planner evaluates it once per statement.
+    -->
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-create-fn-pmtct-infant-hospital-numbers">
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION pmtct_infant_hospital_numbers()
+            RETURNS SETOF text
+            LANGUAGE plpgsql
+            STABLE
+            AS $func$
+            BEGIN
+                IF to_regclass('public.pmtct_infant_information') IS NULL THEN
+                    RETURN;
+                END IF;
+
+                RETURN QUERY EXECUTE '
+                    SELECT infant_hospital_number
+                    FROM public.pmtct_infant_information
+                    WHERE infant_hospital_number IS NOT NULL
+                ';
+
+            EXCEPTION WHEN OTHERS THEN
+                -- Table exists but column/shape differs on this facility: stay safe.
+                RETURN;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS pmtct_infant_hospital_numbers();
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

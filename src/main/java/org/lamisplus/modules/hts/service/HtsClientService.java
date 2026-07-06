@@ -532,27 +532,34 @@ public class HtsClientService {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
         //List<HtsPerson> htsPeople = new ArrayList<>();
         Pageable pageable = PageRequest.of(pageNo, pageSize);
+        // Optimized: PMTCT-infant exclusion is a single materialised NOT EXISTS
+        // anti-join (pmtct_infant_hospital_numbers() in a CTE) instead of a
+        // per-row is_pmtct_infant() call; two hts_encounter anti-joins unchanged.
+        // Revert by swapping back to findAllPersonHtsBySearchParam / findAllPersonHts.
         if(!String.valueOf(search).equals("null") && !search.equals("*")){
             search = search.replaceAll("\\s", "");
             String queryParam = "%"+search+"%";
             return htsClientRepository
-                    .findAllPersonHtsBySearchParam(UN_ARCHIVED, facilityId, queryParam, pageable);
+                    .findAllPersonHtsBySearchParamOptimized(UN_ARCHIVED, facilityId, queryParam, pageable);
         }
         return htsClientRepository
-                .findAllPersonHts(UN_ARCHIVED, facilityId, pageable);
+                .findAllPersonHtsOptimized(UN_ARCHIVED, facilityId, pageable);
     }
 
     public Page<HtsPerson> getOnlyPersonHts(String search, int pageNo, int pageSize) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
         Pageable pageable = PageRequest.of(pageNo, pageSize);
+        // Optimized: single hts_client scan (DISTINCT ON earliest registration +
+        // window COUNT) with an exact CTE-based count query.
+        // Revert by swapping back to findOnlyPersonHtsBySearchParam / findOnlyPersonHts.
         if(!String.valueOf(search).equals("null") && !search.equals("*")){
             search = search.replaceAll("\\s", "");
             String queryParam = "%"+search+"%";
             return htsClientRepository
-                    .findOnlyPersonHtsBySearchParam(UN_ARCHIVED, facilityId, queryParam, pageable);
+                    .findOnlyPersonHtsBySearchParamOptimized(UN_ARCHIVED, facilityId, queryParam, pageable);
         }
         return htsClientRepository
-                .findOnlyPersonHts(UN_ARCHIVED, facilityId, pageable);
+                .findOnlyPersonHtsOptimized(UN_ARCHIVED, facilityId, pageable);
     }
 
     public HtsClientDtos getAllHtsClientDtos(Page<HtsClient> page) {
