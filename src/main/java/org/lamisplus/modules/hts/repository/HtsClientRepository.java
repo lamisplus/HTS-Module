@@ -46,26 +46,6 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
     List<HtsPerson> findAllPersonHtsBySearchParam(Integer archived, Long facilityId, String search);
 
 
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // OPTIMIZED equivalent of findAllPersonHts / findAllPersonHtsBySearchParam
-    // ("Patients" tab). Same result set + projection, faster.
-    //
-    // The originals call is_pmtct_infant(p.hospital_number) once PER ROW in the
-    // WHERE clause — a scalar function that runs a sub-query per invocation, for
-    // every candidate at the facility, on BOTH the data and the count query. This
-    // version materialises the full set of PMTCT infant hospital numbers ONCE in a
-    // CTE (via pmtct_infant_hospital_numbers()) and excludes them with a single
-    // hash NOT EXISTS anti-join — O(n) instead of n per-row function calls.
-    //
-    // The two hts_encounter NOT EXISTS blocks are kept byte-for-byte (the planner
-    // already anti-joins them, and the perf indexes back them). Explicit count
-    // queries keep totals exact and avoid Spring's count-derivation on a leading
-    // WITH. NULL / missing-table / differing-shape behaviour is identical to
-    // is_pmtct_infant, so the row set is unchanged.
-    //
-    // Revert by pointing the service back at findAllPersonHts / ...BySearchParam.
-    // ─────────────────────────────────────────────────────────────────────────
     String PATIENTS_INFANT_CTE =
             "WITH pmtct_infants AS (\n" +
             "    SELECT DISTINCT hospital_number\n" +
@@ -139,21 +119,7 @@ public interface HtsClientRepository extends JpaRepository<HtsClient, Long> {
                     PATIENTS_NOT_EXISTS,
             nativeQuery = true)
     Page<HtsPerson> findAllPersonHtsBySearchParamOptimized(Integer archived, Long facilityId, String search, Pageable pageable);
-    // ─────────────────────────────────────────────────────────────────────────
-    // OPTIMIZED equivalent of findOnlyPersonHts / findOnlyPersonHtsBySearchParam
-    // ("HTS Patients Archived" tab). Same result set + projection, faster.
-    //
-    // The originals scan hts_client TWICE — once for the MIN(date_created) +
-    // COUNT group-subquery ("mini"), then self-join hts_client back to it on
-    // (person_uuid, date_created) to fetch the first-registration row. This
-    // version scans hts_client ONCE: DISTINCT ON (person_uuid) ... ORDER BY
-    // person_uuid, date_created ASC, id ASC picks the earliest registration per
-    // person, and COUNT(*) OVER (PARTITION BY person_uuid) carries hts_count on
-    // the same pass. Explicit countQuery over the same CTE keeps totals exact
-    // (and avoids Spring's fragile count-derivation on a leading WITH).
-    //
-    // Revert by pointing the service back at findOnlyPersonHts / ...BySearchParam.
-    // ─────────────────────────────────────────────────────────────────────────
+
     String ONLY_PERSON_HTS_CTE =
             "WITH first_hc AS (\n" +
             "    SELECT DISTINCT ON (hc.person_uuid)\n" +

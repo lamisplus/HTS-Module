@@ -549,9 +549,7 @@ public class HtsClientService {
     public Page<HtsPerson> getOnlyPersonHts(String search, int pageNo, int pageSize) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        // Optimized: single hts_client scan (DISTINCT ON earliest registration +
-        // window COUNT) with an exact CTE-based count query.
-        // Revert by swapping back to findOnlyPersonHtsBySearchParam / findOnlyPersonHts.
+
         if(!String.valueOf(search).equals("null") && !search.equals("*")){
             search = search.replaceAll("\\s", "");
             String queryParam = "%"+search+"%";
@@ -681,9 +679,6 @@ public class HtsClientService {
     }
 
     public Boolean checkForClientCode(String clientCode) {
-        // if the repository finds that the client code exists,
-        // should return false to indicate that
-        // this client code doesn't pass the check, else true
         return !htsClientRepository.existsByClientCode(clientCode);
     }
 

@@ -308,13 +308,6 @@
         </sql>
     </changeSet>
 
-    <!--
-      Drop is_pmtct_infant(): its only callers were the original "Patients" grid
-      queries (findAllPersonHts / ...BySearchParam), now replaced by the set-based
-      pmtct_infant_hospital_numbers() anti-join. The scalar per-row function is
-      dead. IF EXISTS + failOnError=false so a missing function (or any lingering
-      dependency) never blocks startup.
-    -->
     <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-drop-fn-is-pmtct-infant">
         <sql splitStatements="false">
             DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
@@ -322,16 +315,6 @@
         <rollback/>
     </changeSet>
 
-    <!--
-      Covering indexes for the "Patients" tab (findAllPersonHtsOptimized / ...BySearchParamOptimized).
-      It filters patient_person by (facility_id, archived) then sorts by
-      created_date DESC, and excludes anyone already linked to an hts_encounter via
-      two NOT EXISTS probes: one on client_code = hospital_number, one on
-      CAST(patient_uuid AS TEXT) = uuid (patient_person.uuid is VARCHAR while
-      hts_encounter.patient_uuid is UUID, hence the cast). The expression index
-      matches that exact cast so the anti-join can use an index instead of a
-      seq-scan per row.
-    -->
     <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-hts-patients-tab-perf-indexes">
         <sql splitStatements="true" endDelimiter=";">
             -- patient_person driver + ORDER BY created_date DESC.
@@ -359,17 +342,6 @@
         </sql>
     </changeSet>
 
-    <!--
-      Set-based counterpart to is_pmtct_infant(): returns the full set of PMTCT
-      infant hospital numbers once, so the "Patients" grid can exclude infants
-      with a single materialised NOT EXISTS anti-join instead of a per-row scalar
-      function call (findAllPersonHtsOptimized / ...BySearchParamOptimized).
-      Same cross-facility safety as is_pmtct_infant: to_regclass() guards a
-      missing table (returns an empty set → excludes nobody), and EXCEPTION WHEN
-      OTHERS covers a differing column shape (also empty set). NULL hospital
-      numbers are dropped, matching the scalar function's NULL-in → not-an-infant
-      behaviour. STABLE so the planner evaluates it once per statement.
-    -->
     <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-create-fn-pmtct-infant-hospital-numbers">
         <sql splitStatements="false">
             CREATE OR REPLACE FUNCTION pmtct_infant_hospital_numbers()
