@@ -142,4 +142,83 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
             Long facilityId,
             @Param("search") String search,
             Pageable pageable);
+
+    String HTS_SUMMARY_CTES =
+            "WITH hts_agg AS (\n" +
+            "    SELECT DISTINCT ON (e.patient_uuid)\n" +
+            "        e.id, e.uuid, e.patient_uuid, e.client_code, e.date_of_visit,\n" +
+            "        e.setting, e.observation, e.facility_id,\n" +
+            "        COUNT(*) OVER (PARTITION BY e.patient_uuid) AS hts_count\n" +
+            "    FROM hts_encounter e\n" +
+            "    WHERE e.archived = false\n" +
+            "      AND e.facility_id = :facilityId\n" +
+            "    ORDER BY e.patient_uuid, e.id DESC\n" +
+            "),\n" +
+            "ict_agg AS (\n" +
+            "    SELECT patient_uuid, COUNT(*) AS ict_count\n" +
+            "    FROM hts_ict_encounter\n" +
+            "    WHERE archived = false\n" +
+            "      AND facility_id = :facilityId\n" +
+            "    GROUP BY patient_uuid\n" +
+            ")\n";
+
+    String HTS_SUMMARY_WHERE =
+            "WHERE p.archived = 0\n" +
+            "  AND p.facility_id = :facilityId\n" +
+            "  AND (:search IS NULL\n" +
+            "      OR p.first_name      ILIKE CAST(:search AS text)\n" +
+            "      OR p.surname         ILIKE CAST(:search AS text)\n" +
+            "      OR p.other_name      ILIKE CAST(:search AS text)\n" +
+            "      OR p.hospital_number ILIKE CAST(:search AS text)\n" +
+            "      OR EXISTS (\n" +
+            "          SELECT 1\n" +
+            "          FROM jsonb_array_elements(p.contact_point->'contactPoint') cp\n" +
+            "          WHERE cp->>'value' ILIKE CAST(:search AS text)\n" +
+            "      ))\n";
+
+    @Query(value =
+            HTS_SUMMARY_CTES +
+            "SELECT\n" +
+            "    hts.id,\n" +
+            "    CAST(hts.uuid AS text),\n" +
+            "    p.id                    AS person_id,\n" +
+            "    hts.client_code,\n" +
+            "    hts.date_of_visit,\n" +
+            "    hts.setting,\n" +
+            "    CAST(hts.observation AS text),\n" +
+            "    hts.facility_id,\n" +
+            "    hts.hts_count,\n" +
+            "    COALESCE(ict.ict_count, 0) AS ict_count\n" +
+            "FROM patient_person p\n" +
+            "INNER JOIN hts_agg hts ON hts.patient_uuid = p.uuid\n" +
+            "LEFT JOIN ict_agg ict ON ict.patient_uuid = p.uuid\n" +
+            HTS_SUMMARY_WHERE +
+            "ORDER BY hts.id DESC",
+            countQuery =
+
+                    "SELECT COUNT(*)\n" +
+                    "FROM patient_person p\n" +
+                    "WHERE p.archived = 0\n" +
+                    "  AND p.facility_id = :facilityId\n" +
+                    "  AND EXISTS (\n" +
+                    "      SELECT 1 FROM hts_encounter e\n" +
+                    "      WHERE e.patient_uuid = p.uuid\n" +
+                    "        AND e.archived = false\n" +
+                    "        AND e.facility_id = :facilityId\n" +
+                    "  )\n" +
+                    "  AND (:search IS NULL\n" +
+                    "      OR p.first_name      ILIKE CAST(:search AS text)\n" +
+                    "      OR p.surname         ILIKE CAST(:search AS text)\n" +
+                    "      OR p.other_name      ILIKE CAST(:search AS text)\n" +
+                    "      OR p.hospital_number ILIKE CAST(:search AS text)\n" +
+                    "      OR EXISTS (\n" +
+                    "          SELECT 1\n" +
+                    "          FROM jsonb_array_elements(p.contact_point->'contactPoint') cp\n" +
+                    "          WHERE cp->>'value' ILIKE CAST(:search AS text)\n" +
+                    "      ))",
+            nativeQuery = true)
+    Page<Object[]> findHtsPatientSummariesOptimized(
+            @Param("facilityId") Long facilityId,
+            @Param("search") String search,
+            Pageable pageable);
 }

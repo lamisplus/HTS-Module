@@ -168,7 +168,7 @@ public class HtsEncounterService {
         );
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
 
-        Page<Object[]> raw = repository.findHtsPatientSummaries(facilityId, searchParam, pageableWithoutSort);
+        Page<Object[]> raw = repository.findHtsPatientSummariesOptimized(facilityId, searchParam, pageableWithoutSort);
 
         return raw.map(row -> {
             HtsPatientSummaryDto dto = new HtsPatientSummaryDto();

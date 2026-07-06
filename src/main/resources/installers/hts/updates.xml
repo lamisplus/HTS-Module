@@ -291,4 +291,21 @@
         </sql>
     </changeSet>
 
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-hts-patient-grid-perf-indexes">
+        <sql splitStatements="true" endDelimiter=";">
+            -- hts_encounter: DISTINCT ON latest + window COUNT driver
+            -- (filter on facility_id+archived, then order by patient_uuid, id DESC).
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_latest
+                ON hts_encounter (facility_id, archived, patient_uuid, id DESC);
+
+            -- hts_encounter: EXISTS semi-join in the lean count query.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_count
+                ON hts_encounter (patient_uuid, facility_id, archived);
+
+            -- hts_ict_encounter: grouped ict_count CTE.
+            CREATE INDEX IF NOT EXISTS idx_hts_ict_encounter_grid_count
+                ON hts_ict_encounter (facility_id, archived, patient_uuid);
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
