@@ -241,7 +241,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    previouslyTestedNegative: yup.string(),
+    previouslyTestedNegative: yup.string().nullable(),
 
     timeOfLastNegativeTest: yup.mixed().test(
       "time-last-negative-conditional",
@@ -260,11 +260,11 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    clientInformedTransmissionRoutes: yup.string(),
-    clientInformedRiskFactors: yup.string(),
-    clientInformedPreventionMethods: yup.string(),
-    clientInformedPossibleResults: yup.string(),
-    informedConsentGiven: yup.string(),
+    clientInformedTransmissionRoutes: yup.string().nullable(),
+    clientInformedRiskFactors: yup.string().nullable(),
+    clientInformedPreventionMethods: yup.string().nullable(),
+    clientInformedPossibleResults: yup.string().nullable(),
+    informedConsentGiven: yup.string().nullable(),
     // clientInformedRiskFactors: yup.mixed().test(
     //   "risk-factors-conditional",
     //   "This field is required",
@@ -301,7 +301,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    everHadSexualIntercourse: yup.string(),
+    everHadSexualIntercourse: yup.string().nullable(),
 
     // everHadSexualIntercourse: yup.mixed().test(
     //   "ever-sex-conditional",
@@ -312,7 +312,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    moreThanOneSexPartner: yup.string(),
+    moreThanOneSexPartner: yup.string().nullable(),
 
     // moreThanOneSexPartner: yup.mixed().test(
     //   "multi-partner-conditional",
@@ -323,7 +323,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    unprotectedVaginalSex: yup.string(),
+    unprotectedVaginalSex: yup.string().nullable(),
 
     // unprotectedVaginalSex: yup.mixed().test(
     //   "vaginal-sex-conditional",
@@ -336,7 +336,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    unprotectedAnalSex:yup.string(),
+    unprotectedAnalSex:yup.string().nullable(),
 
     // unprotectedAnalSex: yup.mixed().test(
     //   "anal-sex-conditional",
@@ -357,8 +357,8 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    bloodTransfusionLast3Months: yup.string(),
-    sexUnderInfluence:yup.string(),
+    bloodTransfusionLast3Months: yup.string().nullable(),
+    sexUnderInfluence:yup.string().nullable(),
 
     // sexUnderInfluence: yup.mixed().test(
     //   "sex-influence-conditional",
@@ -369,7 +369,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    historyOfSTI: yup.string(),
+    historyOfSTI: yup.string().nullable(),
 
     // historyOfSTI: yup.mixed().test(
     //   "sti-history-conditional",
@@ -412,7 +412,7 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
-    complaintsVaginalDischarge: yup.string(),
+    complaintsVaginalDischarge: yup.string().nullable(),
 
     // complaintsVaginalDischarge: yup.mixed().test(
     //   "vaginal-discharge-conditional",
@@ -423,7 +423,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    complaintsLowerAbdominalPain: yup.string(),
+    complaintsLowerAbdominalPain: yup.string().nullable(),
 
     // complaintsLowerAbdominalPain: yup.mixed().test(
     //   "lower-abdominal-conditional",
@@ -445,10 +445,10 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    complaintsUrethralDischarge: yup.string(),
-    complaintsScroralSwelling: yup.string(),
-    complaintsGenitalSores: yup.string(),
-    complaintsSwollenLymphNodes: yup.string(),
+    complaintsUrethralDischarge: yup.string().nullable(),
+    complaintsScroralSwelling: yup.string().nullable(),
+    complaintsGenitalSores: yup.string().nullable(),
+    complaintsSwollenLymphNodes: yup.string().nullable(),
     // complaintsScroralSwelling: yup.mixed().test(
     //   "scrotal-swelling-conditional",
     //   "This field is required",
@@ -474,7 +474,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    partnerNewlyDiagnosed: yup.string(),
+    partnerNewlyDiagnosed: yup.string().nullable(),
 
     // partnerNewlyDiagnosed: yup.mixed().test(
     //   "partner-new-dx-conditional",
@@ -486,7 +486,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    partnerPregnantOnArv: yup.string(),
+    partnerPregnantOnArv: yup.string().nullable(),
 
     // partnerPregnantOnArv: yup.mixed().test(
     //   "partner-pmtct-conditional",
@@ -498,7 +498,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    adolescentHivPositive: yup.string(),
+    adolescentHivPositive: yup.string().nullable(),
 
     // adolescentHivPositive: yup.mixed().test(
     //   "adolescent-hiv-conditional",
@@ -523,8 +523,8 @@ export const buildValidationSchema = (isNewPatient) => {
     //     return !!value || this.createError({ message: "This field is required" });
     //   }
     // ),
-    partnerNotRegularlyOnDrugs: yup.string(),
-    partnerRecentlyReturnedToTreatment: yup.string(),
+    partnerNotRegularlyOnDrugs: yup.string().nullable(),
+    partnerRecentlyReturnedToTreatment: yup.string().nullable(),
 
     // partnerRecentlyReturnedToTreatment: yup.mixed().test(
     //   "partner-ltfu-conditional",
@@ -536,7 +536,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    hadSexWithHivPositivePartnerInRiskGroup: yup.string(),
+    hadSexWithHivPositivePartnerInRiskGroup: yup.string().nullable(),
 
     // hadSexWithHivPositivePartnerInRiskGroup: yup.mixed().test(
     //   "had-sex-with-hiv-conditional",
@@ -612,8 +612,8 @@ export const buildValidationSchema = (isNewPatient) => {
 
 
     // previouslyTestedThisYear: yup.string().required("This field is required"),
-    previouslyTestedThisYear: yup.string(),
-    clientReceivedTestResult: yup.string(),
+    previouslyTestedThisYear: yup.string().nullable(),
+    clientReceivedTestResult: yup.string().nullable(),
     // clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
 
@@ -661,15 +661,15 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Accepted Index testing is required when confirmatory HIV test is positive" });
       }
     ),
-    providedFpInfo: yup.string(),
+    providedFpInfo: yup.string().nullable(),
     // providedFpInfo: yup.string().required("This field is required"),
-    clientPartnerUseFpMethods: yup.string(),
+    clientPartnerUseFpMethods: yup.string().nullable(),
     // clientPartnerUseFpMethods: yup.string().required("This field is required"),
-    clientPartnerUseCondoms: yup.string(),
+    clientPartnerUseCondoms: yup.string().nullable(),
     // clientPartnerUseCondoms: yup.string().required("This field is required"),
-    correctCondomUseDemonstrated: yup.string(),
+    correctCondomUseDemonstrated: yup.string().nullable(),
     // correctCondomUseDemonstrated: yup.string().required("This field is required"),
-    condomsProvided: yup.string(),
+    condomsProvided: yup.string().nullable(),
     // condomsProvided: yup.string().required("This field is required"),
     clientReferredToOtherServices: yup.string().required("This field is required"),
     completedBy: yup.string().required("This field is required"),
