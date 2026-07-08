@@ -928,4 +928,22 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="adjust_risk_stratification" author="Emmanuel Nnajiofor">
+        <sql>
+            UPDATE hts_encounter he
+            SET
+                setting = r.entry_point,
+                observation = jsonb_set(
+                    he.observation,
+                    '{facilitySetting}',
+                    to_jsonb(r.testing_setting::text),
+                    true
+                )
+            FROM hts_client h
+            JOIN hts_risk_stratification r
+                ON r.code = h.risk_stratification_code
+            WHERE he.uuid = h.uuid;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

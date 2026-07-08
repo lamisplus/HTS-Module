@@ -15,7 +15,6 @@ import org.hibernate.annotations.GenerationTime;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "hts_encounter")
@@ -36,8 +35,9 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
     @JoinColumn(name = "patient_id", nullable = false)
     private Person person;
 
-    @Column(name = "patient_uuid", columnDefinition = "uuid")
-    private UUID patientUuid;
+
+    @Column(name = "patient_uuid", columnDefinition = "varchar(50)", length = 50)
+    private String patientUuid;
 
     @Column(name = "client_code", nullable = false, length = 50)
     private String clientCode;

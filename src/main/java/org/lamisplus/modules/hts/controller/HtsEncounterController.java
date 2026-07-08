@@ -20,7 +20,6 @@ import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/hts-encounter")
@@ -86,7 +85,9 @@ public class HtsEncounterController {
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<HtsEncounterResponse> getForProphylaxis(
             @PathVariable("screening-date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate screeningDate,
-            @PathVariable("patient-uuid") UUID patientUuid) {
+            // patientUuid taken as a raw String (not java.util.UUID) so legacy/migrated
+            // patient_uuid values that aren't well-formed UUIDs don't 400 at binding time.
+            @PathVariable("patient-uuid") String patientUuid) {
         return ResponseEntity.ok(service.getForProphylaxis(screeningDate, patientUuid));
     }
 
