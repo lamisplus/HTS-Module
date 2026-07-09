@@ -173,11 +173,11 @@ export const buildValidationSchema = (isNewPatient) => {
 
     serialNumber: yup
       .string()
-      .required("Serial number is required to generate a client code")
-      .matches(
-        /^[a-zA-Z0-9]+$/,
-        "Serial number must contain only letters and numbers — no special characters"
-      ),
+      .required("Serial number is required to generate a client code"),
+      // .matches(
+      //   /^[a-zA-Z0-9]+$/,
+      //   "Serial number must contain only letters and numbers — no special characters"
+      // ),
 
 
     setting: yup.string().required("Setting is required"),
