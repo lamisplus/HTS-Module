@@ -946,4 +946,78 @@
         </sql>
     </changeSet>
 
+    <changeSet id="backfill_final_hiv_test_result" author="Emmanuel Nnajiofor">
+        <comment>
+            Backfills / corrects the derived "finalHivTestResult" field inside the
+            hts_encounter.observation JSONB column, using the same logic as
+            DiagnosticTestingSection.jsx:
+
+            Path A (typeOfHivTestDone = TYPE_OF_HIV_TEST_HIV_EARLY_DETECT):
+            - hivEarlyDetectResult is Antigen Reactive or Antigen+Antibody Reactive
+            -> "Suspected Acute Infection"
+            - hivEarlyDetectResult is Antibody Reactive
+            -> confirmatoryHivTest positive -> "Positive"
+            -> confirmatoryHivTest negative -> "Negative"
+
+            Path B (typeOfHivTestDone = TYPE_OF_HIV_TEST_RAPID_ANTIBODY):
+            - initialHivTest = STI_HIV_RESULT_NEGATIVE -> "Negative"
+            - initialHivTest = STI_HIV_RESULT_POSITIVE
+            -> confirmatoryHivTest positive -> "Positive"
+            -> confirmatoryHivTest negative -> "Negative"
+
+            Any record for which none of the above branches resolve to a value
+            (incomplete data, unrecognised typeOfHivTestDone, etc.) is left
+            untouched — we only ever write a value we can actually derive.
+        </comment>
+        <sql>
+            WITH computed AS (
+                SELECT
+                    id,
+                    CASE
+                        WHEN observation->>'typeOfHivTestDone' = 'TYPE_OF_HIV_TEST_HIV_EARLY_DETECT' THEN
+                                CASE
+                                    WHEN observation->>'hivEarlyDetectResult' IN (
+                                                                                  'HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE',
+                                                                                  'HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE'
+                                    ) THEN 'Suspected Acute Infection'
+                WHEN observation->>'hivEarlyDetectResult' = 'HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE' THEN
+                CASE
+                WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_positive' THEN 'Positive'
+                WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_negative' THEN 'Negative'
+                ELSE NULL
+            END
+            ELSE NULL
+            END
+            WHEN observation->>'typeOfHivTestDone' = 'TYPE_OF_HIV_TEST_RAPID_ANTIBODY' THEN
+                        CASE
+                            WHEN observation->>'initialHivTest' = 'STI_HIV_RESULT_NEGATIVE' THEN 'Negative'
+                            WHEN observation->>'initialHivTest' = 'STI_HIV_RESULT_POSITIVE' THEN
+                                CASE
+                                    WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_positive' THEN 'Positive'
+                                    WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_negative' THEN 'Negative'
+                                    ELSE NULL
+            END
+            ELSE NULL
+            END
+            ELSE NULL
+            END AS computed_result
+            FROM public.hts_encounter
+            WHERE observation IS NOT NULL
+        )
+            UPDATE public.hts_encounter e
+            SET observation = jsonb_set(e.observation, '{finalHivTestResult}', to_jsonb(c.computed_result::text), true)
+                FROM computed c
+            WHERE e.id = c.id
+              AND c.computed_result IS NOT NULL
+              AND (e.observation->>'finalHivTestResult') IS DISTINCT FROM c.computed_result;
+        </sql>
+        <rollback>
+            <comment>
+                Not reversible: the prior values of finalHivTestResult (blank or
+                incorrect) are not preserved anywhere, so there's nothing safe to
+                roll back to. If you need reversibility, snapshot the affected
+                rows into a temp table before running this in production.
+            </comment>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

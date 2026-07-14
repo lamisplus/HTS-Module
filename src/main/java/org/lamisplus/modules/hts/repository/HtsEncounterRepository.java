@@ -97,6 +97,7 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                     "      OR p.surname         ILIKE CAST(:search AS text)\n" +
                     "      OR p.other_name      ILIKE CAST(:search AS text)\n" +
                     "      OR p.hospital_number ILIKE CAST(:search AS text)\n" +
+                    "      OR hts.client_code   ILIKE CAST(:search AS text)\n" +
                     "      OR EXISTS (\n" +
                     "          SELECT 1\n" +
                     "          FROM jsonb_array_elements(p.contact_point->'contactPoint') cp\n" +
@@ -140,6 +141,13 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
                             "      OR p.surname         ILIKE CAST(:search AS text)\n" +
                             "      OR p.other_name      ILIKE CAST(:search AS text)\n" +
                             "      OR p.hospital_number ILIKE CAST(:search AS text)\n" +
+                            "      OR EXISTS (\n" +
+                            "          SELECT 1 FROM hts_encounter e2\n" +
+                            "          WHERE CAST(e2.patient_uuid AS text) = CAST(p.uuid AS text)\n" +
+                            "            AND e2.archived = false\n" +
+                            "            AND e2.facility_id = :facilityId\n" +
+                            "            AND e2.client_code ILIKE CAST(:search AS text)\n" +
+                            "      )\n" +
                             "      OR EXISTS (\n" +
                             "          SELECT 1\n" +
                             "          FROM jsonb_array_elements(p.contact_point->'contactPoint') cp\n" +
