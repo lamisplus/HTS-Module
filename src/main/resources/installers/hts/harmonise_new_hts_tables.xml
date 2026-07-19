@@ -1,8 +1,8 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd"
-                   >
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+>
 
 
     <changeSet id="harmonise_v4_hts_encounter_add_source" author="Emmanuel Nnajiofor">
@@ -285,7 +285,7 @@
         </comment>
         <sql>
             ALTER TABLE hts_encounter
-                ALTER COLUMN client_code   TYPE VARCHAR(200) USING client_code::VARCHAR(200),
+            ALTER COLUMN client_code   TYPE VARCHAR(200) USING client_code::VARCHAR(200),
                 ALTER COLUMN setting       TYPE VARCHAR(200) USING setting::VARCHAR(200),
                 ALTER COLUMN source        TYPE VARCHAR(200) USING source::VARCHAR(200),
                 ALTER COLUMN latitude      TYPE VARCHAR(200) USING latitude::VARCHAR(200),
@@ -295,13 +295,13 @@
         </sql>
         <rollback>
             ALTER TABLE hts_encounter
-                ALTER COLUMN client_code   TYPE VARCHAR(50),
-                ALTER COLUMN setting       TYPE VARCHAR(50),
-                ALTER COLUMN source        TYPE VARCHAR(50),
-                ALTER COLUMN latitude      TYPE VARCHAR(50),
-                ALTER COLUMN longitude     TYPE VARCHAR(50),
-                ALTER COLUMN created_by    TYPE VARCHAR(50),
-                ALTER COLUMN modified_by   TYPE VARCHAR(50);
+            ALTER COLUMN client_code   TYPE VARCHAR(50),
+            ALTER COLUMN setting       TYPE VARCHAR(50),
+            ALTER COLUMN source        TYPE VARCHAR(50),
+            ALTER COLUMN latitude      TYPE VARCHAR(50),
+            ALTER COLUMN longitude     TYPE VARCHAR(50),
+            ALTER COLUMN created_by    TYPE VARCHAR(50),
+            ALTER COLUMN modified_by   TYPE VARCHAR(50);
         </rollback>
     </changeSet>
 
@@ -313,15 +313,15 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN setting     TYPE VARCHAR(200) USING setting::VARCHAR(200),
+            ALTER COLUMN setting     TYPE VARCHAR(200) USING setting::VARCHAR(200),
                 ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
                 ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN setting     TYPE VARCHAR(100),
-                ALTER COLUMN created_by  TYPE VARCHAR(255),
-                ALTER COLUMN modified_by TYPE VARCHAR(255);
+            ALTER COLUMN setting     TYPE VARCHAR(100),
+            ALTER COLUMN created_by  TYPE VARCHAR(255),
+            ALTER COLUMN modified_by TYPE VARCHAR(255);
         </rollback>
     </changeSet>
 
@@ -332,13 +332,13 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
+            ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
                 ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN created_by  TYPE VARCHAR(255),
-                ALTER COLUMN modified_by TYPE VARCHAR(255);
+            ALTER COLUMN created_by  TYPE VARCHAR(255),
+            ALTER COLUMN modified_by TYPE VARCHAR(255);
         </rollback>
     </changeSet>
 
@@ -398,7 +398,7 @@
 
             -- Retype the column
             ALTER TABLE hts_encounter
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             -- Restore the default and unique constraint
             ALTER TABLE hts_encounter
@@ -420,11 +420,11 @@
         <comment>Convert hts_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
         <sql>
             ALTER TABLE hts_encounter
-                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+            ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
         </sql>
         <rollback>
             ALTER TABLE hts_encounter
-                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+            ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
         </rollback>
     </changeSet>
 
@@ -435,7 +435,7 @@
             ALTER TABLE hts_ict_encounter DROP CONSTRAINT IF EXISTS hts_ict_encounter_uuid_key;
 
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             ALTER TABLE hts_ict_encounter
                 ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
@@ -456,11 +456,11 @@
         <comment>Convert hts_ict_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+            ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+            ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
         </rollback>
     </changeSet>
 
@@ -471,7 +471,7 @@
             ALTER TABLE hts_ict_contact DROP CONSTRAINT IF EXISTS hts_ict_contact_uuid_key;
 
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             ALTER TABLE hts_ict_contact
                 ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
@@ -521,12 +521,12 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts;
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ADD CONSTRAINT fk_ict_encounter_hts
-                    FOREIGN KEY (hts_encounter_id) REFERENCES hts_encounter(id);
+            ADD CONSTRAINT fk_ict_encounter_hts
+            FOREIGN KEY (hts_encounter_id) REFERENCES hts_encounter(id);
         </rollback>
     </changeSet>
 
@@ -542,7 +542,7 @@
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
         </rollback>
     </changeSet>
 
@@ -583,12 +583,12 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_contact
-                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter;
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                ADD CONSTRAINT fk_ict_contact_encounter
-                    FOREIGN KEY (ict_encounter_id) REFERENCES hts_ict_encounter(id);
+            ADD CONSTRAINT fk_ict_contact_encounter
+            FOREIGN KEY (ict_encounter_id) REFERENCES hts_ict_encounter(id);
         </rollback>
     </changeSet>
 
@@ -604,7 +604,7 @@
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
         </rollback>
     </changeSet>
 
@@ -630,26 +630,26 @@
          ═══════════════════════════════════════════════════════════════════════ -->
 
 
-         <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
-            <comment>
-                Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
-            </comment>
-            <sql>
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts TYPE boolean
+    <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
+        <comment>
+            Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
+        </comment>
+        <sql>
+            ALTER TABLE hts_encounter
+            ALTER COLUMN pmtct_hts TYPE boolean
                     USING COALESCE((pmtct_hts::text)::boolean, false);
 
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts SET DEFAULT false;
+            ALTER TABLE hts_encounter
+                ALTER COLUMN pmtct_hts SET DEFAULT false;
 
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts SET NOT NULL;
-            </sql>
-            <rollback>
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
-            </rollback>
-        </changeSet>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN pmtct_hts SET NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter
+            ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
+        </rollback>
+    </changeSet>
 
 
     <!-- Add client_category_other TEXT column to hts_ict_encounter -->
@@ -934,14 +934,14 @@
             SET
                 setting = r.entry_point,
                 observation = jsonb_set(
-                    he.observation,
-                    '{facilitySetting}',
-                    to_jsonb(r.testing_setting::text),
-                    true
-                )
-            FROM hts_client h
+                        he.observation,
+                        '{facilitySetting}',
+                        to_jsonb(r.testing_setting::text),
+                        true
+                    )
+                FROM hts_client h
             JOIN hts_risk_stratification r
-                ON r.code = h.risk_stratification_code
+            ON r.code = h.risk_stratification_code
             WHERE he.uuid = h.uuid;
         </sql>
     </changeSet>
