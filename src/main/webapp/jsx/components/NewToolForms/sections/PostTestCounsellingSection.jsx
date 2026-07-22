@@ -170,7 +170,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
         </div>
 
         <div className="row">
-          <SectionSubheading>HIVST</SectionSubheading>
+          {/* <SectionSubheading>HIVST</SectionSubheading> */}
 
           <div className="col-md-4">
             <FormSelect
@@ -245,7 +245,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
               </>
             )
           }
-          <SectionSubheading />
+          {/* <SectionSubheading /> */}
         </div>
 
         {
