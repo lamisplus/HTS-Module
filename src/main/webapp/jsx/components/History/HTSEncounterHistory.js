@@ -22,6 +22,7 @@ import { url as baseUrl, token } from "./../../../api";
 import "semantic-ui-css/semantic.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { CoPresentOutlined } from "@mui/icons-material";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -189,7 +190,7 @@ const HIV_RESULT_MAP = {
   "STI_HIV_RESULT_NEGATIVE": { display: "Negative", color: "green" },
 
   "Positive": { display: "Positive", color: "red" },
-  "Negative": { display: "Negative", color: "red" },
+  "Negative": { display: "Negative", color: "green" },
 
   "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
@@ -293,6 +294,7 @@ const mapResultCode = (code, customMap) => {
 };
 
 const formatHivResult = (rawCode) => {
+  console.log(rawCode)
   const { display, color } = mapResultCode(rawCode, HIV_RESULT_MAP);
   return <Label color={color} size="mini">{display}</Label>;
 };

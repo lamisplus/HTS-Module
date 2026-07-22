@@ -153,10 +153,13 @@ const ContactCard = ({
     });
   };
 
+
   const handleHivResultChange = (e) => {
     if (readOnly) return;
     const v = e.target.value;
-    if (v !== "HIV_TEST_RESULT_POSITIVE") {
+    if (v === "HIV_TEST_RESULT_NOT_DONE") {
+      patch({ hivTestResult: v, dateTestedHiv: "", dateEnrolledArt: "", onArt: "", artClinic: "" });
+    } else if (v !== "HIV_TEST_RESULT_POSITIVE") {
       patch({ hivTestResult: v, dateEnrolledArt: "", onArt: "", artClinic: "" });
     } else {
       set("hivTestResult", v);
@@ -198,6 +201,7 @@ const ContactCard = ({
   const isKnownNegative = val("knownHivPositive") === "YES_NO_NO";
   const showArtEnrollDate = isKnownPositive || val("hivTestResult") === "HIV_TEST_RESULT_POSITIVE";
   const showisArtStartDate = val("onArt") === "YES_NO_YES";
+  const showDateContactTested = val("hivTestResult") !== "HIV_TEST_RESULT_NOT_DONE" && val("hivTestResult") !== ""
 
   return (
     <div style={cardStyle}>
@@ -430,16 +434,20 @@ const ContactCard = ({
                 required
               />
             </div>
-            <div className="col-md-4">
-              <FormGroup style={{ marginBottom: "16px" }}>
-                <Label style={labelStyle}>Date Contact Tested <span style={{ color: "red" }}>*</span></Label>
-                <Input type="date" value={val("dateTestedHiv")}
-                  onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
-                  max={today} onKeyPress={(e) => e.preventDefault()} disabled={readOnly}
-                  style={readOnly ? disabledInputStyle : inputStyle} />
-                {touched.dateTestedHiv && errors.dateTestedHiv && <span style={errorStyle}>{errors.dateTestedHiv}</span>}
-              </FormGroup>
-            </div>
+
+            {showDateContactTested && (
+              <div className="col-md-4">
+                <FormGroup style={{ marginBottom: "16px" }}>
+                  <Label style={labelStyle}>Date Contact Tested <span style={{ color: "red" }}>*</span></Label>
+                  <Input type="date" value={val("dateTestedHiv")}
+                    onChange={(e) => !readOnly && set("dateTestedHiv", e.target.value)}
+                    max={today} onKeyPress={(e) => e.preventDefault()} disabled={readOnly}
+                    style={readOnly ? disabledInputStyle : inputStyle} />
+                  {touched.dateTestedHiv && errors.dateTestedHiv && <span style={errorStyle}>{errors.dateTestedHiv}</span>}
+                </FormGroup>
+              </div>
+            )}
+
             {showArtEnrollDate && (
               <>
                 <div className="col-md-4">

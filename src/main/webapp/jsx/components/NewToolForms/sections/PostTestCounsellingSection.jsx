@@ -1,17 +1,36 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { FormSelect, SectionSubheading } from "./FormFields";
+import { FormSelect, SectionSubheading, inputStyle, labelStyle } from "./FormFields";
 import {
   PREVIOUSLY_TESTED_OPTIONS,
 } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 import { getAllUsers } from "../../../services/getAllUsers.service";
+import { Input, Label } from "reactstrap";
+
+
+const disabledInputStyle = {
+  ...inputStyle,
+  background: "#f6f8fa",
+  color: "#8c959f",
+  cursor: "not-allowed",
+};
+
+const errorStyle = {
+  color: "#f85032",
+  fontSize: "12.8px",
+  marginTop: "4px",
+  display: "block",
+};
+
 
 const PostTestCounsellingSection = ({ formik, readOnly }) => {
-  const { values, errors, touched, handleChange, handleBlur } = formik;
+  const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
   const [codesets, setCodesets] = useState(null);
   const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
+
+
 
   useEffect(() => {
     let isMounted = true;
@@ -114,11 +133,17 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
   useGetCodesets({
     codesetsKeys: [
       "YES_NO",
-      "TARGET_GROUP"
+      "TARGET_GROUP",
+      "HIVST_KIT_USER"
     ],
     patientId: "PostTestCounselling",
     onSuccess: loadCodesets,
   });
+
+  const handleNoOfHivstKitProvided = (e) => {
+    if (e.target.value === "." || e.target.value === ",") e.preventDefault();
+    setFieldValue("numberOfHivstKitDistributed", e.target.value);
+  };
 
 
 
@@ -144,59 +169,84 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
           />
         </div>
 
-        <div className="col-md-6">
-          <FormSelect
-            label="HIV self Test Kits Provided to Client"
-            {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
-          />
+        <div className="row">
+          <SectionSubheading>HIVST</SectionSubheading>
+
+          <div className="col-md-4">
+            <FormSelect
+              label="HIV self Test Kits Provided to Client"
+              {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
+            />
+          </div>
+
+          {
+            showCategoryOfClient && (
+              <>
+                <div className="col-md-5">
+                  {/* <FormSelect
+        label="Category of clients receiving HIV self test kit"
+        {...sp("categoryOfClients", (() => {
+          const rawOptions = transformOptions(codesets?.["TARGET_GROUP"]);
+          const sexValue = values.sex?.toLowerCase();
+          const isMale = sexValue === "sex_male" || sexValue === "male";
+          const isFemale = sexValue === "sex_female" || sexValue === "female";
+          const ageNum = values.age
+            ? parseInt(values.age, 10)
+            : values.dateOfBirth
+              ? (() => {
+                const birth = new Date(values.dateOfBirth);
+                if (isNaN(birth.getTime())) return null;
+                const now = new Date();
+                let y = now.getFullYear() - birth.getFullYear();
+                const m = now.getMonth() - birth.getMonth();
+                if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) y--;
+                return y;
+              })()
+              : null;
+          const isUnder15 = ageNum !== null && ageNum < 15;
+
+          return rawOptions.filter((opt) => {
+            const code = opt.value; // e.g. "TARGET_GROUP_FSW"
+            // FSW: disabled for males (handled below via disabled prop) — here we keep it visible but see note
+            // MSM: hidden for females
+            if (isFemale && code === "TARGET_GROUP_MSM") return false;
+            if (isMale && code === "TARGET_GROUP_FSW") return false;
+            // Children of KP: only show for clients < 15 years
+            if (code === "TARGET_GROUP_CHILDREN_OF_KP" && !isUnder15) return false;
+            return true;
+          }).map((opt) => {
+            // FSW: disable (not remove) for males
+            if (isMale && opt.value === "TARGET_GROUP_FSW") {
+              return { ...opt, disabled: true };
+            }
+            return opt;
+          });
+        })())}
+      /> */}
+
+                  <FormSelect
+                    label="Category of clients receiving HIV self test kit"
+                    {...sp("categoryOfClients", transformOptions(codesets?.["HIVST_KIT_USER"]))}
+                  />
+                </div>
+
+                <div className="col-md-3">
+                  <Label style={labelStyle}>No. of Kits Distributed</Label>
+                  <Input type="number" name="numberOfHivstKitDistributed" value={values?.numberOfHivstKitDistributed || ""}
+                    onChange={readOnly ? undefined : handleNoOfHivstKitProvided} onBlur={handleBlur}
+                    min="0" step="1" disabled={readOnly}
+                    style={readOnly ? disabledInputStyle : inputStyle}
+                    onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
+                  />
+                  {touched?.numberOfHivstKitDistributed && errors?.numberOfHivstKitDistributed && (
+                    <span style={errorStyle}>{errors?.numberOfHivstKitDistributed}</span>
+                  )}
+                </div>
+              </>
+            )
+          }
+          <SectionSubheading />
         </div>
-
-        {
-          showCategoryOfClient && (
-            <div className="col-md-6">
-              <FormSelect
-                label="Category of clients receiving HIV self test kit"
-                {...sp("categoryOfClients", (() => {
-                  const rawOptions = transformOptions(codesets?.["TARGET_GROUP"]);
-                  const sexValue = values.sex?.toLowerCase();
-                  const isMale = sexValue === "sex_male" || sexValue === "male";
-                  const isFemale = sexValue === "sex_female" || sexValue === "female";
-                  const ageNum = values.age
-                    ? parseInt(values.age, 10)
-                    : values.dateOfBirth
-                      ? (() => {
-                        const birth = new Date(values.dateOfBirth);
-                        if (isNaN(birth.getTime())) return null;
-                        const now = new Date();
-                        let y = now.getFullYear() - birth.getFullYear();
-                        const m = now.getMonth() - birth.getMonth();
-                        if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) y--;
-                        return y;
-                      })()
-                      : null;
-                  const isUnder15 = ageNum !== null && ageNum < 15;
-
-                  return rawOptions.filter((opt) => {
-                    const code = opt.value; // e.g. "TARGET_GROUP_FSW"
-                    // FSW: disabled for males (handled below via disabled prop) — here we keep it visible but see note
-                    // MSM: hidden for females
-                    if (isFemale && code === "TARGET_GROUP_MSM") return false;
-                    if (isMale && code === "TARGET_GROUP_FSW") return false;
-                    // Children of KP: only show for clients < 15 years
-                    if (code === "TARGET_GROUP_CHILDREN_OF_KP" && !isUnder15) return false;
-                    return true;
-                  }).map((opt) => {
-                    // FSW: disable (not remove) for males
-                    if (isMale && opt.value === "TARGET_GROUP_FSW") {
-                      return { ...opt, disabled: true };
-                    }
-                    return opt;
-                  });
-                })())}
-              />
-            </div>
-          )
-        }
 
         {
           showAcceptedIndexTesting && (
@@ -215,12 +265,14 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
             {...sp("providedFpInfo", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
+
         <div className="col-md-6">
           <FormSelect
             label="Client/Partner Use FP Methods (Other Than Condom)"
             {...sp("clientPartnerUseFpMethods", transformOptions(codesets?.["YES_NO"]))}
           />
         </div>
+
         <div className="col-md-6">
           <FormSelect
             label="Client/Partner Use Condoms as (one) FP Method"

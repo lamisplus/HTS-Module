@@ -44,7 +44,7 @@ const resolvePersonId = (p) =>
 // ── Map personResponseDto → flat Formik values (display strings, not codes) ──
 const mapPersonToFormValues = (dto) => {
 
-  
+
   if (!dto) return {};
 
   const addressArr = dto?.address?.address ?? [];
@@ -95,7 +95,7 @@ const mapPersonToFormValues = (dto) => {
 
 const blankClinicalValues = {
   dateOfVisit: "", facilityName: "", setting: "", facilitySetting: "",
-  communityEntryPoint: "", typeOfSession: "", indexTesting: "", indexRelationship: "",
+  communityEntryPoint: "", typeOfSession: "", htsPopulationType: "", indexTesting: "", indexRelationship: "",
   indexClientCode: "", numberOfWives: "", numberOfCoWives: "", numberOfBiologicalChildren: "",
   pregnancyStatus: "", breastfeedingDuration: "", previouslyTestedNegative: "",
   timeOfLastNegativeTest: "", clientInformedTransmissionRoutes: "", clientInformedRiskFactors: "",
@@ -110,7 +110,7 @@ const blankClinicalValues = {
   hadSexWithHivPositivePartnerInRiskGroup: "", typeOfHivTestDone: "", hivEarlyDetectResult: "",
   initialHivTest: "", suspectedAcuteInfection: "", confirmatoryHivTest: "", syphilisTestResult: "",
   recencyTest: "", previouslyTestedThisYear: "", clientReceivedTestResult: "",
-  hivTestKitsProvided: "", categoryOfClients: "", acceptedIndexTesting: "", providedFpInfo: "",
+  hivTestKitsProvided: "", categoryOfClients: "", numberOfHivstKitDistributed: "", acceptedIndexTesting: "", providedFpInfo: "",
   clientPartnerUseFpMethods: "", clientPartnerUseCondoms: "", correctCondomUseDemonstrated: "",
   condomsProvided: "", clientReferredToOtherServices: "", completedBy: "", designation: "",
   sexCode: "", maritalStatusCode: "", currentOrganisationUnitId: "", patientId: "",
@@ -244,7 +244,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    "typeOfSession", "indexRelationship", "indexClientCode", "facilityName",
+    "typeOfSession", "htsPopulationType", "indexRelationship", "indexClientCode", "facilityName",
     "surname", "firstName", "dobType", "dateOfBirth", "age", "sex", "phoneNumber",
     "maritalStatus", "numberOfWives", "numberOfCoWives", "numberOfBiologicalChildren",
     "pregnancyStatus", "breastfeedingDuration", "clientState", "clientLga", "address",
@@ -266,7 +266,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   ];
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
-    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo", "clientPartnerUseFpMethods",
+    "categoryOfClients", "numberOfHivstKitDistributed", "acceptedIndexTesting", "providedFpInfo", "clientPartnerUseFpMethods",
     "clientPartnerUseCondoms", "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",
   ];

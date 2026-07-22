@@ -220,7 +220,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       "SEX",
       "YES_NO",
       "ENROLLMENT_SETTING",
-      "DURATION_OF_BREASTFEEDING"
+      "DURATION_OF_BREASTFEEDING",
+      "KP_TYPE"
     ],
     patientId: accountDetail?.currentOrganisationUnitName,
     onSuccess: loadCodesets,
@@ -236,7 +237,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   };
 
 
- 
+
 
   const handleSexChange = (e) => {
     const sex = e.target.value;
@@ -469,7 +470,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       <div className="row">
         <div className="col-md-4">
           <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required
-            // min={values.dateOfBirth || today}
+          // min={values.dateOfBirth || today}
           />
         </div>
 
@@ -633,6 +634,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
           />
         </div>
 
+        <div className="col-md-4">
+          <FormSelect
+            label="Population Type"
+            {...sp("htsPopulationType", transformOptions(codesets?.["KP_TYPE"]))}
+          // required
+          />
+        </div>
+
         {showIndexFields && (
           <div className="col-md-4">
             <FormSelect
@@ -727,7 +736,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showBreastfeedingDuration && (
-          <div className={`col-md-4 ${formik.values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING" ? "mt-4" : ""}`}>
+          <div
+            // className={`col-md-4 ${formik.values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING" ? "mt-4" : ""}`}
+            className="col-md-4"
+          >
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}

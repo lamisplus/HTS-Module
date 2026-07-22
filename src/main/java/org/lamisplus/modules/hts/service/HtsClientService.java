@@ -60,7 +60,7 @@ public class HtsClientService {
         if(htsClientRequestDto.getSource().equalsIgnoreCase(Source.Mobile.toString())){
             Optional<HtsClient> htsClientExists = htsClientRepository.findByUuid(htsClientRequestDto.getUuid());
             if (htsClientExists.isPresent()) {
-                LOG.info("HTS Client with code {} has already been synced", htsClientRequestDto.getClientCode());
+                // LOG.info("HTS Client with code {} has already been synced", htsClientRequestDto.getClientCode());
                 return htsClientToHtsClientDto(htsClientExists.get());
             }}
 

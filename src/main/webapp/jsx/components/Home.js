@@ -190,13 +190,6 @@ const Home = () => {
                   </Tab>
 
 
-                  {/* {permissions.canSeeFindPatients && ( */}
-                  <Tab eventKey="hts" title="HTS Patients Archived">
-                    <Suspense fallback={<LoadingSpinner />}>
-                      {key === "hts" && <HTSList />}
-                    </Suspense>
-                  </Tab>
-                  {/* )} */}
 
 
 
@@ -207,6 +200,16 @@ const Home = () => {
                     </Suspense>
                   </Tab>
                   {/* )} */}
+
+
+                  {/* {permissions.canSeeFindPatients && ( */}
+                  <Tab eventKey="hts" title="HTS Patients Archived">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hts" && <HTSList />}
+                    </Suspense>
+                  </Tab>
+                  {/* )} */}
+
                 </Tabs>
               </div>
             </Card.Body>

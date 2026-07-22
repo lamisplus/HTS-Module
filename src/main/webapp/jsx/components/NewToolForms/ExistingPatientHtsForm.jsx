@@ -83,6 +83,7 @@ const FIELD_CODESET_MAP = {
   facilitySetting: "FACILITY_HTS_TEST_SETTING",
   communityEntryPoint: "COMMUNITY_HTS_TEST_SETTING",
   typeOfSession: "COUNSELING_TYPE",
+  htsPopulationType: "KP_TYPE",
   indexTesting: "YES_NO",
   indexRelationship: "INDEX_TESTING",
   sex: "SEX",
@@ -98,7 +99,8 @@ const FIELD_CODESET_MAP = {
   typeOfHivTestDone: "TYPE_OF_HIV_TEST",
   suspectedAcuteInfection: "YES_NO",
   hivTestKitsProvided: "YES_NO",
-  categoryOfClients: "TARGET_GROUP",
+  categoryOfClients: "HIVST_KIT_USER",
+  numberOfHivstKitDistributed: null,
   acceptedIndexTesting: "YES_NO",
   providedFpInfo: "YES_NO",
   clientPartnerUseFpMethods: "YES_NO",
@@ -315,7 +317,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    "typeOfSession", "indexRelationship", "indexClientCode",
+    "typeOfSession", "htsPopulationType", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
@@ -343,7 +345,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
-    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo",
+    "categoryOfClients", "numberOfHivstKitDistributed", "acceptedIndexTesting", "providedFpInfo",
     "clientPartnerUseFpMethods", "clientPartnerUseCondoms",
     "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",

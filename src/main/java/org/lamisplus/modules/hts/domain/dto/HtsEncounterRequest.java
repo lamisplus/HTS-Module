@@ -34,6 +34,7 @@ public class HtsEncounterRequest {
     private String communityEntryPoint;
     private String modality;
     private String typeOfSession;
+    private String htsPopulationType;
     private String indexTesting;
     private String indexRelationship;
     private String indexClientCode;
@@ -87,6 +88,7 @@ public class HtsEncounterRequest {
     private String clientReceivedTestResult;
     private String hivTestKitsProvided;
     private String categoryOfClients;
+    private Integer numberOfHivstKitDistributed;
     private String acceptedIndexTesting;
     private String providedFpInfo;
     private String clientPartnerUseFpMethods;

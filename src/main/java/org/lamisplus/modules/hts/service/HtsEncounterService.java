@@ -222,6 +222,7 @@ public class HtsEncounterService {
         putStr(obs, "facilitySetting",     r.getFacilitySetting());
         putStr(obs, "communityEntryPoint", r.getCommunityEntryPoint());
         putStr(obs, "typeOfSession",       r.getTypeOfSession());
+        putStr(obs, "htsPopulationType",    r.getHtsPopulationType());
         putStr(obs, "indexTesting",        r.getIndexTesting());
         putStr(obs, "indexRelationship",   r.getIndexRelationship());
         putStr(obs, "indexClientCode",     r.getIndexClientCode());
@@ -289,6 +290,7 @@ public class HtsEncounterService {
         putStr(obs, "clientReceivedTestResult",      r.getClientReceivedTestResult());
         putStr(obs, "hivTestKitsProvided",           r.getHivTestKitsProvided());
         putStr(obs, "categoryOfClients",             r.getCategoryOfClients());
+        if (r.getNumberOfHivstKitDistributed() != null) obs.put("numberOfHivstKitDistributed", r.getNumberOfHivstKitDistributed());
         putStr(obs, "acceptedIndexTesting",          r.getAcceptedIndexTesting());
         putStr(obs, "providedFpInfo",                r.getProvidedFpInfo());
         putStr(obs, "clientPartnerUseFpMethods",     r.getClientPartnerUseFpMethods());

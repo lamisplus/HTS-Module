@@ -103,7 +103,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
     // "modality",
-     "typeOfSession", "indexRelationship", "indexClientCode",
+     "typeOfSession", "htsPopulationType", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
@@ -131,7 +131,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
-    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo",
+    "categoryOfClients", "numberOfHivstKitDistributed", "acceptedIndexTesting", "providedFpInfo",
     "clientPartnerUseFpMethods", "clientPartnerUseCondoms",
     "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",

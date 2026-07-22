@@ -10,39 +10,39 @@ const getSubtypeCode = (setting, facilitySetting, communityEntryPoint) => {
 
   const subtype =
     setting === "HTS_ENTRY_POINT_FACILITY" ? facilitySetting :
-    setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
-    null;
+      setting === "HTS_ENTRY_POINT_COMMUNITY" ? communityEntryPoint :
+        null;
 
   if (!subtype) return null;
 
-  if (subtype.includes("SETTING_STI"))                       return "STI";
-  if (subtype.includes("EMERGENCY"))                         return "EME";
-  if (subtype.includes("SETTING_INDEX"))                     return "IND";
+  if (subtype.includes("SETTING_STI")) return "STI";
+  if (subtype.includes("EMERGENCY")) return "EME";
+  if (subtype.includes("SETTING_INDEX")) return "IND";
   if (subtype.includes("INPATIENT") || subtype.includes("NPATIENT")) return "INP";
-  if (subtype.includes("PMTCT"))                             return "PMTCT";
-  if (subtype.includes("TB"))                                return "TB";
-  if (subtype.includes("VCT"))                               return "VCT";
-  if (subtype.includes("MOBILE"))                            return "MOB";
-  if (subtype.includes("SETTING_SNS"))                       return "SNS";
-  if (subtype.includes("SETTING_ANC"))                       return "ANC";
-  if (subtype.includes("RETESTING"))                         return "RET";
-  if (subtype.includes("SETTING_L&D"))                       return "L&D";
-  if (subtype.includes("POST_NATAL_WARD_BREASTFEEDING"))     return "PNWB";
-  if (subtype.includes("SETTING_CT"))                        return "CT";
-  if (subtype.includes("SETTING_FP"))                        return "FP";
-  if (subtype.includes("BLOOD_BANK"))                        return "BB";
-  if (subtype.includes("PEDIATRIC"))                         return "PED";
-  if (subtype.includes("MALNUTRITION"))                      return "MAL";
-  if (subtype.includes("PREP_TESTING"))                      return "PrEPT";
-  if (subtype.includes("SPOKE_HEALTH_FACILITY"))             return "SPHF";
-  if (subtype.includes("STANDALONE"))                        return "STAN";
-  if (subtype.includes("CONGREGATIONAL"))                    return "CON";
-  if (subtype.includes("DELIVERY_HOMES"))                    return "DEL";
-  if (subtype.includes("TBA_ORTHODOX"))                      return "TBAO";
-  if (subtype.includes("TBA_RT-HCW"))                        return "TBAH";
-  if (subtype.includes("SETTING_OVC"))                       return "OVC";
-  if (subtype.includes("OUTREACH"))                          return "OUT";
-  if (subtype.includes("OTHER"))                             return "OTH";
+  if (subtype.includes("PMTCT")) return "PMTCT";
+  if (subtype.includes("TB")) return "TB";
+  if (subtype.includes("VCT")) return "VCT";
+  if (subtype.includes("MOBILE")) return "MOB";
+  if (subtype.includes("SETTING_SNS")) return "SNS";
+  if (subtype.includes("SETTING_ANC")) return "ANC";
+  if (subtype.includes("RETESTING")) return "RET";
+  if (subtype.includes("SETTING_L&D")) return "L&D";
+  if (subtype.includes("POST_NATAL_WARD_BREASTFEEDING")) return "PNWB";
+  if (subtype.includes("SETTING_CT")) return "CT";
+  if (subtype.includes("SETTING_FP")) return "FP";
+  if (subtype.includes("BLOOD_BANK")) return "BB";
+  if (subtype.includes("PEDIATRIC")) return "PED";
+  if (subtype.includes("MALNUTRITION")) return "MAL";
+  if (subtype.includes("PREP_TESTING")) return "PrEPT";
+  if (subtype.includes("SPOKE_HEALTH_FACILITY")) return "SPHF";
+  if (subtype.includes("STANDALONE")) return "STAN";
+  if (subtype.includes("CONGREGATIONAL")) return "CON";
+  if (subtype.includes("DELIVERY_HOMES")) return "DEL";
+  if (subtype.includes("TBA_ORTHODOX")) return "TBAO";
+  if (subtype.includes("TBA_RT-HCW")) return "TBAH";
+  if (subtype.includes("SETTING_OVC")) return "OVC";
+  if (subtype.includes("OUTREACH")) return "OUT";
+  if (subtype.includes("OTHER")) return "OTH";
 
   return null;
 };
@@ -103,6 +103,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     facilityName,
     communityEntryPoint,
     typeOfSession,
+    htsPopulationType,
     indexTesting,
     indexRelationship,
     indexClientCode,
@@ -177,13 +178,14 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     confirmatoryHivTest,
     syphilisTestResult,
     recencyTest,
-    finalHivTestResult, 
+    finalHivTestResult,
 
     // Post-Test Counselling
     previouslyTestedThisYear,
     clientReceivedTestResult,
     hivTestKitsProvided,
     categoryOfClients,
+    numberOfHivstKitDistributed,
     acceptedIndexTesting,
     providedFpInfo,
     clientPartnerUseFpMethods,
@@ -193,7 +195,8 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     clientReferredToOtherServices,
     completedBy,
     designation,
-    currentOrganisationUnitId
+    currentOrganisationUnitId,
+
   } = formValues;
 
   const payload = {
@@ -205,6 +208,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     facilityName,
     communityEntryPoint,
     typeOfSession,
+    htsPopulationType,
     indexTesting,
     indexRelationship,
     indexClientCode,
@@ -275,11 +279,12 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     confirmatoryHivTest,
     syphilisTestResult,
     recencyTest,
-    finalHivTestResult,                     // 🆕 included in payload
+    finalHivTestResult,
     previouslyTestedThisYear,
     clientReceivedTestResult,
     hivTestKitsProvided,
     categoryOfClients,
+    numberOfHivstKitDistributed,
     acceptedIndexTesting,
     providedFpInfo,
     clientPartnerUseFpMethods,
@@ -289,7 +294,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     clientReferredToOtherServices,
     completedBy,
     designation,
-    pmtctHts: false,
+    pmtctHts: formValues?.pmtctHts || false
   };
 
   if (!isNewPatient) {
