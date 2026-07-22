@@ -91,10 +91,12 @@
     <changeSet failOnError="true" author="Ganiyat Yakub" id="20241102-03431">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_risk_stratification"/>
+            <not>
+                <columnExists tableName="hts_risk_stratification" columnName="spoke_facility"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN spoke_facility varchar(255);
-
         </sql>
     </changeSet>
 
