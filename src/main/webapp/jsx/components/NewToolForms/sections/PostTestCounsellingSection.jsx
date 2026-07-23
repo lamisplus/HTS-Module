@@ -226,7 +226,17 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
 
                   <FormSelect
                     label="Category of clients receiving HIV self test kit"
-                    {...sp("categoryOfClients", transformOptions(codesets?.["HIVST_KIT_USER"]))}
+                    {...sp(
+                      "categoryOfClients",
+                      transformOptions(codesets?.["HIVST_KIT_USER"]).filter((option) =>
+                        [
+                          "HIVST_KIT_USER_SELF",
+                          "HIVST_KIT_USER_PARTNER",
+                          "HIVST_KIT_USER_CAREGIVER_ASSISTED",
+                          "HIVST_KIT_USER_SOCIAL_NETWORK",
+                        ].includes(option.value)
+                      )
+                    )}
                   />
                 </div>
 
