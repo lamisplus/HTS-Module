@@ -31,31 +31,31 @@
         </preConditions>
         <sql>
             CREATE TABLE hivst (
-                id SERIAL PRIMARY KEY,
-                patient_id BIGINT,
-                date_of_visit DATE,
-                service_delivery_point VARCHAR(255),
-                user_type VARCHAR(255),
-                serial_number VARCHAR(255),
-                client_code VARCHAR(255),
-                previously_tested_within_12_months VARCHAR(255),
-                result_of_previously_tested_within_12_months VARCHAR(255),
-                consent_for_follow_up_calls VARCHAR(255),
-                type_of_hivst_kit_received VARCHAR(255),
-                number_of_hivst_kits_received BIGINT,
-                name_of_test_kit VARCHAR(255),
-                lot_number VARCHAR(255),
-                expiry_date DATE,
-                test_kit_users JSONB,
-                other_test_kit_user_info_available VARCHAR(255),
-                other_test_kit_user_details JSONB,
-                part_b JSONB,
-                referral_information JSONB,
-                archived INTEGER DEFAULT 0,
-                created_by VARCHAR(255) NOT NULL,
-                date_created TIMESTAMP NOT NULL,
-                modified_by VARCHAR(255),
-                date_modified TIMESTAMP
+                                   id SERIAL PRIMARY KEY,
+                                   patient_id BIGINT,
+                                   date_of_visit DATE,
+                                   service_delivery_point VARCHAR(255),
+                                   user_type VARCHAR(255),
+                                   serial_number VARCHAR(255),
+                                   client_code VARCHAR(255),
+                                   previously_tested_within_12_months VARCHAR(255),
+                                   result_of_previously_tested_within_12_months VARCHAR(255),
+                                   consent_for_follow_up_calls VARCHAR(255),
+                                   type_of_hivst_kit_received VARCHAR(255),
+                                   number_of_hivst_kits_received BIGINT,
+                                   name_of_test_kit VARCHAR(255),
+                                   lot_number VARCHAR(255),
+                                   expiry_date DATE,
+                                   test_kit_users JSONB,
+                                   other_test_kit_user_info_available VARCHAR(255),
+                                   other_test_kit_user_details JSONB,
+                                   part_b JSONB,
+                                   referral_information JSONB,
+                                   archived INTEGER DEFAULT 0,
+                                   created_by VARCHAR(255) NOT NULL,
+                                   date_created TIMESTAMP NOT NULL,
+                                   modified_by VARCHAR(255),
+                                   date_modified TIMESTAMP
             );
         </sql>
     </changeSet>
@@ -80,6 +80,7 @@
     <changeSet failOnError="true" author="Taiwo Gboyegun" id="20240709-001">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempt"/>
         </preConditions>
         <sql>
 
@@ -97,12 +98,16 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN spoke_facility varchar(255);
+
         </sql>
     </changeSet>
 
     <changeSet failOnError="true" author="Ganiyat Yakub" id="2024-0781">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_risk_stratification"/>
+            <not>
+                <columnExists tableName="hts_risk_stratification" columnName="health_facility"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN health_facility varchar(255);
@@ -133,6 +138,7 @@
     <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-002">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempt"/>
         </preConditions>
         <sql>
 
@@ -154,7 +160,7 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-            ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
+                ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
         </sql>
     </changeSet>
     <changeSet failOnError="true" author="Gamaliel-Emmanuel" id="2025-09-01-rename-column-01">
@@ -163,16 +169,18 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-            RENAME COLUMN attempts TO attempt;
+                RENAME COLUMN attempts TO attempt;
         </sql>
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-13-update-entry-points-on-rst-facility">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_risk_stratification"/>
+        </preConditions>
         <sql>
             UPDATE hts_risk_stratification
             SET entry_point = 'HTS_ENTRY_POINT_FACILITY'
-                where entry_point = 'Facility';
+            where entry_point = 'Facility';
             UPDATE hts_risk_stratification
             SET entry_point = 'HTS_ENTRY_POINT_COMMUNITY'
             where entry_point = 'Community';
@@ -180,7 +188,9 @@
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-risk-stratification">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_risk_stratification"/>
+        </preConditions>
         <sql>
             UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
             UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
@@ -237,7 +247,9 @@
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-client">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_client"/>
+        </preConditions>
         <sql>
             UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
             UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
@@ -354,9 +366,9 @@
             BEGIN
                 IF to_regclass('public.pmtct_infant_information') IS NULL THEN
                     RETURN;
-                END IF;
+            END IF;
 
-                RETURN QUERY EXECUTE '
+            RETURN QUERY EXECUTE '
                     SELECT infant_hospital_number
                     FROM public.pmtct_infant_information
                     WHERE infant_hospital_number IS NOT NULL
