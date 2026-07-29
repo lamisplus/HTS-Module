@@ -46,7 +46,6 @@ export default function App() {
             <PatientDetail />
           </Route>
           <Route path="/register-patient">
-            
             <HtsIctOrchestrator onDone={() => history.push("/")} isOnArt={false}/>
           </Route>
           <Route path="/register-hivst-patient">

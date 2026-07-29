@@ -20,44 +20,44 @@ public class HivstResultController {
     private final HivstResultService service;
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_create', 'hts_encounter_create')")
     public ResponseEntity<HivstResultResponseDTO> create(@Valid @RequestBody HivstResultRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<HivstResultResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
     public ResponseEntity<HivstResultResponseDTO> update(@PathVariable Long id, @Valid @RequestBody HivstResultRequestDTO request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_delete', 'hts_encounter_delete')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/encounter/{encounterId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<HivstResultResponseDTO> getByEncounterId(@PathVariable Long encounterId) {
         return ResponseEntity.ok(service.getByEncounterId(encounterId));
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<List<HivstResultResponseDTO>> getByPatientId(@PathVariable Long patientId) {
         return ResponseEntity.ok(service.getByPatientId(patientId));
     }
 
     @GetMapping("/patient-uuid/{patientUuid}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
     public ResponseEntity<List<HivstResultResponseDTO>> getByPatientUuid(@PathVariable String patientUuid) {
         return ResponseEntity.ok(service.getByPatientUuid(patientUuid));
     }

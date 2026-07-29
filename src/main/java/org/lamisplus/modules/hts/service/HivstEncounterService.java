@@ -12,7 +12,6 @@ import org.lamisplus.modules.hts.domain.dto.HivstPatientSummaryDto;
 import org.lamisplus.modules.hts.domain.entity.HivstEncounter;
 import org.lamisplus.modules.hts.repository.HivstEncounterRepository;
 import org.lamisplus.modules.hts.repository.HivstResultRepository;
-import org.lamisplus.modules.patient.domain.dto.PersonResponseDto;
 import org.lamisplus.modules.patient.domain.entity.Person;
 import org.lamisplus.modules.patient.repository.PersonRepository;
 import org.lamisplus.modules.patient.service.PersonService;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +39,6 @@ public class HivstEncounterService {
     private final ObjectMapper objectMapper;
     private final CurrentUserOrganizationService currentUserOrganizationService;
 
-    @Transactional
     public HivstEncounterResponseDTO save(HivstEncounterRequestDTO request) {
         Person person = personRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new EntityNotFoundException(Person.class, "id", request.getPatientId().toString()));
@@ -56,13 +53,12 @@ public class HivstEncounterService {
         encounter.setSource("Web");
         encounter.setLongitude(request.getLongitude());
         encounter.setLatitude(request.getLatitude());
-        encounter.setObservation(buildObservation(request, person));
+        encounter.setObservation(buildObservation(request));
 
         encounter = encounterRepository.save(encounter);
         return toResponse(encounter);
     }
 
-    @Transactional
     public HivstEncounterResponseDTO update(Long id, HivstEncounterRequestDTO request) {
         HivstEncounter existing = encounterRepository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(HivstEncounter.class, "id", id.toString()));
@@ -78,8 +74,9 @@ public class HivstEncounterService {
         // Update observation: only HIVST-specific fields, keep demographics as snapshot
         JsonNode currentObs = existing.getObservation();
         ObjectNode updatedObs = currentObs != null ? currentObs.deepCopy() : objectMapper.createObjectNode();
-        // Replace HIVST fields
-        putStr(updatedObs, "setting", request.getSetting());
+        // Note: "setting" is intentionally NOT duplicated into the observation JSON here —
+        // it already lives as its own column (existing.setSetting(...) above), matching
+        // how HTS's buildObservation() keeps "setting" out of the JSON entirely.
         putStr(updatedObs, "facilitySetting", request.getFacilitySetting());
         putStr(updatedObs, "communityEntryPoint", request.getCommunityEntryPoint());
         putStr(updatedObs, "typeOfSession", request.getTypeOfSession());
@@ -104,7 +101,6 @@ public class HivstEncounterService {
         return toResponse(existing);
     }
 
-    @Transactional
     public void delete(Long id) {
         HivstEncounter encounter = encounterRepository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(HivstEncounter.class, "id", id.toString()));
@@ -165,12 +161,12 @@ public class HivstEncounterService {
     }
 
     // Helper methods
-    private JsonNode buildObservation(HivstEncounterRequestDTO request, Person person) {
-        PersonResponseDto personDto = personService.getDtoFromPerson(person);
+    private JsonNode buildObservation(HivstEncounterRequestDTO request) {
         ObjectNode obs = objectMapper.createObjectNode();
 
-        // Request fields
-        obs.put("setting", request.getSetting());
+        // Note: "setting" intentionally lives only as its own column
+        // (encounter.setSetting(...) in save()), not duplicated here —
+        // matches HTS's buildObservation().
         putStr(obs, "facilitySetting", request.getFacilitySetting());
         putStr(obs, "communityEntryPoint", request.getCommunityEntryPoint());
         putStr(obs, "typeOfSession", request.getTypeOfSession());

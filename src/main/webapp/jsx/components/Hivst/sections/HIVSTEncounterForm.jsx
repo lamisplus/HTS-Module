@@ -73,31 +73,38 @@ const useStyles = makeStyles(() => ({
  * payload shape below. If your API wraps the record (e.g. { data: {...} }),
  * adjust the unwrap on the getHivstEncounter().then(...) call.
  */
-const mapEncounterToInitialValues = (encounter) => ({
-  dateOfVisit: encounter.dateOfVisit ?? "",
-  serialNumber: encounter.serialNumber ?? "",
-  clientCode: encounter.clientCode ?? "",
-  setting: encounter.setting ?? "",
-  facilitySetting: encounter.facilitySetting ?? "",
-  communityEntryPoint: encounter.communityEntryPoint ?? "",
-  typeOfSession: encounter.typeOfSession ?? "",
-  htsPopulationType: encounter.htsPopulationType ?? "",
-  indexTesting: encounter.indexTesting ?? "",
-  indexRelationship: encounter.indexRelationship ?? "",
-  indexClientCode: encounter.indexClientCode ?? "",
-  numberOfWives: encounter.numberOfWives ?? "",
-  numberOfCoWives: encounter.numberOfCoWives ?? "",
-  numberOfBiologicalChildren: encounter.numberOfBiologicalChildren ?? "",
-  pregnancyStatus: encounter.pregnancyStatus ?? "",
-  breastfeedingDuration: encounter.breastfeedingDuration ?? "",
-  hivTestKitsProvided: encounter.hivTestKitsProvided ?? "",
-  categoryOfClients: encounter.categoryOfClients ?? "",
-  numberOfHivstKitDistributed: encounter.numberOfHivstKitDistributed ?? "",
-  completedBy: encounter.completedBy ?? "",
-  designation: encounter.designation ?? "",
-  currentOrganisationUnitId:
-    encounter.facilityId ?? encounter.currentOrganisationUnitId ?? "",
-});
+const mapEncounterToInitialValues = (encounter) => {
+  // The backend (HivstEncounterResponseDTO) only returns id/patientId/clientCode/
+  // dateOfVisit/setting/facilityId at the top level — every other HIVST-specific
+  // field lives inside `observation` (a JSONB blob), exactly like HTS's
+  // HtsEncounterResponse. serialNumber is never persisted server-side on either
+  // HTS or HIVST (it's only ever used client-side to help build clientCode), so
+  // it can't be recovered on edit — same limitation as HTS.
+  const obs = encounter.observation || {};
+  return {
+    dateOfVisit: encounter.dateOfVisit ?? "",
+    clientCode: encounter.clientCode ?? "",
+    setting: encounter.setting ?? "",
+    facilitySetting: obs.facilitySetting ?? "",
+    communityEntryPoint: obs.communityEntryPoint ?? "",
+    typeOfSession: obs.typeOfSession ?? "",
+    htsPopulationType: obs.htsPopulationType ?? "",
+    indexTesting: obs.indexTesting ?? "",
+    indexRelationship: obs.indexRelationship ?? "",
+    indexClientCode: obs.indexClientCode ?? "",
+    numberOfWives: obs.numberOfWives ?? "",
+    numberOfCoWives: obs.numberOfCoWives ?? "",
+    numberOfBiologicalChildren: obs.numberOfBiologicalChildren ?? "",
+    pregnancyStatus: obs.pregnancyStatus ?? "",
+    breastfeedingDuration: obs.breastfeedingDuration ?? "",
+    hivTestKitsProvided: obs.hivTestKitsProvided ?? "",
+    categoryOfClients: obs.categoryOfClients ?? "",
+    numberOfHivstKitDistributed: obs.numberOfHivstKitDistributed ?? "",
+    completedBy: obs.completedBy ?? "",
+    designation: obs.designation ?? "",
+    currentOrganisationUnitId: encounter.facilityId ?? "",
+  };
+};
 
 /**
  * @param {Object}   patientObj            Patient/person object (same shape used elsewhere in PatientHistory).

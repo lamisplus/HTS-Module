@@ -225,7 +225,20 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
     onSuccess: loadCodesets,
   });
 
-  
+  // ── Prefill read-only patient context from the full patient-detail record ──
+  // HIVST encounters are only ever created for an existing patient, so these
+  // fields (Marital Status, State/LGA/Landmark/Address) are never edited here
+  // — they exist purely so whoever fills the form can see the patient's
+  // details, and so `sex` + `maritalStatus` are correct for the
+  // showNumberOfWives / showNumberOfCoWives / showPregnancy visibility logic
+  // further down in this file.
+  //
+  // `patientData` is expected to be the raw response of GET /patient/{id}
+  // (see HIVSTEncounterForm, which fetches it fresh every time). Codeset
+  // dropdowns (Sex, Marital Status) store CODES (e.g. "SEX_FEMALE"), but the
+  // patient API returns human-readable display text (e.g. "Female") — so we
+  // translate by matching against the already-loaded SEX / MARITAL_STATUS
+  // codesets rather than guessing a naming convention.
   useEffect(() => {
     if (!patientData || !codesets || hasPrefilledFromPatientRef.current) return;
     hasPrefilledFromPatientRef.current = true;

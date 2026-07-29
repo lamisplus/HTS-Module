@@ -344,18 +344,21 @@ const HIVSTEncounterHistory = (props) => {
             ),
           },
         ]}
-        data={(encounters || []).map((record) => ({
-          id: record.id ?? record.encounterId,
-          dateOfVisit: record.dateOfVisit ?? "",
-          clientCode: record.clientCode ?? "",
-          setting: record.setting ?? "",
-          hivTestKitsProvided: record.hivTestKitsProvided ?? "",
-          categoryOfClients: record.categoryOfClients ?? "",
-          numberOfHivstKitDistributed: record.numberOfHivstKitDistributed ?? "",
-          completedBy: record.completedBy ?? "",
-          designation: record.designation ?? "",
-          _raw: record,
-        }))}
+        data={(encounters || []).map((record) => {
+          const obs = record.observation || {};
+          return {
+            id: record.id ?? record.encounterId,
+            dateOfVisit: record.dateOfVisit ?? "",
+            clientCode: record.clientCode ?? "",
+            setting: record.setting ?? "",
+            hivTestKitsProvided: obs.hivTestKitsProvided ?? "",
+            categoryOfClients: obs.categoryOfClients ?? "",
+            numberOfHivstKitDistributed: obs.numberOfHivstKitDistributed ?? "",
+            completedBy: obs.completedBy ?? "",
+            designation: obs.designation ?? "",
+            _raw: record,
+          };
+        })}
         actions={[
           {
             icon: () => <AddBox />,

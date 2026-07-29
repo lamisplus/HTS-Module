@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.lamisplus.modules.base.domain.entities.Audit;
@@ -23,10 +25,12 @@ public class HivstEncounter extends Audit<HivstEncounter> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "varchar(50)", unique = true, nullable = false, updatable = false)
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "varchar(50)", insertable = false, updatable = false, unique = true, nullable = false)
     private String uuid;
 
-    @Column(columnDefinition = "varchar(36)", unique = true, nullable = false, updatable = false)
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "varchar(36)", insertable = false, updatable = false, unique = true, nullable = false)
     private String visitId;
 
     @ManyToOne(fetch = FetchType.LAZY)

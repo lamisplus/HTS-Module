@@ -2,6 +2,8 @@ package org.lamisplus.modules.hts.domain.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.lamisplus.modules.base.domain.entities.Audit;
 import javax.persistence.*;
 
@@ -15,7 +17,8 @@ public class HivstResult extends Audit<HivstResult> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "varchar(50)", unique = true, nullable = false, updatable = false)
+    @Generated(GenerationTime.INSERT)
+    @Column(columnDefinition = "varchar(50)", insertable = false, updatable = false, unique = true, nullable = false)
     private String uuid;
 
     @OneToOne(fetch = FetchType.LAZY)

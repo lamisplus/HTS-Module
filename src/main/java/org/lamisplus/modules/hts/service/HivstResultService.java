@@ -12,7 +12,6 @@ import org.lamisplus.modules.hts.domain.entity.HivstResult;
 import org.lamisplus.modules.hts.repository.HivstEncounterRepository;
 import org.lamisplus.modules.hts.repository.HivstResultRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ public class HivstResultService {
     private final HivstResultRepository resultRepository;
     private final HivstEncounterRepository encounterRepository;
 
-    @Transactional
     public HivstResultResponseDTO save(HivstResultRequestDTO request) {
         HivstEncounter encounter = encounterRepository.findByIdAndArchived(request.getEncounterId(), false)
                 .orElseThrow(() -> new EntityNotFoundException(HivstEncounter.class, "id", request.getEncounterId().toString()));
@@ -59,7 +57,6 @@ public class HivstResultService {
         return toResponse(result);
     }
 
-    @Transactional
     public HivstResultResponseDTO update(Long id, HivstResultRequestDTO request) {
         HivstResult result = resultRepository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(HivstResult.class, "id", id.toString()));
@@ -82,7 +79,6 @@ public class HivstResultService {
         return toResponse(result);
     }
 
-    @Transactional
     public void delete(Long id) {
         HivstResult result = resultRepository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(HivstResult.class, "id", id.toString()));
