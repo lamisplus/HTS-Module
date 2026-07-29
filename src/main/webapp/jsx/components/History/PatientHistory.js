@@ -18,6 +18,12 @@ import { useLocation } from "react-router-dom";
 const NewEncounterHtsIctOrchestrator = lazy(() =>
   import("../NewToolForms/NewEncounterHtsIctOrchestrator")
 );
+const HIVSTEncounterForm = lazy(() =>
+  import("../Hivst/sections/HIVSTEncounterForm")
+);
+const HIVSTEncounterHistory = lazy(() =>
+  import("../Hivst/sections/HIVSTEncounterHistory")
+);
 const ExistingPatientHtsForm = lazy(() =>
   import("../NewToolForms/ExistingPatientHtsForm")
 );
@@ -265,6 +271,35 @@ const Home = (props) => {
                       )}
                     </Suspense>
                   </Tab>
+
+
+                  <Tab eventKey="new-hivst-existing-patient" title="NEW HIVST">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "new-hivst-existing-patient" && (
+                        <HIVSTEncounterForm
+                          patientObj={props.patientObj}
+                          onBack={() => setKey("home")}
+                          onSuccess={() => {
+                            onEncounterMutated?.();
+                            setKey("hivst-history-existing-patient");
+                          }}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
+                  <Tab eventKey="hivst-history-existing-patient" title="HIVST HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hivst-history-existing-patient" && (
+                        <HIVSTEncounterHistory
+                          patientObj={props.patientObj}
+                          onEncounterMutated={onEncounterMutated}
+                          refreshKey={refreshKey}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
 
 
                 </Tabs>

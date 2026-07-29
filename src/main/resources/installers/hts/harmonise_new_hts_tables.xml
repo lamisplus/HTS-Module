@@ -714,7 +714,7 @@
             ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id DROP NOT NULL;
         </sql>
         <rollback>
-            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            -- Reapply NOT NULL only if all existing values are non-NULL (safety rollback)
             ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id SET NOT NULL;
         </rollback>
     </changeSet>
@@ -748,7 +748,7 @@
             ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id DROP NOT NULL;
         </sql>
         <rollback>
-            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            -- Reapply NOT NULL only if all existing values are non-NULL (safety rollback)
             ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id SET NOT NULL;
         </rollback>
     </changeSet>

@@ -60,6 +60,9 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const isAntibodyReactivePath =
     values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
 
+  const isNonReactivePath =
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_NON-REACTIVE";
+
   // Show confirmatory when:
   //   Path A - Antibody Reactive, OR
   //   Path B - Initial HIV Test is Positive
@@ -71,6 +74,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const getFinalResult = () => {
     if (earlyDetectDone) {
       if (isAcutePath) return "Suspected Acute Infection";
+      if (isNonReactivePath) return "Negative";
       if (isAntibodyReactivePath) {
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_negative") return "Negative";

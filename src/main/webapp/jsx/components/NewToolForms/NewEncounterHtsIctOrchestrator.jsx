@@ -1,40 +1,3 @@
-/**
- * NewEncounterHtsIctOrchestrator.jsx
- *
- * Orchestrates a brand-new HTS + ICT session for a patient who is already
- * registered in the system. Replaces the standalone <NewEncounterHtsForm>
- * usage in PatientHistory when ICT may also be needed.
- *
- * HOW IT DIFFERS FROM HtsIctOrchestrator
- * ────────────────────────────────────────
- * HtsIctOrchestrator  → Step 1 is NewPatientHtsForm  (blank demographics, new person)
- * This component      → Step 1 is NewEncounterHtsForm (demographics pre-filled + locked
- *                        from the `person` prop, all clinical fields blank)
- *
- * USAGE (in PatientHistory.js)
- * ────────────────────────────
- * Replace:
- *   <NewEncounterHtsForm
- *     person={props?.patientObj?.person || props?.patientObj}
- *     backButtonAction={() => setKey("home")}
- *   />
- *
- * With:
- *   <NewEncounterHtsIctOrchestrator
- *     person={props?.patientObj?.person || props?.patientObj}
- *     onDone={() => setKey("home")}
- *     isOnArt={false}
- *   />
- *
- * Props
- * ─────
- * person    {Object}    Full patient/person object from the dashboard.
- *                       Same shape NewEncounterHtsForm already accepts.
- * onDone    {Function}  Called when the user clicks Back on step 1,
- *                       or after ICT submits successfully.
- * isOnArt   {boolean}   Forwarded to IctForm to show the ART Clinic field.
- */
-
 import React, { useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { toast } from "react-toastify";
@@ -43,11 +6,7 @@ import IctForm from "../IctForm/IctForm";
 import { COLORS } from "./constants";
 import { useLocation, useHistory } from 'react-router-dom';
 
-// ─── Views ────────────────────────────────────────────────────────────────────
-
 const VIEWS = { HTS: "HTS", ICT: "ICT" };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles(() => ({
   wrapper: {
@@ -137,29 +96,11 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-// ─── Eligibility check ────────────────────────────────────────────────────────
-// Mirrors the logic in HtsIctOrchestrator exactly.
-
-// const isIctEligible = (htsValues) => {
-//   if (!htsValues) return false;
-//   // const sessionMatch =
-//   //   htsValues.typeOfSession?.toUpperCase() === "INDEX CONTACT TESTING" ||
-//   //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
-//   //   htsValues.typeOfSession?.toLowerCase().includes("index");
-//   const positiveResult =
-//     htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
-//   // || htsValues.initialHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
-//   // return sessionMatch && positiveResult;
-//   return positiveResult
-// };
-
-
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
   return htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
 
 const NewEncounterHtsIctOrchestrator = ({
   person,

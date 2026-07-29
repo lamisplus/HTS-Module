@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class HtsEncounterRequest {
+public class HtsEncounterRequestDTO {
 
     private Long patientId;
 

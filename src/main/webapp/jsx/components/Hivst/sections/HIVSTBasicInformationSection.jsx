@@ -3,17 +3,15 @@ import { FormGroup, Label, Input } from "reactstrap";
 import {
   FormSelect,
   FormTextField,
-  ReadOnlyField,
   SectionSubheading,
   labelStyle,
   inputStyle,
   selectStyle,
-} from "./FormFields";
+} from "../../NewToolForms/sections/FormFields";
 import axios from "axios";
 import { url, token } from "../../../../api";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
-import { arrayToObject, generateClientCode } from "../utils/htsEncounterPayload";
-// import { getAllHtsEncounter } from "../../../services/getAllHtsEncounter";
+import { arrayToObject, generateClientCode } from "../../NewToolForms/utils/htsEncounterPayload";
 import { capitalizeFirstLetter } from "../../utils";
 
 const today = new Date().toISOString().split("T")[0];
@@ -51,10 +49,13 @@ const disabledInputStyle = {
   cursor: "not-allowed",
 };
 
-const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
+const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, patientData }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setFieldError } = formik;
+
+
   const [accountDetail, setAccountDetail] = useState(null);
   const [codesets, setCodesets] = useState(null);
+  const hasPrefilledFromPatientRef = React.useRef(false);
 
   const [statesList, setStatesList] = useState([]);
   const [lgasList, setLgasList] = useState([]);
@@ -110,7 +111,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     if (!Array.isArray(items)) return [];
     return items.map(item => ({
       id: item.id,
-      label: item.display.toLowerCase() === 'yes' || item.display.toLowerCase() === 'no' ? capitalizeFirstLetter(item.display) : item.display,
+      label: item?.display?.toLowerCase() === 'yes' || item?.display?.toLowerCase() === 'no' ? capitalizeFirstLetter(item?.display) : item.display,
       value: item.code,
     }));
   };
@@ -223,6 +224,76 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
     patientId: accountDetail?.currentOrganisationUnitName,
     onSuccess: loadCodesets,
   });
+
+  
+  useEffect(() => {
+    if (!patientData || !codesets || hasPrefilledFromPatientRef.current) return;
+    hasPrefilledFromPatientRef.current = true;
+
+    const findCodeByDisplay = (codesetKey, displayText) => {
+      if (!displayText) return "";
+      const list = codesets?.[codesetKey];
+      if (!Array.isArray(list)) return "";
+      const match = list.find(
+        (item) => item?.display?.toLowerCase() === String(displayText).toLowerCase()
+      );
+      return match?.code ?? "";
+    };
+
+    const genderDisplay = patientData.gender?.display ?? patientData.sex ?? "";
+    const maritalDisplay = patientData.maritalStatus?.display ?? "";
+    const addressEntry = patientData.address?.address?.[0] ?? {};
+    const phoneEntry = (patientData.contactPoint?.contactPoint || []).find(
+      (c) => c.type === "phone"
+    );
+
+    const sexCodeValue = findCodeByDisplay("SEX", genderDisplay);
+    const maritalCodeValue = findCodeByDisplay("MARITAL_STATUS", maritalDisplay);
+
+    setFieldValue("surname", patientData.surname ?? "");
+    setFieldValue("firstName", patientData.firstName ?? "");
+    setFieldValue("middleName", patientData.otherName ?? "");
+    setFieldValue("dobType", patientData.isDateOfBirthEstimated ? "Estimated" : "Actual");
+    setFieldValue("dateOfBirth", patientData.dateOfBirth ?? "");
+    setFieldValue("age", patientData.age ?? "");
+    setFieldValue("phoneNumber", phoneEntry?.value ?? "");
+
+    // sex: only used downstream for showNumberOfWives/showNumberOfCoWives/
+    // showPregnancy — falls back to raw display text if no codeset match so
+    // it's at least visible for debugging, but won't match "SEX_MALE"/
+    // "SEX_FEMALE" comparisons below if the fallback path is hit.
+    setFieldValue("sex", sexCodeValue || genderDisplay);
+    if (sexCodeValue) {
+      const map = arrayToObject(codesets?.["SEX"]);
+      setFieldValue("sexCode", String(map[sexCodeValue] ?? ""));
+    }
+
+    setFieldValue("maritalStatus", maritalCodeValue || maritalDisplay);
+    if (maritalCodeValue) {
+      const map = arrayToObject(codesets?.["MARITAL_STATUS"]);
+      setFieldValue("maritalStatusCode", String(map[maritalCodeValue] ?? ""));
+    }
+
+    // Address block. `clientState` must be the state's organisation-unit id
+    // (matched below against statesList to auto-load LGAs) — the patient API
+    // already returns that directly as address.stateId.
+    setFieldValue(
+      "clientState",
+      addressEntry.stateId != null ? String(addressEntry.stateId) : ""
+    );
+    // ASSUMPTION: `district` on the patient address is the LGA's
+    // organisation-unit id (it lines up with how clientLga is matched against
+    // lgaOptions elsewhere in this file). Verify against your data — if LGA
+    // still doesn't display, this is the first thing to check.
+    setFieldValue("clientLga", addressEntry.district ?? "");
+    setFieldValue("address", addressEntry.city ?? "");
+    setFieldValue(
+      "landmark",
+      Array.isArray(addressEntry.line)
+        ? addressEntry.line.filter(Boolean).join(", ")
+        : addressEntry.line ?? ""
+    );
+  }, [patientData, codesets, setFieldValue]);
 
   const handleSettingChange = (e) => {
     setFieldValue("setting", e.target.value);
@@ -759,11 +830,11 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
               <Label style={labelStyle}>Date of Birth <span style={{ color: "red" }}>*</span></Label>
               <div style={radioGroupStyle}>
                 <label style={radioLabelStyle}>
-                  <input type="radio" name="dobType" value="Actual" checked={values.dobType.toLowerCase() === "actual"}
+                  <input type="radio" name="dobType" value="Actual" checked={values?.dobType?.toLowerCase() === "actual"}
                     onChange={readOnly ? undefined : handleDobTypeChange} disabled={readOnly} /> Actual
                 </label>
                 <label style={radioLabelStyle}>
-                  <input type="radio" name="dobType" value="Estimated" checked={values.dobType.toLowerCase() === "estimated"}
+                  <input type="radio" name="dobType" value="Estimated" checked={values?.dobType?.toLowerCase() === "estimated"}
                     onChange={readOnly ? undefined : handleDobTypeChange} disabled={readOnly} /> Estimated
                 </label>
               </div>
@@ -849,4 +920,4 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   );
 };
 
-export default BasicInformationSection;
+export default HIVSTBasicInformationSection;

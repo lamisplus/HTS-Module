@@ -1,13 +1,12 @@
 package org.lamisplus.modules.hts.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
-import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequest;
+import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
@@ -40,7 +39,7 @@ public class HtsEncounterService {
     private final CurrentUserOrganizationService currentUserOrganizationService;
 
 
-    public HtsEncounterResponse save(HtsEncounterRequest request) {
+    public HtsEncounterResponse save(HtsEncounterRequestDTO request) {
         Person person;
         if (request.getPatientId() != null) {
             person = personRepository.findById(request.getPatientId())
@@ -49,7 +48,7 @@ public class HtsEncounterService {
         } else {
             if (request.getPerson() == null) {
                 throw new IllegalTypeException(
-                        HtsEncounterRequest.class, "person",
+                        HtsEncounterRequestDTO.class, "person",
                         "must be provided when patientId is null");
             }
             PersonResponseDto created = personService.createPerson(request.getPerson());
@@ -75,7 +74,7 @@ public class HtsEncounterService {
     }
 
 
-    public HtsEncounterResponse update(Long id, HtsEncounterRequest request) {
+    public HtsEncounterResponse update(Long id, HtsEncounterRequestDTO request) {
         HtsEncounter existing = repository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(
                         HtsEncounter.class, "id", id.toString()));
@@ -214,7 +213,7 @@ public class HtsEncounterService {
     }
 
 
-    private ObjectNode buildObservation(HtsEncounterRequest r) {
+    private ObjectNode buildObservation(HtsEncounterRequestDTO r) {
         ObjectNode obs = objectMapper.createObjectNode();
 
         // Visit / Setting

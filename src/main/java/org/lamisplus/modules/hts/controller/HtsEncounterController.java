@@ -3,7 +3,7 @@ package org.lamisplus.modules.hts.controller;
 import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.base.domain.dto.PageDTO;
 import org.lamisplus.modules.base.util.PaginationUtil;
-import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequest;
+import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
 import org.lamisplus.modules.hts.service.HtsEncounterService;
@@ -30,7 +30,7 @@ public class HtsEncounterController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('hts_create', 'hts_encounter_create')")
-    public ResponseEntity<HtsEncounterResponse> create(@Valid @RequestBody HtsEncounterRequest request) {
+    public ResponseEntity<HtsEncounterResponse> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
 
@@ -43,7 +43,7 @@ public class HtsEncounterController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
     public ResponseEntity<HtsEncounterResponse> update(@PathVariable Long id,
-                                                       @Valid @RequestBody HtsEncounterRequest request) {
+                                                       @Valid @RequestBody HtsEncounterRequestDTO request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 
