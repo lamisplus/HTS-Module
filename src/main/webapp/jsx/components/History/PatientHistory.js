@@ -67,7 +67,11 @@ const Home = (props) => {
 
 
   const [key, setKey] = useState(
-    props.activePage === "NEW HTS" ? "new" : "home"
+    props.activePage === "NEW HTS"
+      ? "new"
+      : props.activePage === "HIVST HISTORY"
+      ? "hivst-history-existing-patient"
+      : "home"
   );
 
   const [lastHts, setLastHTS] = useState({});
@@ -299,9 +303,6 @@ const Home = (props) => {
                       )}
                     </Suspense>
                   </Tab>
-
-
-
                 </Tabs>
               </div>
             </Card.Body>

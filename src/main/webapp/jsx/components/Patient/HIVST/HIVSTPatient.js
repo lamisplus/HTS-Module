@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { forwardRef, useState } from "react";
 import MaterialTable, { MTableToolbar } from "material-table";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
-
-// import { token as token, url as baseUrl } from "./../../../api";
-import { token, url as baseUrl } from "../../../../api";
-import { forwardRef } from "react";
-import "semantic-ui-css/semantic.min.css";
-import { Link } from "react-router-dom";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import { Label } from "semantic-ui-react";
+import { MdDashboard } from "react-icons/md";
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import Check from "@material-ui/icons/Check";
@@ -22,221 +21,218 @@ import Remove from "@material-ui/icons/Remove";
 import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import ViewColumn from "@material-ui/icons/ViewColumn";
+import "semantic-ui-css/semantic.min.css";
 import "react-toastify/dist/ReactToastify.css";
-import "react-widgets/dist/css/react-widgets.css";
-import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
-import { MdDashboard } from "react-icons/md";
-import "@reach/menu-button/styles.css";
-import { Label } from "semantic-ui-react";
-import Moment from "moment";
-import momentLocalizer from "react-widgets-moment";
-//import moment from "moment";
+import { token, url as baseUrl } from "../../../../api";
 
-
+// ── Table icons (same set used across the app's MaterialTable instances) ────
 const tableIcons = {
-    Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-    Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-    Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-    DetailPanel: forwardRef((props, ref) => (
-        <ChevronRight {...props} ref={ref} />
-    )),
-    Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-    Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-    Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-    FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-    LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-    NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-    PreviousPage: forwardRef((props, ref) => (
-        <ChevronLeft {...props} ref={ref} />
-    )),
-    ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-    Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-    SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
-    ThirdStateCheck: forwardRef((props, ref) => <Remove {...props} ref={ref} />),
-    ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />),
+  Add: forwardRef((p, r) => <AddBox {...p} ref={r} />),
+  Check: forwardRef((p, r) => <Check {...p} ref={r} />),
+  Clear: forwardRef((p, r) => <Clear {...p} ref={r} />),
+  Delete: forwardRef((p, r) => <DeleteOutline {...p} ref={r} />),
+  DetailPanel: forwardRef((p, r) => <ChevronRight {...p} ref={r} />),
+  Edit: forwardRef((p, r) => <Edit {...p} ref={r} />),
+  Export: forwardRef((p, r) => <SaveAlt {...p} ref={r} />),
+  Filter: forwardRef((p, r) => <FilterList {...p} ref={r} />),
+  FirstPage: forwardRef((p, r) => <FirstPage {...p} ref={r} />),
+  LastPage: forwardRef((p, r) => <LastPage {...p} ref={r} />),
+  NextPage: forwardRef((p, r) => <ChevronRight {...p} ref={r} />),
+  PreviousPage: forwardRef((p, r) => <ChevronLeft {...p} ref={r} />),
+  ResetSearch: forwardRef((p, r) => <Clear {...p} ref={r} />),
+  Search: forwardRef((p, r) => <Search {...p} ref={r} />),
+  SortArrow: forwardRef((p, r) => <ArrowUpward {...p} ref={r} />),
+  ThirdStateCheck: forwardRef((p, r) => <Remove {...p} ref={r} />),
+  ViewColumn: forwardRef((p, r) => <ViewColumn {...p} ref={r} />),
 };
 
-//Dtate Picker package
-Moment.locale("en");
+/**
+ * Patient summary list backed by GET /api/v1/hivst-encounter/patients
+ * (HivstEncounterController.getPatientSummaries -> HivstPatientSummaryDto).
+ * That endpoint only returns patients with at least one non-archived HIVST
+ * encounter at the current facility where kits distributed > 0 (see the
+ * EXISTS filter added to HivstEncounterRepository.findHivstPatientSummaries).
+ *
+ * Response envelope: { records: [...], totalRecords: N } — confirmed against
+ * both the legacy HIVSTPatient.js and HtsEncounterList.jsx, which agree on
+ * this shape for PaginationUtil.generatePagination() output.
+ */
 const HIVSTPatient = () => {
-    //const [patientList, setPatientList] = useState([])
-    //const [loading, setLoading] = useState(false)
-    const [showPPI, setShowPPI] = useState(true);
-    //const baseUrl2 = "http://localhost:8282/api/v2/"
-    useEffect(() => {
-        //patients()
-    }, []);
+  const history = useHistory();
+  const [showPII, setShowPII] = useState(false);
 
-    const handleCheckBox = (e) => {
-        if (e.target.checked) {
-            setShowPPI(false);
-        } else {
-            setShowPPI(true);
-        }
-    };
+  const fetchData = (query) =>
+    new Promise((resolve, reject) => {
+      const search = query.search?.trim() || "*";
 
-    return (
-        <div>
-            <MaterialTable
-                icons={tableIcons}
-                title="Find HTS Patient "
-                columns={[
-                    // { title: " ID", field: "Id" },
-                    {
-                        title: "Patient Name",
-                        field: "name",
-                        hidden: showPPI,
-                    },
-                    // { title: "Hospital Number", field: "hospital_number", filtering: false },
-                    { title: "Client Code", field: "clientCode", filtering: false },
-                    // { title: "Sex", field: "gender", filtering: false },
-                    { title: "Age", field: "age", filtering: false },
+      axios
+        .get(`${baseUrl}hivst-encounter/patients`, {
+          params: { search, page: query.page, size: query.pageSize },
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          const records = response?.data?.records ?? [];
 
-                    //{ title: "ART Number", field: "v_status", filtering: false },
-                    { title: "HIVST Count", field: "count", filtering: false },
-                    { title: "Actions", field: "actions", filtering: false },
-                ]}
-                data={(query) =>
-                    new Promise((resolve, reject) =>
-                        axios
-                            .get(
-                                `${baseUrl}hivst/persons?pageSize=${query.pageSize}&pageNo=${query.page}&searchValue=${query.search}`,
-                                { headers: { Authorization: `Bearer ${token}` } }
-                            )
-                            .then((response) => response)
-                            .then((result) => {
-                                //setLoading(false)
-                                resolve({
-                                    data:
-                                        result?.data?.records &&
-                                        result?.data?.records
-                                            .filter((client) => {
-                                                return client.clientCode !== null;
-                                            })
-                                            .map((row) => ({
-                                                //name:   row.hivPositive && row.hivPositive===true ? ( <><sup><b style={{color:"red"}}><Icon name='circle' size="small"/></b></sup> { " " + row.personResponseDto.firstName + " " + row.personResponseDto.surname} </>) :row.personResponseDto.firstName + " " + row.personResponseDto.surname,
-                                                name: row.firstName + " " + row.surname,
-                                                // hospital_number: row.hospitalNumber,
-                                                clientCode: row.clientCode,
-                                                gender: row.gender,
-                                                age: row.age,
-                                                count: (
-                                                    <Label color="blue" size="mini">
-                                                        {row.hivstCount}
-                                                    </Label>
-                                                ),
-                                                actions: (
-                                                    <div>
-                                                        {row.hivstCount >= 0 && (
-                                                            <>
-                                                                <Link
-                                                                    to={{
-                                                                        pathname: "/patient-history",
-                                                                        state: {
-                                                                            patientObject: row,
-                                                                            patientObj: row,
-                                                                            clientCode: row.clientCode,
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <ButtonGroup
-                                                                        variant="contained"
-                                                                        aria-label="split button"
-                                                                        style={{
-                                                                            backgroundColor: "rgb(153, 46, 98)",
-                                                                            height: "30px",
-                                                                            width: "215px",
-                                                                        }}
-                                                                        size="large"
-                                                                    >
-                                                                        <Button
-                                                                            color="primary"
-                                                                            size="small"
-                                                                            aria-label="select merge strategy"
-                                                                            aria-haspopup="menu"
-                                                                            style={{
-                                                                                backgroundColor: "rgb(153, 46, 98)",
-                                                                            }}
-                                                                        >
-                                                                            <MdDashboard />
-                                                                        </Button>
-                                                                        <Button
-                                                                            style={{
-                                                                                backgroundColor: "rgb(153, 46, 98)",
-                                                                            }}
-                                                                        >
-                                                                            <span
-                                                                                style={{
-                                                                                    fontSize: "12px",
-                                                                                    color: "#fff",
-                                                                                    fontWeight: "bolder",
-                                                                                }}
-                                                                            >
-                                                                                Patient Dashboard
-                                                                            </span>
-                                                                        </Button>
-                                                                    </ButtonGroup>
-                                                                </Link>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                ),
-                                            })),
-                                    page: query.page,
-                                    totalCount: result.data.totalRecords,
-                                });
-                                //setLoading(false)
-                            })
-                    )
-                }
-                options={{
-                    headerStyle: {
-                        backgroundColor: "#014d88",
-                        color: "#fff",
-                    },
-                    searchFieldStyle: {
-                        width: "200%",
-                        margingLeft: "250px",
-                    },
-                    filtering: false,
-                    exportButton: false,
-                    searchFieldAlignment: "left",
-                    pageSizeOptions: [10, 20, 100],
-                    pageSize: 10,
-                    debounceInterval: 400,
-                }}
-                components={{
-                    Toolbar: (props) => (
-                        <div>
-                            <div className="form-check custom-checkbox  float-left mt-4 ml-3 ">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    name="showPP!"
-                                    id="showPP"
-                                    value="showPP"
-                                    checked={showPPI === true ? false : true}
-                                    onChange={handleCheckBox}
-                                    style={{
-                                        border: "1px solid #014D88",
-                                        borderRadius: "0.25rem",
-                                    }}
-                                />
-                                <label className="form-check-label" htmlFor="basic_checkbox_1">
-                                    <b style={{ color: "#014d88", fontWeight: "bold" }}>
-                                        SHOW PII
-                                    </b>
-                                </label>
-                            </div>
-                            <MTableToolbar {...props} />
-                        </div>
-                    ),
-                }}
-            />
-        </div>
-    );
+          resolve({
+            data: records.map((row) => {
+              // Shaped to match what PatientHistory / PatientDetail expect
+              // elsewhere (personId/id, firstName/surname/otherName flat,
+              // clientCode, etc.) — HivstPatientSummaryDto is already flat,
+              // no nested `person` object like HTS's response has.
+              const _raw = {
+                id: row.patientId,
+                personId: row.patientId,
+                firstName: row.firstName,
+                surname: row.surname,
+                otherName: row.otherName,
+                hospitalNumber: row.hospitalNumber,
+                age: row.age,
+                gender: row.sex,
+                clientCode: row.latestClientCode,
+                hivstCount: row.encounterCount,
+                resultCount: row.resultCount,
+              };
+
+              return {
+                fullName: [row.firstName, row.otherName, row.surname]
+                  .filter(Boolean)
+                  .join(" "),
+                hospitalNumber: row.hospitalNumber ?? "—",
+                phoneNumber: row.phoneNumber ?? "—",
+                sex: row.sex ?? "—",
+                age: row.age ?? "—",
+                encounterCount: row.encounterCount ?? 0,
+                resultCount: row.resultCount ?? 0,
+                clientCode: row.latestClientCode ?? "",
+                _raw,
+              };
+            }),
+            page: query.page,
+            totalCount: response?.data?.totalRecords ?? 0,
+          });
+        })
+        .catch((err) => {
+          console.error("Failed to load HIVST patients:", err);
+          reject(err);
+        });
+    });
+
+  const goToDashboard = (rowData) => {
+    history.push("/patient-history", {
+      patientObject: rowData._raw,
+      patientObj: rowData._raw,
+      clientCode: rowData._raw.clientCode,
+      // Lands directly on the HIVST History tab instead of the default HTS
+      // history tab, since this list is specifically about HIVST records.
+      activePage: "HIVST HISTORY",
+    });
+  };
+
+  const columns = [
+    {
+      title: "Patient Name",
+      field: "fullName",
+      hidden: !showPII,
+      filtering: false,
+      render: (row) => <span style={{ fontWeight: 500 }}>{row.fullName || "—"}</span>,
+    },
+    { title: "Hospital No.", field: "hospitalNumber", filtering: false },
+    { title: "Phone Number", field: "phoneNumber", hidden: !showPII, filtering: false },
+    { title: "Sex", field: "sex", filtering: false },
+    { title: "Age", field: "age", filtering: false },
+    {
+      title: "HIVST Count",
+      field: "encounterCount",
+      filtering: false,
+      render: (row) => (
+        <Label color="blue" size="mini">
+          {row.encounterCount}
+        </Label>
+      ),
+    },
+    {
+      title: "Result Count",
+      field: "resultCount",
+      filtering: false,
+      render: (row) => (
+        <Label color={row.resultCount > 0 ? "teal" : "grey"} size="mini">
+          {row.resultCount}
+        </Label>
+      ),
+    },
+    { title: "Client Code", field: "clientCode", filtering: false },
+    {
+      title: "Actions",
+      field: "actions",
+      filtering: false,
+      sorting: false,
+      render: (rowData) => (
+        <ButtonGroup
+          variant="contained"
+          aria-label="patient dashboard"
+          style={{ height: "30px", width: "215px" }}
+          size="large"
+        >
+          <Button
+            size="small"
+            style={{ backgroundColor: "rgb(153, 46, 98)" }}
+            onClick={() => goToDashboard(rowData)}
+          >
+            <MdDashboard color="#fff" />
+          </Button>
+          <Button
+            style={{ backgroundColor: "rgb(153, 46, 98)" }}
+            onClick={() => goToDashboard(rowData)}
+          >
+            <span style={{ fontSize: "12px", color: "#fff", fontWeight: "bolder" }}>
+              Patient Dashboard
+            </span>
+          </Button>
+        </ButtonGroup>
+      ),
+    },
+  ];
+
+  return (
+    <div>
+      <MaterialTable
+        icons={tableIcons}
+        title="HIVST Patients"
+        columns={columns}
+        data={fetchData}
+        options={{
+          headerStyle: { backgroundColor: "#014d88", color: "#fff" },
+          searchFieldStyle: { width: "200%", marginLeft: "250px" },
+          filtering: false,
+          exportButton: false,
+          searchFieldAlignment: "left",
+          pageSizeOptions: [10, 20, 100],
+          pageSize: 20,
+          debounceInterval: 500,
+        }}
+        components={{
+          Toolbar: (props) => (
+            <div>
+              <div className="form-check custom-checkbox float-left mt-4 ml-3">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="showPII"
+                  checked={showPII}
+                  onChange={(e) => setShowPII(e.target.checked)}
+                  style={{ border: "1px solid #014D88", borderRadius: "0.25rem" }}
+                />
+                <label className="form-check-label" htmlFor="showPII">
+                  <b style={{ color: "#014d88", fontWeight: "bold" }}>SHOW PII</b>
+                </label>
+              </div>
+              <MTableToolbar {...props} />
+            </div>
+          ),
+        }}
+      />
+    </div>
+  );
 };
-export default HIVSTPatient
+
+export default HIVSTPatient;

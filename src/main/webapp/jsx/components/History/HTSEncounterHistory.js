@@ -179,11 +179,8 @@ const DeleteConfirmModal = ({ record, onConfirm, onCancel, deleting }) => {
   );
 };
 
-// ========================
-// CODE SET MAPPINGS
-// ========================
 
-// --- HIV test result mapping ---
+
 const HIV_RESULT_MAP = {
   // STI_HIV_RESULT
   "STI_HIV_RESULT_POSITIVE": { display: "Positive", color: "red" },
@@ -222,6 +219,7 @@ const SETTING_MAP = {
   "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
   "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE": "Antigen Reactive",
   "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE": "Antigen + Antibody Reactive",
+  "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_NON-REACTIVE": "Antigen + Antibody Non-Reactive",
   "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE": "Antibody Reactive",
   "COMMUNITY_HTS_TEST_SETTING_CT": "CT",
   "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT": "Early Detect",

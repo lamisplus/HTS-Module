@@ -73,6 +73,19 @@ const useStyles = makeStyles(() => ({
  * payload shape below. If your API wraps the record (e.g. { data: {...} }),
  * adjust the unwrap on the getHivstEncounter().then(...) call.
  */
+/**
+ * generateClientCode() (see htsEncounterPayload.js) always appends serialNumber
+ * as the LAST "/"-separated segment of clientCode, regardless of whether the
+ * code has 5 segments (setting = OTHERS) or 6 (facility/community with a
+ * subtype) — so extraction is just "take the last segment".
+ */
+const extractSerialNumberFromClientCode = (clientCode) => {
+  if (!clientCode || typeof clientCode !== "string") return "";
+  const segments = clientCode.split("/");
+  if (segments.length < 2) return "";
+  return segments[segments.length - 1] || "";
+};
+
 const mapEncounterToInitialValues = (encounter) => {
   // The backend (HivstEncounterResponseDTO) only returns id/patientId/clientCode/
   // dateOfVisit/setting/facilityId at the top level — every other HIVST-specific
@@ -83,6 +96,7 @@ const mapEncounterToInitialValues = (encounter) => {
   const obs = encounter.observation || {};
   return {
     dateOfVisit: encounter.dateOfVisit ?? "",
+    serialNumber: extractSerialNumberFromClientCode(encounter.clientCode),
     clientCode: encounter.clientCode ?? "",
     setting: encounter.setting ?? "",
     facilitySetting: obs.facilitySetting ?? "",

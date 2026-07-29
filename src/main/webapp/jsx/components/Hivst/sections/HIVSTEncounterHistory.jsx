@@ -24,6 +24,7 @@ import {
   archiveHivstEncounter,
 } from "../../../services/hivst.service";
 import HIVSTEncounterForm from "./HIVSTEncounterForm";
+import HivstResultModal from "./HivstResultModal";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -214,6 +215,7 @@ const HIVSTEncounterHistory = (props) => {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [view, setView] = useState({ mode: VIEW.LIST });
+  const [resultModalRecord, setResultModalRecord] = useState(null);
 
   const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? null;
 
@@ -284,6 +286,16 @@ const HIVSTEncounterHistory = (props) => {
         deleting={deleting}
       />
 
+      {resultModalRecord && (
+        <HivstResultModal
+          encounterId={resultModalRecord.id}
+          numberOfKits={resultModalRecord.numberOfHivstKitDistributed}
+          clientCode={resultModalRecord.clientCode}
+          onClose={() => setResultModalRecord(null)}
+          onSaved={() => setResultModalRecord(null)}
+        />
+      )}
+
       <MaterialTable
         icons={tableIcons}
         title="HIVST History"
@@ -317,31 +329,42 @@ const HIVSTEncounterHistory = (props) => {
             field: "actions",
             filtering: false,
             sorting: false,
-            render: (rowData) => (
-              <Menu.Menu position="right">
-                <Menu.Item>
-                  <Button
-                    style={{ backgroundColor: "rgb(153,46,98)" }}
-                    primary
-                    onClick={(e) => e.preventDefault()}
-                  >
-                    <Dropdown item text="Action">
-                      <Dropdown.Menu style={{ marginTop: "10px" }}>
-                        <Dropdown.Item onClick={() => openForm(rowData._raw, "view")}>
-                          <Icon name="eye" /> View
-                        </Dropdown.Item>
-                        <Dropdown.Item onClick={() => openForm(rowData._raw, "edit")}>
-                          <Icon name="edit" /> Edit
-                        </Dropdown.Item>
-                        <Dropdown.Item onClick={() => setPendingDelete(rowData._raw)}>
-                          <Icon name="delete" /> Delete
-                        </Dropdown.Item>
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </Button>
-                </Menu.Item>
-              </Menu.Menu>
-            ),
+            render: (rowData) => {
+              const hasKits = Number(rowData.numberOfHivstKitDistributed) > 0;
+              return (
+                <Menu.Menu position="right">
+                  <Menu.Item>
+                    <Button
+                      style={{ backgroundColor: "rgb(153,46,98)" }}
+                      primary
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <Dropdown item text="Action">
+                        <Dropdown.Menu style={{ marginTop: "10px" }}>
+                          <Dropdown.Item onClick={() => openForm(rowData._raw, "view")}>
+                            <Icon name="eye" /> View
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => openForm(rowData._raw, "edit")}>
+                            <Icon name="edit" /> Edit
+                          </Dropdown.Item>
+                          <Dropdown.Item onClick={() => setPendingDelete(rowData._raw)}>
+                            <Icon name="delete" /> Delete
+                          </Dropdown.Item>
+                          <Dropdown.Divider />
+                          <Dropdown.Item
+                            disabled={!hasKits}
+                            title={!hasKits ? "No kits were distributed on this encounter" : undefined}
+                            onClick={() => hasKits && setResultModalRecord(rowData)}
+                          >
+                            <Icon name="flask" /> Result
+                          </Dropdown.Item>
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    </Button>
+                  </Menu.Item>
+                </Menu.Menu>
+              );
+            },
           },
         ]}
         data={(encounters || []).map((record) => {
