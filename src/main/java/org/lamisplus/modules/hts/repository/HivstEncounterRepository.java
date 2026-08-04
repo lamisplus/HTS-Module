@@ -16,18 +16,6 @@ public interface HivstEncounterRepository extends JpaRepository<HivstEncounter, 
 
     List<HivstEncounter> findByPerson_IdAndArchivedOrderByDateOfVisitDesc(Long patientId, Boolean archived);
 
-    // Mirrors HtsEncounterRepository's findHtsPatientSummariesOptimized pattern:
-    // one DISTINCT ON + COUNT(*) OVER (PARTITION BY ...) pass over hivst_encounter
-    // for the latest encounter + total count, plus a small aggregate CTE for result
-    // counts (like HTS's ict_agg).
-    //
-    // IMPORTANT: :facilityId / :search are each bound EXACTLY ONCE, in the top
-    // "params" CTE below, then reused via CROSS JOIN params everywhere else in
-    // the query. Native queries in this Hibernate/Spring Data JPA version have
-    // proven unreliable with a named or positional parameter referenced many
-    // times in one query (caused both a Postgres-side syntax error AND, with
-    // positional params, an application startup failure) — binding once and
-    // reusing the captured value via SQL avoids that whole class of bug.
     String HIVST_SUMMARY_CTES =
             "WITH params AS (\n" +
                     "    SELECT CAST(:facilityId AS bigint) AS facility_id,\n" +
@@ -57,8 +45,6 @@ public interface HivstEncounterRepository extends JpaRepository<HivstEncounter, 
     String HIVST_SUMMARY_WHERE =
             "WHERE p.archived = 0\n" +
                     "  AND p.facility_id = params.facility_id\n" +
-                    // Only patients with at least one non-archived HIVST encounter at this
-                    // facility where kits were actually distributed (> 0) qualify for the list.
                     "  AND EXISTS (\n" +
                     "      SELECT 1 FROM hivst_encounter e3\n" +
                     "      WHERE e3.patient_uuid = CAST(p.uuid AS text)\n" +
@@ -90,13 +76,14 @@ public interface HivstEncounterRepository extends JpaRepository<HivstEncounter, 
                     "    (SELECT cp->>'value' FROM jsonb_array_elements(p.contact_point->'contactPoint') cp WHERE cp->>'type' = 'phone' LIMIT 1) AS phoneNumber,\n" +
                     "    hv.client_code AS latestClientCode,\n" +
                     "    COALESCE(hv.encounter_count, 0) AS encounterCount,\n" +
-                    "    COALESCE(res.result_count, 0) AS resultCount\n" +
+                    "    COALESCE(res.result_count, 0) AS resultCount,\n" +
+                    "    hv.date_of_visit AS dateOfVisit\n" +   // ← expose the column so Pageable can sort on it
                     "FROM patient_person p\n" +
                     "CROSS JOIN params\n" +
                     "INNER JOIN hivst_agg hv ON hv.patient_uuid = CAST(p.uuid AS text)\n" +
                     "LEFT JOIN hivst_res_agg res ON res.patient_uuid = CAST(p.uuid AS text)\n" +
-                    HIVST_SUMMARY_WHERE +
-                    "ORDER BY hv.date_of_visit DESC",
+                    HIVST_SUMMARY_WHERE,
+            // NO ORDER BY here
             countQuery =
                     "WITH params AS (\n" +
                             "    SELECT CAST(:facilityId AS bigint) AS facility_id,\n" +

@@ -102,6 +102,37 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
   const [forceEdit, setForceEdit] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // ---- Sanitisation helper (same as in HIVSTPostTestCounsellingSection) ----
+  const sanitiseNumber = (value) => {
+    const digitsOnly = String(value).replace(/\D/g, "");
+    if (digitsOnly === "") return "";
+    const num = parseInt(digitsOnly, 10);
+    if (isNaN(num) || num < 0) return "0";
+    return String(num);
+  };
+
+  // ---- Handlers for reactive fields ----
+  const handleReactiveChange = (setter) => (e) => {
+    const raw = e.target.value;
+    const sanitised = sanitiseNumber(raw);
+    setter(sanitised === "" ? "" : sanitised);
+  };
+
+  const handleReactivePaste = (setter) => (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData("text");
+    const sanitised = sanitiseNumber(pasted);
+    setter(sanitised === "" ? "" : sanitised);
+  };
+
+  const handleKeyDown = (e) => {
+    if (["-", "e", "+", "."].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  // ----------------------------------------------------------------
+
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
@@ -230,7 +261,9 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
                 step="1"
                 value={reactiveGt15}
                 disabled={effectiveReadOnly}
-                onChange={(e) => setReactiveGt15(e.target.value)}
+                onChange={handleReactiveChange(setReactiveGt15)}
+                onPaste={handleReactivePaste(setReactiveGt15)}
+                onKeyDown={handleKeyDown}
                 style={effectiveReadOnly ? disabledInputStyle : inputStyle}
               />
             </div>
@@ -243,7 +276,9 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
                 step="1"
                 value={reactiveLe15}
                 disabled={effectiveReadOnly}
-                onChange={(e) => setReactiveLe15(e.target.value)}
+                onChange={handleReactiveChange(setReactiveLe15)}
+                onPaste={handleReactivePaste(setReactiveLe15)}
+                onKeyDown={handleKeyDown}
                 style={effectiveReadOnly ? disabledInputStyle : inputStyle}
               />
             </div>

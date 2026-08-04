@@ -30,6 +30,15 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
   const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
 
+  // Sanitise number input: only digits, clamp >= 0
+  const sanitiseNumber = (value) => {
+    const digitsOnly = String(value).replace(/\D/g, "");
+    if (digitsOnly === "") return "";
+    const num = parseInt(digitsOnly, 10);
+    if (isNaN(num) || num < 0) return "0";
+    return String(num);
+  };
+
 
 
   useEffect(() => {
@@ -141,10 +150,17 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
   });
 
   const handleNoOfHivstKitProvided = (e) => {
-    if (e.target.value === "." || e.target.value === ",") e.preventDefault();
-    setFieldValue("numberOfHivstKitDistributed", e.target.value);
+    const raw = e.target.value;
+    const sanitised = sanitiseNumber(raw);
+    setFieldValue("numberOfHivstKitDistributed", sanitised === "" ? "" : Number(sanitised));
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData("text");
+    const sanitised = sanitiseNumber(pasted);
+    setFieldValue("numberOfHivstKitDistributed", sanitised === "" ? "" : Number(sanitised));
+  };
 
 
 
@@ -242,11 +258,22 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
 
                 <div className="col-md-3">
                   <Label style={labelStyle}>No. of Kits Distributed</Label>
-                  <Input type="number" name="numberOfHivstKitDistributed" value={values?.numberOfHivstKitDistributed || ""}
-                    onChange={readOnly ? undefined : handleNoOfHivstKitProvided} onBlur={handleBlur}
-                    min="0" step="1" disabled={readOnly}
+                  <Input
+                    type="number"
+                    name="numberOfHivstKitDistributed"
+                    value={values?.numberOfHivstKitDistributed ?? ""}
+                    onChange={readOnly ? undefined : handleNoOfHivstKitProvided}
+                    onPaste={readOnly ? undefined : handlePaste}
+                    onBlur={handleBlur}
+                    min="0"
+                    step="1"
+                    disabled={readOnly}
                     style={readOnly ? disabledInputStyle : inputStyle}
-                    onKeyDown={(e) => { if (e.key === "." || e.key === ",") e.preventDefault(); }}
+                    onKeyDown={(e) => {
+                      if (["-", "e", "+", ".", ","].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                   />
                   {touched?.numberOfHivstKitDistributed && errors?.numberOfHivstKitDistributed && (
                     <span style={errorStyle}>{errors?.numberOfHivstKitDistributed}</span>
