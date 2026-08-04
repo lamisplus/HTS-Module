@@ -85,11 +85,11 @@ const centerNote = {
 
 /**
  * @param {number} encounterId          The HIVST encounter this result belongs to.
- * @param {number} numberOfKits         numberOfHivstKitDistributed on that encounter — used for
+ * @param {number} numberOfKits         numberOfHivstKitDistributed on that encounter - used for
  *                                       display + client-side validation before hitting the API.
  * @param {string} [clientCode]         For display in the modal header only.
  * @param {Function} onClose            Called to dismiss the modal without saving.
- * @param {Function} onSaved            Called after a successful create/update/delete — parent
+ * @param {Function} onSaved            Called after a successful create/update/delete - parent
  *                                       should close the modal and refresh its list.
  */
 const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSaved }) => {
@@ -144,7 +144,7 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
         setReactiveLe15(data?.reactiveLe15 != null ? String(data.reactiveLe15) : "");
       })
       .catch(() => {
-        // No result yet for this encounter (404) — stay in create mode.
+        // No result yet for this encounter (404) - stay in create mode.
         if (isMounted) setExistingResult(null);
       })
       .finally(() => {
@@ -254,7 +254,7 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
             </div>
 
             <div>
-              <label style={labelStyle}>Reactive — Age greater than 15</label>
+              <label style={labelStyle}>Reactive - Age greater than 15</label>
               <input
                 type="number"
                 min="0"
@@ -269,7 +269,7 @@ const HivstResultModal = ({ encounterId, numberOfKits, clientCode, onClose, onSa
             </div>
 
             <div>
-              <label style={labelStyle}>Reactive — Age 15 and below</label>
+              <label style={labelStyle}>Reactive - Age 15 and below</label>
               <input
                 type="number"
                 min="0"
