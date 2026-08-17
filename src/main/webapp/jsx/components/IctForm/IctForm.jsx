@@ -92,10 +92,10 @@ const mapIctResponseToFormValues = (response) => {
     dateOfService: response.dateOfService ?? "",
     setting: response.setting ?? "",
     clientCategory: response.clientCategory ?? "",
-    clientCategoryOther: response?.clientCategoryOther ||  d?.clientCategoryOther | "",
+    clientCategoryOther: response?.clientCategoryOther || d?.clientCategoryOther | "",
     offeredPns: response.offeredPns ?? "",
     acceptedPns: response.acceptedPns ?? "",
-    
+
 
     // These are stored in the encounter's data JSONB
     facilityName: d.facilityName ?? "",
@@ -166,7 +166,7 @@ const IctForm = ({
 
   const mergedHtsValues = htsValues ? { ...htsValues, isOnArt, } : null;
 
-  
+
 
   const onSubmit = async (values) => {
     setIsLoading(true);
@@ -176,9 +176,13 @@ const IctForm = ({
       try {
         const res = await getHtsEcounter(htsId);
         const obs = res?.data?.observation ?? res?.observation ?? {};
-        if (obs.confirmatoryHivTest?.toLowerCase() !== "hiv_confirmatory_test_result_positive" || obs.finalHivTestResult?.toLowerCase() !== "positive") {
+        const confirmatoryPositive = obs.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
+        const finalPositive = ["positive", "acute hiv infection"].includes(
+          obs.finalHivTestResult?.toLowerCase()
+        );
+        if (!confirmatoryPositive && !finalPositive) {
           toast.error(
-            "ICT can only be created for a client with a confirmed positive HIV test result." 
+            "ICT can only be created for a client with a confirmed positive HIV test result."
           );
           return;
         }

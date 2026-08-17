@@ -1,0 +1,80 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="add_facility_id_to_hivst_result_08172026" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hivst_result" columnName="facility_id"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds facility_id to hivst_result. Column is added nullable first so existing
+            rows can be backfilled, then locked to NOT NULL once every row has a value.
+            Backfill source: hivst_encounter.facility_id via hivst_result.encounter_id.
+        </comment>
+
+        <addColumn tableName="hivst_result">
+            <column name="facility_id" type="BIGINT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_hivst_result_facility"
+                             references="base_organisation_unit(id)"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE hivst_result r
+            SET facility_id = e.facility_id
+            FROM hivst_encounter e
+            WHERE r.encounter_id = e.id
+              AND r.facility_id IS NULL;
+        </sql>
+
+        <addNotNullConstraint tableName="hivst_result"
+                               columnName="facility_id"
+                               columnDataType="BIGINT"/>
+
+        <createIndex indexName="idx_hivst_result_facility" tableName="hivst_result">
+            <column name="facility_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="add_facility_id_to_hts_ict_contact_08172026" author="Emmanuel Nnajiofor">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="hts_ict_contact" columnName="facility_id"/>
+            </not>
+        </preConditions>
+        <comment>
+            Adds facility_id to hts_ict_contact. Column is added nullable first so existing
+            rows can be backfilled, then locked to NOT NULL once every row has a value.
+            Backfill source: hts_ict_encounter.facility_id via hts_ict_contact.ict_encounter_id.
+        </comment>
+
+        <addColumn tableName="hts_ict_contact">
+            <column name="facility_id" type="BIGINT">
+                <constraints nullable="true"
+                             foreignKeyName="fk_hts_ict_contact_facility"
+                             references="base_organisation_unit(id)"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE hts_ict_contact c
+            SET facility_id = e.facility_id
+            FROM hts_ict_encounter e
+            WHERE c.ict_encounter_id = e.id
+              AND c.facility_id IS NULL;
+        </sql>
+
+        <addNotNullConstraint tableName="hts_ict_contact"
+                               columnName="facility_id"
+                               columnDataType="BIGINT"/>
+
+        <createIndex indexName="idx_hts_ict_contact_facility" tableName="hts_ict_contact">
+            <column name="facility_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

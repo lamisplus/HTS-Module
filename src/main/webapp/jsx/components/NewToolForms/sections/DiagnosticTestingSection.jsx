@@ -201,7 +201,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <>
             <div className="col-md-12">
               <div style={warningBannerStyle}>
-                ⚠️ Suspected Acute HIV Infection — This client should be enrolled in
+                Suspected Acute HIV Infection - This client should be enrolled in
                 PrEP/PEP and have access to the HIV Module for laboratory tests only.
               </div>
             </div>

@@ -56,7 +56,9 @@ export const generateClientCode = (
   serialNumber
 ) => {
   const settingPrefix = SETTING_PREFIX_MAP[setting];
-  if (!settingPrefix || !facilityCode || !serialNumber || !dateOfVisit) return null;
+  if (!settingPrefix 
+    // || !facilityCode 
+    || !serialNumber || !dateOfVisit) return null;
 
   const date = new Date(dateOfVisit);
   if (isNaN(date.getTime())) return null;
@@ -69,9 +71,9 @@ export const generateClientCode = (
   // "Others" has no subtype
   const segments =
     setting === "HTS_ENTRY_POINT_OTHERS"
-      ? [settingPrefix, facilityCode, yyyy, mm, serialNumber]
+      ? [settingPrefix, yyyy, mm, serialNumber]
       : subtypeCode
-        ? [settingPrefix, facilityCode, subtypeCode, yyyy, mm, serialNumber]
+        ? [settingPrefix, subtypeCode, yyyy, mm, serialNumber]
         : null; // facility/community selected but subtype not yet chosen
 
   if (!segments) return null;

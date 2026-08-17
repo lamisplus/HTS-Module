@@ -259,7 +259,7 @@ function PatientCard(props) {
                                   Status : Checking current status ...
                                 </Label>
                               ) :
-                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" || finalHivTestResult === "acute hiv infection" ?
                                   (<Label color={"red"} size={"small"}>
                                     Status : Positive
                                   </Label>) :

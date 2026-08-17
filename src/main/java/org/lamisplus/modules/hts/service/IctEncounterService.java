@@ -195,6 +195,7 @@ public class IctEncounterService {
     private IctContact mapToContact(IctContactRequest cr, IctEncounter encounter) {
         IctContact c = new IctContact();
         c.setIctEncounter(encounter);
+        c.setFacilityId(encounter.getFacilityId());
         c.setContactCode(cr.getContactCode());
         c.setFirstName(cr.getFirstName());
         c.setMiddleName(cr.getMiddleName());

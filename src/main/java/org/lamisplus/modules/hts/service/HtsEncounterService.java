@@ -1,5 +1,6 @@
 package org.lamisplus.modules.hts.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
@@ -88,6 +89,44 @@ public class HtsEncounterService {
         if (request.getLongitude() != null) existing.setLongitude(request.getLongitude());
         if (request.getLatitude() != null) existing.setLatitude(request.getLatitude());
         existing.setObservation(buildObservation(request));
+
+        existing = repository.save(existing);
+        return toResponse(existing);
+    }
+
+
+    /**
+     * Called by the HIV module when a viral load result of >= 1000 comes back for a
+     * patient, to flag their most recent HTS encounter as an acute HIV infection.
+     * Only the finalHivTestResult key inside the observation JSON is touched; every
+     * other observation field on the record, and hts_ict_encounter, are left alone.
+     */
+    public HtsEncounterResponse markAcuteHivInfection(Long id) {
+        return updateFinalHivTestResult(id, "ACUTE HIV INFECTION");
+    }
+
+    /**
+     * Called by the HIV module when a viral load result of < 1000 comes back for a
+     * patient, to flag their most recent HTS encounter as negative. Only the
+     * finalHivTestResult key inside the observation JSON is touched; every other
+     * observation field on the record, and hts_ict_encounter, are left alone.
+     */
+    public HtsEncounterResponse markNegative(Long id) {
+        return updateFinalHivTestResult(id, "Negative");
+    }
+
+    private HtsEncounterResponse updateFinalHivTestResult(Long id, String finalHivTestResult) {
+        HtsEncounter existing = repository.findByIdAndArchived(id, false)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        HtsEncounter.class, "id", id.toString()));
+
+        JsonNode current = existing.getObservation();
+        ObjectNode obs = (current != null && current.isObject())
+                ? (ObjectNode) current
+                : objectMapper.createObjectNode();
+
+        obs.put("finalHivTestResult", finalHivTestResult);
+        existing.setObservation(obs);
 
         existing = repository.save(existing);
         return toResponse(existing);

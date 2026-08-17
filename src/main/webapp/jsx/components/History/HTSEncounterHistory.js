@@ -288,6 +288,9 @@ const mapResultCode = (code, customMap) => {
   if (lowerCode.includes("suspected")) {
     return { display: code, color: "orange" };
   }
+  if (lowerCode.includes("acute hiv infection")) {
+    return { display: code, color: "red" };
+  }
   return { display: code, color: "grey" };
 };
 

@@ -49,6 +49,7 @@ public class HivstResultService {
 
         HivstResult result = new HivstResult();
         result.setEncounter(encounter);
+        result.setFacilityId(encounter.getFacilityId()); 
         result.setNumberOfKits(numberOfKits);
         result.setReactiveGt15(request.getReactiveGt15());
         result.setReactiveLe15(request.getReactiveLe15());

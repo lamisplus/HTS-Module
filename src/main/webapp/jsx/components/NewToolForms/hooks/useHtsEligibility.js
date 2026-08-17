@@ -3,6 +3,7 @@ import { useMemo } from "react";
 export const POSITIVE_HIV_RESULT_CODES = new Set([
   "hiv_confirmatory_test_result_positive",
   "positive",
+  "acute hiv infection"
 ]);
 
 function isPositiveValue(value) {

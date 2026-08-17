@@ -47,6 +47,24 @@ public class HtsEncounterController {
         return ResponseEntity.ok(service.update(id, request));
     }
 
+    // Called by the HIV module when a patient's viral load result is >= 1000.
+    // Flags the given HTS encounter's finalHivTestResult as an acute HIV infection.
+    // Does not touch hts_ict_encounter or any other observation field on the record.
+    @PatchMapping("/{id}/final-result/acute-hiv-infection")
+    @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
+    public ResponseEntity<HtsEncounterResponse> markAcuteHivInfection(@PathVariable Long id) {
+        return ResponseEntity.ok(service.markAcuteHivInfection(id));
+    }
+
+    // Called by the HIV module when a patient's viral load result is < 1000.
+    // Flags the given HTS encounter's finalHivTestResult as negative.
+    // Does not touch hts_ict_encounter or any other observation field on the record.
+    @PatchMapping("/{id}/final-result/negative")
+    @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
+    public ResponseEntity<HtsEncounterResponse> markNegative(@PathVariable Long id) {
+        return ResponseEntity.ok(service.markNegative(id));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_delete', 'hts_encounter_delete')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

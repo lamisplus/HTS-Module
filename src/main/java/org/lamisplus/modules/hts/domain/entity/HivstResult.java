@@ -25,6 +25,9 @@ public class HivstResult extends Audit<HivstResult> {
     @JoinColumn(name = "encounter_id", nullable = false, unique = true)
     private HivstEncounter encounter;
 
+    @Column(name = "facility_id", nullable = false)
+    private Long facilityId;
+
     @Column(name = "number_of_kits", nullable = false)
     private Integer numberOfKits;
 
