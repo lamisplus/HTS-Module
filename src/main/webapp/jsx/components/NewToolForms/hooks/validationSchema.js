@@ -700,8 +700,9 @@ export const buildValidationSchema = (isNewPatient) => {
     // correctCondomUseDemonstrated: yup.string().required("This field is required"),
     condomsProvided: yup.string().nullable(),
     // condomsProvided: yup.string().required("This field is required"),
+    dateOfFinalHivTestDone: yup.string().nullable(),
     clientReferredToOtherServices: yup.string().required("This field is required"),
     completedBy: yup.string().required("This field is required"),
-    designation: yup.string().required("This field is required"),
+    designation: yup.string().required("This field is required")
   });
 };

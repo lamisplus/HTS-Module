@@ -77,4 +77,22 @@
         </createIndex>
     </changeSet>
 
+
+    <changeSet id="clear_suspected_acute_infection_final_result_08182026" author="Emmanuel Nnajiofor">
+        <comment>
+            Data fix: hts_encounter.observation->>'finalHivTestResult' has some rows with the
+            legacy/incorrect value "Suspected Acute Infection" (case varies due to data quality
+            issues — e.g. "suspected acute infection", "SUSPECTED ACUTE INFECTION"). This clears
+            that value to an empty string, keeping the finalHivTestResult key in the JSON but
+            emptying it out, since it's no longer a valid final result value.
+        </comment>
+
+        <sql>
+            UPDATE hts_encounter
+            SET observation = jsonb_set(observation, '{finalHivTestResult}', '""'::jsonb, false)
+            WHERE observation IS NOT NULL
+            AND observation ? 'finalHivTestResult'
+            AND lower(trim(observation->>'finalHivTestResult')) = 'suspected acute infection';
+        </sql>
+    </changeSet>
 </databaseChangeLog>

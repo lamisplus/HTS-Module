@@ -30,6 +30,7 @@ export function checkHtsEligibility(encounters) {
 
   const confirmatoryResult = latest?.observation?.confirmatoryHivTest?.trim().toLowerCase();
   const finalHivTestResult = latest?.observation?.finalHivTestResult?.trim().toLowerCase();
+  const suspectedAcuteInfection = latest?.observation?.suspectedAcuteInfection?.trim().toLowerCase();
 
   const positiveEncounter = sorted.find(isPositiveEncounter);
   if (positiveEncounter) {
@@ -37,7 +38,8 @@ export function checkHtsEligibility(encounters) {
       isEligible: false,
       reason: "Client has a previously documented HIV Positive result and cannot have a new HTS record.",
       confirmatoryResult: positiveEncounter?.observation?.confirmatoryHivTest?.trim().toLowerCase() || confirmatoryResult,
-      finalHivTestResult: positiveEncounter?.observation?.finalHivTestResult?.trim().toLowerCase() || finalHivTestResult
+      finalHivTestResult: positiveEncounter?.observation?.finalHivTestResult?.trim().toLowerCase() || finalHivTestResult,
+      suspectedAcuteInfection
     };
   }
 
@@ -53,7 +55,8 @@ export function checkHtsEligibility(encounters) {
         isEligible: false,
         reason: `Client tested Negative on ${latest.dateOfVisit}, which is within the last 3 months.`,
         confirmatoryResult,
-        finalHivTestResult
+        finalHivTestResult,
+        suspectedAcuteInfection
       };
     }
 
@@ -61,7 +64,8 @@ export function checkHtsEligibility(encounters) {
       isEligible: true,
       reason: `Client's last Negative result (${latest.dateOfVisit}) is older than 3 months.`,
       confirmatoryResult,
-      finalHivTestResult
+      finalHivTestResult,
+      suspectedAcuteInfection
     };
   }
 
@@ -69,17 +73,18 @@ export function checkHtsEligibility(encounters) {
     isEligible: true,
     reason: "No conclusive result from any previous HIV confirmatory test was found.",
     confirmatoryResult,
-    finalHivTestResult
+    finalHivTestResult,
+    suspectedAcuteInfection
   };
 }
 
 export function useHtsEligibility(encounters, isLoadingEncounters, refreshKey) {
-  const { isEligible, reason, confirmatoryResult, finalHivTestResult } = useMemo(() => {
+  const { isEligible, reason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection } = useMemo(() => {
     if (isLoadingEncounters) {
-      return { isEligible: false, reason: "Loading encounter history...", confirmatoryResult: "checking...", finalHivTestResult: "checking..." };
+      return { isEligible: false, reason: "Loading encounter history...", confirmatoryResult: "checking...", finalHivTestResult: "checking...", suspectedAcuteInfection: "checking..." };
     }
     return checkHtsEligibility(encounters);
   }, [encounters, isLoadingEncounters, refreshKey]);
 
-  return { isPatientEligibleForHts: isEligible, eligibilityReason: reason, confirmatoryResult, finalHivTestResult };
+  return { isPatientEligibleForHts: isEligible, eligibilityReason: reason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection };
 }

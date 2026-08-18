@@ -1,6 +1,6 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState, useEffect } from "react";
-import { FormSelect, SectionSubheading, ReadOnlyField } from "./FormFields";
+import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 
@@ -73,7 +73,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   // ── Derived Final HIV Test Result ─────────────────────────────────────────
   const getFinalResult = () => {
     if (earlyDetectDone) {
-      if (isAcutePath) return "Suspected Acute Infection";
+      // if (isAcutePath) return "Suspected Acute Infection"; 
+      if (isAcutePath) return ""; // if it is suspected, finalHivTestResult will now remain blank
       if (isNonReactivePath) return "Negative";
       if (isAntibodyReactivePath) {
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
@@ -93,7 +94,6 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   const finalResult = getFinalResult();
 
-  // 🔁 Update Formik field whenever finalResult changes
   useEffect(() => {
     setFieldValue("finalHivTestResult", finalResult || "");
   }, [finalResult, setFieldValue]);
@@ -196,7 +196,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* PATH A - Acute sub-path: Suspected Acute Infection (locked YES) */}
+
         {earlyDetectDone && isAcutePath && (
           <>
             <div className="col-md-12">
@@ -248,10 +248,11 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
+      </div>
 
-        {/* Final HIV Test Result - derived, read-only display */}
-        {finalResult && (
-          <div className="col-md-12">
+      <div className="row">
+        {formik?.values?.finalHivTestResult && formik?.values?.finalHivTestResult !== "" && (
+          <div className="col-md-6">
             <div style={{ marginBottom: 16 }}>
               <label style={{
                 fontSize: "14px",
@@ -262,10 +263,20 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
               }}>
                 Final HIV Test Result
               </label>
-              <span style={finalResultBoxStyle(finalResult)}>{finalResult}</span>
+              <span style={finalResultBoxStyle(formik?.values?.finalHivTestResult)}>{formik?.values?.finalHivTestResult}</span>
             </div>
           </div>
         )}
+
+        {
+          formik?.values?.dateOfFinalHivTestDone && formik?.values?.dateOfFinalHivTestDone !== "" && (
+            <div className="col-md-6">
+              <FormTextField label="Date of Final HIV test" type="date" value={formik?.values?.dateOfFinalHivTestDone}
+                disabled
+              />
+            </div>
+          )
+        }
       </div>
 
       {/* Syphilis - always shown */}

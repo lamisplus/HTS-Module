@@ -71,9 +71,10 @@ function PatientCard(props) {
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
   const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
+  const clientSuspectedAcuteInfection = props?.patientObj?.observation?.suspectedAcuteInfection?.toLowerCase() || props?.clientEligibility?.suspectedAcuteInfection?.toLowerCase()
   const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
   const isLoadingEncounters = props?.isLoadingEncounters
-
+  console.log(props)
 
   useEffect(() => {
     PatientCurrentObject();
@@ -259,7 +260,7 @@ function PatientCard(props) {
                                   Status : Checking current status ...
                                 </Label>
                               ) :
-                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" || finalHivTestResult === "acute hiv infection" ?
+                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
                                   (<Label color={"red"} size={"small"}>
                                     Status : Positive
                                   </Label>) :
@@ -269,10 +270,10 @@ function PatientCard(props) {
                                         Status: Negative
                                       </Label>
                                     ) :
-                                    finalHivTestResult === "suspected acute infection" ?
+                                    clientSuspectedAcuteInfection === "yes_no_yes" ?
                                       (
                                         <Label color="orange" size={"small"}>
-                                          Status: {finalHivTestResult}
+                                          Status: Suspected Acute Infection - No final HIV test result yet
                                         </Label>
                                       ) :
 

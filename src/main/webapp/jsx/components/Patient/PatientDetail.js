@@ -138,7 +138,7 @@ function PatientCard(props) {
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
 
-  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult } = useHtsEligibility(
+  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection } = useHtsEligibility(
     encounters,
     isLoadingEncounters, refreshKey
   );
@@ -167,7 +167,7 @@ function PatientCard(props) {
             patientObject={personInfo || patientObject || patientObj}
             setPersonInfo={setPersonInfo}
             isLoadingEncounters={isLoadingEncounters}
-            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult }}
+            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection }}
           />
 
           {activePage.activePage === "home" && (
