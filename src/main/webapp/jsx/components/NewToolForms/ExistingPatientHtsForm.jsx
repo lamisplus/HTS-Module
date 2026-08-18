@@ -279,7 +279,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             `Cannot save: another HTS record for this patient (visited ${conflictingRecord.dateOfVisit}) already has an HIV Positive result. A patient cannot have two HIV-positive records.`,
             { autoClose: 8000 }
           );
-          return; // abort — do not call the API
+          return; // abort - do not call the API
         }
       } catch (err) {
         console.error("Failed to validate existing encounters before update:", err);
@@ -360,7 +360,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             <span style={modeBadgeStyle(readOnly)}>{readOnly ? "View" : "Edit"}</span>
           </h2>
           <p className={classes.subtitle}>
-            {readOnly ? "Viewing existing HTS record — no changes can be made" : "Editing existing HTS record — update the required fields and save"}
+            {readOnly ? "Viewing existing HTS record - no changes can be made" : "Editing existing HTS record - update the required fields and save"}
           </p>
           {isRefreshingEncounter && <p className={classes.subtitle}>Refreshing Record, Please wait...</p>}
         </div>

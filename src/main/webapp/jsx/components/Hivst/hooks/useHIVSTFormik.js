@@ -32,7 +32,7 @@ const defaultValues = {
   breastfeedingDuration: "",
 
   // Patient/person reference fields rendered (read-only) inside
-  // HIVSTBasicInformationSection — populated from the existing patient record,
+  // HIVSTBasicInformationSection - populated from the existing patient record,
   // never edited from this form.
   surname: "",
   firstName: "",

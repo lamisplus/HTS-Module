@@ -223,7 +223,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
 
           return rawOptions.filter((opt) => {
             const code = opt.value; // e.g. "TARGET_GROUP_FSW"
-            // FSW: disabled for males (handled below via disabled prop) — here we keep it visible but see note
+            // FSW: disabled for males (handled below via disabled prop) - here we keep it visible but see note
             // MSM: hidden for females
             if (isFemale && code === "TARGET_GROUP_MSM") return false;
             if (isMale && code === "TARGET_GROUP_FSW") return false;

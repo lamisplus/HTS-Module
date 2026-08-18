@@ -184,7 +184,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           />
         </div>
 
-        {/* PATH A — Early Detect = YES */}
+        {/* PATH A - Early Detect = YES */}
         {earlyDetectDone && (
           <div className="col-md-6">
             <FormSelect
@@ -196,7 +196,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* PATH A — Acute sub-path: Suspected Acute Infection (locked YES) */}
+        {/* PATH A - Acute sub-path: Suspected Acute Infection (locked YES) */}
         {earlyDetectDone && isAcutePath && (
           <>
             <div className="col-md-12">
@@ -215,7 +215,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </>
         )}
 
-        {/* PATH B — Early Detect = NO → show Initial HIV Test */}
+        {/* PATH B - Early Detect = NO → show Initial HIV Test */}
         {earlyDetectNo && (
           <div className="col-md-6">
             <FormSelect
@@ -227,7 +227,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* SHARED — Confirmatory: shown for Antibody Reactive (Path A) 
+        {/* SHARED - Confirmatory: shown for Antibody Reactive (Path A) 
                      OR Initial Positive (Path B) */}
         {showConfirmatory && (
           <div className="col-md-6">
@@ -238,7 +238,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* Recency — commented out per requirement */}
+        {/* Recency - commented out per requirement */}
         {showRecency && (
           <div className="col-md-6">
             <FormSelect
@@ -249,7 +249,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* Final HIV Test Result — derived, read-only display */}
+        {/* Final HIV Test Result - derived, read-only display */}
         {finalResult && (
           <div className="col-md-12">
             <div style={{ marginBottom: 16 }}>
@@ -268,7 +268,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         )}
       </div>
 
-      {/* Syphilis — always shown */}
+      {/* Syphilis - always shown */}
       <SectionSubheading>Syphilis Testing</SectionSubheading>
       <div className="row">
         <div className="col-md-6">

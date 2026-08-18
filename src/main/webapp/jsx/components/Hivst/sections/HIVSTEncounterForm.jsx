@@ -77,7 +77,7 @@ const useStyles = makeStyles(() => ({
  * generateClientCode() (see htsEncounterPayload.js) always appends serialNumber
  * as the LAST "/"-separated segment of clientCode, regardless of whether the
  * code has 5 segments (setting = OTHERS) or 6 (facility/community with a
- * subtype) — so extraction is just "take the last segment".
+ * subtype) - so extraction is just "take the last segment".
  */
 const extractSerialNumberFromClientCode = (clientCode) => {
   if (!clientCode || typeof clientCode !== "string") return "";
@@ -88,11 +88,11 @@ const extractSerialNumberFromClientCode = (clientCode) => {
 
 const mapEncounterToInitialValues = (encounter) => {
   // The backend (HivstEncounterResponseDTO) only returns id/patientId/clientCode/
-  // dateOfVisit/setting/facilityId at the top level — every other HIVST-specific
+  // dateOfVisit/setting/facilityId at the top level - every other HIVST-specific
   // field lives inside `observation` (a JSONB blob), exactly like HTS's
   // HtsEncounterResponse. serialNumber is never persisted server-side on either
   // HTS or HIVST (it's only ever used client-side to help build clientCode), so
-  // it can't be recovered on edit — same limitation as HTS.
+  // it can't be recovered on edit - same limitation as HTS.
   const obs = encounter.observation || {};
   return {
     dateOfVisit: encounter.dateOfVisit ?? "",
@@ -124,7 +124,7 @@ const mapEncounterToInitialValues = (encounter) => {
  * @param {Object}   patientObj            Patient/person object (same shape used elsewhere in PatientHistory).
  * @param {string}   [patientId]           Optional override; otherwise derived from patientObj.
  * @param {string}   [existingEncounterId] When present, form loads + edits/views that encounter instead of creating a new one.
- * @param {boolean}  [readOnly]            View mode — renders read-only with an "Edit" escape hatch.
+ * @param {boolean}  [readOnly]            View mode - renders read-only with an "Edit" escape hatch.
  * @param {Function} [onBack]              Called when the Back button is clicked.
  * @param {Function} [onSuccess]           Called with the API response after a successful create/update.
  */
@@ -148,7 +148,7 @@ const HIVSTEncounterForm = ({
   const effectiveReadOnly = readOnly && !forceEdit;
 
   // Always fetch the FULL patient detail fresh (marital status, address,
-  // state/LGA, etc. all live here — the lightweight patientObj passed down
+  // state/LGA, etc. all live here - the lightweight patientObj passed down
   // from PatientHistory only carries name/id/age).
   useEffect(() => {
     let isMounted = true;
@@ -200,7 +200,7 @@ const HIVSTEncounterForm = ({
     };
   }, [existingEncounterId]);
 
-  // The patient-detail endpoint doesn't return `age` — fall back to the
+  // The patient-detail endpoint doesn't return `age` - fall back to the
   // lightweight patientObj's age (already computed server-side) for display
   // purposes only; it isn't part of the encounter payload.
   const mergedPatientData = useMemo(() => {

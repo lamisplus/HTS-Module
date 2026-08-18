@@ -10,22 +10,22 @@ import java.util.List;
 /**
  * Service that answers uniqueness checks for any client-code string.
  *
- * Uses {@link EntityManager} with a native SQL query directly — no Spring Data
+ * Uses {@link EntityManager} with a native SQL query directly - no Spring Data
  * repository interface is needed because there is no JPA entity backing this
  * query (it spans three tables).
  *
  * Four locations are checked in a single UNION ALL query:
- *  1. hts_encounter.client_code
- *  2. hts_encounter.observation->>'indexClientCode'   (JSONB)
- *  3. hts_ict_encounter.data->>'indexClientId'        (JSONB)
- *  4. hts_ict_contact.contact_code
+ * 1. hts_encounter.client_code
+ * 2. hts_encounter.observation->>'indexClientCode' (JSONB)
+ * 3. hts_ict_encounter.data->>'indexClientId' (JSONB)
+ * 4. hts_ict_contact.contact_code
  */
 @Service
 @Slf4j
 public class ClientCodeUniquenessService {
 
     /**
-     * Injected by the JPA container — no constructor argument needed, so
+     * Injected by the JPA container - no constructor argument needed, so
      * {@code @RequiredArgsConstructor} is intentionally omitted here.
      */
     @PersistenceContext
@@ -64,7 +64,7 @@ public class ClientCodeUniquenessService {
             return false;
         }
         String trimmed = clientCode.trim();
-//        log.debug("Checking uniqueness for client code: {}", trimmed);
+        // log.debug("Checking uniqueness for client code: {}", trimmed);
 
         @SuppressWarnings("unchecked")
         List<Object> results = entityManager

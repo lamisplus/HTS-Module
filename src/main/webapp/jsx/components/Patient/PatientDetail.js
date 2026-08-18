@@ -109,7 +109,7 @@ function PatientCard(props) {
       activeObject: {},
       actionType: "",
     });
-    // After returning from view/update, land on HTS History — not NEW HTS
+    // After returning from view/update, land on HTS History - not NEW HTS
     setPatientHistoryDefaultTab("home");
   }
 

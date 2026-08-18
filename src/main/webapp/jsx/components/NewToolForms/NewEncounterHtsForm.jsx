@@ -148,7 +148,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   // ── 1. Fetch patient record ───────────────────────────────────────────────
   useEffect(() => {
     if (!personId) {
-      // No id — nothing to fetch; show blank form immediately
+      // No id - nothing to fetch; show blank form immediately
       setIsLoadingForm(false);
       return;
     }
@@ -158,7 +158,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
         const res = await axios.get(`${url}patient/${personId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // API returns { personId, personResponseDto, ... } — extract the dto
+        // API returns { personId, personResponseDto, ... } - extract the dto
         const dto = res.data?.personResponseDto ?? res.data;
         personDtoRef.current = dto;
         tryBuildFormValues();
@@ -299,7 +299,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
             </span>
           </h2>
           <p className={classes.subtitle}>
-            New HTS encounter for <strong>{displayName}</strong> — demographics are locked, all clinical fields are blank
+            New HTS encounter for <strong>{displayName}</strong> - demographics are locked, all clinical fields are blank
           </p>
         </div>
         <Button content="Back" icon="left arrow" labelPosition="left"
@@ -311,7 +311,7 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
       <div className={classes.body}>
         <form onSubmit={formik.handleSubmit} noValidate>
           <FormAccordion step={1} title="Basic Information"
-            subtitle="Patient demographics are pre-filled and locked — complete the visit and clinical fields"
+            subtitle="Patient demographics are pre-filled and locked - complete the visit and clinical fields"
             defaultExpanded hasError={sectionHasError(basicFields)}>
             <BasicInformationSection formik={formik} isExistingPatient readOnly={false} />
           </FormAccordion>

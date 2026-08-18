@@ -39,7 +39,6 @@ public class HtsEncounterService {
     private final ObjectMapper objectMapper;
     private final CurrentUserOrganizationService currentUserOrganizationService;
 
-
     public HtsEncounterResponse save(HtsEncounterRequestDTO request) {
         Person person;
         if (request.getPatientId() != null) {
@@ -74,26 +73,32 @@ public class HtsEncounterService {
         return toResponse(encounter);
     }
 
-
     public HtsEncounterResponse update(Long id, HtsEncounterRequestDTO request) {
         HtsEncounter existing = repository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(
                         HtsEncounter.class, "id", id.toString()));
 
-        if (request.getClientCode() != null) existing.setClientCode(request.getClientCode());
-        if (request.getDateOfVisit() != null) existing.setDateOfVisit(request.getDateOfVisit());
-        if (request.getSetting() != null) existing.setSetting(request.getSetting());
-        if (request.getFacilityId() != null) existing.setFacilityId(request.getFacilityId());
-        if (request.getPmtctHts() != null) existing.setPmtctHts(request.getPmtctHts());
-        if (request.getSource() != null) existing.setSource(request.getSource());
-        if (request.getLongitude() != null) existing.setLongitude(request.getLongitude());
-        if (request.getLatitude() != null) existing.setLatitude(request.getLatitude());
+        if (request.getClientCode() != null)
+            existing.setClientCode(request.getClientCode());
+        if (request.getDateOfVisit() != null)
+            existing.setDateOfVisit(request.getDateOfVisit());
+        if (request.getSetting() != null)
+            existing.setSetting(request.getSetting());
+        if (request.getFacilityId() != null)
+            existing.setFacilityId(request.getFacilityId());
+        if (request.getPmtctHts() != null)
+            existing.setPmtctHts(request.getPmtctHts());
+        if (request.getSource() != null)
+            existing.setSource(request.getSource());
+        if (request.getLongitude() != null)
+            existing.setLongitude(request.getLongitude());
+        if (request.getLatitude() != null)
+            existing.setLatitude(request.getLatitude());
         existing.setObservation(buildObservation(request));
 
         existing = repository.save(existing);
         return toResponse(existing);
     }
-
 
     /**
      * Called by the HIV module when a viral load result of >= 1000 comes back for a
@@ -132,7 +137,6 @@ public class HtsEncounterService {
         return toResponse(existing);
     }
 
-
     public HtsEncounterResponse getById(Long id) {
         HtsEncounter encounter = repository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -166,8 +170,6 @@ public class HtsEncounterService {
                 .collect(Collectors.toList());
     }
 
-
-
     public void delete(Long id) {
         HtsEncounter encounter = repository.findByIdAndArchived(id, false)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -176,33 +178,28 @@ public class HtsEncounterService {
         repository.save(encounter);
     }
 
-
     public Page<PatientHtsSummaryDto> getPatientSummaries(Long facilityId, String search, Pageable pageable) {
         String searchParam = (search == null || search.trim().isEmpty() || search.equals("*"))
-                ? null : "%" + search.trim() + "%";
-        Page<PatientHtsSummaryProjection> page =
-                repository.findPatientSummaries(facilityId, searchParam, pageable);
+                ? null
+                : "%" + search.trim() + "%";
+        Page<PatientHtsSummaryProjection> page = repository.findPatientSummaries(facilityId, searchParam, pageable);
         return page.map(proj -> new PatientHtsSummaryDto(
                 proj.getPersonId(),
                 proj.getFirstName(),
                 proj.getSurname(),
                 proj.getOtherName(),
                 proj.getHospitalNumber(),
-                proj.getEncounterCount()
-        ));
+                proj.getEncounterCount()));
     }
-
 
     public Page<HtsPatientSummaryDto> getHtsPatientSummaries(String search, Pageable pageable) {
         String searchParam = (search == null || search.trim().isEmpty() || search.equals("*"))
                 ? null
                 : "%" + search.trim() + "%";
 
-
         Pageable pageableWithoutSort = PageRequest.of(
                 pageable.getPageNumber(),
-                pageable.getPageSize()
-        );
+                pageable.getPageSize());
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
 
         Page<Object[]> raw = repository.findHtsPatientSummariesOptimized(facilityId, searchParam, pageableWithoutSort);
@@ -225,7 +222,6 @@ public class HtsEncounterService {
                         : LocalDate.parse(row[4].toString()));
             }
 
-
             dto.setSetting(row[5] != null ? row[5].toString() : null);
 
             // row[6] = observation (Hibernate returns JSONB as String in native queries)
@@ -243,125 +239,133 @@ public class HtsEncounterService {
             dto.setIctCount(toLong(row[9]));
 
             if (personId != null && personId > 0) {
-                personRepository.findById(personId).ifPresent(person ->
-                        dto.setPerson(personService.getDtoFromPerson(person)));
+                personRepository.findById(personId)
+                        .ifPresent(person -> dto.setPerson(personService.getDtoFromPerson(person)));
             }
 
             return dto;
         });
     }
 
-
     private ObjectNode buildObservation(HtsEncounterRequestDTO r) {
         ObjectNode obs = objectMapper.createObjectNode();
 
         // Visit / Setting
-        putStr(obs, "facilityName",        r.getFacilityName());
-        putStr(obs, "facilitySetting",     r.getFacilitySetting());
+        putStr(obs, "facilityName", r.getFacilityName());
+        putStr(obs, "facilitySetting", r.getFacilitySetting());
         putStr(obs, "communityEntryPoint", r.getCommunityEntryPoint());
-        putStr(obs, "typeOfSession",       r.getTypeOfSession());
-        putStr(obs, "htsPopulationType",    r.getHtsPopulationType());
-        putStr(obs, "indexTesting",        r.getIndexTesting());
-        putStr(obs, "indexRelationship",   r.getIndexRelationship());
-        putStr(obs, "indexClientCode",     r.getIndexClientCode());
+        putStr(obs, "typeOfSession", r.getTypeOfSession());
+        putStr(obs, "htsPopulationType", r.getHtsPopulationType());
+        putStr(obs, "indexTesting", r.getIndexTesting());
+        putStr(obs, "indexRelationship", r.getIndexRelationship());
+        putStr(obs, "indexClientCode", r.getIndexClientCode());
 
-        if (r.getNumberOfWives()              != null) obs.put("numberOfWives",              r.getNumberOfWives());
-        if (r.getNumberOfCoWives()            != null) obs.put("numberOfCoWives",            r.getNumberOfCoWives());
-        if (r.getNumberOfBiologicalChildren() != null) obs.put("numberOfBiologicalChildren", r.getNumberOfBiologicalChildren());
-        putStr(obs, "pregnancyStatus",      r.getPregnancyStatus());
+        if (r.getNumberOfWives() != null)
+            obs.put("numberOfWives", r.getNumberOfWives());
+        if (r.getNumberOfCoWives() != null)
+            obs.put("numberOfCoWives", r.getNumberOfCoWives());
+        if (r.getNumberOfBiologicalChildren() != null)
+            obs.put("numberOfBiologicalChildren", r.getNumberOfBiologicalChildren());
+        putStr(obs, "pregnancyStatus", r.getPregnancyStatus());
         putStr(obs, "breastfeedingDuration", r.getBreastfeedingDuration());
         putStr(obs, "modality", r.getModality());
 
-
         // Knowledge Assessment
-        putStr(obs, "previouslyTestedNegative",        r.getPreviouslyTestedNegative());
-        putStr(obs, "timeOfLastNegativeTest",           r.getTimeOfLastNegativeTest());
+        putStr(obs, "previouslyTestedNegative", r.getPreviouslyTestedNegative());
+        putStr(obs, "timeOfLastNegativeTest", r.getTimeOfLastNegativeTest());
         putStr(obs, "clientInformedTransmissionRoutes", r.getClientInformedTransmissionRoutes());
-        putStr(obs, "clientInformedRiskFactors",        r.getClientInformedRiskFactors());
-        putStr(obs, "clientInformedPreventionMethods",  r.getClientInformedPreventionMethods());
-        putStr(obs, "clientInformedPossibleResults",    r.getClientInformedPossibleResults());
-        putStr(obs, "informedConsentGiven",             r.getInformedConsentGiven());
+        putStr(obs, "clientInformedRiskFactors", r.getClientInformedRiskFactors());
+        putStr(obs, "clientInformedPreventionMethods", r.getClientInformedPreventionMethods());
+        putStr(obs, "clientInformedPossibleResults", r.getClientInformedPossibleResults());
+        putStr(obs, "informedConsentGiven", r.getInformedConsentGiven());
 
         // Personal HIV Risk
-        putStr(obs, "everHadSexualIntercourse",   r.getEverHadSexualIntercourse());
-        putStr(obs, "moreThanOneSexPartner",       r.getMoreThanOneSexPartner());
-        putStr(obs, "unprotectedVaginalSex",       r.getUnprotectedVaginalSex());
-        putStr(obs, "unprotectedAnalSex",          r.getUnprotectedAnalSex());
+        putStr(obs, "everHadSexualIntercourse", r.getEverHadSexualIntercourse());
+        putStr(obs, "moreThanOneSexPartner", r.getMoreThanOneSexPartner());
+        putStr(obs, "unprotectedVaginalSex", r.getUnprotectedVaginalSex());
+        putStr(obs, "unprotectedAnalSex", r.getUnprotectedAnalSex());
         putStr(obs, "bloodTransfusionLast3Months", r.getBloodTransfusionLast3Months());
-        putStr(obs, "sexUnderInfluence",           r.getSexUnderInfluence());
-        putStr(obs, "historyOfSTI",                r.getHistoryOfSTI());
+        putStr(obs, "sexUnderInfluence", r.getSexUnderInfluence());
+        putStr(obs, "historyOfSTI", r.getHistoryOfSTI());
 
         // TB Screening
         putStr(obs, "currentCough", r.getCurrentCough());
-        putStr(obs, "weightLoss",   r.getWeightLoss());
-        putStr(obs, "fever",        r.getFever());
-        putStr(obs, "nightSweats",  r.getNightSweats());
+        putStr(obs, "weightLoss", r.getWeightLoss());
+        putStr(obs, "fever", r.getFever());
+        putStr(obs, "nightSweats", r.getNightSweats());
 
         // STI Screening
-        putStr(obs, "complaintsVaginalDischarge",   r.getComplaintsVaginalDischarge());
+        putStr(obs, "complaintsVaginalDischarge", r.getComplaintsVaginalDischarge());
         putStr(obs, "complaintsLowerAbdominalPain", r.getComplaintsLowerAbdominalPain());
-        putStr(obs, "complaintsUrethralDischarge",  r.getComplaintsUrethralDischarge());
-        putStr(obs, "complaintsScroralSwelling",    r.getComplaintsScroralSwelling());
-        putStr(obs, "complaintsGenitalSores",       r.getComplaintsGenitalSores());
-        putStr(obs, "complaintsSwollenLymphNodes",  r.getComplaintsSwollenLymphNodes());
+        putStr(obs, "complaintsUrethralDischarge", r.getComplaintsUrethralDischarge());
+        putStr(obs, "complaintsScroralSwelling", r.getComplaintsScroralSwelling());
+        putStr(obs, "complaintsGenitalSores", r.getComplaintsGenitalSores());
+        putStr(obs, "complaintsSwollenLymphNodes", r.getComplaintsSwollenLymphNodes());
 
         // Sex Partner Risk
-        putStr(obs, "partnerNewlyDiagnosed",                   r.getPartnerNewlyDiagnosed());
-        putStr(obs, "partnerPregnantOnArv",                    r.getPartnerPregnantOnArv());
-        putStr(obs, "adolescentHivPositive",                   r.getAdolescentHivPositive());
-        putStr(obs, "partnerNotRegularlyOnDrugs",              r.getPartnerNotRegularlyOnDrugs());
-        putStr(obs, "partnerRecentlyReturnedToTreatment",      r.getPartnerRecentlyReturnedToTreatment());
+        putStr(obs, "partnerNewlyDiagnosed", r.getPartnerNewlyDiagnosed());
+        putStr(obs, "partnerPregnantOnArv", r.getPartnerPregnantOnArv());
+        putStr(obs, "adolescentHivPositive", r.getAdolescentHivPositive());
+        putStr(obs, "partnerNotRegularlyOnDrugs", r.getPartnerNotRegularlyOnDrugs());
+        putStr(obs, "partnerRecentlyReturnedToTreatment", r.getPartnerRecentlyReturnedToTreatment());
         putStr(obs, "hadSexWithHivPositivePartnerInRiskGroup", r.getHadSexWithHivPositivePartnerInRiskGroup());
 
         // Diagnostic Testing
-        putStr(obs, "typeOfHivTestDone",  r.getTypeOfHivTestDone());
-        putStr(obs, "hivEarlyDetectResult",    r.getHivEarlyDetectResult());
-        putStr(obs, "initialHivTest",          r.getInitialHivTest());
+        putStr(obs, "typeOfHivTestDone", r.getTypeOfHivTestDone());
+        putStr(obs, "hivEarlyDetectResult", r.getHivEarlyDetectResult());
+        putStr(obs, "initialHivTest", r.getInitialHivTest());
         putStr(obs, "suspectedAcuteInfection", r.getSuspectedAcuteInfection());
-        putStr(obs, "confirmatoryHivTest",     r.getConfirmatoryHivTest());
-        putStr(obs, "finalHivTestResult",     r.getFinalHivTestResult());
-        putStr(obs, "syphilisTestResult",      r.getSyphilisTestResult());
-        putStr(obs, "recencyTest",             r.getRecencyTest());
+        putStr(obs, "confirmatoryHivTest", r.getConfirmatoryHivTest());
+        putStr(obs, "finalHivTestResult", r.getFinalHivTestResult());
+        putStr(obs, "syphilisTestResult", r.getSyphilisTestResult());
+        putStr(obs, "recencyTest", r.getRecencyTest());
 
         // Post-Test Counselling
-        putStr(obs, "previouslyTestedThisYear",     r.getPreviouslyTestedThisYear());
-        putStr(obs, "clientReceivedTestResult",      r.getClientReceivedTestResult());
-        putStr(obs, "hivTestKitsProvided",           r.getHivTestKitsProvided());
-        putStr(obs, "categoryOfClients",             r.getCategoryOfClients());
-        if (r.getNumberOfHivstKitDistributed() != null) obs.put("numberOfHivstKitDistributed", r.getNumberOfHivstKitDistributed());
-        putStr(obs, "acceptedIndexTesting",          r.getAcceptedIndexTesting());
-        putStr(obs, "providedFpInfo",                r.getProvidedFpInfo());
-        putStr(obs, "clientPartnerUseFpMethods",     r.getClientPartnerUseFpMethods());
-        putStr(obs, "clientPartnerUseCondoms",       r.getClientPartnerUseCondoms());
-        putStr(obs, "correctCondomUseDemonstrated",  r.getCorrectCondomUseDemonstrated());
-        putStr(obs, "condomsProvided",               r.getCondomsProvided());
+        putStr(obs, "previouslyTestedThisYear", r.getPreviouslyTestedThisYear());
+        putStr(obs, "clientReceivedTestResult", r.getClientReceivedTestResult());
+        putStr(obs, "hivTestKitsProvided", r.getHivTestKitsProvided());
+        putStr(obs, "categoryOfClients", r.getCategoryOfClients());
+        if (r.getNumberOfHivstKitDistributed() != null)
+            obs.put("numberOfHivstKitDistributed", r.getNumberOfHivstKitDistributed());
+        putStr(obs, "acceptedIndexTesting", r.getAcceptedIndexTesting());
+        putStr(obs, "providedFpInfo", r.getProvidedFpInfo());
+        putStr(obs, "clientPartnerUseFpMethods", r.getClientPartnerUseFpMethods());
+        putStr(obs, "clientPartnerUseCondoms", r.getClientPartnerUseCondoms());
+        putStr(obs, "correctCondomUseDemonstrated", r.getCorrectCondomUseDemonstrated());
+        putStr(obs, "condomsProvided", r.getCondomsProvided());
         putStr(obs, "clientReferredToOtherServices", r.getClientReferredToOtherServices());
-        putStr(obs, "completedBy",                   r.getCompletedBy());
-        putStr(obs, "designation",                   r.getDesignation());
+        putStr(obs, "completedBy", r.getCompletedBy());
+        putStr(obs, "designation", r.getDesignation());
 
         return obs;
     }
 
-
     private void putStr(ObjectNode node, String key, String value) {
-        if (value != null) node.put(key, value);
+        if (value != null)
+            node.put(key, value);
     }
 
     // Relaxed: patient_uuid is stored as varchar to tolerate legacy/migrated data
     // that isn't a strictly well-formed UUID (e.g. "787-KXoSesiSLeE-787"). We no
-    // longer call UUID.fromString() here — doing so throws IllegalArgumentException
+    // longer call UUID.fromString() here - doing so throws IllegalArgumentException
     // and rejects the whole save/update for records we still need to support.
     private String resolveUuid(Object uuid) {
-        if (uuid == null) return null;
+        if (uuid == null)
+            return null;
         return uuid.toString();
     }
 
     private long toLong(Object val) {
-        if (val == null)               return 0L;
-        if (val instanceof Long)       return (Long) val;
-        if (val instanceof BigInteger) return ((BigInteger) val).longValue();
-        if (val instanceof Integer)    return ((Integer) val).longValue();
-        if (val instanceof Number)     return ((Number) val).longValue();
+        if (val == null)
+            return 0L;
+        if (val instanceof Long)
+            return (Long) val;
+        if (val instanceof BigInteger)
+            return ((BigInteger) val).longValue();
+        if (val instanceof Integer)
+            return ((Integer) val).longValue();
+        if (val instanceof Number)
+            return ((Number) val).longValue();
         return Long.parseLong(val.toString());
     }
 

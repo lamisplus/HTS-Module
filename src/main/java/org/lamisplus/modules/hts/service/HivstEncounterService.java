@@ -64,17 +64,24 @@ public class HivstEncounterService {
                 .orElseThrow(() -> new EntityNotFoundException(HivstEncounter.class, "id", id.toString()));
 
         // Update only allowed fields (not patient demographics)
-        if (request.getClientCode() != null) existing.setClientCode(request.getClientCode());
-        if (request.getDateOfVisit() != null) existing.setDateOfVisit(request.getDateOfVisit());
-        if (request.getSetting() != null) existing.setSetting(request.getSetting());
-        if (request.getFacilityId() != null) existing.setFacilityId(request.getFacilityId());
-        if (request.getLongitude() != null) existing.setLongitude(request.getLongitude());
-        if (request.getLatitude() != null) existing.setLatitude(request.getLatitude());
+        if (request.getClientCode() != null)
+            existing.setClientCode(request.getClientCode());
+        if (request.getDateOfVisit() != null)
+            existing.setDateOfVisit(request.getDateOfVisit());
+        if (request.getSetting() != null)
+            existing.setSetting(request.getSetting());
+        if (request.getFacilityId() != null)
+            existing.setFacilityId(request.getFacilityId());
+        if (request.getLongitude() != null)
+            existing.setLongitude(request.getLongitude());
+        if (request.getLatitude() != null)
+            existing.setLatitude(request.getLatitude());
 
         // Update observation: only HIVST-specific fields, keep demographics as snapshot
         JsonNode currentObs = existing.getObservation();
         ObjectNode updatedObs = currentObs != null ? currentObs.deepCopy() : objectMapper.createObjectNode();
-        // Note: "setting" is intentionally NOT duplicated into the observation JSON here —
+        // Note: "setting" is intentionally NOT duplicated into the observation JSON
+        // here -
         // it already lives as its own column (existing.setSetting(...) above), matching
         // how HTS's buildObservation() keeps "setting" out of the JSON entirely.
         putStr(updatedObs, "facilitySetting", request.getFacilitySetting());
@@ -84,15 +91,19 @@ public class HivstEncounterService {
         putStr(updatedObs, "indexTesting", request.getIndexTesting());
         putStr(updatedObs, "indexRelationship", request.getIndexRelationship());
         putStr(updatedObs, "indexClientCode", request.getIndexClientCode());
-        if (request.getNumberOfWives() != null) updatedObs.put("numberOfWives", request.getNumberOfWives());
-        if (request.getNumberOfCoWives() != null) updatedObs.put("numberOfCoWives", request.getNumberOfCoWives());
-        if (request.getNumberOfBiologicalChildren() != null) updatedObs.put("numberOfBiologicalChildren", request.getNumberOfBiologicalChildren());
+        if (request.getNumberOfWives() != null)
+            updatedObs.put("numberOfWives", request.getNumberOfWives());
+        if (request.getNumberOfCoWives() != null)
+            updatedObs.put("numberOfCoWives", request.getNumberOfCoWives());
+        if (request.getNumberOfBiologicalChildren() != null)
+            updatedObs.put("numberOfBiologicalChildren", request.getNumberOfBiologicalChildren());
         putStr(updatedObs, "pregnancyStatus", request.getPregnancyStatus());
         putStr(updatedObs, "breastfeedingDuration", request.getBreastfeedingDuration());
         // HIVST-specific
         putStr(updatedObs, "hivTestKitsProvided", request.getHivTestKitsProvided());
         putStr(updatedObs, "categoryOfClients", request.getCategoryOfClients());
-        if (request.getNumberOfHivstKitDistributed() != null) updatedObs.put("numberOfHivstKitDistributed", request.getNumberOfHivstKitDistributed());
+        if (request.getNumberOfHivstKitDistributed() != null)
+            updatedObs.put("numberOfHivstKitDistributed", request.getNumberOfHivstKitDistributed());
         putStr(updatedObs, "completedBy", request.getCompletedBy());
         putStr(updatedObs, "designation", request.getDesignation());
 
@@ -137,7 +148,8 @@ public class HivstEncounterService {
 
     public Page<HivstPatientSummaryDto> getPatientSummaries(String search, Pageable pageable) {
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
-        String searchParam = (search == null || search.trim().isEmpty() || search.equals("*")) ? null : "%" + search.trim() + "%";
+        String searchParam = (search == null || search.trim().isEmpty() || search.equals("*")) ? null
+                : "%" + search.trim() + "%";
 
         Page<Object[]> rawPage = encounterRepository.findHivstPatientSummaries(facilityId, searchParam, pageable);
         List<HivstPatientSummaryDto> dtos = new ArrayList<>();
@@ -165,7 +177,7 @@ public class HivstEncounterService {
         ObjectNode obs = objectMapper.createObjectNode();
 
         // Note: "setting" intentionally lives only as its own column
-        // (encounter.setSetting(...) in save()), not duplicated here —
+        // (encounter.setSetting(...) in save()), not duplicated here -
         // matches HTS's buildObservation().
         putStr(obs, "facilitySetting", request.getFacilitySetting());
         putStr(obs, "communityEntryPoint", request.getCommunityEntryPoint());
@@ -174,14 +186,18 @@ public class HivstEncounterService {
         putStr(obs, "indexTesting", request.getIndexTesting());
         putStr(obs, "indexRelationship", request.getIndexRelationship());
         putStr(obs, "indexClientCode", request.getIndexClientCode());
-        if (request.getNumberOfWives() != null) obs.put("numberOfWives", request.getNumberOfWives());
-        if (request.getNumberOfCoWives() != null) obs.put("numberOfCoWives", request.getNumberOfCoWives());
-        if (request.getNumberOfBiologicalChildren() != null) obs.put("numberOfBiologicalChildren", request.getNumberOfBiologicalChildren());
+        if (request.getNumberOfWives() != null)
+            obs.put("numberOfWives", request.getNumberOfWives());
+        if (request.getNumberOfCoWives() != null)
+            obs.put("numberOfCoWives", request.getNumberOfCoWives());
+        if (request.getNumberOfBiologicalChildren() != null)
+            obs.put("numberOfBiologicalChildren", request.getNumberOfBiologicalChildren());
         putStr(obs, "pregnancyStatus", request.getPregnancyStatus());
         putStr(obs, "breastfeedingDuration", request.getBreastfeedingDuration());
         putStr(obs, "hivTestKitsProvided", request.getHivTestKitsProvided());
         putStr(obs, "categoryOfClients", request.getCategoryOfClients());
-        if (request.getNumberOfHivstKitDistributed() != null) obs.put("numberOfHivstKitDistributed", request.getNumberOfHivstKitDistributed());
+        if (request.getNumberOfHivstKitDistributed() != null)
+            obs.put("numberOfHivstKitDistributed", request.getNumberOfHivstKitDistributed());
         putStr(obs, "completedBy", request.getCompletedBy());
         putStr(obs, "designation", request.getDesignation());
 
@@ -189,12 +205,15 @@ public class HivstEncounterService {
     }
 
     private void putStr(ObjectNode node, String key, String value) {
-        if (value != null) node.put(key, value);
+        if (value != null)
+            node.put(key, value);
     }
 
     private long toLong(Object val) {
-        if (val == null) return 0L;
-        if (val instanceof Number) return ((Number) val).longValue();
+        if (val == null)
+            return 0L;
+        if (val instanceof Number)
+            return ((Number) val).longValue();
         return Long.parseLong(val.toString());
     }
 

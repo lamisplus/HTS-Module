@@ -176,7 +176,7 @@ export const buildValidationSchema = (isNewPatient) => {
       .required("Serial number is required to generate a client code"),
     // .matches(
     //   /^[a-zA-Z0-9]+$/,
-    //   "Serial number must contain only letters and numbers — no special characters"
+    //   "Serial number must contain only letters and numbers - no special characters"
     // ),
 
 
@@ -604,7 +604,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Recency test result is required",
       function (value) {
         // Mirrors DiagnosticTestingSection's `showRecency` flag:
-        // the field is only rendered — and therefore only required —
+        // the field is only rendered - and therefore only required -
         // when the initial HIV test result is Positive.
         if (this.parent.initialHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
         return !!value || this.createError({ message: "Recency test result is required" });

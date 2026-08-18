@@ -203,7 +203,7 @@ const HtsIctOrchestrator = ({
     }
   };
 
-  
+
   const [ictSubmitted, setIctSubmitted] = useState(false);
 
   const handleIctSubmitSuccess = (ictResponse) => {
@@ -230,7 +230,7 @@ const HtsIctOrchestrator = ({
         : ictEligible
           ? htsSubmitted
             ? "Ready to fill"
-            : "Eligible — complete HTS first"
+            : "Eligible - complete HTS first"
           : "Not yet eligible",
       locked: !ictEligible,
       done: ictSubmitted,
@@ -350,7 +350,7 @@ const HtsIctOrchestrator = ({
  * NOTE: The cleanest way to do this is to accept an onValuesChange prop
  * directly inside NewPatientHtsForm and call it inside a useEffect watching
  * formik.values. The snippet below shows the change that needs to be made
- * to NewPatientHtsForm — see the comment block at the bottom of this file.
+ * to NewPatientHtsForm - see the comment block at the bottom of this file.
  */
 const NewPatientHtsFormWithWatcher = ({ onValuesChange, onSubmitSuccess, onBack }) => {
   return (

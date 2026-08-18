@@ -70,8 +70,8 @@ const Home = (props) => {
     props.activePage === "NEW HTS"
       ? "new"
       : props.activePage === "HIVST HISTORY"
-      ? "hivst-history-existing-patient"
-      : "home"
+        ? "hivst-history-existing-patient"
+        : "home"
   );
 
   const [lastHts, setLastHTS] = useState({});
@@ -133,7 +133,7 @@ const Home = (props) => {
     // patientsCurrentHts();
 
     // key is already initialised correctly from props.activePage in useState above.
-    // Do NOT re-derive it here — doing so caused the tab to jump back to "new"
+    // Do NOT re-derive it here - doing so caused the tab to jump back to "new"
     // after returning from an update when the router state still held "NEW HTS".
   }, []);
 

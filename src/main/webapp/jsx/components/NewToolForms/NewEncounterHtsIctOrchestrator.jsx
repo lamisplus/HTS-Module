@@ -121,14 +121,14 @@ const NewEncounterHtsIctOrchestrator = ({
   const location = useLocation();
   const history = useHistory();
   const skipEligibility = location?.state?.skipEligibility ?? false;
- 
+
   const updateSkipEligibility = (newValue) => {
     history.replace({
       pathname: location.pathname,
       state: { ...location.state, skipEligibility: newValue },
     });
   };
-  // ── Real-time eligibility — fired on every HTS formik change ─────────────
+  // ── Real-time eligibility - fired on every HTS formik change ─────────────
   const handleHtsValuesChange = (values) => {
     setHtsValues(values);
     const eligible = isIctEligible(values);
@@ -150,7 +150,7 @@ const NewEncounterHtsIctOrchestrator = ({
 
   // ── HTS submit success ────────────────────────────────────────────────────
   // NewEncounterHtsForm calls onSubmitSuccess(htsRecord, formValues) after a
-  // successful API call — same contract as NewPatientHtsForm.
+  // successful API call - same contract as NewPatientHtsForm.
   const handleHtsSubmitSuccess = (record, formValues) => {
     setHtsRecord(record);
     setHtsValues(formValues);
@@ -193,7 +193,7 @@ const NewEncounterHtsIctOrchestrator = ({
       sub: ictSubmitted
         ? "Completed"
         : ictEligible
-          ? htsSubmitted ? "Ready to fill" : "Eligible — complete HTS first"
+          ? htsSubmitted ? "Ready to fill" : "Eligible - complete HTS first"
           : "Not yet eligible",
       locked: !ictEligible,
       done: ictSubmitted,

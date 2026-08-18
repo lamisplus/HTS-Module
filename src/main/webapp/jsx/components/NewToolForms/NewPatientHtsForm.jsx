@@ -145,7 +145,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
       <div className={classes.topBar}>
         <div className={classes.titleBlock}>
           <h2 className={classes.title}>HIV Testing Form</h2>
-          <p className={classes.subtitle}>New Client Registration — complete all required fields</p>
+          <p className={classes.subtitle}>New Client Registration - complete all required fields</p>
         </div>
         <Button
           content="Back"

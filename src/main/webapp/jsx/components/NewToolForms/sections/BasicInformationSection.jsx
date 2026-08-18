@@ -538,7 +538,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                 <span style={errorStyle}>{errors.serialNumber}</span>
               )}
               {/* <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-                Letters and numbers only — no special characters
+                Letters and numbers only - no special characters
               </small> */}
             </FormGroup>
           </div>

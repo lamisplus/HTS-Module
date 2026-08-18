@@ -53,7 +53,7 @@ const tableIcons = {
  * encounter at the current facility where kits distributed > 0 (see the
  * EXISTS filter added to HivstEncounterRepository.findHivstPatientSummaries).
  *
- * Response envelope: { records: [...], totalRecords: N } — confirmed against
+ * Response envelope: { records: [...], totalRecords: N } - confirmed against
  * both the legacy HIVSTPatient.js and HtsEncounterList.jsx, which agree on
  * this shape for PaginationUtil.generatePagination() output.
  */
@@ -77,7 +77,7 @@ const HIVSTPatient = () => {
             data: records.map((row) => {
               // Shaped to match what PatientHistory / PatientDetail expect
               // elsewhere (personId/id, firstName/surname/otherName flat,
-              // clientCode, etc.) — HivstPatientSummaryDto is already flat,
+              // clientCode, etc.) - HivstPatientSummaryDto is already flat,
               // no nested `person` object like HTS's response has.
               const _raw = {
                 id: row.patientId,
@@ -97,10 +97,10 @@ const HIVSTPatient = () => {
                 fullName: [row.firstName, row.otherName, row.surname]
                   .filter(Boolean)
                   .join(" "),
-                hospitalNumber: row.hospitalNumber ?? "—",
-                phoneNumber: row.phoneNumber ?? "—",
-                sex: row.sex ?? "—",
-                age: row.age ?? "—",
+                hospitalNumber: row.hospitalNumber ?? "-",
+                phoneNumber: row.phoneNumber ?? "-",
+                sex: row.sex ?? "-",
+                age: row.age ?? "-",
                 encounterCount: row.encounterCount ?? 0,
                 resultCount: row.resultCount ?? 0,
                 clientCode: row.latestClientCode ?? "",
@@ -134,7 +134,7 @@ const HIVSTPatient = () => {
       field: "fullName",
       hidden: !showPII,
       filtering: false,
-      render: (row) => <span style={{ fontWeight: 500 }}>{row.fullName || "—"}</span>,
+      render: (row) => <span style={{ fontWeight: 500 }}>{row.fullName || "-"}</span>,
     },
     { title: "Hospital No.", field: "hospitalNumber", filtering: false },
     { title: "Phone Number", field: "phoneNumber", hidden: !showPII, filtering: false },

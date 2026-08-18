@@ -228,7 +228,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
   // ── Prefill read-only patient context from the full patient-detail record ──
   // HIVST encounters are only ever created for an existing patient, so these
   // fields (Marital Status, State/LGA/Landmark/Address) are never edited here
-  // — they exist purely so whoever fills the form can see the patient's
+  // - they exist purely so whoever fills the form can see the patient's
   // details, and so `sex` + `maritalStatus` are correct for the
   // showNumberOfWives / showNumberOfCoWives / showPregnancy visibility logic
   // further down in this file.
@@ -236,7 +236,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
   // `patientData` is expected to be the raw response of GET /patient/{id}
   // (see HIVSTEncounterForm, which fetches it fresh every time). Codeset
   // dropdowns (Sex, Marital Status) store CODES (e.g. "SEX_FEMALE"), but the
-  // patient API returns human-readable display text (e.g. "Female") — so we
+  // patient API returns human-readable display text (e.g. "Female") - so we
   // translate by matching against the already-loaded SEX / MARITAL_STATUS
   // codesets rather than guessing a naming convention.
   useEffect(() => {
@@ -272,7 +272,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
     setFieldValue("phoneNumber", phoneEntry?.value ?? "");
 
     // sex: only used downstream for showNumberOfWives/showNumberOfCoWives/
-    // showPregnancy — falls back to raw display text if no codeset match so
+    // showPregnancy - falls back to raw display text if no codeset match so
     // it's at least visible for debugging, but won't match "SEX_MALE"/
     // "SEX_FEMALE" comparisons below if the fallback path is hit.
     setFieldValue("sex", sexCodeValue || genderDisplay);
@@ -288,7 +288,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
     }
 
     // Address block. `clientState` must be the state's organisation-unit id
-    // (matched below against statesList to auto-load LGAs) — the patient API
+    // (matched below against statesList to auto-load LGAs) - the patient API
     // already returns that directly as address.stateId.
     setFieldValue(
       "clientState",
@@ -296,7 +296,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
     );
     // ASSUMPTION: `district` on the patient address is the LGA's
     // organisation-unit id (it lines up with how clientLga is matched against
-    // lgaOptions elsewhere in this file). Verify against your data — if LGA
+    // lgaOptions elsewhere in this file). Verify against your data - if LGA
     // still doesn't display, this is the first thing to check.
     setFieldValue("clientLga", addressEntry.district ?? "");
     setFieldValue("address", addressEntry.city ?? "");
@@ -622,7 +622,7 @@ const HIVSTBasicInformationSection = ({ formik, isExistingPatient, readOnly, pat
                 <span style={errorStyle}>{errors.serialNumber}</span>
               )}
               {/* <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-                Letters and numbers only — no special characters
+                Letters and numbers only - no special characters
               </small> */}
             </FormGroup>
           </div>
