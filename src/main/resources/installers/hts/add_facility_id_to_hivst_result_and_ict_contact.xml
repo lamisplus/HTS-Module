@@ -63,7 +63,7 @@
             </column>
         </addColumn>
 
-        <sql>
+        <sql splitStatements="false">
             DO $$
             DECLARE
             orphan_count integer;
@@ -90,7 +90,6 @@
             <column name="facility_id"/>
         </createIndex>
     </changeSet>
-
 
     <changeSet id="clear_suspected_acute_infection_final_result_08182026" author="Emmanuel Nnajiofor">
         <comment>
