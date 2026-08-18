@@ -48,8 +48,11 @@
         </preConditions>
         <comment>
             Adds facility_id to hts_ict_contact. Column is added nullable first so existing
-            rows can be backfilled, then locked to NOT NULL once every row has a value.
-            Backfill source: hts_ict_encounter.facility_id via hts_ict_contact.ict_encounter_id.
+            rows can be backfilled from hts_ict_encounter.facility_id via ict_encounter_id.
+            NOT NULL is only enforced if every row was successfully backfilled — rows whose
+            parent hts_ict_encounter no longer exists (orphaned FK) are left with a null
+            facility_id rather than failing the whole install, and a NOTICE is logged for
+            visibility.
         </comment>
 
         <addColumn tableName="hts_ict_contact">
@@ -61,16 +64,27 @@
         </addColumn>
 
         <sql>
+            DO $$
+            DECLARE
+            orphan_count integer;
+            BEGIN
             UPDATE hts_ict_contact c
             SET facility_id = e.facility_id
-            FROM hts_ict_encounter e
+                FROM hts_ict_encounter e
             WHERE c.ict_encounter_id = e.id
               AND c.facility_id IS NULL;
-        </sql>
 
-        <addNotNullConstraint tableName="hts_ict_contact"
-                               columnName="facility_id"
-                               columnDataType="BIGINT"/>
+            SELECT COUNT(*) INTO orphan_count
+            FROM hts_ict_contact
+            WHERE facility_id IS NULL;
+
+            IF orphan_count = 0 THEN
+            ALTER TABLE hts_ict_contact ALTER COLUMN facility_id SET NOT NULL;
+            ELSE
+                    RAISE NOTICE 'hts_ict_contact: % row(s) could not be backfilled (no matching hts_ict_encounter) and were left with facility_id = NULL. NOT NULL constraint was skipped.', orphan_count;
+            END IF;
+            END $$;
+        </sql>
 
         <createIndex indexName="idx_hts_ict_contact_facility" tableName="hts_ict_contact">
             <column name="facility_id"/>
@@ -91,8 +105,8 @@
             UPDATE hts_encounter
             SET observation = jsonb_set(observation, '{finalHivTestResult}', '""'::jsonb, false)
             WHERE observation IS NOT NULL
-            AND observation ? 'finalHivTestResult'
-            AND lower(trim(observation->>'finalHivTestResult')) = 'suspected acute infection';
+              AND jsonb_exists(observation, 'finalHivTestResult')
+              AND lower(trim(observation->>'finalHivTestResult')) = 'suspected acute infection';
         </sql>
     </changeSet>
 </databaseChangeLog>
