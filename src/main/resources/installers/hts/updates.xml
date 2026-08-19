@@ -385,6 +385,33 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="Gamaliel-Emmanuel" id="19-08-2026-add-last-modified-date-to-hts-encounter">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="hts_encounter"/>
+                <not>
+                    <columnExists tableName="hts_encounter" columnName="last_modified_date"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="hts_encounter">
+            <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE hts_encounter
+            SET last_modified_date = coalesce(date_modified, date_created)
+            WHERE last_modified_date IS NULL;
+        </sql>
+
+        <createIndex indexName="idx_hts_encounter_last_modified_date" tableName="hts_encounter">
+            <column name="last_modified_date"/>
+        </createIndex>
+    </changeSet>
+
     <changeSet author="Gamaliel-Emmanuel" id="18-08-2026-fix-pregnancy-status-breastfeeding-concat">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_encounter"/>
@@ -393,7 +420,9 @@
 
         <sql>
             UPDATE hts_encounter e
-            SET observation = jsonb_set(e.observation, '{pregnancyStatus}', to_jsonb(v.new_value), false)
+            SET observation        = jsonb_set(e.observation, '{pregnancyStatus}', to_jsonb(v.new_value), false),
+                date_modified      = now(),
+                last_modified_date = now()
             FROM (
                 SELECT c.id,
                        CASE

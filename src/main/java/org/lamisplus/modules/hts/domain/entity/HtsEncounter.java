@@ -15,6 +15,7 @@ import org.hibernate.annotations.GenerationTime;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "hts_encounter")
@@ -69,6 +70,19 @@ public class HtsEncounter extends Audit<HtsEncounter> implements Serializable {
 
 
 
+    @Column(name = "last_modified_date")
+    private LocalDateTime lastModifiedDate = LocalDateTime.now();
+
     @Column(nullable = false)
     private Boolean archived = false;
+
+    // Mirrors date_modified for a downstream module that reads last_modified_date instead.
+    // Entity listener callbacks (AuditingEntityListener, which sets date_modified) run
+    // before the entity's own callbacks, so date_modified is already populated here.
+    @PrePersist
+    @PreUpdate
+    public void syncLastModifiedDate() {
+        LocalDateTime modified = getDateModified();
+        this.lastModifiedDate = modified != null ? modified : LocalDateTime.now();
+    }
 }
