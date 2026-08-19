@@ -269,15 +269,19 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         )}
 
         {
-          formik?.values?.dateOfFinalHivTestDone && formik?.values?.dateOfFinalHivTestDone !== "" && (
+          formik?.values?.finalHivTestResult?.toLowerCase() === 'positive' &&
+          formik?.values?.dateOfFinalHivTestDone &&
+          formik?.values?.dateOfFinalHivTestDone !== "" && (
             <div className="col-md-6">
-              <FormTextField label="Date of Final HIV test" type="date" value={formik?.values?.dateOfFinalHivTestDone}
-                disabled
+              <ReadOnlyField
+                label="Date of Final HIV test"
+                value={new Date(
+                  formik.values.dateOfFinalHivTestDone?.replace(" ", "T")
+                ).toLocaleString()}
               />
             </div>
           )
-        }
-      </div>
+        }      </div>
 
       {/* Syphilis - always shown */}
       <SectionSubheading>Syphilis Testing</SectionSubheading>

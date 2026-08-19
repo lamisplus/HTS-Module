@@ -26,14 +26,14 @@
         <sql>
             UPDATE hivst_result r
             SET facility_id = e.facility_id
-            FROM hivst_encounter e
+                FROM hivst_encounter e
             WHERE r.encounter_id = e.id
               AND r.facility_id IS NULL;
         </sql>
 
         <addNotNullConstraint tableName="hivst_result"
-                               columnName="facility_id"
-                               columnDataType="BIGINT"/>
+                              columnName="facility_id"
+                              columnDataType="BIGINT"/>
 
         <createIndex indexName="idx_hivst_result_facility" tableName="hivst_result">
             <column name="facility_id"/>
@@ -102,7 +102,9 @@
 
         <sql>
             UPDATE hts_encounter
-            SET observation = jsonb_set(observation, '{finalHivTestResult}', '""'::jsonb, false)
+            SET observation = jsonb_set(observation, '{finalHivTestResult}', '""'::jsonb, false),
+                modified_by = 'system',
+                date_modified = now()
             WHERE observation IS NOT NULL
               AND jsonb_exists(observation, 'finalHivTestResult')
               AND lower(trim(observation->>'finalHivTestResult')) = 'suspected acute infection';
