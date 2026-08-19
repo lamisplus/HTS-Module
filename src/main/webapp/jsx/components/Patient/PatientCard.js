@@ -74,7 +74,7 @@ function PatientCard(props) {
   const clientSuspectedAcuteInfection = props?.patientObj?.observation?.suspectedAcuteInfection?.toLowerCase() || props?.clientEligibility?.suspectedAcuteInfection?.toLowerCase()
   const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
   const isLoadingEncounters = props?.isLoadingEncounters
-  console.log(props)
+  
 
   useEffect(() => {
     PatientCurrentObject();

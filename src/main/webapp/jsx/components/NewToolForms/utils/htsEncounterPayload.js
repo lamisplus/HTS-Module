@@ -181,6 +181,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     syphilisTestResult,
     recencyTest,
     finalHivTestResult,
+    dateOfFinalHivTestDone,
 
     // Post-Test Counselling
     previouslyTestedThisYear,
@@ -282,6 +283,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     syphilisTestResult,
     recencyTest,
     finalHivTestResult,
+    dateOfFinalHivTestDone,
     previouslyTestedThisYear,
     clientReceivedTestResult,
     hivTestKitsProvided,

@@ -81,6 +81,7 @@ public class HtsEncounterRequestDTO {
     private String suspectedAcuteInfection;
     private String confirmatoryHivTest;
     private String finalHivTestResult;
+    private String dateOfFinalHivTestDone;
     private String syphilisTestResult;
     private String recencyTest;
     private String hivEarlyDetectResult;

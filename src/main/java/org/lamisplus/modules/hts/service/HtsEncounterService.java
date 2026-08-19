@@ -317,6 +317,7 @@ public class HtsEncounterService {
         putStr(obs, "suspectedAcuteInfection", r.getSuspectedAcuteInfection());
         putStr(obs, "confirmatoryHivTest", r.getConfirmatoryHivTest());
         putStr(obs, "finalHivTestResult", r.getFinalHivTestResult());
+        putStr(obs, "dateOfFinalHivTestDone", r.getDateOfFinalHivTestDone());
         putStr(obs, "syphilisTestResult", r.getSyphilisTestResult());
         putStr(obs, "recencyTest", r.getRecencyTest());
 

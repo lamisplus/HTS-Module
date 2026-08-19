@@ -423,6 +423,12 @@ const HTSEncounterHistory = (props) => {
             render: (rowData) => formatHivResult(rowData?.finalHivTestResult),
           },
           {
+            title: "Date of Final HIV Test",
+            field: "dateOfFinalHivTestDone",
+            filtering: false,
+            render: (rowData) => formatHivResult(rowData?.dateOfFinalHivTestDone),
+          },
+          {
             title: "PMTCT-HTS record",
             field: "pmtctHts",
             filtering: false,
@@ -485,6 +491,7 @@ const HTSEncounterHistory = (props) => {
           initialHivTest: record.observation?.initialHivTest ?? "",
           confirmatoryHivTest: record.observation?.confirmatoryHivTest ?? "",
           finalHivTestResult: record.observation?.finalHivTestResult ?? "",
+          dateOfFinalHivTestDone: record.observation?.dateOfFinalHivTestDone ?? "",
           syphilisTestResult: record.observation?.syphilisTestResult ?? "",
           suspectedAcuteInfection: record.observation?.suspectedAcuteInfection ?? "",
           hivEarlyDetectResult: record.observation?.hivEarlyDetectResult ?? "",

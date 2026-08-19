@@ -96,6 +96,12 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   useEffect(() => {
     setFieldValue("finalHivTestResult", finalResult || "");
+    if (finalResult?.toLowerCase() === 'positive') {
+      setFieldValue("dateOfFinalHivTestDone", formik?.values?.dateOfVisit);
+    }
+    else {
+      setFieldValue("dateOfFinalHivTestDone", "");
+    }
   }, [finalResult, setFieldValue]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -169,6 +175,17 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         result === "Negative" ? "1px solid #a5d6a7" :
           "1px solid #ff9800",
   });
+
+  const formatFinalHivTestDate = (raw) => {
+    if (!raw) return "-";
+
+    const datePart = raw.trim().slice(0, 10);
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+    if (!match) return raw;
+
+    const [, year, month, day] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString();
+  };
 
   return (
     <div style={{ width: "100%" }}>
@@ -275,13 +292,12 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             <div className="col-md-6">
               <ReadOnlyField
                 label="Date of Final HIV test"
-                value={new Date(
-                  formik.values.dateOfFinalHivTestDone?.replace(" ", "T")
-                ).toLocaleString()}
+                value={formatFinalHivTestDate(formik?.values?.dateOfFinalHivTestDone)}
               />
             </div>
           )
-        }      </div>
+        }
+      </div>
 
       {/* Syphilis - always shown */}
       <SectionSubheading>Syphilis Testing</SectionSubheading>

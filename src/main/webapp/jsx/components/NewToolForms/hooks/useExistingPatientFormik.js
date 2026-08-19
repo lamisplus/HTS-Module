@@ -68,6 +68,7 @@ const defaultValues = {
   syphilisTestResult: "",
   recencyTest: "",
   finalHivTestResult: "",
+  dateOfFinalHivTestDone: "",
   previouslyTestedThisYear: "",
   clientReceivedTestResult: "",
   hivTestKitsProvided: "",
