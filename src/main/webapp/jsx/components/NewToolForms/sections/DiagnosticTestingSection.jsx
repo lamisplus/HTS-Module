@@ -102,7 +102,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     else {
       setFieldValue("dateOfFinalHivTestDone", "");
     }
-  }, [finalResult, setFieldValue]);
+  }, [finalResult, setFieldValue, formik?.values?.dateOfVisit]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
