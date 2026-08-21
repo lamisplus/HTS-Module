@@ -4,7 +4,7 @@ export const url =
     : "/api/v1/";
 export const token =
   process.env.NODE_ENV === "development"
-    ? "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZGUtdXNlciIsImF1dGgiOiJTdXBlciBBZG1pbixVc2VyLFJERSIsImV4cCI6MTc4NzE2MTk4MywibmFtZSI6InJkZS11c2VyIGxhc3RuYW1lIn0.1OLoaf5nmxPMSsBGW7aB42VYhMwmzxfmX6-KE3hL5nn3-z83cyUKgKOCBdnVpa_IRVOTZ0DkpdgI2n11H_ancg"
+    ? "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZGUtdXNlciIsImF1dGgiOiJTdXBlciBBZG1pbixVc2VyLFJERSIsImV4cCI6MTc4NzMyODc0NiwibmFtZSI6InJkZS11c2VyIGxhc3RuYW1lIn0.Zh0eallI4POrQhzd_IxQOKREiWcF1YyNqublU9_y86ujRTqr5ArhPYpL2hwBKCpTKnV_ehB4znONn9THcfp-oA"
     : new URLSearchParams(window.location.search).get("jwt");
 
 export const wsUrl =

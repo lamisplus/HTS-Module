@@ -25,7 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +58,15 @@ public class HtsEncounterService {
                     .orElseThrow(() -> new IllegalStateException("Person creation failed"));
         }
 
+        ObjectNode observation = buildObservation(request);
+
+        validateHivResultRules(
+                person.getId(),
+                patientIdentifier(request.getClientCode(), person.getId()),
+                observation,
+                request.getDateOfVisit(),
+                null);
+
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
         encounter.setPatientUuid(resolveUuid(person.getUuid()));
@@ -67,7 +78,7 @@ public class HtsEncounterService {
         encounter.setSource(request.getSource() != null ? request.getSource() : "web");
         encounter.setLongitude(request.getLongitude());
         encounter.setLatitude(request.getLatitude());
-        encounter.setObservation(buildObservation(request));
+        encounter.setObservation(observation);
 
         encounter = repository.save(encounter);
         return toResponse(encounter);
@@ -94,7 +105,23 @@ public class HtsEncounterService {
             existing.setLongitude(request.getLongitude());
         if (request.getLatitude() != null)
             existing.setLatitude(request.getLatitude());
-        existing.setObservation(buildObservation(request));
+
+        ObjectNode observation = buildObservation(request);
+        LocalDate incomingDateOfVisit = request.getDateOfVisit() != null
+                ? request.getDateOfVisit()
+                : existing.getDateOfVisit();
+        String clientCode = request.getClientCode() != null
+                ? request.getClientCode()
+                : existing.getClientCode();
+
+        validateHivResultRules(
+                existing.getPerson().getId(),
+                patientIdentifier(clientCode, existing.getPerson().getId()),
+                observation,
+                incomingDateOfVisit,
+                id);
+
+        existing.setObservation(observation);
 
         existing = repository.save(existing);
         return toResponse(existing);
@@ -102,12 +129,12 @@ public class HtsEncounterService {
 
     /**
      * Called by the HIV module when a viral load result of >= 1000 comes back for a
-     * patient, to flag their most recent HTS encounter as an acute HIV infection.
+     * patient, to flag their most recent HTS encounter as a postive.
      * Only the finalHivTestResult key inside the observation JSON is touched; every
      * other observation field on the record, and hts_ict_encounter, are left alone.
      */
     public HtsEncounterResponse markAcuteHivInfection(Long id) {
-        return updateFinalHivTestResult(id, "ACUTE HIV INFECTION");
+        return updateFinalHivTestResult(id, "Positive");
     }
 
     /**
@@ -131,6 +158,14 @@ public class HtsEncounterService {
                 : objectMapper.createObjectNode();
 
         obs.put("finalHivTestResult", finalHivTestResult);
+
+        validateHivResultRules(
+                existing.getPerson().getId(),
+                patientIdentifier(existing.getClientCode(), existing.getPerson().getId()),
+                obs,
+                existing.getDateOfVisit(),
+                id);
+
         existing.setObservation(obs);
 
         existing = repository.save(existing);
@@ -344,6 +379,148 @@ public class HtsEncounterService {
     private void putStr(ObjectNode node, String key, String value) {
         if (value != null)
             node.put(key, value);
+    }
+
+    // ------------------------------------------------------------------
+    // HIV result business rules
+    //
+    // Rule 1 (absolute, cross-facility): a patient can never have more than
+    // one active (non-archived) HTS encounter whose finalHivTestResult or
+    // confirmatoryHivTest is positive - regardless of dateOfVisit ordering.
+    // "Positive" (set by markAcuteHivInfection) is treated as a
+    // positive-equivalent result for this rule, since it represents a
+    // confirmed HIV-positive status ahead of full seroconversion.
+    //
+    // Rule 2 (absolute, cross-facility): if the incoming encounter's result
+    // is negative and the patient already has another active negative
+    // encounter, the two dateOfVisit values must be at least 90 days apart.
+    // The closest existing negative encounter (by day gap) is used for the
+    // check and for the error message, since it is always the tightest
+    // constraint.
+    //
+    // Both rules look across ALL facilities for the patient (HIV status is
+    // a patient-level fact, not a facility-level one) and exclude the
+    // encounter currently being edited from the comparison set.
+    // ------------------------------------------------------------------
+
+    private static final String POSITIVE_MARKER = "POSITIVE";
+    private static final String NEGATIVE_MARKER = "NEGATIVE";
+    private static final String ACUTE_INFECTION_RESULT = "Positive";
+    private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 90;
+
+    private void validateHivResultRules(
+            Long patientId,
+            String patientIdentifier,
+            JsonNode incomingObservation,
+            LocalDate incomingDateOfVisit,
+            Long excludeEncounterId) {
+
+        boolean incomingPositive = isPositiveObservation(incomingObservation);
+        boolean incomingNegative = isNegativeObservation(incomingObservation);
+
+        if (!incomingPositive && !incomingNegative) {
+            // Result not yet determined either way (e.g. pending/blank) - nothing to enforce.
+            return;
+        }
+
+        List<HtsEncounter> otherActiveEncounters = repository
+                .findByPerson_IdAndArchivedOrderByDateOfVisitDesc(patientId, false)
+                .stream()
+                .filter(e -> excludeEncounterId == null || !e.getId().equals(excludeEncounterId))
+                .collect(Collectors.toList());
+
+        if (incomingPositive) {
+            HtsEncounter existingPositive = otherActiveEncounters.stream()
+                    .filter(e -> isPositiveObservation(e.getObservation()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingPositive != null) {
+                throw new IllegalTypeException(
+                        HtsEncounterRequestDTO.class,
+                        "finalHivTestResult",
+                        String.format(
+                                "Cannot save this HTS encounter as a positive result: patient %s already has a " +
+                                        "positive HTS result recorded on %s (encounter ID %d, client code '%s'). A patient " +
+                                        "cannot have more than one active positive HTS result. If this new result is " +
+                                        "correct and the earlier record was entered in error, correct or archive the " +
+                                        "earlier encounter first.",
+                                patientIdentifier,
+                                existingPositive.getDateOfVisit(),
+                                existingPositive.getId(),
+                                existingPositive.getClientCode()));
+            }
+        }
+
+        if (incomingNegative && incomingDateOfVisit != null) {
+            HtsEncounter closestNegative = null;
+            long closestGapDays = Long.MAX_VALUE;
+
+            for (HtsEncounter existing : otherActiveEncounters) {
+                if (existing.getDateOfVisit() == null || !isNegativeObservation(existing.getObservation())) {
+                    continue;
+                }
+                long gapDays = Math.abs(ChronoUnit.DAYS.between(existing.getDateOfVisit(), incomingDateOfVisit));
+                if (gapDays < closestGapDays) {
+                    closestGapDays = gapDays;
+                    closestNegative = existing;
+                }
+            }
+
+            if (closestNegative != null && closestGapDays < MIN_DAYS_BETWEEN_NEGATIVE_RESULTS) {
+                throw new IllegalTypeException(
+                        HtsEncounterRequestDTO.class,
+                        "dateOfVisit",
+                        String.format(
+                                "Cannot save this HTS encounter as a negative result: patient %s already has a " +
+                                        "negative HTS result recorded on %s (encounter ID %d, client code '%s'), which is " +
+                                        "only %d day(s) from this encounter's date of visit (%s). Negative HTS results " +
+                                        "must be at least %d days apart.",
+                                patientIdentifier,
+                                closestNegative.getDateOfVisit(),
+                                closestNegative.getId(),
+                                closestNegative.getClientCode(),
+                                closestGapDays,
+                                incomingDateOfVisit,
+                                MIN_DAYS_BETWEEN_NEGATIVE_RESULTS));
+            }
+        }
+    }
+
+    private boolean isPositiveObservation(JsonNode observation) {
+        return containsMarker(observation, "finalHivTestResult", POSITIVE_MARKER)
+                || containsMarker(observation, "confirmatoryHivTest", POSITIVE_MARKER)
+                || matchesExactly(observation, "finalHivTestResult", ACUTE_INFECTION_RESULT);
+    }
+
+    private boolean isNegativeObservation(JsonNode observation) {
+        return containsMarker(observation, "finalHivTestResult", NEGATIVE_MARKER)
+                || containsMarker(observation, "confirmatoryHivTest", NEGATIVE_MARKER);
+    }
+
+    private boolean containsMarker(JsonNode observation, String field, String marker) {
+        String value = textValue(observation, field);
+        return value != null && value.toUpperCase(Locale.ROOT).contains(marker);
+    }
+
+    private boolean matchesExactly(JsonNode observation, String field, String expected) {
+        String value = textValue(observation, field);
+        return value != null && expected.equalsIgnoreCase(value.trim());
+    }
+
+    private String textValue(JsonNode observation, String field) {
+        if (observation == null) {
+            return null;
+        }
+        JsonNode node = observation.get(field);
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        return node.asText("");
+    }
+
+    private String patientIdentifier(String clientCode, Long patientId) {
+        return String.format("with client code '%s' (patient ID %d)", clientCode, patientId);
     }
 
     // Relaxed: patient_uuid is stored as varchar to tolerate legacy/migrated data

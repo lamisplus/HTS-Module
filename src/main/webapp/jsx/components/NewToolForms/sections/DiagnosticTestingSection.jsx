@@ -96,7 +96,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   useEffect(() => {
     setFieldValue("finalHivTestResult", finalResult || "");
-    if (finalResult?.toLowerCase() === 'positive') {
+    if (finalResult !== '') {
       setFieldValue("dateOfFinalHivTestDone", formik?.values?.dateOfVisit);
     }
     else {
@@ -286,7 +286,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
         )}
 
         {
-          formik?.values?.finalHivTestResult?.toLowerCase() === 'positive' &&
+          formik?.values?.finalHivTestResult &&
+          formik?.values?.finalHivTestResult !== "" &&
           formik?.values?.dateOfFinalHivTestDone &&
           formik?.values?.dateOfFinalHivTestDone !== "" && (
             <div className="col-md-6">
