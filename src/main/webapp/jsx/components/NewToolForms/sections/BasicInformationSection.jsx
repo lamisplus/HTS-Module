@@ -485,17 +485,16 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <FormSelect
               label="Facility Setting"
               {...sp("facilitySetting", (() => {
-                const MALE_EXCLUDED_FACILITY_CODES = [
+                const ARCHIVED_FACILITY_CODES = [
                   "SETTING_ANC",
                   "SETTING_L&D",
                   "POST_NATAL_WARD_BREASTFEEDING",
                 ];
                 return transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]).filter(
-                  (opt) => !isMaleClient || !MALE_EXCLUDED_FACILITY_CODES.some((ex) => opt.value.includes(ex))
+                  (opt) => !ARCHIVED_FACILITY_CODES.some((ex) => opt.value.includes(ex))
                 );
               })())}
               onChange={readOnly ? undefined : (e) => {
-                // If a now-hidden option was previously selected, clear it
                 handleChange(e);
               }}
               required

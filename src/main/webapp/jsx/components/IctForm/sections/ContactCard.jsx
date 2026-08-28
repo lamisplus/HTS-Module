@@ -429,7 +429,10 @@ const ContactCard = ({
             <div className="col-md-4">
               <FormSelect
                 label="HIV Test Result"
-                {...sp("hivTestResult", transformOptions(codesets?.["HIV_TEST_RESULT"]))}
+                {...sp("hivTestResult", (() => {
+                  const allOptions = transformOptions(codesets?.["HIV_TEST_RESULT"]);
+                  return allOptions.filter(opt => opt.value !== "HIV_TEST_RESULT_EARLY_DETECT");
+                })())}
                 onChange={handleHivResultChange}
                 required
               />

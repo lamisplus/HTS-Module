@@ -216,12 +216,12 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   return (
     <div style={{ width: "100%" }}>
-      <SectionSubheading>Facility Context</SectionSubheading>
+      {/* <SectionSubheading>Facility Context</SectionSubheading>
       <div className="row">
         <div className="col-md-4"><ReadOnlyField label="State" value={stateDisplayName} /></div>
         <div className="col-md-4"><ReadOnlyField label="LGA" value={lgaDisplayName} /></div>
         <div className="col-md-4"><ReadOnlyField label="Facility Name" value={values.facilityName} /></div>
-      </div>
+      </div> */}
 
       <SectionSubheading>Visit Details</SectionSubheading>
       <div className="row">
