@@ -1,5 +1,11 @@
 import React, { useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 import { toast } from "react-toastify";
 import NewEncounterHtsForm from "./NewEncounterHtsForm";
 import IctForm from "../IctForm/IctForm";
@@ -116,6 +122,7 @@ const NewEncounterHtsIctOrchestrator = ({
   const [ictSubmitted, setIctSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null); // live formik snapshot
   const [htsRecord, setHtsRecord] = useState(null); // API response after HTS save
+  const [showIctPrompt, setShowIctPrompt] = useState(false);
   const eligibilityToastFiredRef = useRef(false);
 
   const location = useLocation();
@@ -159,14 +166,26 @@ const NewEncounterHtsIctOrchestrator = ({
     if (isIctEligible(formValues)) {
       setIctEligible(true);
       onEncounterMutated?.()
-      setTimeout(() => setActiveView(VIEWS.ICT), 600);
-      // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+      // Don't auto-navigate into ICT - ask the user first.
+      setShowIctPrompt(true);
     }
     else {
       updateSkipEligibility(false)
       onDone?.()
     }
     // If not eligible, HTS is done and the user can navigate back via onDone.
+  };
+
+  // ── ICT skip-confirmation prompt ──────────────────────────────────────────
+  const handleProceedToIct = () => {
+    setShowIctPrompt(false);
+    setActiveView(VIEWS.ICT);
+  };
+
+  const handleSkipIct = () => {
+    setShowIctPrompt(false);
+    updateSkipEligibility(false);
+    onDone?.();
   };
 
   // ── ICT submit success ────────────────────────────────────────────────────
@@ -283,6 +302,34 @@ const NewEncounterHtsIctOrchestrator = ({
         )}
 
       </div>
+
+      {/* ── ICT skip-confirmation modal ── */}
+      <Dialog
+        open={showIctPrompt}
+        onClose={handleSkipIct}
+        aria-labelledby="ict-prompt-title"
+      >
+        <DialogTitle id="ict-prompt-title">Client eligible for Index Contact Testing</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            The HTS record was saved successfully, and this client is eligible for
+            Index Contact Testing (ICT). Do you want to continue and fill the ICT
+            form now?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSkipIct} color="default">
+            No, go to HTS history
+          </Button>
+          <Button
+            onClick={handleProceedToIct}
+            style={{ backgroundColor: COLORS.primary, color: "#fff" }}
+            autoFocus
+          >
+            Yes, fill ICT form
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

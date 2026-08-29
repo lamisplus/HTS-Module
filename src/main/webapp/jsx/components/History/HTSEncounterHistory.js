@@ -295,7 +295,6 @@ const mapResultCode = (code, customMap) => {
 };
 
 const formatHivResult = (rawCode) => {
-  console.log(rawCode)
   const { display, color } = mapResultCode(rawCode, HIV_RESULT_MAP);
   return <Label color={color} size="mini">{display}</Label>;
 };

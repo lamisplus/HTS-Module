@@ -129,9 +129,20 @@ const HIVSTPostTestCounsellingSection = ({ formik, readOnly }) => {
       {/* First row: HIV Test Kits, Category, No. of Kits */}
       <div className="row">
         <div className="col-md-4">
+          {/* <FormSelect
+            label="HIV self Test Kits Provided to Client"
+            {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
+            required
+          /> */}
+
           <FormSelect
             label="HIV self Test Kits Provided to Client"
             {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
+            onChange={(e) => {
+              handleChange(e);
+              setFieldValue("categoryOfClients", "");
+              setFieldValue("numberOfHivstKitDistributed", "");
+            }}
             required
           />
         </div>

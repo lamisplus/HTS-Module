@@ -218,7 +218,7 @@ const NewIctForExistingPatient = ({ patientId, onDone, isOnArt = false }) => {
                 } else {
                     setPositiveHtsRecord(positiveRecord);
                     const mapped = mapHtsRecordToIctValues(positiveRecord);
-                    console.log(mapped)
+                  
                     setIctInitialValues(mapped);
                 }
             } catch (err) {

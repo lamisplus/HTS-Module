@@ -189,9 +189,21 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
           {/* <SectionSubheading>HIVST</SectionSubheading> */}
 
           <div className="col-md-4">
+            {/* <FormSelect
+              label="HIV self Test Kits Provided to Client"
+              {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
+              required
+            /> */}
+
             <FormSelect
               label="HIV self Test Kits Provided to Client"
               {...sp("hivTestKitsProvided", transformOptions(codesets?.["YES_NO"]))}
+              onChange={(e) => {
+                handleChange(e);
+                setFieldValue("categoryOfClients", "");
+                setFieldValue("numberOfHivstKitDistributed", "");
+              }}
+              required
             />
           </div>
 
@@ -253,11 +265,15 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
                         ].includes(option.value)
                       )
                     )}
+                    required
                   />
                 </div>
 
                 <div className="col-md-3">
-                  <Label style={labelStyle}>No. of Kits Distributed</Label>
+                  <Label style={labelStyle}>
+                    No. of Kits Distributed
+                    <span style={{ color: "red" }}> *</span>
+                  </Label>
                   <Input
                     type="number"
                     name="numberOfHivstKitDistributed"
@@ -291,6 +307,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Accepted Index Testing"
                 {...sp("acceptedIndexTesting", transformOptions(codesets?.["YES_NO"]))}
+                required
               />
             </div>
           )
@@ -332,6 +349,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
           <FormSelect
             label="Client Referred to Other Services"
             {...sp("clientReferredToOtherServices", transformOptions(codesets?.["YES_NO"]))}
+            required
           />
         </div>
       </div>
@@ -343,6 +361,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
             label="Completed By"
             {...sp("completedBy", completedByOptions)}
             disabled={readOnly || isLoadingAllUsers}
+            required
           />
         </div>
         <div className="col-md-6">
@@ -350,6 +369,7 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
             label="Designation"
             {...sp("designation", designationOptions)}
             disabled={readOnly || isLoadingAllUsers}
+            required
           />
         </div>
       </div>

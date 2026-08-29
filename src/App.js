@@ -38,9 +38,9 @@ export default function App() {
     <div>
       <QueryClientProvider client={queryClient}>
         <ToastContainer />
-        {permissions.canSeeCheckedInPatientsAlert && (
+        {/* {permissions.canSeeCheckedInPatientsAlert && (
           <CheckedInPatientsAlert />
-        )}
+        )} */}
         <Switch>
           <Route path="/patient-history">
             <PatientDetail />

@@ -130,11 +130,6 @@ const Home = (props) => {
 
   useEffect(() => {
     patients();
-    // patientsCurrentHts();
-
-    // key is already initialised correctly from props.activePage in useState above.
-    // Do NOT re-derive it here - doing so caused the tab to jump back to "new"
-    // after returning from an update when the router state still held "NEW HTS".
   }, []);
 
   async function patients() {
@@ -192,6 +187,7 @@ const Home = (props) => {
     }),
     [hasAnyPermission, props?.patientObj]
   );
+
 
   return (
     <Fragment>

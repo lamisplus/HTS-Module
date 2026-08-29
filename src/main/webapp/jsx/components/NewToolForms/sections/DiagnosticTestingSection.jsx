@@ -198,6 +198,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             label="Type of HIV Test ?"
             {...sp("typeOfHivTestDone", transformOptions(codesets?.["TYPE_OF_HIV_TEST"]))}
             onChange={readOnly ? undefined : handleEarlyDetectDoneChange}
+            required
           />
         </div>
 
@@ -227,6 +228,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
                 label="Suspected Acute HIV Infection?"
                 {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
                 disabled // always locked to YES on this path
+                required
               />
             </div>
           </>
@@ -251,6 +253,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             <FormSelect
               label="Confirmatory HIV Test"
               {...sp("confirmatoryHivTest", transformOptions(codesets?.["HIV_CONFIRMATORY_TEST_RESULT"]))}
+              required
             />
           </div>
         )}

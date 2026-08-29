@@ -80,7 +80,6 @@ const modeBadgeStyle = (mode) => {
 
 
 const mapIctResponseToFormValues = (response) => {
-  console.log(response?.clientCategoryOther)
   if (!response) return {};
   const d = response.data ?? {};
 

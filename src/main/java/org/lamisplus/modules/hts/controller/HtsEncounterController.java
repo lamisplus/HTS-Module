@@ -6,6 +6,7 @@ import org.lamisplus.modules.base.util.PaginationUtil;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
+import org.lamisplus.modules.hts.repository.HtsEncounterRepository;
 import org.lamisplus.modules.hts.service.HtsEncounterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/hts-encounter")
@@ -27,12 +30,29 @@ import java.util.List;
 public class HtsEncounterController {
 
     private final HtsEncounterService service;
+    
+    private final HtsEncounterRepository repository;
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('hts_create', 'hts_encounter_create')")
-    public ResponseEntity<HtsEncounterResponse> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
+    public ResponseEntity<Object> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
+        if (repository.existsActiveHivTransferInForPerson(request.getPatientId(), null)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap(
+                    "message", "This patient has a documented HIV Transfer-In record and cannot have a new HTS record created. Use the ICT form instead."
+            ));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
+
+    
+    @GetMapping("/transfer-in-check")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view', 'hts_create', 'hts_encounter_create')")
+    public ResponseEntity<Boolean> checkActiveHivTransferIn(
+            @RequestParam(required = false) Long personId,
+            @RequestParam(required = false) String personUuid) {
+        return ResponseEntity.ok(repository.existsActiveHivTransferInForPerson(personId, personUuid));
+    }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")

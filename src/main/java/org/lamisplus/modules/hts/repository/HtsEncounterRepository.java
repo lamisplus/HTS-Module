@@ -21,6 +21,29 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
     Optional<HtsEncounter> findFirstByPatientUuidAndDateOfVisitAndArchivedOrderByIdDesc(
             String patientUuid, LocalDate dateOfVisit, Boolean archived);
 
+    // hiv_patient_transfer_in lives in the HIV module; there is no shared entity/repository
+    // for it here, so this is a direct native query against the table. Only rows with
+    // archived = 0 (active) count - matches uk_transfer_in_person_facility_active.
+    // Matches on EITHER person_id OR person_uuid - either one being present is enough
+    // to block a new HTS record for this patient.
+    // Both params are explicitly CAST - when either is passed as null (e.g. personUuid
+    // is null on the create() call, which only has a patientId), Postgres's JDBC driver
+    // can otherwise infer the null's type as bytea instead of the target column's type,
+    // causing "operator does not exist: character varying = bytea" / "bigint = bytea".
+    @Query(value =
+            "SELECT EXISTS (" +
+                    "    SELECT 1 FROM hiv_patient_transfer_in t " +
+                    "    WHERE t.archived = 0 " +
+                    "      AND (" +
+                    "           (:personId IS NOT NULL AND t.person_id = CAST(:personId AS bigint)) " +
+                    "        OR (:personUuid IS NOT NULL AND t.person_uuid = CAST(:personUuid AS varchar))" +
+                    "      )" +
+                    ")",
+            nativeQuery = true)
+    boolean existsActiveHivTransferInForPerson(
+            @Param("personId") Long personId,
+            @Param("personUuid") String personUuid);
+
     @Query("SELECT e FROM HtsEncounter e " +
             "JOIN e.person p " +
             "WHERE e.archived = false " +

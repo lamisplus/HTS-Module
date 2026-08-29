@@ -231,8 +231,6 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     onSubmit,
   });
 
-  // console.log(formik)
-
 
   useEffect(() => {
     onValuesChange?.(formik.values);
