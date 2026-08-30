@@ -5,14 +5,13 @@ import lombok.Data;
 import org.lamisplus.modules.patient.domain.dto.PersonResponseDto;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 public class HtsEncounterResponse {
     private Long id;
     private String uuid;
     private Long patientId;
-    private UUID patientUuid;
+    private String patientUuid;
     private PersonResponseDto person;
     private String clientCode;
     private LocalDate dateOfVisit;

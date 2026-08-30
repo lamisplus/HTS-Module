@@ -64,6 +64,8 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
 
   const { formik } = useNewPatientFormik(onSubmit);
+  console.log(formik)
+
 
   const onSubmit = async (values) => {
     const payload = buildHtsEncounterPayload(values, true);

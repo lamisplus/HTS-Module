@@ -1,28 +1,89 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FormSelect, SectionSubheading } from "./FormFields";
 import {
   PREVIOUSLY_TESTED_OPTIONS,
 } from "../constants";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
-
-const COMPLETED_BY_OPTIONS = [
-  { label: "Counsellor", value: "Counsellor" },
-  { label: "Nurse", value: "Nurse" },
-  { label: "Doctor", value: "Doctor" },
-  { label: "Lab Technician", value: "Lab Technician" },
-];
-
-const DESIGNATION_OPTIONS = [
-  { label: "HTS Provider", value: "HTS Provider" },
-  { label: "Nurse", value: "Nurse" },
-  { label: "Doctor", value: "Doctor" },
-  { label: "Community Health Worker", value: "Community Health Worker" },
-];
+import { getAllUsers } from "../../../services/getAllUsers.service";
 
 const PostTestCounsellingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur } = formik;
   const [codesets, setCodesets] = useState(null);
+  const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchAllUsers = async () => {
+      setIsLoadingAllUsers(true);
+      try {
+        const data = await getAllUsers();
+        if (isMounted) {
+          setAllUsers(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+        if (isMounted) {
+          setAllUsers([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingAllUsers(false);
+        }
+      }
+    };
+
+    fetchAllUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // "Completed By" options: derived from firstname + lastname of each user
+  const completedByOptions = useMemo(() => {
+    if (!Array.isArray(allUsers)) return [];
+    return allUsers
+      .filter((user) => user?.firstName && user?.lastName)
+      .map((user) => {
+        const fullName = `${user.firstName} ${user.lastName}`;
+        return { label: fullName, value: fullName };
+      });
+  }, [allUsers]);
+
+
+  const designationOptions = useMemo(() => {
+    if (!Array.isArray(allUsers)) return [];
+
+    const toTitleCase = (str) =>
+      str
+        .toLowerCase()
+        .split(/\s+/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+    const seen = new Map(); // normalized key -> display label
+
+    allUsers.forEach((user) => {
+      const raw = user?.designation;
+      if (!raw || typeof raw !== "string") return;
+
+      const trimmed = raw.trim();
+      if (!trimmed) return;
+
+      const key = trimmed.toLowerCase();
+      if (!seen.has(key)) {
+        seen.set(key, toTitleCase(trimmed));
+      }
+    });
+
+    return Array.from(seen.values())
+      .sort()
+      .map((designation) => ({ label: designation, value: designation }));
+  }, [allUsers]);
+
 
   const fp = (name) => ({
     name,
@@ -60,6 +121,8 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
   });
 
 
+
+
   const showCategoryOfClient = values.hivTestKitsProvided === "YES_NO_YES";
   const showAcceptedIndexTesting = values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 
@@ -70,14 +133,14 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
           <FormSelect
             label="Have You Been Tested for HIV Before Within This Year?"
             {...sp("previouslyTestedThisYear", PREVIOUSLY_TESTED_OPTIONS)}
-            required
+          // required
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Client Received Test Result?"
             {...sp("clientReceivedTestResult", transformOptions(codesets?.["YES_NO"]))}
-            required
+          // required
           />
         </div>
 
@@ -189,13 +252,15 @@ const PostTestCounsellingSection = ({ formik, readOnly }) => {
         <div className="col-md-6">
           <FormSelect
             label="Completed By"
-            {...sp("completedBy", COMPLETED_BY_OPTIONS)}
+            {...sp("completedBy", completedByOptions)}
+            disabled={readOnly || isLoadingAllUsers}
           />
         </div>
         <div className="col-md-6">
           <FormSelect
             label="Designation"
-            {...sp("designation", DESIGNATION_OPTIONS)}
+            {...sp("designation", designationOptions)}
+            disabled={readOnly || isLoadingAllUsers}
           />
         </div>
       </div>

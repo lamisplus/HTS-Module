@@ -173,11 +173,11 @@ export const buildValidationSchema = (isNewPatient) => {
 
     serialNumber: yup
       .string()
-      .required("Serial number is required to generate a client code")
-      .matches(
-        /^[a-zA-Z0-9]+$/,
-        "Serial number must contain only letters and numbers — no special characters"
-      ),
+      .required("Serial number is required to generate a client code"),
+      // .matches(
+      //   /^[a-zA-Z0-9]+$/,
+      //   "Serial number must contain only letters and numbers — no special characters"
+      // ),
 
 
     setting: yup.string().required("Setting is required"),
@@ -232,14 +232,17 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Index client code/ID is required" });
       }
     ),
-    previouslyTestedNegative: yup.mixed().test(
-      "prev-tested-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
+    // previouslyTestedNegative: yup.mixed().test(
+    //   "prev-tested-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    previouslyTestedNegative: yup.string().nullable(),
+
     timeOfLastNegativeTest: yup.mixed().test(
       "time-last-negative-conditional",
       "Time of last negative test is required",
@@ -249,108 +252,134 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Time of last negative test is required" });
       }
     ),
-    clientInformedTransmissionRoutes: yup.mixed().test(
-      "transmission-routes-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedRiskFactors: yup.mixed().test(
-      "risk-factors-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedPreventionMethods: yup.mixed().test(
-      "prevention-methods-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    clientInformedPossibleResults: yup.mixed().test(
-      "possible-results-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    informedConsentGiven: yup.mixed().test(
-      "consent-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    everHadSexualIntercourse: yup.mixed().test(
-      "ever-sex-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    moreThanOneSexPartner: yup.mixed().test(
-      "multi-partner-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    unprotectedVaginalSex: yup.mixed().test(
-      "vaginal-sex-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.sex !== "SEX_FEMALE") return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    unprotectedAnalSex: yup.mixed().test(
-      "anal-sex-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    bloodTransfusionLast3Months: yup.mixed().test(
-      "blood-transfusion-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    sexUnderInfluence: yup.mixed().test(
-      "sex-influence-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    historyOfSTI: yup.mixed().test(
-      "sti-history-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
+    // clientInformedTransmissionRoutes: yup.mixed().test(
+    //   "transmission-routes-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    clientInformedTransmissionRoutes: yup.string().nullable(),
+    clientInformedRiskFactors: yup.string().nullable(),
+    clientInformedPreventionMethods: yup.string().nullable(),
+    clientInformedPossibleResults: yup.string().nullable(),
+    informedConsentGiven: yup.string().nullable(),
+    // clientInformedRiskFactors: yup.mixed().test(
+    //   "risk-factors-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // clientInformedPreventionMethods: yup.mixed().test(
+    //   "prevention-methods-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // clientInformedPossibleResults: yup.mixed().test(
+    //   "possible-results-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // informedConsentGiven: yup.mixed().test(
+    //   "consent-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    everHadSexualIntercourse: yup.string().nullable(),
+
+    // everHadSexualIntercourse: yup.mixed().test(
+    //   "ever-sex-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    moreThanOneSexPartner: yup.string().nullable(),
+
+    // moreThanOneSexPartner: yup.mixed().test(
+    //   "multi-partner-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    unprotectedVaginalSex: yup.string().nullable(),
+
+    // unprotectedVaginalSex: yup.mixed().test(
+    //   "vaginal-sex-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.sex !== "SEX_FEMALE") return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    unprotectedAnalSex:yup.string().nullable(),
+
+    // unprotectedAnalSex: yup.mixed().test(
+    //   "anal-sex-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // bloodTransfusionLast3Months: yup.mixed().test(
+    //   "blood-transfusion-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    bloodTransfusionLast3Months: yup.string().nullable(),
+    sexUnderInfluence:yup.string().nullable(),
+
+    // sexUnderInfluence: yup.mixed().test(
+    //   "sex-influence-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    historyOfSTI: yup.string().nullable(),
+
+    // historyOfSTI: yup.mixed().test(
+    //   "sti-history-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
     currentCough: yup.mixed().test(
       "curent-cough-conditional",
       "This field is required",
@@ -383,116 +412,142 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "This field is required" });
       }
     ),
-    complaintsVaginalDischarge: yup.mixed().test(
-      "vaginal-discharge-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.sex !== "SEX_FEMALE") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    complaintsLowerAbdominalPain: yup.mixed().test(
-      "lower-abdominal-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.sex !== "SEX_FEMALE") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    complaintsUrethralDischarge: yup.mixed().test(
-      "urethral-discharge-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.sex !== "SEX_MALE") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    complaintsScroralSwelling: yup.mixed().test(
-      "scrotal-swelling-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.sex !== "SEX_MALE") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    complaintsGenitalSores: yup.mixed().test(
-      "complaint-genital-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    complaintsSwollenLymphNodes: yup.mixed().test(
-      "complaint-swollen-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    partnerNewlyDiagnosed: yup.mixed().test(
-      "partner-new-dx-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    partnerPregnantOnArv: yup.mixed().test(
-      "partner-pmtct-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    adolescentHivPositive: yup.mixed().test(
-      "adolescent-hiv-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        // Use resolveAge so the check works whether age comes from the
-        // age field or is derived from dateOfBirth (avoids invisible required error)
-        const age = resolveAge(this.parent);
-        if (age === null || age < 10 || age > 19) return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    partnerNotRegularlyOnDrugs: yup.mixed().test(
-      "partner-not-drugs-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    partnerRecentlyReturnedToTreatment: yup.mixed().test(
-      "partner-ltfu-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
-    hadSexWithHivPositivePartnerInRiskGroup: yup.mixed().test(
-      "had-sex-with-hiv-conditional",
-      "This field is required",
-      function (value) {
-        if (skipKnowledgeAndRisk(this)) return true;
-        if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
-        return !!value || this.createError({ message: "This field is required" });
-      }
-    ),
+    complaintsVaginalDischarge: yup.string().nullable(),
+
+    // complaintsVaginalDischarge: yup.mixed().test(
+    //   "vaginal-discharge-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.sex !== "SEX_FEMALE") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    complaintsLowerAbdominalPain: yup.string().nullable(),
+
+    // complaintsLowerAbdominalPain: yup.mixed().test(
+    //   "lower-abdominal-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.sex !== "SEX_FEMALE") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // complaintsUrethralDischarge: yup.mixed().test(
+    //   "urethral-discharge-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.sex !== "SEX_MALE") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    complaintsUrethralDischarge: yup.string().nullable(),
+    complaintsScroralSwelling: yup.string().nullable(),
+    complaintsGenitalSores: yup.string().nullable(),
+    complaintsSwollenLymphNodes: yup.string().nullable(),
+    // complaintsScroralSwelling: yup.mixed().test(
+    //   "scrotal-swelling-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.sex !== "SEX_MALE") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    // complaintsGenitalSores: yup.mixed().test(
+    //   "complaint-genital-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    // complaintsSwollenLymphNodes: yup.mixed().test(
+    //   "complaint-swollen-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    partnerNewlyDiagnosed: yup.string().nullable(),
+
+    // partnerNewlyDiagnosed: yup.mixed().test(
+    //   "partner-new-dx-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    partnerPregnantOnArv: yup.string().nullable(),
+
+    // partnerPregnantOnArv: yup.mixed().test(
+    //   "partner-pmtct-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    adolescentHivPositive: yup.string().nullable(),
+
+    // adolescentHivPositive: yup.mixed().test(
+    //   "adolescent-hiv-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     // Use resolveAge so the check works whether age comes from the
+    //     // age field or is derived from dateOfBirth (avoids invisible required error)
+    //     const age = resolveAge(this.parent);
+    //     if (age === null || age < 10 || age > 19) return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    // partnerNotRegularlyOnDrugs: yup.mixed().test(
+    //   "partner-not-drugs-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+    partnerNotRegularlyOnDrugs: yup.string().nullable(),
+    partnerRecentlyReturnedToTreatment: yup.string().nullable(),
+
+    // partnerRecentlyReturnedToTreatment: yup.mixed().test(
+    //   "partner-ltfu-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
+    hadSexWithHivPositivePartnerInRiskGroup: yup.string().nullable(),
+
+    // hadSexWithHivPositivePartnerInRiskGroup: yup.mixed().test(
+    //   "had-sex-with-hiv-conditional",
+    //   "This field is required",
+    //   function (value) {
+    //     if (skipKnowledgeAndRisk(this)) return true;
+    //     if (this.parent.everHadSexualIntercourse !== "YES_NO_YES") return true;
+    //     return !!value || this.createError({ message: "This field is required" });
+    //   }
+    // ),
+
     typeOfHivTestDone: yup.string().required("This field is required"),
     hivEarlyDetectResult: yup.mixed().test(
       "earlyDetectResult-conditional",
@@ -539,9 +594,27 @@ export const buildValidationSchema = (isNewPatient) => {
     ),
 
 
-    recencyTest: yup.string(),
-    previouslyTestedThisYear: yup.string().required("This field is required"),
-    clientReceivedTestResult: yup.string().required("This field is required"),
+    // recencyTest: yup.string(),
+
+    syphilisTestResult: yup.string().required("Syphilis Test Result is required"),
+
+    recencyTest: yup.mixed().test(
+      "recencyTest-conditional",
+      "Recency test result is required",
+      function (value) {
+        // Mirrors DiagnosticTestingSection's `showRecency` flag:
+        // the field is only rendered — and therefore only required —
+        // when the initial HIV test result is Positive.
+        if (this.parent.initialHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
+        return !!value || this.createError({ message: "Recency test result is required" });
+      }
+    ),
+
+
+    // previouslyTestedThisYear: yup.string().required("This field is required"),
+    previouslyTestedThisYear: yup.string().nullable(),
+    clientReceivedTestResult: yup.string().nullable(),
+    // clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
 
     categoryOfClients: yup.mixed().test(
@@ -588,11 +661,16 @@ export const buildValidationSchema = (isNewPatient) => {
         return !!value || this.createError({ message: "Accepted Index testing is required when confirmatory HIV test is positive" });
       }
     ),
-    providedFpInfo: yup.string().required("This field is required"),
-    clientPartnerUseFpMethods: yup.string().required("This field is required"),
-    clientPartnerUseCondoms: yup.string().required("This field is required"),
-    correctCondomUseDemonstrated: yup.string().required("This field is required"),
-    condomsProvided: yup.string().required("This field is required"),
+    providedFpInfo: yup.string().nullable(),
+    // providedFpInfo: yup.string().required("This field is required"),
+    clientPartnerUseFpMethods: yup.string().nullable(),
+    // clientPartnerUseFpMethods: yup.string().required("This field is required"),
+    clientPartnerUseCondoms: yup.string().nullable(),
+    // clientPartnerUseCondoms: yup.string().required("This field is required"),
+    correctCondomUseDemonstrated: yup.string().nullable(),
+    // correctCondomUseDemonstrated: yup.string().required("This field is required"),
+    condomsProvided: yup.string().nullable(),
+    // condomsProvided: yup.string().required("This field is required"),
     clientReferredToOtherServices: yup.string().required("This field is required"),
     completedBy: yup.string().required("This field is required"),
     designation: yup.string().required("This field is required"),

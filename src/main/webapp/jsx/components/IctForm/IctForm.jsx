@@ -111,7 +111,7 @@ const mapIctResponseToFormValues = (response) => {
     indexFirstName: d.indexFirstName ?? "",
     indexMiddleName: d.indexMiddleName ?? "",
     indexSurname: d.indexSurname ?? "",
-    indexSex: d.indexSex ?? "",   // codeset code — display resolved in Section A
+    indexSex: d.indexSex ?? "",   // codeset code - display resolved in Section A
     indexDob: d.indexDob ?? "",
     indexAge: d.indexAge != null ? String(d.indexAge) : "",
     indexPhone: d.indexPhone ?? "",
@@ -289,9 +289,9 @@ const IctForm = ({
           </h2>
           <p className={classes.subtitle}>
             {readOnly
-              ? "Viewing ICT record — no changes can be made"
+              ? "Viewing ICT record - no changes can be made"
               : isEditMode
-                ? "Editing existing ICT record — all fields are editable"
+                ? "Editing existing ICT record - all fields are editable"
                 : "Complete Section A, then add all elicited contacts in Section B"}
           </p>
         </div>
@@ -309,7 +309,7 @@ const IctForm = ({
 
           <FormAccordion
             step={1}
-            title="Section A — Index Client Details"
+            title="Section A - Index Client Details"
             subtitle="Facility context, visit details and index client identity"
             defaultExpanded
             hasError={sectionHasError(sectionAFields)}
@@ -319,10 +319,10 @@ const IctForm = ({
 
           <FormAccordion
             step={2}
-            title="Section B — Contact Enumeration & Testing Tracker"
+            title="Section B - Contact Enumeration & Testing Tracker"
             subtitle={
               sectionBLocked
-                ? "Locked — complete Index Testing Services fields in Section A to enable"
+                ? "Locked - complete Index Testing Services fields in Section A to enable"
                 : `${values.contacts?.length || 0} contact(s) added`
             }
             hasError={hasSubmitted && !!errors.contacts}

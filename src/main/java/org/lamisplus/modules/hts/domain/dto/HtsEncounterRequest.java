@@ -69,14 +69,12 @@ public class HtsEncounterRequest {
     private String complaintsScroralSwelling;
     private String complaintsGenitalSores;
     private String complaintsSwollenLymphNodes;
-
     private String partnerNewlyDiagnosed;
     private String partnerPregnantOnArv;
     private String adolescentHivPositive;
     private String partnerNotRegularlyOnDrugs;
     private String partnerRecentlyReturnedToTreatment;
     private String hadSexWithHivPositivePartnerInRiskGroup;
-
     private String typeOfHivTestDone;
     private String initialHivTest;
     private String suspectedAcuteInfection;
@@ -85,7 +83,6 @@ public class HtsEncounterRequest {
     private String syphilisTestResult;
     private String recencyTest;
     private String hivEarlyDetectResult;
-
     private String previouslyTestedThisYear;
     private String clientReceivedTestResult;
     private String hivTestKitsProvided;
@@ -100,7 +97,6 @@ public class HtsEncounterRequest {
     private String completedBy;
     private String designation;
     private Boolean pmtctHts = false;
-
     private String source ="Web";
     private String longitude;
     private String latitude;

@@ -1,8 +1,8 @@
 <?xml version="1.1" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd"
-                   >
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+>
 
 
     <changeSet id="harmonise_v4_hts_encounter_add_source" author="Emmanuel Nnajiofor">
@@ -285,7 +285,7 @@
         </comment>
         <sql>
             ALTER TABLE hts_encounter
-                ALTER COLUMN client_code   TYPE VARCHAR(200) USING client_code::VARCHAR(200),
+            ALTER COLUMN client_code   TYPE VARCHAR(200) USING client_code::VARCHAR(200),
                 ALTER COLUMN setting       TYPE VARCHAR(200) USING setting::VARCHAR(200),
                 ALTER COLUMN source        TYPE VARCHAR(200) USING source::VARCHAR(200),
                 ALTER COLUMN latitude      TYPE VARCHAR(200) USING latitude::VARCHAR(200),
@@ -295,13 +295,13 @@
         </sql>
         <rollback>
             ALTER TABLE hts_encounter
-                ALTER COLUMN client_code   TYPE VARCHAR(50),
-                ALTER COLUMN setting       TYPE VARCHAR(50),
-                ALTER COLUMN source        TYPE VARCHAR(50),
-                ALTER COLUMN latitude      TYPE VARCHAR(50),
-                ALTER COLUMN longitude     TYPE VARCHAR(50),
-                ALTER COLUMN created_by    TYPE VARCHAR(50),
-                ALTER COLUMN modified_by   TYPE VARCHAR(50);
+            ALTER COLUMN client_code   TYPE VARCHAR(50),
+            ALTER COLUMN setting       TYPE VARCHAR(50),
+            ALTER COLUMN source        TYPE VARCHAR(50),
+            ALTER COLUMN latitude      TYPE VARCHAR(50),
+            ALTER COLUMN longitude     TYPE VARCHAR(50),
+            ALTER COLUMN created_by    TYPE VARCHAR(50),
+            ALTER COLUMN modified_by   TYPE VARCHAR(50);
         </rollback>
     </changeSet>
 
@@ -313,15 +313,15 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN setting     TYPE VARCHAR(200) USING setting::VARCHAR(200),
+            ALTER COLUMN setting     TYPE VARCHAR(200) USING setting::VARCHAR(200),
                 ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
                 ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN setting     TYPE VARCHAR(100),
-                ALTER COLUMN created_by  TYPE VARCHAR(255),
-                ALTER COLUMN modified_by TYPE VARCHAR(255);
+            ALTER COLUMN setting     TYPE VARCHAR(100),
+            ALTER COLUMN created_by  TYPE VARCHAR(255),
+            ALTER COLUMN modified_by TYPE VARCHAR(255);
         </rollback>
     </changeSet>
 
@@ -332,13 +332,13 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
+            ALTER COLUMN created_by  TYPE VARCHAR(200) USING created_by::VARCHAR(200),
                 ALTER COLUMN modified_by TYPE VARCHAR(200) USING modified_by::VARCHAR(200);
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN created_by  TYPE VARCHAR(255),
-                ALTER COLUMN modified_by TYPE VARCHAR(255);
+            ALTER COLUMN created_by  TYPE VARCHAR(255),
+            ALTER COLUMN modified_by TYPE VARCHAR(255);
         </rollback>
     </changeSet>
 
@@ -398,7 +398,7 @@
 
             -- Retype the column
             ALTER TABLE hts_encounter
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             -- Restore the default and unique constraint
             ALTER TABLE hts_encounter
@@ -420,11 +420,11 @@
         <comment>Convert hts_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
         <sql>
             ALTER TABLE hts_encounter
-                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+            ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
         </sql>
         <rollback>
             ALTER TABLE hts_encounter
-                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+            ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
         </rollback>
     </changeSet>
 
@@ -435,7 +435,7 @@
             ALTER TABLE hts_ict_encounter DROP CONSTRAINT IF EXISTS hts_ict_encounter_uuid_key;
 
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             ALTER TABLE hts_ict_encounter
                 ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
@@ -456,11 +456,11 @@
         <comment>Convert hts_ict_encounter.patient_uuid from UUID to VARCHAR(50).</comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
+            ALTER COLUMN patient_uuid TYPE VARCHAR(50) USING patient_uuid::text;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
+            ALTER COLUMN patient_uuid TYPE UUID USING patient_uuid::uuid;
         </rollback>
     </changeSet>
 
@@ -471,7 +471,7 @@
             ALTER TABLE hts_ict_contact DROP CONSTRAINT IF EXISTS hts_ict_contact_uuid_key;
 
             ALTER TABLE hts_ict_contact
-                ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
+            ALTER COLUMN uuid TYPE VARCHAR(50) USING uuid::text;
 
             ALTER TABLE hts_ict_contact
                 ALTER COLUMN uuid SET DEFAULT gen_random_uuid()::text;
@@ -521,12 +521,12 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_encounter
-                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts;
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                ADD CONSTRAINT fk_ict_encounter_hts
-                    FOREIGN KEY (hts_encounter_id) REFERENCES hts_encounter(id);
+            ADD CONSTRAINT fk_ict_encounter_hts
+            FOREIGN KEY (hts_encounter_id) REFERENCES hts_encounter(id);
         </rollback>
     </changeSet>
 
@@ -542,7 +542,7 @@
         </sql>
         <rollback>
             ALTER TABLE hts_ict_encounter
-                DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
+            DROP CONSTRAINT IF EXISTS fk_ict_encounter_hts_uuid;
         </rollback>
     </changeSet>
 
@@ -583,12 +583,12 @@
         </comment>
         <sql>
             ALTER TABLE hts_ict_contact
-                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter;
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter;
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                ADD CONSTRAINT fk_ict_contact_encounter
-                    FOREIGN KEY (ict_encounter_id) REFERENCES hts_ict_encounter(id);
+            ADD CONSTRAINT fk_ict_contact_encounter
+            FOREIGN KEY (ict_encounter_id) REFERENCES hts_ict_encounter(id);
         </rollback>
     </changeSet>
 
@@ -604,7 +604,7 @@
         </sql>
         <rollback>
             ALTER TABLE hts_ict_contact
-                DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
+            DROP CONSTRAINT IF EXISTS fk_ict_contact_encounter_uuid;
         </rollback>
     </changeSet>
 
@@ -630,26 +630,26 @@
          ═══════════════════════════════════════════════════════════════════════ -->
 
 
-         <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
-            <comment>
-                Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
-            </comment>
-            <sql>
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts TYPE boolean
+    <changeSet id="harmonise_v4_hts_encounter_pmtct_to_boolean" author="Emmanuel Nnajiofor">
+        <comment>
+            Convert pmtct_hts from jsonb to boolean where it may still be jsonb.
+        </comment>
+        <sql>
+            ALTER TABLE hts_encounter
+            ALTER COLUMN pmtct_hts TYPE boolean
                     USING COALESCE((pmtct_hts::text)::boolean, false);
 
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts SET DEFAULT false;
+            ALTER TABLE hts_encounter
+                ALTER COLUMN pmtct_hts SET DEFAULT false;
 
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts SET NOT NULL;
-            </sql>
-            <rollback>
-                ALTER TABLE hts_encounter
-                    ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
-            </rollback>
-        </changeSet>
+            ALTER TABLE hts_encounter
+                ALTER COLUMN pmtct_hts SET NOT NULL;
+        </sql>
+        <rollback>
+            ALTER TABLE hts_encounter
+            ALTER COLUMN pmtct_hts TYPE jsonb USING to_jsonb(pmtct_hts);
+        </rollback>
+    </changeSet>
 
 
     <!-- Add client_category_other TEXT column to hts_ict_encounter -->
@@ -928,4 +928,96 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="adjust_risk_stratification" author="Emmanuel Nnajiofor">
+        <sql>
+            UPDATE hts_encounter he
+            SET
+                setting = r.entry_point,
+                observation = jsonb_set(
+                        he.observation,
+                        '{facilitySetting}',
+                        to_jsonb(r.testing_setting::text),
+                        true
+                    )
+                FROM hts_client h
+            JOIN hts_risk_stratification r
+            ON r.code = h.risk_stratification_code
+            WHERE he.uuid = h.uuid;
+        </sql>
+    </changeSet>
+
+    <changeSet id="backfill_final_hiv_test_result" author="Emmanuel Nnajiofor">
+        <comment>
+            Backfills / corrects the derived "finalHivTestResult" field inside the
+            hts_encounter.observation JSONB column, using the same logic as
+            DiagnosticTestingSection.jsx:
+
+            Path A (typeOfHivTestDone = TYPE_OF_HIV_TEST_HIV_EARLY_DETECT):
+            - hivEarlyDetectResult is Antigen Reactive or Antigen+Antibody Reactive
+            -> "Suspected Acute Infection"
+            - hivEarlyDetectResult is Antibody Reactive
+            -> confirmatoryHivTest positive -> "Positive"
+            -> confirmatoryHivTest negative -> "Negative"
+
+            Path B (typeOfHivTestDone = TYPE_OF_HIV_TEST_RAPID_ANTIBODY):
+            - initialHivTest = STI_HIV_RESULT_NEGATIVE -> "Negative"
+            - initialHivTest = STI_HIV_RESULT_POSITIVE
+            -> confirmatoryHivTest positive -> "Positive"
+            -> confirmatoryHivTest negative -> "Negative"
+
+            Any record for which none of the above branches resolve to a value
+            (incomplete data, unrecognised typeOfHivTestDone, etc.) is left
+            untouched — we only ever write a value we can actually derive.
+        </comment>
+        <sql>
+            WITH computed AS (
+                SELECT
+                    id,
+                    CASE
+                        WHEN observation->>'typeOfHivTestDone' = 'TYPE_OF_HIV_TEST_HIV_EARLY_DETECT' THEN
+                                CASE
+                                    WHEN observation->>'hivEarlyDetectResult' IN (
+                                                                                  'HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE',
+                                                                                  'HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE'
+                                    ) THEN 'Suspected Acute Infection'
+                WHEN observation->>'hivEarlyDetectResult' = 'HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE' THEN
+                CASE
+                WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_positive' THEN 'Positive'
+                WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_negative' THEN 'Negative'
+                ELSE NULL
+            END
+            ELSE NULL
+            END
+            WHEN observation->>'typeOfHivTestDone' = 'TYPE_OF_HIV_TEST_RAPID_ANTIBODY' THEN
+                        CASE
+                            WHEN observation->>'initialHivTest' = 'STI_HIV_RESULT_NEGATIVE' THEN 'Negative'
+                            WHEN observation->>'initialHivTest' = 'STI_HIV_RESULT_POSITIVE' THEN
+                                CASE
+                                    WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_positive' THEN 'Positive'
+                                    WHEN lower(observation->>'confirmatoryHivTest') = 'hiv_confirmatory_test_result_negative' THEN 'Negative'
+                                    ELSE NULL
+            END
+            ELSE NULL
+            END
+            ELSE NULL
+            END AS computed_result
+            FROM public.hts_encounter
+            WHERE observation IS NOT NULL
+        )
+            UPDATE public.hts_encounter e
+            SET observation = jsonb_set(e.observation, '{finalHivTestResult}', to_jsonb(c.computed_result::text), true)
+                FROM computed c
+            WHERE e.id = c.id
+              AND c.computed_result IS NOT NULL
+              AND (e.observation->>'finalHivTestResult') IS DISTINCT FROM c.computed_result;
+        </sql>
+        <rollback>
+            <comment>
+                Not reversible: the prior values of finalHivTestResult (blank or
+                incorrect) are not preserved anywhere, so there's nothing safe to
+                roll back to. If you need reversibility, snapshot the affected
+                rows into a temp table before running this in production.
+            </comment>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

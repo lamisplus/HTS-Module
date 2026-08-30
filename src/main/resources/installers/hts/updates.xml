@@ -31,31 +31,31 @@
         </preConditions>
         <sql>
             CREATE TABLE hivst (
-                id SERIAL PRIMARY KEY,
-                patient_id BIGINT,
-                date_of_visit DATE,
-                service_delivery_point VARCHAR(255),
-                user_type VARCHAR(255),
-                serial_number VARCHAR(255),
-                client_code VARCHAR(255),
-                previously_tested_within_12_months VARCHAR(255),
-                result_of_previously_tested_within_12_months VARCHAR(255),
-                consent_for_follow_up_calls VARCHAR(255),
-                type_of_hivst_kit_received VARCHAR(255),
-                number_of_hivst_kits_received BIGINT,
-                name_of_test_kit VARCHAR(255),
-                lot_number VARCHAR(255),
-                expiry_date DATE,
-                test_kit_users JSONB,
-                other_test_kit_user_info_available VARCHAR(255),
-                other_test_kit_user_details JSONB,
-                part_b JSONB,
-                referral_information JSONB,
-                archived INTEGER DEFAULT 0,
-                created_by VARCHAR(255) NOT NULL,
-                date_created TIMESTAMP NOT NULL,
-                modified_by VARCHAR(255),
-                date_modified TIMESTAMP
+                                   id SERIAL PRIMARY KEY,
+                                   patient_id BIGINT,
+                                   date_of_visit DATE,
+                                   service_delivery_point VARCHAR(255),
+                                   user_type VARCHAR(255),
+                                   serial_number VARCHAR(255),
+                                   client_code VARCHAR(255),
+                                   previously_tested_within_12_months VARCHAR(255),
+                                   result_of_previously_tested_within_12_months VARCHAR(255),
+                                   consent_for_follow_up_calls VARCHAR(255),
+                                   type_of_hivst_kit_received VARCHAR(255),
+                                   number_of_hivst_kits_received BIGINT,
+                                   name_of_test_kit VARCHAR(255),
+                                   lot_number VARCHAR(255),
+                                   expiry_date DATE,
+                                   test_kit_users JSONB,
+                                   other_test_kit_user_info_available VARCHAR(255),
+                                   other_test_kit_user_details JSONB,
+                                   part_b JSONB,
+                                   referral_information JSONB,
+                                   archived INTEGER DEFAULT 0,
+                                   created_by VARCHAR(255) NOT NULL,
+                                   date_created TIMESTAMP NOT NULL,
+                                   modified_by VARCHAR(255),
+                                   date_modified TIMESTAMP
             );
         </sql>
     </changeSet>
@@ -80,6 +80,7 @@
     <changeSet failOnError="true" author="Taiwo Gboyegun" id="20240709-001">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempt"/>
         </preConditions>
         <sql>
 
@@ -91,6 +92,9 @@
     <changeSet failOnError="true" author="Ganiyat Yakub" id="20241102-03431">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_risk_stratification"/>
+            <not>
+                <columnExists tableName="hts_risk_stratification" columnName="spoke_facility"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN spoke_facility varchar(255);
@@ -101,6 +105,9 @@
     <changeSet failOnError="true" author="Ganiyat Yakub" id="2024-0781">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_risk_stratification"/>
+            <not>
+                <columnExists tableName="hts_risk_stratification" columnName="health_facility"/>
+            </not>
         </preConditions>
         <sql>
             ALTER TABLE hts_risk_stratification ADD COLUMN health_facility varchar(255);
@@ -131,6 +138,7 @@
     <changeSet failOnError="true" author="Ganiyat" id="2025-26-01-002">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="hts_family_index_testing_tracker"/>
+            <columnExists tableName="hts_family_index_testing_tracker" columnName="attempt"/>
         </preConditions>
         <sql>
 
@@ -152,7 +160,7 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-            ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
+                ALTER COLUMN attempts SET DATA TYPE character varying USING attempts::text;
         </sql>
     </changeSet>
     <changeSet failOnError="true" author="Gamaliel-Emmanuel" id="2025-09-01-rename-column-01">
@@ -161,16 +169,18 @@
         </preConditions>
         <sql>
             ALTER TABLE hts_family_index_testing_tracker
-            RENAME COLUMN attempts TO attempt;
+                RENAME COLUMN attempts TO attempt;
         </sql>
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-13-update-entry-points-on-rst-facility">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_risk_stratification"/>
+        </preConditions>
         <sql>
             UPDATE hts_risk_stratification
             SET entry_point = 'HTS_ENTRY_POINT_FACILITY'
-                where entry_point = 'Facility';
+            where entry_point = 'Facility';
             UPDATE hts_risk_stratification
             SET entry_point = 'HTS_ENTRY_POINT_COMMUNITY'
             where entry_point = 'Community';
@@ -178,7 +188,9 @@
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-risk-stratification">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_risk_stratification"/>
+        </preConditions>
         <sql>
             UPDATE hts_risk_stratification SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
             UPDATE hts_risk_stratification SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
@@ -235,7 +247,9 @@
     </changeSet>
 
     <changeSet failOnError="true" author="Joshua" id="2025-10-27-update-hts-client">
-
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_client"/>
+        </preConditions>
         <sql>
             UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_DELIVERY_HOMES';
             UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_CT' WHERE testing_setting = 'TEST_SETTING_CT';
@@ -289,6 +303,86 @@
             UPDATE hts_client SET testing_setting = 'FACILITY_HTS_TEST_SETTING_SNS' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_SNS';
             UPDATE hts_client SET testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OUTREACH' WHERE testing_setting = 'COMMUNITY_HTS_TEST_SETTING_OVC';
         </sql>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-hts-patient-grid-perf-indexes">
+        <sql splitStatements="true" endDelimiter=";">
+            -- hts_encounter: DISTINCT ON latest + window COUNT driver
+            -- (filter on facility_id+archived, then order by patient_uuid, id DESC).
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_latest
+                ON hts_encounter (facility_id, archived, patient_uuid, id DESC);
+
+            -- hts_encounter: EXISTS semi-join in the lean count query.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_count
+                ON hts_encounter (patient_uuid, facility_id, archived);
+
+            -- hts_ict_encounter: grouped ict_count CTE.
+            CREATE INDEX IF NOT EXISTS idx_hts_ict_encounter_grid_count
+                ON hts_ict_encounter (facility_id, archived, patient_uuid);
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-drop-fn-is-pmtct-infant">
+        <sql splitStatements="false">
+            DROP FUNCTION IF EXISTS is_pmtct_infant(TEXT);
+        </sql>
+        <rollback/>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-hts-patients-tab-perf-indexes">
+        <sql splitStatements="true" endDelimiter=";">
+            -- patient_person driver + ORDER BY created_date DESC.
+            CREATE INDEX IF NOT EXISTS idx_patient_person_facility_arch_created
+                ON patient_person (facility_id, archived, created_date DESC);
+
+            -- NOT EXISTS #1: hts_encounter.client_code = patient_person.hospital_number.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_client_code
+                ON hts_encounter (facility_id, archived, client_code);
+
+            -- NOT EXISTS #2: CAST(hts_encounter.patient_uuid AS TEXT) = patient_person.uuid.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_uuid_text
+                ON hts_encounter (facility_id, archived, (CAST(patient_uuid AS text)));
+
+            -- "HTS Patients Archived" tab (findOnlyPersonHts): DISTINCT ON first
+            -- (earliest) registration per person + per-person count.
+            CREATE INDEX IF NOT EXISTS idx_hts_client_facility_arch_person_created
+                ON hts_client (facility_id, archived, person_uuid, date_created);
+
+            -- "HIVST Patients" tab (findAllPersonHivst): hivst ⋈ patient_person.
+            CREATE INDEX IF NOT EXISTS idx_hivst_patient_archived
+                ON hivst (patient_id, archived);
+            CREATE INDEX IF NOT EXISTS idx_patient_person_facility_arch_id
+                ON patient_person (facility_id, archived, id);
+        </sql>
+    </changeSet>
+
+    <changeSet failOnError="false" author="Gamaliel-Emmanuel" id="06-07-2026-create-fn-pmtct-infant-hospital-numbers">
+        <sql splitStatements="false">
+            CREATE OR REPLACE FUNCTION pmtct_infant_hospital_numbers()
+            RETURNS SETOF text
+            LANGUAGE plpgsql
+            STABLE
+            AS $func$
+            BEGIN
+                IF to_regclass('public.pmtct_infant_information') IS NULL THEN
+                    RETURN;
+            END IF;
+
+            RETURN QUERY EXECUTE '
+                    SELECT infant_hospital_number
+                    FROM public.pmtct_infant_information
+                    WHERE infant_hospital_number IS NOT NULL
+                ';
+
+            EXCEPTION WHEN OTHERS THEN
+                -- Table exists but column/shape differs on this facility: stay safe.
+                RETURN;
+            END;
+            $func$;
+        </sql>
+        <rollback>
+            DROP FUNCTION IF EXISTS pmtct_infant_hospital_numbers();
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>

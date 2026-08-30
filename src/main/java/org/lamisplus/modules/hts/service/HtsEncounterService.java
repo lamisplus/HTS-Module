@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,7 +107,7 @@ public class HtsEncounterService {
         return repository.search(facilityId, searchParam, pageable).map(this::toResponse);
     }
 
-    public HtsEncounterResponse getForProphylaxis(LocalDate screeningDate, UUID patientUuid) {
+    public HtsEncounterResponse getForProphylaxis(LocalDate screeningDate, String patientUuid) {
         HtsEncounter encounter = repository
                 .findFirstByPatientUuidAndDateOfVisitAndArchivedOrderByIdDesc(patientUuid, screeningDate, false)
                 .orElseThrow(() -> new EntityNotFoundException(
@@ -168,7 +167,7 @@ public class HtsEncounterService {
         );
         Long facilityId = currentUserOrganizationService.getCurrentUserOrganization();
 
-        Page<Object[]> raw = repository.findHtsPatientSummaries(facilityId, searchParam, pageableWithoutSort);
+        Page<Object[]> raw = repository.findHtsPatientSummariesOptimized(facilityId, searchParam, pageableWithoutSort);
 
         return raw.map(row -> {
             HtsPatientSummaryDto dto = new HtsPatientSummaryDto();
@@ -308,10 +307,13 @@ public class HtsEncounterService {
         if (value != null) node.put(key, value);
     }
 
-    private UUID resolveUuid(Object uuid) {
-        if (uuid instanceof UUID)   return (UUID) uuid;
-        if (uuid instanceof String) return UUID.fromString((String) uuid);
-        return null;
+    // Relaxed: patient_uuid is stored as varchar to tolerate legacy/migrated data
+    // that isn't a strictly well-formed UUID (e.g. "787-KXoSesiSLeE-787"). We no
+    // longer call UUID.fromString() here — doing so throws IllegalArgumentException
+    // and rejects the whole save/update for records we still need to support.
+    private String resolveUuid(Object uuid) {
+        if (uuid == null) return null;
+        return uuid.toString();
     }
 
     private long toLong(Object val) {

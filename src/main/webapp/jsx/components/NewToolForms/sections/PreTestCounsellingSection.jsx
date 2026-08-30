@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { FormSelect, SectionSubheading, ScoreDisplay } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
+import { url, token } from "../../../../api";
 
 const skippedNoticeStyle = {
   padding: "12px 16px",
@@ -181,7 +182,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
           <div className="row">
             <div className="col-md-6">
               <FormSelect
-                label="Previously Tested HIV Negative?"
+                label="Previously Tested HIV Negative?" 
                 {...sp("previouslyTestedNegative", transformOptions(codesets?.["YES_NO"]))}
                 onChange={readOnly ? undefined : handlePreviouslyTestedChange}
               />
@@ -200,35 +201,35 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Client Informed About HIV Transmission Routes"
                 {...sp("clientInformedTransmissionRoutes", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Risk Factors for HIV Transmission"
                 {...sp("clientInformedRiskFactors", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed on Preventing HIV Transmission Methods"
                 {...sp("clientInformedPreventionMethods", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Client Informed About Possible Test Results"
                 {...sp("clientInformedPossibleResults", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Informed Consent for HIV Testing Given"
                 {...sp("informedConsentGiven", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
           </div>
@@ -250,7 +251,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                 label="Ever Had Sexual Intercourse"
                 {...sp("everHadSexualIntercourse", transformOptions(codesets?.["YES_NO"]))}
                 onChange={readOnly ? undefined : handleEverHadSexChange}
-                required
+                // required
               />
             </div>
             {showSexDependent && (
@@ -259,7 +260,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="More Than One Sex Partner"
                     {...sp("moreThanOneSexPartner", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 {isFemale && (
@@ -267,7 +268,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                     <FormSelect
                       label="Unprotected Vaginal Sex"
                       {...sp("unprotectedVaginalSex", transformOptions(codesets?.["YES_NO"]))}
-                      required
+                      // required
                     />
                   </div>
                 )}
@@ -275,7 +276,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Unprotected Anal Sex"
                     {...sp("unprotectedAnalSex", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
               </>
@@ -284,7 +285,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Blood Transfusion in Last 3 Months"
                 {...sp("bloodTransfusionLast3Months", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             {showSexDependent && (
@@ -293,14 +294,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Sex Under the Influence of Drugs or Alcohol"
                     {...sp("sexUnderInfluence", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="History of STI"
                     {...sp("historyOfSTI", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
               </>
@@ -343,14 +344,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
                     {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
                     {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
               </>
@@ -361,14 +362,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
                     {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="Male: Complaints of Scrotal Swelling or Pain?"
                     {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
               </>
@@ -377,14 +378,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
               <FormSelect
                 label="Complaints of Genital Sore(s)"
                 {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
                 label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
                 {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
-                required
+                // required
               />
             </div>
           </div>
@@ -405,14 +406,14 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Partner Newly Diagnosed and Started Treatment < 3-6 Months Ago?"
                     {...sp("partnerNewlyDiagnosed", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="Partner Pregnant and Currently Receiving ARV for PMTCT?"
                     {...sp("partnerPregnantOnArv", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 {Number(values?.age) >= 10 && Number(values?.age) <= 19 && (
@@ -420,7 +421,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                     <FormSelect
                       label="Adolescent (10-19 yrs) Known to be HIV Infected (on ARV or NOT)"
                       {...sp("adolescentHivPositive", transformOptions(codesets?.["YES_NO"]))}
-                      required
+                      // required
                     />
                   </div>
                 )}
@@ -428,21 +429,21 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
                   <FormSelect
                     label="Known HIV Positive Partner Not Regularly Taking Drugs"
                     {...sp("partnerNotRegularlyOnDrugs", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-6">
                   <FormSelect
                     label="Known HIV Positive Recently Returned to Treatment After LTFU"
                     {...sp("partnerRecentlyReturnedToTreatment", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
                 <div className="col-md-12">
                   <FormSelect
                     label="Have you had sex with a partner who is HIV positive and falls in any of the categories above ?"
                     {...sp("hadSexWithHivPositivePartnerInRiskGroup", transformOptions(codesets?.["YES_NO"]))}
-                    required
+                    // required
                   />
                 </div>
               </div>
