@@ -18,6 +18,7 @@ import axios from "axios";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { getCodesets } from "../../services/getCodesets.service";
 import { convertFieldsToCodes } from "../../../utils";
+import { checkActiveHivTransferIn } from "../../services/checkHivTransferIn.service";
 
 const useStyles = makeStyles(() => ({
   root: { backgroundColor: "#f6f8fa", minHeight: "100vh", padding: "0", width: "100%" },
@@ -34,6 +35,25 @@ const useStyles = makeStyles(() => ({
   subtitle: { fontSize: "13px", color: "#57606a", marginTop: 4, marginBottom: 0 },
   body: { padding: "28px" },
   footer: { display: "flex", justifyContent: "flex-end", paddingTop: "8px", paddingBottom: "24px" },
+  blockOverlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 2000,
+    background: "rgba(15, 23, 42, 0.72)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  blockCard: {
+    background: "#fff",
+    borderRadius: 10,
+    maxWidth: 480,
+    width: "100%",
+    padding: "32px 28px",
+    textAlign: "center",
+    boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+  },
 }));
 
 // ── Resolve person id regardless of which object shape the caller passes ─────
@@ -129,6 +149,42 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
   const codesetsRef = useRef(null);
 
   const personId = resolvePersonId(person);
+  // Same resolution pattern as resolvePersonId, but for the UUID - handles whichever
+  // shape the caller passed the person object in.
+  const personUuid =
+    person?.personResponseDto?.uuid ?? person?.personUuid ?? person?.uuid ?? null;
+
+  // ── HIV Transfer-In block - checked before anything else renders ───────────
+  const [transferInCheck, setTransferInCheck] = useState({ checked: false, blocked: false });
+  const transferInCheckedForRef = useRef(null);
+
+  useEffect(() => {
+    if (!personId && !personUuid) {
+      setTransferInCheck({ checked: true, blocked: false });
+      return;
+    }
+    const key = `${personId ?? ""}|${personUuid ?? ""}`;
+    if (transferInCheckedForRef.current === key) return;
+    transferInCheckedForRef.current = key;
+
+    let isMounted = true;
+    setTransferInCheck({ checked: false, blocked: false });
+
+    checkActiveHivTransferIn(personId, personUuid)
+      .then((result) => {
+        if (isMounted) setTransferInCheck({ checked: true, blocked: !!result });
+      })
+      .catch((error) => {
+        console.error("Failed to check HIV Transfer-In status:", error);
+        // Fail open on the frontend check specifically - the backend still enforces
+        // this unconditionally at save time regardless of what happens here.
+        if (isMounted) setTransferInCheck({ checked: true, blocked: false });
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [personId, personUuid]);
 
   // ── Attempt to merge as soon as BOTH personDto AND codesets are available ──
   const tryBuildFormValues = () => {
@@ -231,6 +287,8 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     onSubmit,
   });
 
+  // console.log(formik)
+
 
   useEffect(() => {
     onValuesChange?.(formik.values);
@@ -273,6 +331,38 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     formik.values.firstName || person?.personResponseDto?.firstName,
     formik.values.surname || person?.personResponseDto?.surname,
   ].filter(Boolean).join(" ") || "existing patient";
+
+  if (!transferInCheck.checked) {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "#57606a", fontSize: 14 }}>
+        Checking patient eligibility…
+      </div>
+    );
+  }
+
+  if (transferInCheck.blocked) {
+    return (
+      <div className={classes.blockOverlay}>
+        <div className={classes.blockCard}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>⛔</div>
+          <h3 style={{ color: "#c62828", margin: "0 0 12px" }}>
+            Cannot Create New HTS Record
+          </h3>
+          <p style={{ color: "#24292f", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            This patient has a documented HIV Transfer-In record and cannot have a new
+            HTS record created. Please use the ICT form instead.
+          </p>
+          <Button
+            content="Back"
+            icon="left arrow"
+            labelPosition="left"
+            style={{ backgroundColor: COLORS.primary, color: "#fff" }}
+            onClick={() => backButtonAction?.()}
+          />
+        </div>
+      </div>
+    );
+  }
 
   if (isLoadingForm) {
     return (
