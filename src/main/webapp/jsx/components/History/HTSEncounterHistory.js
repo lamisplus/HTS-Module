@@ -22,6 +22,7 @@ import { url as baseUrl, token } from "./../../../api";
 import "semantic-ui-css/semantic.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { CoPresentOutlined } from "@mui/icons-material";
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -178,18 +179,15 @@ const DeleteConfirmModal = ({ record, onConfirm, onCancel, deleting }) => {
   );
 };
 
-// ========================
-// CODE SET MAPPINGS
-// ========================
 
-// --- HIV test result mapping ---
+
 const HIV_RESULT_MAP = {
   // STI_HIV_RESULT
   "STI_HIV_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "STI_HIV_RESULT_NEGATIVE": { display: "Negative", color: "green" },
 
   "Positive": { display: "Positive", color: "red" },
-  "Negative": { display: "Negative", color: "red" },
+  "Negative": { display: "Negative", color: "green" },
 
   "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE": { display: "Positive", color: "red" },
   "HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE": { display: "Negative", color: "green" },
@@ -221,6 +219,7 @@ const SETTING_MAP = {
   "COMMUNITY_HTS_TEST_SETTING_CONGREGATIONAL_SETTING": "Congregational setting",
   "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE": "Antigen Reactive",
   "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_REACTIVE": "Antigen + Antibody Reactive",
+  "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_NON-REACTIVE": "Antigen + Antibody Non-Reactive",
   "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE": "Antibody Reactive",
   "COMMUNITY_HTS_TEST_SETTING_CT": "CT",
   "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT": "Early Detect",
@@ -288,6 +287,9 @@ const mapResultCode = (code, customMap) => {
   }
   if (lowerCode.includes("suspected")) {
     return { display: code, color: "orange" };
+  }
+  if (lowerCode.includes("acute hiv infection")) {
+    return { display: code, color: "red" };
   }
   return { display: code, color: "grey" };
 };
@@ -420,6 +422,12 @@ const HTSEncounterHistory = (props) => {
             render: (rowData) => formatHivResult(rowData?.finalHivTestResult),
           },
           {
+            title: "Date of Final HIV Test",
+            field: "dateOfFinalHivTestDone",
+            filtering: false,
+            render: (rowData) => formatHivResult(rowData?.dateOfFinalHivTestDone),
+          },
+          {
             title: "PMTCT-HTS record",
             field: "pmtctHts",
             filtering: false,
@@ -482,6 +490,7 @@ const HTSEncounterHistory = (props) => {
           initialHivTest: record.observation?.initialHivTest ?? "",
           confirmatoryHivTest: record.observation?.confirmatoryHivTest ?? "",
           finalHivTestResult: record.observation?.finalHivTestResult ?? "",
+          dateOfFinalHivTestDone: record.observation?.dateOfFinalHivTestDone ?? "",
           syphilisTestResult: record.observation?.syphilisTestResult ?? "",
           suspectedAcuteInfection: record.observation?.suspectedAcuteInfection ?? "",
           hivEarlyDetectResult: record.observation?.hivEarlyDetectResult ?? "",

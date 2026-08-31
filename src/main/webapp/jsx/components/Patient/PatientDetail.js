@@ -95,10 +95,7 @@ function PatientCard(props) {
     actionType: "",
   });
 
-  // Controls which tab PatientHistory opens on.
-  // Starts from router state (e.g. "NEW HTS" from PatientList),
-  // but resets to "home" after any update/view action so we never
-  // bounce back to the NEW HTS tab after saving an edit.
+ 
   const [patientHistoryDefaultTab, setPatientHistoryDefaultTab] = useState(
     history?.location?.state?.activepage ?? "home"
   );
@@ -109,7 +106,7 @@ function PatientCard(props) {
       activeObject: {},
       actionType: "",
     });
-    // After returning from view/update, land on HTS History — not NEW HTS
+    // After returning from view/update, land on HTS History - not NEW HTS
     setPatientHistoryDefaultTab("home");
   }
 
@@ -138,10 +135,14 @@ function PatientCard(props) {
     moment(patientObj.dateOfBirth).format("YYYY-MM-DD")
   );
 
-  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult } = useHtsEligibility(
+  const { isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection } = useHtsEligibility(
     encounters,
-    isLoadingEncounters, refreshKey
+    isLoadingEncounters, refreshKey,
+    patientObj?.personId,
+    patientObj?.personUuid
   );
+
+ 
 
   return (
     <div className={classes.root}>
@@ -167,7 +168,7 @@ function PatientCard(props) {
             patientObject={personInfo || patientObject || patientObj}
             setPersonInfo={setPersonInfo}
             isLoadingEncounters={isLoadingEncounters}
-            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult }}
+            clientEligibility={{ isPatientEligibleForHts, eligibilityReason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection }}
           />
 
           {activePage.activePage === "home" && (

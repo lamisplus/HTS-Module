@@ -38,16 +38,14 @@ export default function App() {
     <div>
       <QueryClientProvider client={queryClient}>
         <ToastContainer />
-        {permissions.canSeeCheckedInPatientsAlert && (
+        {/* {permissions.canSeeCheckedInPatientsAlert && (
           <CheckedInPatientsAlert />
-        )}
+        )} */}
         <Switch>
           <Route path="/patient-history">
             <PatientDetail />
           </Route>
           <Route path="/register-patient">
-            {/* <RegisterPatient /> */}
-            {/* <NewPatientHtsForm/> */}
             <HtsIctOrchestrator onDone={() => history.push("/")} isOnArt={false}/>
           </Route>
           <Route path="/register-hivst-patient">

@@ -1,6 +1,6 @@
 basePackage: org.lamisplus.modules.hts
 name: HtsModule
-dependencies: { PatientModule: 2.0.4 }
+dependencies: { PatientModule: 2.2.0.1 }
 menus:
   - icon: fa-solid fa-microscope
     disabled: false

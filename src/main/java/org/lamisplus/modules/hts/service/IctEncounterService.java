@@ -35,18 +35,24 @@ public class IctEncounterService {
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
 
+    private HtsEncounter validateAndFetchConfirmedPositiveHts(Long htsEncounterId) {
+        HtsEncounter hts = findHtsOrThrow(htsEncounterId);
+        JsonNode obs = hts.getObservation();
+
+        boolean confirmatoryPositive = obs != null && obs.has("confirmatoryHivTest")
+                && "HIV_CONFIRMATORY_TEST_RESULT_POSITIVE".equals(obs.get("confirmatoryHivTest").asText());
+        boolean finalResultPositive = obs != null && obs.has("finalHivTestResult")
+                && "Positive".equalsIgnoreCase(obs.get("finalHivTestResult").asText());
+
+        if (!confirmatoryPositive && !finalResultPositive) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "ICT encounter can only be created for a client with a confirmed positive HIV test result.");
+        }
+        return hts;
+    }
+
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPatientId());
-
-        if (request.getHtsEncounterId() != null) {
-            HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
-            JsonNode obs = hts.getObservation();
-            if (obs == null || !obs.has("confirmatoryHivTest") ||
-                    !"HIV_CONFIRMATORY_TEST_RESULT_POSITIVE".equals(obs.get("confirmatoryHivTest").asText())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "ICT encounter can only be created for a client with a confirmed positive HIV test result.");
-            }
-        }
 
         IctEncounter encounter = new IctEncounter();
         encounter.setPerson(person);
@@ -62,7 +68,7 @@ public class IctEncounterService {
         mapRequestToEncounter(request, encounter);
 
         if (request.getHtsEncounterId() != null) {
-            HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
+            HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
             if (hts.getUuid() != null) {
                 encounter.setHtsEncounterUuid(hts.getUuid().toString());
@@ -79,7 +85,6 @@ public class IctEncounterService {
 
         return toResponse(savedEncounter);
     }
-
     private List<IctContact> buildContacts(List<IctContactRequest> contactRequests, IctEncounter encounter) {
         if (contactRequests == null || contactRequests.isEmpty()) {
             return new ArrayList<>();
@@ -122,7 +127,7 @@ public class IctEncounterService {
         mapRequestToEncounter(request, encounter);
 
         if (request.getHtsEncounterId() != null) {
-            HtsEncounter hts = findHtsOrThrow(request.getHtsEncounterId());
+            HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
             if (hts.getUuid() != null) {
                 encounter.setHtsEncounterUuid(hts.getUuid().toString());
@@ -140,7 +145,6 @@ public class IctEncounterService {
         IctEncounter updated = ictEncounterRepository.save(encounter);
         return toResponse(updated);
     }
-
     public void delete(Long id) {
         IctEncounter encounter = findActiveOrThrow(id);
         encounter.setArchived(true);
@@ -191,6 +195,7 @@ public class IctEncounterService {
     private IctContact mapToContact(IctContactRequest cr, IctEncounter encounter) {
         IctContact c = new IctContact();
         c.setIctEncounter(encounter);
+        c.setFacilityId(encounter.getFacilityId());
         c.setContactCode(cr.getContactCode());
         c.setFirstName(cr.getFirstName());
         c.setMiddleName(cr.getMiddleName());

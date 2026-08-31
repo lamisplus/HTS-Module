@@ -85,7 +85,7 @@ export const useIctFormik = (onSubmit, htsValues) => {
   const formik = useFormik({
     initialValues: buildInitialValues(htsValues),
     validationSchema: buildIctValidationSchema(),
-    enableReinitialize: true,   // ✅ FIX: allow updates when htsValues changes
+    enableReinitialize: true,
     onSubmit,
   });
   return { formik };

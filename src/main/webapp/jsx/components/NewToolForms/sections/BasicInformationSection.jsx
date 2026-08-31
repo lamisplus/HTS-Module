@@ -1,4 +1,3 @@
-// src/NewToolForms/sections/BasicInformationSection.jsx
 import React, { useEffect, useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import {
@@ -54,8 +53,6 @@ const disabledInputStyle = {
 
 const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue, setFieldError } = formik;
-
-
   const [accountDetail, setAccountDetail] = useState(null);
   const [codesets, setCodesets] = useState(null);
 
@@ -220,7 +217,8 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       "SEX",
       "YES_NO",
       "ENROLLMENT_SETTING",
-      "DURATION_OF_BREASTFEEDING"
+      "DURATION_OF_BREASTFEEDING",
+      "KP_TYPE"
     ],
     patientId: accountDetail?.currentOrganisationUnitName,
     onSuccess: loadCodesets,
@@ -236,7 +234,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
   };
 
 
- 
+
 
   const handleSexChange = (e) => {
     const sex = e.target.value;
@@ -469,7 +467,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
       <div className="row">
         <div className="col-md-4">
           <FormTextField label="Date of Visit" type="date" {...fp("dateOfVisit")} required
-            // min={values.dateOfBirth || today}
+          // min={values.dateOfBirth || today}
           />
         </div>
 
@@ -487,17 +485,16 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             <FormSelect
               label="Facility Setting"
               {...sp("facilitySetting", (() => {
-                const MALE_EXCLUDED_FACILITY_CODES = [
+                const ARCHIVED_FACILITY_CODES = [
                   "SETTING_ANC",
                   "SETTING_L&D",
                   "POST_NATAL_WARD_BREASTFEEDING",
                 ];
                 return transformOptions(codesets?.["FACILITY_HTS_TEST_SETTING"]).filter(
-                  (opt) => !isMaleClient || !MALE_EXCLUDED_FACILITY_CODES.some((ex) => opt.value.includes(ex))
+                  (opt) => !ARCHIVED_FACILITY_CODES.some((ex) => opt.value.includes(ex))
                 );
               })())}
               onChange={readOnly ? undefined : (e) => {
-                // If a now-hidden option was previously selected, clear it
                 handleChange(e);
               }}
               required
@@ -540,7 +537,7 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
                 <span style={errorStyle}>{errors.serialNumber}</span>
               )}
               {/* <small style={{ color: "#57606a", marginTop: 4, display: "block" }}>
-                Letters and numbers only — no special characters
+                Letters and numbers only - no special characters
               </small> */}
             </FormGroup>
           </div>
@@ -630,6 +627,14 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
             {...sp("typeOfSession", transformOptions(codesets?.["COUNSELING_TYPE"]))}
             onChange={readOnly ? undefined : handleTypeOfSessionChange}
             required
+          />
+        </div>
+
+        <div className="col-md-4">
+          <FormSelect
+            label="Population Type"
+            {...sp("htsPopulationType", transformOptions(codesets?.["KP_TYPE"]))}
+          // required
           />
         </div>
 
@@ -727,7 +732,10 @@ const BasicInformationSection = ({ formik, isExistingPatient, readOnly }) => {
         )}
 
         {showBreastfeedingDuration && (
-          <div className={`col-md-4 ${formik.values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING" ? "mt-4" : ""}`}>
+          <div
+            // className={`col-md-4 ${formik.values.pregnancyStatus === "PREGANACY_STATUS_BREASTFEEDING" ? "mt-4" : ""}`}
+            className="col-md-4"
+          >
             <FormSelect
               label="Duration of Breastfeeding"
               {...sp("breastfeedingDuration", transformOptions(codesets?.["DURATION_OF_BREASTFEEDING"]))}

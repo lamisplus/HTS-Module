@@ -71,6 +71,7 @@ function PatientCard(props) {
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
   const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
+  const clientSuspectedAcuteInfection = props?.patientObj?.observation?.suspectedAcuteInfection?.toLowerCase() || props?.clientEligibility?.suspectedAcuteInfection?.toLowerCase()
   const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
   const isLoadingEncounters = props?.isLoadingEncounters
 
@@ -259,28 +260,33 @@ function PatientCard(props) {
                                   Status : Checking current status ...
                                 </Label>
                               ) :
-                                clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
+                                clientSuspectedAcuteInfection === "yes_no_yes" && finalHivTestResult === "positive" ?
                                   (<Label color={"red"} size={"small"}>
-                                    Status : Positive
+                                    Status : Acute HIV Infection
                                   </Label>) :
-                                  clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
-                                    (
-                                      <Label color="teal" size={"small"}>
-                                        Status: Negative
-                                      </Label>
-                                    ) :
-                                    finalHivTestResult === "suspected acute infection" ?
+
+                                  clientConfirmatoryResult === "hiv_confirmatory_test_result_positive" || finalHivTestResult === "positive" ?
+                                    (<Label color={"red"} size={"small"}>
+                                      Status : Positive
+                                    </Label>) :
+                                    clientConfirmatoryResult === "hiv_confirmatory_test_result_negative" || finalHivTestResult === "negative" ?
                                       (
-                                        <Label color="orange" size={"small"}>
-                                          Status: {finalHivTestResult}
+                                        <Label color="teal" size={"small"}>
+                                          Status: Negative
                                         </Label>
                                       ) :
+                                      clientSuspectedAcuteInfection === "yes_no_yes" ?
+                                        (
+                                          <Label color="orange" size={"small"}>
+                                            Status: Suspected Acute Infection - No final HIV test result yet
+                                          </Label>
+                                        ) :
 
-                                      (
-                                        <Label color="blue" size={"small"}>
-                                          Status: Not Tested
-                                        </Label>
-                                      )
+                                        (
+                                          <Label color="blue" size={"small"}>
+                                            Status: Not Tested
+                                          </Label>
+                                        )
                             }
                           </Typography>
                         </div>

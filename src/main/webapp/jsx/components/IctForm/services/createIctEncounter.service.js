@@ -4,7 +4,7 @@ import { url, token } from "../../../../api";
 /**
  * Creates a new ICT encounter.
  *
- * @param {Object} payload  — Built by buildIctEncounterPayload() with htsEncounterId attached.
+ * @param {Object} payload  - Built by buildIctEncounterPayload() with htsEncounterId attached.
  * @returns {Promise<Object>} The created IctEncounterResponse from the backend.
  */
 export const createIctEncounter = async (payload) => {

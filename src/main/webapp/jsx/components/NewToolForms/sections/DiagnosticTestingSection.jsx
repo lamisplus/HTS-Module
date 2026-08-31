@@ -1,6 +1,6 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState, useEffect } from "react";
-import { FormSelect, SectionSubheading, ReadOnlyField } from "./FormFields";
+import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 
@@ -60,6 +60,9 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const isAntibodyReactivePath =
     values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
 
+  const isNonReactivePath =
+    values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_+_ANTIBODY_NON-REACTIVE";
+
   // Show confirmatory when:
   //   Path A - Antibody Reactive, OR
   //   Path B - Initial HIV Test is Positive
@@ -70,7 +73,9 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   // ── Derived Final HIV Test Result ─────────────────────────────────────────
   const getFinalResult = () => {
     if (earlyDetectDone) {
-      if (isAcutePath) return "Suspected Acute Infection";
+      // if (isAcutePath) return "Suspected Acute Infection"; 
+      if (isAcutePath) return ""; // if it is suspected, finalHivTestResult will now remain blank
+      if (isNonReactivePath) return "Negative";
       if (isAntibodyReactivePath) {
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_negative") return "Negative";
@@ -89,10 +94,15 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   const finalResult = getFinalResult();
 
-  // 🔁 Update Formik field whenever finalResult changes
   useEffect(() => {
     setFieldValue("finalHivTestResult", finalResult || "");
-  }, [finalResult, setFieldValue]);
+    if (finalResult !== '') {
+      setFieldValue("dateOfFinalHivTestDone", formik?.values?.dateOfVisit);
+    }
+    else {
+      setFieldValue("dateOfFinalHivTestDone", "");
+    }
+  }, [finalResult, setFieldValue, formik?.values?.dateOfVisit]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -166,6 +176,17 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           "1px solid #ff9800",
   });
 
+  const formatFinalHivTestDate = (raw) => {
+    if (!raw) return "-";
+
+    const datePart = raw.trim().slice(0, 10);
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart);
+    if (!match) return raw;
+
+    const [, year, month, day] = match;
+    return new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString();
+  };
+
   return (
     <div style={{ width: "100%" }}>
       <SectionSubheading>HIV Testing</SectionSubheading>
@@ -177,10 +198,11 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             label="Type of HIV Test ?"
             {...sp("typeOfHivTestDone", transformOptions(codesets?.["TYPE_OF_HIV_TEST"]))}
             onChange={readOnly ? undefined : handleEarlyDetectDoneChange}
+            required
           />
         </div>
 
-        {/* PATH A — Early Detect = YES */}
+        {/* PATH A - Early Detect = YES */}
         {earlyDetectDone && (
           <div className="col-md-6">
             <FormSelect
@@ -192,12 +214,12 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* PATH A — Acute sub-path: Suspected Acute Infection (locked YES) */}
+
         {earlyDetectDone && isAcutePath && (
           <>
             <div className="col-md-12">
               <div style={warningBannerStyle}>
-                ⚠️ Suspected Acute HIV Infection — This client should be enrolled in
+                Suspected Acute HIV Infection - This client should be enrolled in
                 PrEP/PEP and have access to the HIV Module for laboratory tests only.
               </div>
             </div>
@@ -206,12 +228,13 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
                 label="Suspected Acute HIV Infection?"
                 {...sp("suspectedAcuteInfection", transformOptions(codesets?.["YES_NO"]))}
                 disabled // always locked to YES on this path
+                required
               />
             </div>
           </>
         )}
 
-        {/* PATH B — Early Detect = NO → show Initial HIV Test */}
+        {/* PATH B - Early Detect = NO → show Initial HIV Test */}
         {earlyDetectNo && (
           <div className="col-md-6">
             <FormSelect
@@ -223,18 +246,19 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           </div>
         )}
 
-        {/* SHARED — Confirmatory: shown for Antibody Reactive (Path A) 
+        {/* SHARED - Confirmatory: shown for Antibody Reactive (Path A) 
                      OR Initial Positive (Path B) */}
         {showConfirmatory && (
           <div className="col-md-6">
             <FormSelect
               label="Confirmatory HIV Test"
               {...sp("confirmatoryHivTest", transformOptions(codesets?.["HIV_CONFIRMATORY_TEST_RESULT"]))}
+              required
             />
           </div>
         )}
 
-        {/* Recency — commented out per requirement */}
+        {/* Recency - commented out per requirement */}
         {showRecency && (
           <div className="col-md-6">
             <FormSelect
@@ -244,10 +268,11 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
             />
           </div>
         )}
+      </div>
 
-        {/* Final HIV Test Result — derived, read-only display */}
-        {finalResult && (
-          <div className="col-md-12">
+      <div className="row">
+        {formik?.values?.finalHivTestResult && formik?.values?.finalHivTestResult !== "" && (
+          <div className="col-md-6">
             <div style={{ marginBottom: 16 }}>
               <label style={{
                 fontSize: "14px",
@@ -258,13 +283,27 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
               }}>
                 Final HIV Test Result
               </label>
-              <span style={finalResultBoxStyle(finalResult)}>{finalResult}</span>
+              <span style={finalResultBoxStyle(formik?.values?.finalHivTestResult)}>{formik?.values?.finalHivTestResult}</span>
             </div>
           </div>
         )}
+
+        {
+          formik?.values?.finalHivTestResult &&
+          formik?.values?.finalHivTestResult !== "" &&
+          formik?.values?.dateOfFinalHivTestDone &&
+          formik?.values?.dateOfFinalHivTestDone !== "" && (
+            <div className="col-md-6">
+              <ReadOnlyField
+                label="Date of Final HIV test"
+                value={formatFinalHivTestDate(formik?.values?.dateOfFinalHivTestDone)}
+              />
+            </div>
+          )
+        }
       </div>
 
-      {/* Syphilis — always shown */}
+      {/* Syphilis - always shown */}
       <SectionSubheading>Syphilis Testing</SectionSubheading>
       <div className="row">
         <div className="col-md-6">

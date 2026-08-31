@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 
-public class HtsEncounterRequest {
+public class HtsEncounterRequestDTO {
 
     private Long patientId;
 
@@ -34,6 +34,7 @@ public class HtsEncounterRequest {
     private String communityEntryPoint;
     private String modality;
     private String typeOfSession;
+    private String htsPopulationType;
     private String indexTesting;
     private String indexRelationship;
     private String indexClientCode;
@@ -80,6 +81,7 @@ public class HtsEncounterRequest {
     private String suspectedAcuteInfection;
     private String confirmatoryHivTest;
     private String finalHivTestResult;
+    private String dateOfFinalHivTestDone;
     private String syphilisTestResult;
     private String recencyTest;
     private String hivEarlyDetectResult;
@@ -87,6 +89,7 @@ public class HtsEncounterRequest {
     private String clientReceivedTestResult;
     private String hivTestKitsProvided;
     private String categoryOfClients;
+    private Integer numberOfHivstKitDistributed;
     private String acceptedIndexTesting;
     private String providedFpInfo;
     private String clientPartnerUseFpMethods;
@@ -96,7 +99,7 @@ public class HtsEncounterRequest {
     private String clientReferredToOtherServices;
     private String completedBy;
     private String designation;
-    private Boolean pmtctHts = false;
+    private Boolean pmtctHts;
     private String source ="Web";
     private String longitude;
     private String latitude;

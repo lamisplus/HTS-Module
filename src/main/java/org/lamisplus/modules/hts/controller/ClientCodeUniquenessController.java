@@ -20,11 +20,11 @@ import java.util.Map;
  * <pre>
  * GET /api/v1/hts-client-code/exists?clientCode=H01/26/05/1714RA
  *
- * 200 OK  →  { "exists": true }   // code is taken — reject on the frontend
- * 200 OK  →  { "exists": false }  // code is free  — allow the form to proceed
+ * 200 OK  →  { "exists": true }   // code is taken - reject on the frontend
+ * 200 OK  →  { "exists": false }  // code is free  - allow the form to proceed
  * </pre>
  *
- * Reuses the existing {@code hts_view} / {@code hts_encounter_view} authority —
+ * Reuses the existing {@code hts_view} / {@code hts_encounter_view} authority -
  * no new permissions need to be registered.
  */
 @RestController

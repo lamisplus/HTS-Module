@@ -104,7 +104,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 2 — Ensure all expected columns exist on hts_ict_encounter
+         SECTION 2 - Ensure all expected columns exist on hts_ict_encounter
          ═══════════════════════════════════════════════════════════════════════ -->
 
     <changeSet id="harmonise_v4_ict_encounter_add_date_modified" author="Emmanuel Nnajiofor">
@@ -185,7 +185,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 3 — Ensure all expected columns exist on hts_ict_contact
+         SECTION 3 - Ensure all expected columns exist on hts_ict_contact
          ═══════════════════════════════════════════════════════════════════════ -->
 
     <changeSet id="harmonise_v4_ict_contact_add_date_modified" author="Emmanuel Nnajiofor">
@@ -266,7 +266,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 4 — Widen varchar columns to VARCHAR(200) on all three tables.
+         SECTION 4 - Widen varchar columns to VARCHAR(200) on all three tables.
          Covers: client_code, setting, source (hts_encounter only),
                  latitude, longitude (hts_encounter only),
                  created_by, modified_by (all three tables).
@@ -344,7 +344,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 5 — Drop NOT NULL constraints on hts_encounter.source
+         SECTION 5 - Drop NOT NULL constraints on hts_encounter.source
                      and hts_encounter.patient_id
          ═══════════════════════════════════════════════════════════════════════ -->
 
@@ -374,7 +374,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 6 — Convert all uuid and patient_uuid columns from the
+         SECTION 6 - Convert all uuid and patient_uuid columns from the
                      native UUID type to VARCHAR(50) on all three tables.
 
          Strategy:
@@ -489,7 +489,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 7 — Restructure FK: hts_encounter → hts_ict_encounter
+         SECTION 7 - Restructure FK: hts_encounter → hts_ict_encounter
                      FROM: hts_ict_encounter.hts_encounter_id → hts_encounter(id)
                      TO:   hts_ict_encounter.hts_encounter_uuid → hts_encounter(uuid)
 
@@ -548,7 +548,7 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 8 — Restructure FK: hts_ict_encounter → hts_ict_contact
+         SECTION 8 - Restructure FK: hts_ict_encounter → hts_ict_contact
                      FROM: hts_ict_contact.ict_encounter_id → hts_ict_encounter(id)
                      TO:   hts_ict_contact.hts_ict_encounter_uuid
                                → hts_ict_encounter(uuid)
@@ -610,14 +610,14 @@
 
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 9 — Application-layer bug fix note
+         SECTION 9 - Application-layer bug fix note
          (handled above in the back-fill steps; documented here for clarity)
 
          ROOT CAUSE:  In IctEncounterService.mapToContact(), the line
                         c.setIctEncounterUuid(encounter.getUuid().toString())
                       is only called if encounter.getUuid() != null.
                       The encounter IS saved before buildContacts() is called,
-                      so the UUID should exist — HOWEVER on databases where
+                      so the UUID should exist - HOWEVER on databases where
                       the uuid column is still native UUID type, the entity's
                       getUuid() may return a java.util.UUID object, while the
                       setter expects a String. After this migration converts
@@ -700,7 +700,7 @@
     </changeSet>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-     SECTION 5b — Drop NOT NULL constraints on foreign key columns
+     SECTION 5b - Drop NOT NULL constraints on foreign key columns
                     that may still be marked as NOT NULL in some databases
      ═══════════════════════════════════════════════════════════════════════ -->
 
@@ -714,7 +714,7 @@
             ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id DROP NOT NULL;
         </sql>
         <rollback>
-            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            -- Reapply NOT NULL only if all existing values are non-NULL (safety rollback)
             ALTER TABLE hts_ict_encounter ALTER COLUMN hts_encounter_id SET NOT NULL;
         </rollback>
     </changeSet>
@@ -734,7 +734,7 @@
     </changeSet>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-     SECTION 5c — Drop NOT NULL constraints on hts_ict_encounter.patient_id
+     SECTION 5c - Drop NOT NULL constraints on hts_ict_encounter.patient_id
                      and hts_ict_encounter.date_of_service
      ═══════════════════════════════════════════════════════════════════════ -->
 
@@ -748,7 +748,7 @@
             ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id DROP NOT NULL;
         </sql>
         <rollback>
-            -- Reapply NOT NULL only if all existing values are non‑NULL (safety rollback)
+            -- Reapply NOT NULL only if all existing values are non-NULL (safety rollback)
             ALTER TABLE hts_ict_encounter ALTER COLUMN patient_id SET NOT NULL;
         </rollback>
     </changeSet>
@@ -769,14 +769,14 @@
     </changeSet>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-         SECTION 10 — Update FK cascade rules for parent-child relationships
+         SECTION 10 - Update FK cascade rules for parent-child relationships
                        hts_encounter → hts_ict_encounter → hts_ict_contact
          ═══════════════════════════════════════════════════════════════════════ -->
 
     <changeSet id="harmonise_v4_fk_ict_encounter_cascade_on_hts_encounter" author="Emmanuel Nnajiofor">
         <comment>
             Re-create fk_ict_encounter_hts_uuid on hts_ict_encounter with CASCADE rules.
-            hts_encounter is a parent of hts_ict_encounter — deletes/updates on the
+            hts_encounter is a parent of hts_ict_encounter - deletes/updates on the
             parent must propagate to child rows.
         </comment>
         <sql>
@@ -806,7 +806,7 @@
     <changeSet id="harmonise_v4_fk_ict_contact_cascade_on_ict_encounter" author="Emmanuel Nnajiofor">
         <comment>
             Re-create fk_ict_contact_encounter_uuid on hts_ict_contact with CASCADE rules.
-            hts_ict_encounter is a parent of hts_ict_contact — deletes/updates on the
+            hts_ict_encounter is a parent of hts_ict_contact - deletes/updates on the
             parent must propagate to child rows.
         </comment>
         <sql>
@@ -967,7 +967,7 @@
 
             Any record for which none of the above branches resolve to a value
             (incomplete data, unrecognised typeOfHivTestDone, etc.) is left
-            untouched — we only ever write a value we can actually derive.
+            untouched - we only ever write a value we can actually derive.
         </comment>
         <sql>
             WITH computed AS (

@@ -49,7 +49,7 @@ public class IndexElicitationService {
         if(indexElicitationDto.getSource().equalsIgnoreCase(Source.Mobile.toString())) {
             Optional<IndexElicitation> indexElicitationExists = indexElicitationRepository.findByUuid(indexElicitationDto.getUuid());
             if (indexElicitationExists.isPresent()) {
-                LOG.info("Index Elicitation with ID {} has already been synced", indexElicitationDto.getUuid());
+                // LOG.info("Index Elicitation with ID {} has already been synced", indexElicitationDto.getUuid());
                 return convertToIndexElicitationResponseDto(indexElicitationExists.get().getHtsClient(), indexElicitationExists.get());
             }
         }

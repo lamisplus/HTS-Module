@@ -134,7 +134,7 @@ export const FormTextField = ({
 export const ReadOnlyField = ({ label, value }) => (
   <FormGroup style={{ marginBottom: "16px" }}>
     <Label style={labelStyle}>{label}</Label>
-    <span style={readOnlyValueStyle}>{value || "—"}</span>
+    <span style={readOnlyValueStyle}>{value || "-"}</span>
   </FormGroup>
 );
 

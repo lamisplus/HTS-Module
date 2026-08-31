@@ -83,6 +83,7 @@ const FIELD_CODESET_MAP = {
   facilitySetting: "FACILITY_HTS_TEST_SETTING",
   communityEntryPoint: "COMMUNITY_HTS_TEST_SETTING",
   typeOfSession: "COUNSELING_TYPE",
+  htsPopulationType: "KP_TYPE",
   indexTesting: "YES_NO",
   indexRelationship: "INDEX_TESTING",
   sex: "SEX",
@@ -98,7 +99,8 @@ const FIELD_CODESET_MAP = {
   typeOfHivTestDone: "TYPE_OF_HIV_TEST",
   suspectedAcuteInfection: "YES_NO",
   hivTestKitsProvided: "YES_NO",
-  categoryOfClients: "TARGET_GROUP",
+  categoryOfClients: "HIVST_KIT_USER",
+  numberOfHivstKitDistributed: null,
   acceptedIndexTesting: "YES_NO",
   providedFpInfo: "YES_NO",
   clientPartnerUseFpMethods: "YES_NO",
@@ -277,7 +279,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             `Cannot save: another HTS record for this patient (visited ${conflictingRecord.dateOfVisit}) already has an HIV Positive result. A patient cannot have two HIV-positive records.`,
             { autoClose: 8000 }
           );
-          return; // abort — do not call the API
+          return; // abort - do not call the API
         }
       } catch (err) {
         console.error("Failed to validate existing encounters before update:", err);
@@ -303,7 +305,6 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const { formik } = useExistingPatientFormik(onSubmit, formInitialValues);
 
-  console.log(formik)
 
 
   const { errors, submitCount } = formik;
@@ -315,7 +316,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
-    "typeOfSession", "indexRelationship", "indexClientCode",
+    "typeOfSession", "htsPopulationType", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
@@ -343,7 +344,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
-    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo",
+    "categoryOfClients", "numberOfHivstKitDistributed", "acceptedIndexTesting", "providedFpInfo",
     "clientPartnerUseFpMethods", "clientPartnerUseCondoms",
     "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",
@@ -358,7 +359,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             <span style={modeBadgeStyle(readOnly)}>{readOnly ? "View" : "Edit"}</span>
           </h2>
           <p className={classes.subtitle}>
-            {readOnly ? "Viewing existing HTS record — no changes can be made" : "Editing existing HTS record — update the required fields and save"}
+            {readOnly ? "Viewing existing HTS record - no changes can be made" : "Editing existing HTS record - update the required fields and save"}
           </p>
           {isRefreshingEncounter && <p className={classes.subtitle}>Refreshing Record, Please wait...</p>}
         </div>

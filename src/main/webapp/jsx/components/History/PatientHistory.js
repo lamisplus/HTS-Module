@@ -18,6 +18,12 @@ import { useLocation } from "react-router-dom";
 const NewEncounterHtsIctOrchestrator = lazy(() =>
   import("../NewToolForms/NewEncounterHtsIctOrchestrator")
 );
+const HIVSTEncounterForm = lazy(() =>
+  import("../Hivst/sections/HIVSTEncounterForm")
+);
+const HIVSTEncounterHistory = lazy(() =>
+  import("../Hivst/sections/HIVSTEncounterHistory")
+);
 const ExistingPatientHtsForm = lazy(() =>
   import("../NewToolForms/ExistingPatientHtsForm")
 );
@@ -61,7 +67,11 @@ const Home = (props) => {
 
 
   const [key, setKey] = useState(
-    props.activePage === "NEW HTS" ? "new" : "home"
+    props.activePage === "NEW HTS"
+      ? "new"
+      : props.activePage === "HIVST HISTORY"
+        ? "hivst-history-existing-patient"
+        : "home"
   );
 
   const [lastHts, setLastHTS] = useState({});
@@ -120,11 +130,6 @@ const Home = (props) => {
 
   useEffect(() => {
     patients();
-    // patientsCurrentHts();
-
-    // key is already initialised correctly from props.activePage in useState above.
-    // Do NOT re-derive it here — doing so caused the tab to jump back to "new"
-    // after returning from an update when the router state still held "NEW HTS".
   }, []);
 
   async function patients() {
@@ -182,6 +187,7 @@ const Home = (props) => {
     }),
     [hasAnyPermission, props?.patientObj]
   );
+
 
   return (
     <Fragment>
@@ -267,6 +273,32 @@ const Home = (props) => {
                   </Tab>
 
 
+                  <Tab eventKey="new-hivst-existing-patient" title="NEW HIVST">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "new-hivst-existing-patient" && (
+                        <HIVSTEncounterForm
+                          patientObj={props.patientObj}
+                          onBack={() => setKey("home")}
+                          onSuccess={() => {
+                            onEncounterMutated?.();
+                            setKey("hivst-history-existing-patient");
+                          }}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
+
+                  <Tab eventKey="hivst-history-existing-patient" title="HIVST HISTORY">
+                    <Suspense fallback={<LoadingSpinner />}>
+                      {key === "hivst-history-existing-patient" && (
+                        <HIVSTEncounterHistory
+                          patientObj={props.patientObj}
+                          onEncounterMutated={onEncounterMutated}
+                          refreshKey={refreshKey}
+                        />
+                      )}
+                    </Suspense>
+                  </Tab>
                 </Tabs>
               </div>
             </Card.Body>

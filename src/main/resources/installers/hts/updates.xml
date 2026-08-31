@@ -385,4 +385,75 @@
         </rollback>
     </changeSet>
 
+    <changeSet author="Gamaliel-Emmanuel" id="19-08-2026-add-last-modified-date-to-hts-encounter">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="hts_encounter"/>
+                <not>
+                    <columnExists tableName="hts_encounter" columnName="last_modified_date"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn tableName="hts_encounter">
+            <column name="last_modified_date" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <sql>
+            UPDATE hts_encounter
+            SET last_modified_date = coalesce(date_modified, date_created)
+            WHERE last_modified_date IS NULL;
+        </sql>
+
+        <createIndex indexName="idx_hts_encounter_last_modified_date" tableName="hts_encounter">
+            <column name="last_modified_date"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet author="Gamaliel-Emmanuel" id="18-08-2026-fix-pregnancy-status-breastfeeding-concat">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="hts_encounter"/>
+        </preConditions>
+
+
+        <sql>
+            UPDATE hts_encounter e
+            SET observation        = jsonb_set(e.observation, '{pregnancyStatus}', to_jsonb(v.new_value), false),
+                date_modified      = now(),
+                last_modified_date = now()
+            FROM (
+                SELECT c.id,
+                       CASE
+                           WHEN c.prefix ~ '^[0-9]+$'
+                               THEN coalesce(
+                                        (SELECT k.code
+                                         FROM base_application_codeset k
+                                         WHERE k.id::text = c.prefix
+                                           AND k.code LIKE 'PREGANACY!_STATUS!_%' ESCAPE '!'),
+                                        c.prefix)
+                           WHEN c.prefix != '' THEN c.prefix
+                           WHEN c.breastfeeding = 'YES' AND c.is_female THEN 'PREGANACY_STATUS_BREASTFEEDING'
+                           ELSE ''
+                       END AS new_value
+                FROM (
+                    SELECT e2.id,
+                           btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 1)) AS prefix,
+                           upper(btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 2))) AS breastfeeding,
+                           (upper(btrim(coalesce(p.sex, ''))) LIKE '%FEMALE%'
+                            OR upper(btrim(coalesce(p.sex, ''))) = 'F') AS is_female
+                    FROM hts_encounter e2
+                    LEFT JOIN patient_person p ON p.id = e2.patient_id
+                    WHERE e2.observation IS NOT NULL
+                      AND jsonb_typeof(e2.observation-&gt;'pregnancyStatus') = 'string'
+                      AND (strpos(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_') != 0
+                           OR btrim(e2.observation-&gt;&gt;'pregnancyStatus') ~ '^[0-9]+$')
+                ) c
+            ) v
+            WHERE e.id = v.id
+              AND coalesce(e.observation-&gt;&gt;'pregnancyStatus', '') IS DISTINCT FROM v.new_value;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

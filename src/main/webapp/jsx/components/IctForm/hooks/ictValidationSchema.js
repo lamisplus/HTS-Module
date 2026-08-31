@@ -45,11 +45,17 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
         return toLocalDateString(value) >= toLocalDateString(htsDateOfVisit);
       }
     )
-    .when("knownHivPositive", {
-      is: "YES_NO_NO",
-      then: (schema) => schema.required("Date contact tested for HIV is required when Known HIV Positive is No"),
-      otherwise: (schema) => schema.nullable(),
-    }),
+    .test(
+      "date-contact-tested-required",
+      "Date contact tested for HIV is required",
+      function (value) {
+        const { knownHivPositive, hivTestResult } = this.parent;
+        if (knownHivPositive === "YES_NO_NO" && hivTestResult && hivTestResult !== "HIV_TEST_RESULT_NOT_DONE") {
+          return !!value;
+        }
+        return true;
+      }
+    ),
 
   hivTestResult: yup.mixed().test("hiv-result-required", "HIV test result is required", function (val) {
     if (this.parent.knownHivPositive !== "YES_NO_NO") return true;
@@ -91,7 +97,7 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
 
   dateEnrolledOvc: yup.mixed().test("ovc-date-conditional", "OVC enrollment date is required", function (val) {
     if (!this.parent.enrolledInOvc) return true;
-    if (!val) return this.createError({ message: "Date enrolled in OVC is required" }); 
+    if (!val) return this.createError({ message: "Date enrolled in OVC is required" });
     if (new Date(val) > today) return this.createError({ message: "Cannot be a future date" });
     return true;
   }),

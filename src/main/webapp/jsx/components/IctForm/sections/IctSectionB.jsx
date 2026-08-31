@@ -53,7 +53,7 @@ const IctSectionB = ({
     const updated = contacts.map((c, i) => {
       if (i !== idx) return c;
       if (typeof fieldOrPatch === "object" && fieldOrPatch !== null) {
-        // Patch object — spread all fields atomically
+        // Patch object - spread all fields atomically
         return { ...c, ...fieldOrPatch };
       }
       // Single field

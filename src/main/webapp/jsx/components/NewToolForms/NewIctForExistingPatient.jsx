@@ -210,7 +210,7 @@ const NewIctForExistingPatient = ({ patientId, onDone, isOnArt = false }) => {
                     : [];
 
                 const positiveRecord = sortedEncounters.find(
-                    (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
+                    (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive" || enc?.observation?.finalHivTestResult?.toLowerCase() === "positive"
                 );
 
                 if (!positiveRecord) {
@@ -218,7 +218,7 @@ const NewIctForExistingPatient = ({ patientId, onDone, isOnArt = false }) => {
                 } else {
                     setPositiveHtsRecord(positiveRecord);
                     const mapped = mapHtsRecordToIctValues(positiveRecord);
-                    console.log(mapped)
+                  
                     setIctInitialValues(mapped);
                 }
             } catch (err) {

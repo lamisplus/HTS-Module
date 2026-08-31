@@ -12,7 +12,7 @@ const toIntOrNull = (val) => {
 };
 
 export const buildIctEncounterPayload = (values) => {
-  // Use codeset codes for all guards — values are always codeset codes
+  // Use codeset codes for all guards - values are always codeset codes
   const offeredYes = values.offeredPns === "YES_NO_YES";
   const acceptedYes = values.acceptedPns === "YES_NO_YES";
   const isAccepted = offeredYes && acceptedYes;
@@ -35,7 +35,7 @@ export const buildIctEncounterPayload = (values) => {
     // artClinic only when the index client is on ART
     artClinic: values.isOnArt ? values.artClinic || null : null,
 
-    // Facility context — send numeric IDs for state/LGA, not display names
+    // Facility context - send numeric IDs for state/LGA, not display names
     facilityName: values.facilityName || null,
     state: values.state || null,   // stored as numeric id string e.g. "7"
     lga: values.lga || null,   // stored as numeric id string e.g. "156"

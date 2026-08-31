@@ -34,6 +34,9 @@ public class IctContact extends Audit<IctContact> implements Serializable {
     @JoinColumn(name = "ict_encounter_id", nullable = false)
     private IctEncounter ictEncounter;
 
+    @Column(name = "facility_id", nullable = false)
+    private Long facilityId;
+
     @Column(name = "contact_code", length = 100)
     private String contactCode;
 

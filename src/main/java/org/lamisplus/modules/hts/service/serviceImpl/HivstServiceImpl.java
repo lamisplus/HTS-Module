@@ -47,11 +47,11 @@ public class HivstServiceImpl implements HivstService {
 
     @Override
     public List<HivstDto> saveHivst(HivstDto hivstDto) {
-        LOG.info("Validating HivstDto: {}", hivstDto.toString());
+        // LOG.info("Validating HivstDto: {}", hivstDto.toString());
         validateHasPatient(hivstDto);
         validateTestKitUserCategories(hivstDto.getTestKitUserDetails(), hivstDto.getTestKitUsers());
 
-        LOG.info("Processing HivstDto");
+        // LOG.info("Processing HivstDto");
         List<Hivst> processedHivstList = new ArrayList<>();
         if (hivstDto.getTestKitUserDetails().isEmpty()) {
             // create a raw HIVST
@@ -63,7 +63,7 @@ public class HivstServiceImpl implements HivstService {
             processedHivstList.addAll(processHivstForPrimaryAndSecondaryPatients(hivstDto));
         }
 
-        LOG.info("Saving Hivst");
+        // LOG.info("Saving Hivst");
         List<Hivst> savedHivst = hivstRepository.saveAll(processedHivstList);
 
         return savedHivst.stream().map(each -> {
@@ -128,9 +128,9 @@ public class HivstServiceImpl implements HivstService {
 
     @Override
     public List<HivstDto> updateHivst(HivstDto hivstDto, Long id) {
-        LOG.info("Finding Hivst by id: {}", id);
+        // LOG.info("Finding Hivst by id: {}", id);
         Hivst hivst = hivstRepository.findByIdAndArchived(hivstDto.getId(), UN_ARCHIVED).orElseThrow(() -> new EntityNotFoundException(Hivst.class, "id", hivstDto.getId().toString()));
-        LOG.info("Found. Updating Hivst...");
+        // LOG.info("Found. Updating Hivst...");
 
         Hivst hivstUpdate = Hivst.fromDto(hivstDto);
         List<Hivst> toBeUpdated = editHivstForPrimaryAndSecondaryPatients(hivstDto);
@@ -149,7 +149,7 @@ public class HivstServiceImpl implements HivstService {
 
     @Override
     public String deleteHivst(Long id) {
-        LOG.info("Deleting Hivst by id: {}" , id);
+        // LOG.info("Deleting Hivst by id: {}" , id);
         Hivst hivst = hivstRepository.findByIdAndArchived(id, UN_ARCHIVED).orElse(null);
         if (hivst != null) {
             hivst.setArchived(1);

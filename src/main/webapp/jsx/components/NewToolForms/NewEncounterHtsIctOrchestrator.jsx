@@ -1,53 +1,18 @@
-/**
- * NewEncounterHtsIctOrchestrator.jsx
- *
- * Orchestrates a brand-new HTS + ICT session for a patient who is already
- * registered in the system. Replaces the standalone <NewEncounterHtsForm>
- * usage in PatientHistory when ICT may also be needed.
- *
- * HOW IT DIFFERS FROM HtsIctOrchestrator
- * ────────────────────────────────────────
- * HtsIctOrchestrator  → Step 1 is NewPatientHtsForm  (blank demographics, new person)
- * This component      → Step 1 is NewEncounterHtsForm (demographics pre-filled + locked
- *                        from the `person` prop, all clinical fields blank)
- *
- * USAGE (in PatientHistory.js)
- * ────────────────────────────
- * Replace:
- *   <NewEncounterHtsForm
- *     person={props?.patientObj?.person || props?.patientObj}
- *     backButtonAction={() => setKey("home")}
- *   />
- *
- * With:
- *   <NewEncounterHtsIctOrchestrator
- *     person={props?.patientObj?.person || props?.patientObj}
- *     onDone={() => setKey("home")}
- *     isOnArt={false}
- *   />
- *
- * Props
- * ─────
- * person    {Object}    Full patient/person object from the dashboard.
- *                       Same shape NewEncounterHtsForm already accepts.
- * onDone    {Function}  Called when the user clicks Back on step 1,
- *                       or after ICT submits successfully.
- * isOnArt   {boolean}   Forwarded to IctForm to show the ART Clinic field.
- */
-
 import React, { useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogActions from "@material-ui/core/DialogActions";
+import Button from "@material-ui/core/Button";
 import { toast } from "react-toastify";
 import NewEncounterHtsForm from "./NewEncounterHtsForm";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "./constants";
 import { useLocation, useHistory } from 'react-router-dom';
 
-// ─── Views ────────────────────────────────────────────────────────────────────
-
 const VIEWS = { HTS: "HTS", ICT: "ICT" };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const useStyles = makeStyles(() => ({
   wrapper: {
@@ -137,29 +102,11 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-// ─── Eligibility check ────────────────────────────────────────────────────────
-// Mirrors the logic in HtsIctOrchestrator exactly.
-
-// const isIctEligible = (htsValues) => {
-//   if (!htsValues) return false;
-//   // const sessionMatch =
-//   //   htsValues.typeOfSession?.toUpperCase() === "INDEX CONTACT TESTING" ||
-//   //   htsValues.typeOfSession?.toLowerCase() === "index contact testing" ||
-//   //   htsValues.typeOfSession?.toLowerCase().includes("index");
-//   const positiveResult =
-//     htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive"
-//   // || htsValues.initialHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
-//   // return sessionMatch && positiveResult;
-//   return positiveResult
-// };
-
-
 const isIctEligible = (htsValues) => {
   if (!htsValues) return false;
   return htsValues.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive";
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
 
 const NewEncounterHtsIctOrchestrator = ({
   person,
@@ -175,19 +122,20 @@ const NewEncounterHtsIctOrchestrator = ({
   const [ictSubmitted, setIctSubmitted] = useState(false);
   const [htsValues, setHtsValues] = useState(null); // live formik snapshot
   const [htsRecord, setHtsRecord] = useState(null); // API response after HTS save
+  const [showIctPrompt, setShowIctPrompt] = useState(false);
   const eligibilityToastFiredRef = useRef(false);
 
   const location = useLocation();
   const history = useHistory();
   const skipEligibility = location?.state?.skipEligibility ?? false;
- 
+
   const updateSkipEligibility = (newValue) => {
     history.replace({
       pathname: location.pathname,
       state: { ...location.state, skipEligibility: newValue },
     });
   };
-  // ── Real-time eligibility — fired on every HTS formik change ─────────────
+  // ── Real-time eligibility - fired on every HTS formik change ─────────────
   const handleHtsValuesChange = (values) => {
     setHtsValues(values);
     const eligible = isIctEligible(values);
@@ -209,7 +157,7 @@ const NewEncounterHtsIctOrchestrator = ({
 
   // ── HTS submit success ────────────────────────────────────────────────────
   // NewEncounterHtsForm calls onSubmitSuccess(htsRecord, formValues) after a
-  // successful API call — same contract as NewPatientHtsForm.
+  // successful API call - same contract as NewPatientHtsForm.
   const handleHtsSubmitSuccess = (record, formValues) => {
     setHtsRecord(record);
     setHtsValues(formValues);
@@ -218,14 +166,26 @@ const NewEncounterHtsIctOrchestrator = ({
     if (isIctEligible(formValues)) {
       setIctEligible(true);
       onEncounterMutated?.()
-      setTimeout(() => setActiveView(VIEWS.ICT), 600);
-      // toast.success("HTS record saved. Opening ICT form…", { autoClose: 3000 });
+      // Don't auto-navigate into ICT - ask the user first.
+      setShowIctPrompt(true);
     }
     else {
       updateSkipEligibility(false)
       onDone?.()
     }
     // If not eligible, HTS is done and the user can navigate back via onDone.
+  };
+
+  // ── ICT skip-confirmation prompt ──────────────────────────────────────────
+  const handleProceedToIct = () => {
+    setShowIctPrompt(false);
+    setActiveView(VIEWS.ICT);
+  };
+
+  const handleSkipIct = () => {
+    setShowIctPrompt(false);
+    updateSkipEligibility(false);
+    onDone?.();
   };
 
   // ── ICT submit success ────────────────────────────────────────────────────
@@ -252,7 +212,7 @@ const NewEncounterHtsIctOrchestrator = ({
       sub: ictSubmitted
         ? "Completed"
         : ictEligible
-          ? htsSubmitted ? "Ready to fill" : "Eligible — complete HTS first"
+          ? htsSubmitted ? "Ready to fill" : "Eligible - complete HTS first"
           : "Not yet eligible",
       locked: !ictEligible,
       done: ictSubmitted,
@@ -342,6 +302,34 @@ const NewEncounterHtsIctOrchestrator = ({
         )}
 
       </div>
+
+      {/* ── ICT skip-confirmation modal ── */}
+      <Dialog
+        open={showIctPrompt}
+        onClose={handleSkipIct}
+        aria-labelledby="ict-prompt-title"
+      >
+        <DialogTitle id="ict-prompt-title">Client eligible for Index Contact Testing</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            The HTS record was saved successfully, and this client is eligible for
+            Index Contact Testing (ICT). Do you want to continue and fill the ICT
+            form now?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSkipIct} color="default">
+            No, go to HTS history
+          </Button>
+          <Button
+            onClick={handleProceedToIct}
+            style={{ backgroundColor: COLORS.primary, color: "#fff" }}
+            autoFocus
+          >
+            Yes, fill ICT form
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -136,7 +136,7 @@ const DeleteConfirmModal = ({ record, onConfirm, onCancel, deleting }) => {
  *   />
  *
  * Action buttons (View / Edit / Delete) call props.setActivePage with the
- * raw ICT encounter record — same contract HTSEncounterHistory uses so the
+ * raw ICT encounter record - same contract HTSEncounterHistory uses so the
  * parent can mount the correct form.
  */
 const ICTEncounterHistory = (props) => {
@@ -145,7 +145,7 @@ const ICTEncounterHistory = (props) => {
     const [pendingDelete, setPendingDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
 
-    // Resolve personId from patientObj — same dual-path as HTSEncounterHistory
+    // Resolve personId from patientObj - same dual-path as HTSEncounterHistory
     const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? null;
 
 

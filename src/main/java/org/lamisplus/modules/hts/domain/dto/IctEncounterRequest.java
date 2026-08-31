@@ -11,10 +11,10 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-// @ValidIctEncounter  ← REMOVED
+// @ValidIctEncounter ← REMOVED
 public class IctEncounterRequest {
 
-    @NotNull(message = "patientId is required — ICT must be linked to an existing patient")
+    @NotNull(message = "patientId is required - ICT must be linked to an existing patient")
     private Long patientId;
 
     @NotNull(message = "facilityId is required")

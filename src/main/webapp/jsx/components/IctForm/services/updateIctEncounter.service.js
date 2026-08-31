@@ -4,8 +4,8 @@ import { url, token } from "../../../../api";
 /**
  * Updates an existing ICT encounter.
  *
- * @param {number} id       — The ICT encounter ID to update.
- * @param {Object} payload  — Built by buildIctEncounterPayload() with htsEncounterId attached.
+ * @param {number} id       - The ICT encounter ID to update.
+ * @param {Object} payload  - Built by buildIctEncounterPayload() with htsEncounterId attached.
  * @returns {Promise<Object>} The updated IctEncounterResponse from the backend.
  */
 export const updateIctEncounter = async (id, payload) => {

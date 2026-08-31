@@ -3,9 +3,10 @@ package org.lamisplus.modules.hts.controller;
 import lombok.RequiredArgsConstructor;
 import org.lamisplus.modules.base.domain.dto.PageDTO;
 import org.lamisplus.modules.base.util.PaginationUtil;
-import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequest;
+import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
+import org.lamisplus.modules.hts.repository.HtsEncounterRepository;
 import org.lamisplus.modules.hts.service.HtsEncounterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/hts-encounter")
@@ -27,12 +30,29 @@ import java.util.List;
 public class HtsEncounterController {
 
     private final HtsEncounterService service;
+    
+    private final HtsEncounterRepository repository;
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('hts_create', 'hts_encounter_create')")
-    public ResponseEntity<HtsEncounterResponse> create(@Valid @RequestBody HtsEncounterRequest request) {
+    public ResponseEntity<Object> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
+        if (repository.existsActiveHivTransferInForPerson(request.getPatientId(), null)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap(
+                    "message", "This patient has a documented HIV Transfer-In record and cannot have a new HTS record created. Use the ICT form instead."
+            ));
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
+
+    
+    @GetMapping("/transfer-in-check")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view', 'hts_create', 'hts_encounter_create')")
+    public ResponseEntity<Boolean> checkActiveHivTransferIn(
+            @RequestParam(required = false) Long personId,
+            @RequestParam(required = false) String personUuid) {
+        return ResponseEntity.ok(repository.existsActiveHivTransferInForPerson(personId, personUuid));
+    }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")
@@ -43,8 +63,26 @@ public class HtsEncounterController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
     public ResponseEntity<HtsEncounterResponse> update(@PathVariable Long id,
-                                                       @Valid @RequestBody HtsEncounterRequest request) {
+                                                       @Valid @RequestBody HtsEncounterRequestDTO request) {
         return ResponseEntity.ok(service.update(id, request));
+    }
+
+    // Called by the HIV module when a patient's viral load result is >= 1000.
+    // Flags the given HTS encounter's finalHivTestResult as an acute HIV infection.
+    // Does not touch hts_ict_encounter or any other observation field on the record.
+    @PatchMapping("/{id}/final-result/acute-hiv-infection")
+    @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
+    public ResponseEntity<HtsEncounterResponse> markAcuteHivInfection(@PathVariable Long id) {
+        return ResponseEntity.ok(service.markAcuteHivInfection(id));
+    }
+
+    // Called by the HIV module when a patient's viral load result is < 1000.
+    // Flags the given HTS encounter's finalHivTestResult as negative.
+    // Does not touch hts_ict_encounter or any other observation field on the record.
+    @PatchMapping("/{id}/final-result/negative")
+    @PreAuthorize("hasAnyAuthority('hts_update', 'hts_encounter_update')")
+    public ResponseEntity<HtsEncounterResponse> markNegative(@PathVariable Long id) {
+        return ResponseEntity.ok(service.markNegative(id));
     }
 
     @DeleteMapping("/{id}")

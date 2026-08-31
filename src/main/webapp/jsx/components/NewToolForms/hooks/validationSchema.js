@@ -174,14 +174,15 @@ export const buildValidationSchema = (isNewPatient) => {
     serialNumber: yup
       .string()
       .required("Serial number is required to generate a client code"),
-      // .matches(
-      //   /^[a-zA-Z0-9]+$/,
-      //   "Serial number must contain only letters and numbers — no special characters"
-      // ),
+    // .matches(
+    //   /^[a-zA-Z0-9]+$/,
+    //   "Serial number must contain only letters and numbers - no special characters"
+    // ),
 
 
     setting: yup.string().required("Setting is required"),
     typeOfSession: yup.string().required("Type of session is required"),
+    htsPopulationType: yup.string(),
 
     facilitySetting: yup.mixed().test(
       "facility-setting-conditional",
@@ -336,7 +337,7 @@ export const buildValidationSchema = (isNewPatient) => {
     //   }
     // ),
 
-    unprotectedAnalSex:yup.string().nullable(),
+    unprotectedAnalSex: yup.string().nullable(),
 
     // unprotectedAnalSex: yup.mixed().test(
     //   "anal-sex-conditional",
@@ -358,7 +359,7 @@ export const buildValidationSchema = (isNewPatient) => {
     // ),
 
     bloodTransfusionLast3Months: yup.string().nullable(),
-    sexUnderInfluence:yup.string().nullable(),
+    sexUnderInfluence: yup.string().nullable(),
 
     // sexUnderInfluence: yup.mixed().test(
     //   "sex-influence-conditional",
@@ -603,7 +604,7 @@ export const buildValidationSchema = (isNewPatient) => {
       "Recency test result is required",
       function (value) {
         // Mirrors DiagnosticTestingSection's `showRecency` flag:
-        // the field is only rendered — and therefore only required —
+        // the field is only rendered - and therefore only required -
         // when the initial HIV test result is Positive.
         if (this.parent.initialHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
         return !!value || this.createError({ message: "Recency test result is required" });
@@ -617,38 +618,66 @@ export const buildValidationSchema = (isNewPatient) => {
     // clientReceivedTestResult: yup.string().required("This field is required"),
     hivTestKitsProvided: yup.string().required("This field is required"),
 
+    // categoryOfClients: yup.mixed().test(
+    //   "categoryOfClients-conditional",
+    //   "Category of client is required",
+    //   function (value) {
+    //     if (this.parent.hivTestKitsProvided !== "YES_NO_YES") return true;
+    //     if (!value)
+    //       return this.createError({
+    //         message: "Category of client is required when HIV self test kit provided to client is yes",
+    //       });
+
+    //     const age = resolveAge(this.parent);
+    //     const sex = this.parent.sex;
+
+    //     // MSM is not applicable for female clients
+    //     if (value === "TARGET_GROUP_MSM" && sex === "SEX_FEMALE") {
+    //       return this.createError({
+    //         message: "MSM category is not applicable for female clients",
+    //       });
+    //     }
+    //     // FSW is not applicable for male clients
+    //     if (value === "TARGET_GROUP_FSW" && sex === "SEX_MALE") {
+    //       return this.createError({
+    //         message: "FSW category is not applicable for male clients",
+    //       });
+    //     }
+    //     // Children of KP is only applicable for clients under 15
+    //     if (value === "TARGET_GROUP_CHILDREN_OF_KP" && age !== null && age >= 15) {
+    //       return this.createError({
+    //         message: "Children of most-at-risk population category is only applicable for clients under 15 years",
+    //       });
+    //     }
+
+    //     return true;
+    //   }
+    // ),
+
     categoryOfClients: yup.mixed().test(
       "categoryOfClients-conditional",
       "Category of client is required",
       function (value) {
         if (this.parent.hivTestKitsProvided !== "YES_NO_YES") return true;
-        if (!value)
+        if (!value) {
           return this.createError({
             message: "Category of client is required when HIV self test kit provided to client is yes",
           });
+        }
+        return true;
+      }
+    ),
 
-        const age = resolveAge(this.parent);
-        const sex = this.parent.sex;
-
-        // MSM is not applicable for female clients
-        if (value === "TARGET_GROUP_MSM" && sex === "SEX_FEMALE") {
+    numberOfHivstKitDistributed: yup.mixed().test(
+      "numberOfHivstKitDistributed-conditional",
+      "Number of Kits Distributed is required",
+      function (value) {
+        if (this.parent.hivTestKitsProvided !== "YES_NO_YES") return true;
+        if (!value) {
           return this.createError({
-            message: "MSM category is not applicable for female clients",
+            message: "Number of Kits Distributed is required when HIV self test kit provided to client is yes",
           });
         }
-        // FSW is not applicable for male clients
-        if (value === "TARGET_GROUP_FSW" && sex === "SEX_MALE") {
-          return this.createError({
-            message: "FSW category is not applicable for male clients",
-          });
-        }
-        // Children of KP is only applicable for clients under 15
-        if (value === "TARGET_GROUP_CHILDREN_OF_KP" && age !== null && age >= 15) {
-          return this.createError({
-            message: "Children of most-at-risk population category is only applicable for clients under 15 years",
-          });
-        }
-
         return true;
       }
     ),
@@ -671,8 +700,9 @@ export const buildValidationSchema = (isNewPatient) => {
     // correctCondomUseDemonstrated: yup.string().required("This field is required"),
     condomsProvided: yup.string().nullable(),
     // condomsProvided: yup.string().required("This field is required"),
+    dateOfFinalHivTestDone: yup.string().nullable(),
     clientReferredToOtherServices: yup.string().required("This field is required"),
     completedBy: yup.string().required("This field is required"),
-    designation: yup.string().required("This field is required"),
+    designation: yup.string().required("This field is required")
   });
 };

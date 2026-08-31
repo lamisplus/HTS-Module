@@ -64,7 +64,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
 
   const { formik } = useNewPatientFormik(onSubmit);
-  console.log(formik)
+  
 
 
   const onSubmit = async (values) => {
@@ -106,7 +106,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   const basicFields = [
     "dateOfVisit", "clientCode", "setting", "facilitySetting", "communityEntryPoint",
     // "modality", 
-    "typeOfSession", "indexRelationship", "indexClientCode",
+    "typeOfSession", "htsPopulationType", "indexRelationship", "indexClientCode",
     "facilityName", "surname", "firstName", "dobType", "dateOfBirth", "age",
     "sex", "phoneNumber", "maritalStatus", "numberOfWives", "numberOfCoWives",
     "numberOfBiologicalChildren", "pregnancyStatus", "breastfeedingDuration",
@@ -134,7 +134,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
 
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",
-    "categoryOfClients", "acceptedIndexTesting", "providedFpInfo",
+    "categoryOfClients", "numberOfHivstKitDistributed", "acceptedIndexTesting", "providedFpInfo",
     "clientPartnerUseFpMethods", "clientPartnerUseCondoms",
     "correctCondomUseDemonstrated", "condomsProvided",
     "clientReferredToOtherServices", "completedBy", "designation",
@@ -145,7 +145,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
       <div className={classes.topBar}>
         <div className={classes.titleBlock}>
           <h2 className={classes.title}>HIV Testing Form</h2>
-          <p className={classes.subtitle}>New Client Registration — complete all required fields</p>
+          <p className={classes.subtitle}>New Client Registration - complete all required fields</p>
         </div>
         <Button
           content="Back"

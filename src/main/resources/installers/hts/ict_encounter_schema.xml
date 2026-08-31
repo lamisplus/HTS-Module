@@ -13,7 +13,7 @@
             </not>
         </preConditions>
         <comment>
-            V3 — Fresh install only.
+            V3 - Fresh install only.
             Changes from V2:
             - uuid:        VARCHAR(36) → UUID with gen_random_uuid() default (DB-generated)
             - person_id:   renamed to patient_id

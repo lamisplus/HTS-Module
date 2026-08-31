@@ -111,10 +111,10 @@ const IctSectionA = ({ formik, readOnly = false }) => {
       const looksLikeId = /^\d+$/.test(String(values.state).trim());
       if (looksLikeId) {
         const matched = statesList.find((s) => String(s.id) === String(values.state));
-        // DO NOT overwrite values.state — keep the numeric id, just fetch LGAs
+        // DO NOT overwrite values.state - keep the numeric id, just fetch LGAs
         if (matched) fetchLgas(matched.id);
       } else {
-        // It's a display name (legacy data) — resolve to id and store id
+        // It's a display name (legacy data) - resolve to id and store id
         const matched = statesList.find(
           (s) => s.name.toLowerCase() === String(values.state).toLowerCase()
         );
@@ -131,9 +131,9 @@ const IctSectionA = ({ formik, readOnly = false }) => {
     if (lgasList?.length > 0 && values?.lga) {
       const looksLikeId = /^\d+$/.test(String(values.lga).trim());
       if (looksLikeId) {
-        // Already an id — no overwrite needed
+        // Already an id - no overwrite needed
       } else {
-        // It's a display name (legacy data) — resolve to id
+        // It's a display name (legacy data) - resolve to id
         const matched = lgasList.find(
           (l) => l.name.toLowerCase() === String(values.lga).toLowerCase()
         );
@@ -216,12 +216,12 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   return (
     <div style={{ width: "100%" }}>
-      <SectionSubheading>Facility Context</SectionSubheading>
+      {/* <SectionSubheading>Facility Context</SectionSubheading>
       <div className="row">
         <div className="col-md-4"><ReadOnlyField label="State" value={stateDisplayName} /></div>
         <div className="col-md-4"><ReadOnlyField label="LGA" value={lgaDisplayName} /></div>
         <div className="col-md-4"><ReadOnlyField label="Facility Name" value={values.facilityName} /></div>
-      </div>
+      </div> */}
 
       <SectionSubheading>Visit Details</SectionSubheading>
       <div className="row">
