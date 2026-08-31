@@ -298,7 +298,7 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
     clientReferredToOtherServices,
     completedBy,
     designation,
-    pmtctHts: formValues?.pmtctHts || false
+    pmtctHts: isNewPatient ? (formValues?.pmtctHts ?? false) : formValues?.pmtctHts
   };
 
   if (!isNewPatient) {

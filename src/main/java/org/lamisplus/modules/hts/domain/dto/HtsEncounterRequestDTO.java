@@ -99,7 +99,7 @@ public class HtsEncounterRequestDTO {
     private String clientReferredToOtherServices;
     private String completedBy;
     private String designation;
-    private Boolean pmtctHts = false;
+    private Boolean pmtctHts;
     private String source ="Web";
     private String longitude;
     private String latitude;
