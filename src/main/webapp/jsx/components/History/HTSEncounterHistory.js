@@ -384,7 +384,17 @@ const HTSEncounterHistory = (props) => {
         isLoading={loading}
         columns={[
           { title: "Date of Visit", field: "dateOfVisit", filtering: false },
+
           { title: "Client Code", field: "clientCode", filtering: false },
+
+          {
+            title: "Previously Known Hiv Positive",
+            field: "previouslyKnownHivPositive",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData.previouslyKnownHivPositive),
+
+          },
+
           {
             title: "Setting",
             field: "setting",
@@ -485,6 +495,7 @@ const HTSEncounterHistory = (props) => {
         ]}
         data={encounters.map?.((record) => ({
           dateOfVisit: record.dateOfVisit ?? "",
+          previouslyKnownHivPositive: record?.observation?.previouslyKnownHivPositive ?? (record?.previouslyKnownHivPositive || ""),
           clientCode: record.clientCode ?? "",
           setting: record.setting ?? "",
           initialHivTest: record.observation?.initialHivTest ?? "",

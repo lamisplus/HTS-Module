@@ -65,7 +65,8 @@ public class HtsEncounterService {
                 patientIdentifier(request.getClientCode(), person.getId()),
                 observation,
                 request.getDateOfVisit(),
-                null);
+                null,
+                request.getPmtctHts());
 
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
@@ -79,7 +80,6 @@ public class HtsEncounterService {
         encounter.setLongitude(request.getLongitude());
         encounter.setLatitude(request.getLatitude());
         encounter.setObservation(observation);
-
         encounter = repository.save(encounter);
         return toResponse(encounter);
     }
@@ -119,7 +119,8 @@ public class HtsEncounterService {
                 patientIdentifier(clientCode, existing.getPerson().getId()),
                 observation,
                 incomingDateOfVisit,
-                id);
+                id,
+                existing.getPmtctHts());
 
         existing.setObservation(observation);
 
@@ -164,7 +165,8 @@ public class HtsEncounterService {
                 patientIdentifier(existing.getClientCode(), existing.getPerson().getId()),
                 obs,
                 existing.getDateOfVisit(),
-                id);
+                id,
+                existing.getPmtctHts());
 
         existing.setObservation(obs);
 
@@ -372,6 +374,7 @@ public class HtsEncounterService {
         putStr(obs, "clientReferredToOtherServices", r.getClientReferredToOtherServices());
         putStr(obs, "completedBy", r.getCompletedBy());
         putStr(obs, "designation", r.getDesignation());
+        putStr(obs, "previouslyKnownHivPositive", r.getPreviouslyKnownHivPositive());
 
         return obs;
     }
@@ -408,12 +411,35 @@ public class HtsEncounterService {
     private static final String ACUTE_INFECTION_RESULT = "Positive";
     private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 90;
 
+    // Exception to the "one active positive result" rule (Rule 1 only - the 90-day
+    // negative-result spacing rule is unaffected): PMTCT sends HTS records for clients
+    // whose positive status was already known before this encounter, and needs to be
+    // able to record that even when the patient already has another active positive HTS
+    // result on file. Requires BOTH pmtctHts=true AND previouslyKnownHivPositive containing
+    // "yes" (case-insensitive) on the record being saved - matched loosely (contains, not
+    // exact-equals) so it tolerates either a plain "Yes" or a codeset-style value like
+    // "YES_NO_YES" without needing to know which convention the sender uses.
+    private boolean isPmtctKnownPositiveException(JsonNode observation, Boolean pmtctHts) {
+        if (pmtctHts == null || !pmtctHts) {
+            return false;
+        }
+        if (observation == null) {
+            return false;
+        }
+        JsonNode node = observation.get("previouslyKnownHivPositive");
+        if (node == null || node.isNull()) {
+            return false;
+        }
+        return node.asText("").trim().toLowerCase().contains("yes");
+    }
+
     private void validateHivResultRules(
             Long patientId,
             String patientIdentifier,
             JsonNode incomingObservation,
             LocalDate incomingDateOfVisit,
-            Long excludeEncounterId) {
+            Long excludeEncounterId,
+            Boolean pmtctHts) {
 
         boolean incomingPositive = isPositiveObservation(incomingObservation);
         boolean incomingNegative = isNegativeObservation(incomingObservation);
@@ -429,7 +455,7 @@ public class HtsEncounterService {
                 .filter(e -> excludeEncounterId == null || !e.getId().equals(excludeEncounterId))
                 .collect(Collectors.toList());
 
-        if (incomingPositive) {
+        if (incomingPositive && !isPmtctKnownPositiveException(incomingObservation, pmtctHts)) {
             HtsEncounter existingPositive = otherActiveEncounters.stream()
                     .filter(e -> isPositiveObservation(e.getObservation()))
                     .findFirst()

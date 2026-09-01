@@ -99,7 +99,23 @@ public class HtsEncounterRequestDTO {
     private String clientReferredToOtherServices;
     private String completedBy;
     private String designation;
+    // No default here on purpose: create() falls back to false explicitly when this is
+    // omitted, and update()'s "if (request.getPmtctHts() != null)" guard depends on an
+    // omitted field genuinely deserializing to null - defaulting it to false here made
+    // that guard always pass, silently clearing pmtctHts on every edit that doesn't send it
+    // (e.g. the HTS edit form, which has no field for it at all).
+    // No default here on purpose: create() falls back to false explicitly when this is
+    // omitted, and update()'s "if (request.getPmtctHts() != null)" guard depends on an
+    // omitted field genuinely deserializing to null - defaulting it to false here made
+    // that guard always pass, silently clearing pmtctHts on every edit that doesn't send it
+    // (e.g. the HTS edit form, which has no field for it at all).
     private Boolean pmtctHts;
+    // Sent by PMTCT alongside pmtctHts=true when the client's positive status was already
+    // known prior to this encounter - used in HtsEncounterService to bypass the "only one
+    // active positive result" rule for that specific case. Expected as a plain "Yes"/"No"
+    // string (matched case-insensitively), not one of this app's internal codeset codes,
+    // since PMTCT is an external producer.
+    private String previouslyKnownHivPositive;
     private String source ="Web";
     private String longitude;
     private String latitude;
