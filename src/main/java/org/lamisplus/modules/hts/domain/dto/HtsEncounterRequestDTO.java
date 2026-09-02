@@ -116,6 +116,37 @@ public class HtsEncounterRequestDTO {
     // string (matched case-insensitively), not one of this app's internal codeset codes,
     // since PMTCT is an external producer.
     private String previouslyKnownHivPositive;
+
+    // ---- PMTCT-only fields below (from PMTCT_vs_HTS_field_comparison.xlsx audit) ----
+    // All optional/nullable, no validation - HTS itself never sends any of these, only
+    // PMTCT does. Field names match PMTCT's observation JSON keys EXACTLY (including
+    // testEntryPoint/testSetting, which intentionally duplicate the values already mapped
+    // into the shared setting/facilitySetting/communityEntryPoint fields elsewhere, and
+    // dateoffinalHivTestResult, whose unconventional casing is intentional and exact - not
+    // a typo, not to be confused with the existing dateOfFinalHivTestDone field) so that
+    // PMTCT's existing GET-side consumers keep working against these observation keys
+    // unchanged.
+    private String pmtctCycleUuid;
+    private String testingType;
+    private String pmtctTestEntryPoint;
+    private String testEntryPoint;
+    private String testSetting;
+    private String stageOfPregnancy;
+    private String pregnancyStatusAtEntry;
+    private String hospitalNumber;
+    private String enrolledOnArt;
+    private String initiatedOnProphylaxis;
+    private String viralLoadMonitoring;
+    private String hivEarlyDetectViralLoad;
+    private String confirmatoryFromSpokes;
+    private String tbScreeningStatus;
+    private String tbReferred;
+    private String hepatitisC;
+    private String dateoffinalHivTestResult;
+
+    private SyphilisInfoDto syphilisInfo;
+    private HbvInfoDto hbvInfo;
+    private PartnerInfoDto partnerInfo;
     private String source ="Web";
     private String longitude;
     private String latitude;

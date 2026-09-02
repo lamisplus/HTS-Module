@@ -80,6 +80,7 @@ public class HtsEncounterService {
         encounter.setLongitude(request.getLongitude());
         encounter.setLatitude(request.getLatitude());
         encounter.setObservation(observation);
+
         encounter = repository.save(encounter);
         return toResponse(encounter);
     }
@@ -376,12 +377,43 @@ public class HtsEncounterService {
         putStr(obs, "designation", r.getDesignation());
         putStr(obs, "previouslyKnownHivPositive", r.getPreviouslyKnownHivPositive());
 
+        // ---- PMTCT-only fields below - all optional, HTS itself never sends these ----
+        putStr(obs, "pmtctCycleUuid", r.getPmtctCycleUuid());
+        putStr(obs, "testingType", r.getTestingType());
+        putStr(obs, "pmtctTestEntryPoint", r.getPmtctTestEntryPoint());
+        putStr(obs, "testEntryPoint", r.getTestEntryPoint());
+        putStr(obs, "testSetting", r.getTestSetting());
+        putStr(obs, "stageOfPregnancy", r.getStageOfPregnancy());
+        putStr(obs, "pregnancyStatusAtEntry", r.getPregnancyStatusAtEntry());
+        putStr(obs, "hospitalNumber", r.getHospitalNumber());
+        putStr(obs, "enrolledOnArt", r.getEnrolledOnArt());
+        putStr(obs, "initiatedOnProphylaxis", r.getInitiatedOnProphylaxis());
+        putStr(obs, "viralLoadMonitoring", r.getViralLoadMonitoring());
+        putStr(obs, "hivEarlyDetectViralLoad", r.getHivEarlyDetectViralLoad());
+        putStr(obs, "confirmatoryFromSpokes", r.getConfirmatoryFromSpokes());
+        putStr(obs, "tbScreeningStatus", r.getTbScreeningStatus());
+        putStr(obs, "tbReferred", r.getTbReferred());
+        putStr(obs, "hepatitisC", r.getHepatitisC());
+        putStr(obs, "dateoffinalHivTestResult", r.getDateoffinalHivTestResult());
+        putObject(obs, "syphilisInfo", r.getSyphilisInfo());
+        putObject(obs, "hbvInfo", r.getHbvInfo());
+        putObject(obs, "partnerInfo", r.getPartnerInfo());
+
         return obs;
     }
 
     private void putStr(ObjectNode node, String key, String value) {
         if (value != null)
             node.put(key, value);
+    }
+
+    // Mirrors putStr's null-skip behavior for the three PMTCT nested objects (syphilisInfo,
+    // hbvInfo, partnerInfo) - if the block itself wasn't sent, no key is written at all
+    // (never an empty {}), matching how every other optional field here behaves.
+    private void putObject(ObjectNode node, String key, Object nestedDto) {
+        if (nestedDto != null) {
+            node.set(key, objectMapper.valueToTree(nestedDto));
+        }
     }
 
     // ------------------------------------------------------------------
