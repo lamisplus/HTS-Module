@@ -30,7 +30,11 @@ import java.util.Map;
 public class HtsEncounterController {
 
     private final HtsEncounterService service;
-    
+    // hiv_patient_transfer_in lives in the HIV module and there's no shared entity/service
+    // for it, so the transfer-in check goes straight through this repository - see
+    // HtsEncounterRepository#existsActiveHivTransferInForPerson. Ideally this check moves
+    // into HtsEncounterService alongside the rest of the create() business logic once that
+    // file is available to edit.
     private final HtsEncounterRepository repository;
 
     @PostMapping
@@ -44,7 +48,8 @@ public class HtsEncounterController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
 
-    
+    // Frontend eligibility check (useHtsEligibility) - returns whether this patient has an
+    // active (archived = 0) HIV Transfer-In record, matched on either personId or personUuid.
     @GetMapping("/transfer-in-check")
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view', 'hts_create', 'hts_encounter_create')")
     public ResponseEntity<Boolean> checkActiveHivTransferIn(

@@ -74,7 +74,7 @@ public class HtsEncounterService {
         encounter.setClientCode(request.getClientCode());
         encounter.setDateOfVisit(request.getDateOfVisit());
         encounter.setSetting(request.getSetting());
-        encounter.setFacilityId(request.getFacilityId());
+        encounter.setFacilityId(resolveFacilityId(request.getFacilityId()));
         encounter.setPmtctHts(request.getPmtctHts() != null ? request.getPmtctHts() : false);
         encounter.setSource(request.getSource() != null ? request.getSource() : "web");
         encounter.setLongitude(request.getLongitude());
@@ -97,7 +97,7 @@ public class HtsEncounterService {
         if (request.getSetting() != null)
             existing.setSetting(request.getSetting());
         if (request.getFacilityId() != null)
-            existing.setFacilityId(request.getFacilityId());
+            existing.setFacilityId(resolveFacilityId(request.getFacilityId()));
         if (request.getPmtctHts() != null)
             existing.setPmtctHts(request.getPmtctHts());
         if (request.getSource() != null)
@@ -400,6 +400,27 @@ public class HtsEncounterService {
         putObject(obs, "partnerInfo", r.getPartnerInfo());
 
         return obs;
+    }
+
+    // Resolves facilityId for create/update: always tries the current logged-in user's own
+    // organization first (authoritative, server-derived), and only falls back to whatever
+    // the client sent in the request if that derivation fails for any reason (throws, or
+    // returns null - e.g. a service/API caller whose token has no interactive-session
+    // organization context to resolve). Existing callers who already send facilityId keep
+    // working exactly as before in the common case, since the derived and sent values
+    // typically match; this only changes behavior when they'd otherwise disagree.
+    private Long resolveFacilityId(Long clientProvidedFacilityId) {
+        try {
+            Long derived = currentUserOrganizationService.getCurrentUserOrganization();
+            if (derived != null) {
+                return derived;
+            }
+        } catch (Exception e) {
+//            log.warn("Failed to derive facilityId from currentUserOrganizationService, " +
+//                            "falling back to client-provided facilityId ({}): {}",
+//                    clientProvidedFacilityId, e.getMessage());
+        }
+        return clientProvidedFacilityId;
     }
 
     private void putStr(ObjectNode node, String key, String value) {
