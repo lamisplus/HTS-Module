@@ -21,6 +21,8 @@ import { url as baseUrl, token } from "./../../../api";
 import Typography from "@material-ui/core/Typography";
 import { Label, Sticky } from "semantic-ui-react";
 import { calculate_age } from "../utils";
+import { checkActiveHivTransferIn } from "../../services/checkHivTransferIn.service";
+// import { checkActiveHivTransferIn } from "../../../services/checkHivTransferIn.service";
 //Dtate Picker package
 Moment.locale("en");
 momentLocalizer();
@@ -64,12 +66,15 @@ function PatientCard(props) {
   const { classes } = props;
   //const patientCurrentStatus=props.patientObj && props.patientObj.currentStatus==="Died (Confirmed)" ? true : false ;
   const patientObjs = props.patientObj ? props.patientObj : {};
+  console.log(patientObjs?.personId)
+  console.log(patientObjs?.personUuid)
   //const permissions= props.permissions ? props.permissions : [];
   const [patientObj, setPatientObj] = useState(null);
   const [hivStatus, setHivStatus] = useState("false");
   const [htscount, setHtscount] = useState(0);
   const [htsResult, setHtsResult] = useState("");
   const [htsResult2, setHtsResult2] = useState("");
+  const [hasActiveTransferIn, setHasActiveTransferIn] = useState(false);
   const clientConfirmatoryResult = props?.patientObj?.observation?.confirmatoryHivTest?.toLowerCase() || props?.clientEligibility?.confirmatoryResult?.toLowerCase()
   const clientSuspectedAcuteInfection = props?.patientObj?.observation?.suspectedAcuteInfection?.toLowerCase() || props?.clientEligibility?.suspectedAcuteInfection?.toLowerCase()
   const finalHivTestResult = props?.patientObj?.observation?.finalHivTestResult?.toLowerCase() || props?.clientEligibility?.finalHivTestResult?.toLowerCase()
@@ -79,6 +84,26 @@ function PatientCard(props) {
   useEffect(() => {
     PatientCurrentObject();
   }, []);
+
+  
+  useEffect(() => {
+    let isMounted = true;
+    const personId = patientObjs?.personId;
+    const personUuid = patientObjs?.personUuid;
+
+    if (!personId && !personUuid) {
+      setHasActiveTransferIn(false);
+      return undefined;
+    }
+
+    checkActiveHivTransferIn(personId, personUuid).then((result) => {
+      if (isMounted) setHasActiveTransferIn(!!result);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [patientObjs?.personId, patientObjs?.personUuid]);
 
   ///GET LIST OF Patients
   async function PatientCurrentObject() {
@@ -288,7 +313,17 @@ function PatientCard(props) {
                                           </Label>
                                         )
                             }
+
+                            {hasActiveTransferIn && (
+                              <Label color={"grey"} size={"small"}>
+                                Transfer In Patient
+                              </Label>
+                            )}
+
                           </Typography>
+
+
+
                         </div>
                       </Col>
 

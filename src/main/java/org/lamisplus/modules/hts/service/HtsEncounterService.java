@@ -58,14 +58,41 @@ public class HtsEncounterService {
                     .orElseThrow(() -> new IllegalStateException("Person creation failed"));
         }
 
+        // HIV Transfer-In block - checked first, before anything else. Blocks a new HTS
+        // record for any patient with an active (archived = 0) Transfer-In record, UNLESS
+        // this is a PMTCT record (pmtctHts = true), in which case it's allowed through and
+        // permanently flagged via pmtctTransferInPatient below. Regular HTS-module creates
+        // remain blocked exactly as before - only pmtctHts = true bypasses this.
+        // Matches on both id and uuid now that person is already resolved, widening the
+        // match slightly versus the old controller-level check (which only had patientId).
+        boolean hasActiveTransferIn = repository.existsActiveHivTransferInForPerson(person.getId(), person.getUuid());
+        boolean isPmtctRecord = Boolean.TRUE.equals(request.getPmtctHts());
+
+        if (hasActiveTransferIn && !isPmtctRecord) {
+            throw new IllegalTypeException(
+                    HtsEncounterRequestDTO.class,
+                    "patientId",
+                    "This patient has a documented HIV Transfer-In record and cannot have a new HTS record " +
+                            "created. Use the ICT form instead.");
+        }
+
         ObjectNode observation = buildObservation(request);
+
+        if (hasActiveTransferIn && isPmtctRecord) {
+            // Permanent audit marker: this PMTCT record was allowed through despite the
+            // patient having an active Transfer-In record. Set once, here, at creation only -
+            // update() explicitly carries this key forward untouched on every edit and never
+            // lets it be set, changed, or removed by any update request.
+            observation.put("pmtctTransferInPatient", true);
+        }
 
         validateHivResultRules(
                 person.getId(),
                 patientIdentifier(request.getClientCode(), person.getId()),
                 observation,
                 request.getDateOfVisit(),
-                null);
+                null,
+                request.getPmtctHts());
 
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
@@ -73,7 +100,7 @@ public class HtsEncounterService {
         encounter.setClientCode(request.getClientCode());
         encounter.setDateOfVisit(request.getDateOfVisit());
         encounter.setSetting(request.getSetting());
-        encounter.setFacilityId(request.getFacilityId());
+        encounter.setFacilityId(resolveFacilityId(request.getFacilityId()));
         encounter.setPmtctHts(request.getPmtctHts() != null ? request.getPmtctHts() : false);
         encounter.setSource(request.getSource() != null ? request.getSource() : "web");
         encounter.setLongitude(request.getLongitude());
@@ -96,7 +123,7 @@ public class HtsEncounterService {
         if (request.getSetting() != null)
             existing.setSetting(request.getSetting());
         if (request.getFacilityId() != null)
-            existing.setFacilityId(request.getFacilityId());
+            existing.setFacilityId(resolveFacilityId(request.getFacilityId()));
         if (request.getPmtctHts() != null)
             existing.setPmtctHts(request.getPmtctHts());
         if (request.getSource() != null)
@@ -107,6 +134,18 @@ public class HtsEncounterService {
             existing.setLatitude(request.getLatitude());
 
         ObjectNode observation = buildObservation(request);
+
+        // pmtctTransferInPatient is permanent once set at creation and must never change on
+        // an update, in either direction - buildObservation() only builds from the incoming
+        // request (which has no field for this key at all, so it could never set it anyway),
+        // so without this it would simply be dropped by the wholesale observation replace
+        // below. Carry it forward from the existing record exactly as-is, ignoring the
+        // incoming request entirely for this one key.
+        JsonNode existingObservation = existing.getObservation();
+        if (existingObservation != null && existingObservation.has("pmtctTransferInPatient")) {
+            observation.set("pmtctTransferInPatient", existingObservation.get("pmtctTransferInPatient"));
+        }
+
         LocalDate incomingDateOfVisit = request.getDateOfVisit() != null
                 ? request.getDateOfVisit()
                 : existing.getDateOfVisit();
@@ -119,7 +158,8 @@ public class HtsEncounterService {
                 patientIdentifier(clientCode, existing.getPerson().getId()),
                 observation,
                 incomingDateOfVisit,
-                id);
+                id,
+                existing.getPmtctHts());
 
         existing.setObservation(observation);
 
@@ -164,7 +204,8 @@ public class HtsEncounterService {
                 patientIdentifier(existing.getClientCode(), existing.getPerson().getId()),
                 obs,
                 existing.getDateOfVisit(),
-                id);
+                id,
+                existing.getPmtctHts());
 
         existing.setObservation(obs);
 
@@ -372,13 +413,67 @@ public class HtsEncounterService {
         putStr(obs, "clientReferredToOtherServices", r.getClientReferredToOtherServices());
         putStr(obs, "completedBy", r.getCompletedBy());
         putStr(obs, "designation", r.getDesignation());
+        putStr(obs, "previouslyKnownHivPositive", r.getPreviouslyKnownHivPositive());
+        putStr(obs, "dateOfPreviouslyKnown", r.getDateOfPreviouslyKnown());
+
+        // ---- PMTCT-only fields below - all optional, HTS itself never sends these ----
+        putStr(obs, "pmtctCycleUuid", r.getPmtctCycleUuid());
+        putStr(obs, "testingType", r.getTestingType());
+        putStr(obs, "pmtctTestEntryPoint", r.getPmtctTestEntryPoint());
+        putStr(obs, "testEntryPoint", r.getTestEntryPoint());
+        putStr(obs, "testSetting", r.getTestSetting());
+        putStr(obs, "stageOfPregnancy", r.getStageOfPregnancy());
+        putStr(obs, "pregnancyStatusAtEntry", r.getPregnancyStatusAtEntry());
+        putStr(obs, "hospitalNumber", r.getHospitalNumber());
+        putStr(obs, "enrolledOnArt", r.getEnrolledOnArt());
+        putStr(obs, "initiatedOnProphylaxis", r.getInitiatedOnProphylaxis());
+        putStr(obs, "viralLoadMonitoring", r.getViralLoadMonitoring());
+        putStr(obs, "hivEarlyDetectViralLoad", r.getHivEarlyDetectViralLoad());
+        putStr(obs, "confirmatoryFromSpokes", r.getConfirmatoryFromSpokes());
+        putStr(obs, "tbScreeningStatus", r.getTbScreeningStatus());
+        putStr(obs, "tbReferred", r.getTbReferred());
+        putStr(obs, "hepatitisC", r.getHepatitisC());
+        putStr(obs, "dateoffinalHivTestResult", r.getDateoffinalHivTestResult());
+        putObject(obs, "syphilisInfo", r.getSyphilisInfo());
+        putObject(obs, "hbvInfo", r.getHbvInfo());
+        putObject(obs, "partnerInfo", r.getPartnerInfo());
 
         return obs;
+    }
+
+    // Resolves facilityId for create/update: always tries the current logged-in user's own
+    // organization first (authoritative, server-derived), and only falls back to whatever
+    // the client sent in the request if that derivation fails for any reason (throws, or
+    // returns null - e.g. a service/API caller whose token has no interactive-session
+    // organization context to resolve). Existing callers who already send facilityId keep
+    // working exactly as before in the common case, since the derived and sent values
+    // typically match; this only changes behavior when they'd otherwise disagree.
+    private Long resolveFacilityId(Long clientProvidedFacilityId) {
+        try {
+            Long derived = currentUserOrganizationService.getCurrentUserOrganization();
+            if (derived != null) {
+                return derived;
+            }
+        } catch (Exception e) {
+//            log.warn("Failed to derive facilityId from currentUserOrganizationService, " +
+//                            "falling back to client-provided facilityId ({}): {}",
+//                    clientProvidedFacilityId, e.getMessage());
+        }
+        return clientProvidedFacilityId;
     }
 
     private void putStr(ObjectNode node, String key, String value) {
         if (value != null)
             node.put(key, value);
+    }
+
+    // Mirrors putStr's null-skip behavior for the three PMTCT nested objects (syphilisInfo,
+    // hbvInfo, partnerInfo) - if the block itself wasn't sent, no key is written at all
+    // (never an empty {}), matching how every other optional field here behaves.
+    private void putObject(ObjectNode node, String key, Object nestedDto) {
+        if (nestedDto != null) {
+            node.set(key, objectMapper.valueToTree(nestedDto));
+        }
     }
 
     // ------------------------------------------------------------------
@@ -407,13 +502,37 @@ public class HtsEncounterService {
     private static final String NEGATIVE_MARKER = "NEGATIVE";
     private static final String ACUTE_INFECTION_RESULT = "Positive";
     private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 90;
+    private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT = 30;
+
+    // Exception to the "one active positive result" rule (Rule 1 only - the 90-day
+    // negative-result spacing rule is unaffected): PMTCT sends HTS records for clients
+    // whose positive status was already known before this encounter, and needs to be
+    // able to record that even when the patient already has another active positive HTS
+    // result on file. Requires BOTH pmtctHts=true AND previouslyKnownHivPositive containing
+    // "yes" (case-insensitive) on the record being saved - matched loosely (contains, not
+    // exact-equals) so it tolerates either a plain "Yes" or a codeset-style value like
+    // "YES_NO_YES" without needing to know which convention the sender uses.
+    private boolean isPmtctKnownPositiveException(JsonNode observation, Boolean pmtctHts) {
+        if (pmtctHts == null || !pmtctHts) {
+            return false;
+        }
+        if (observation == null) {
+            return false;
+        }
+        JsonNode node = observation.get("previouslyKnownHivPositive");
+        if (node == null || node.isNull()) {
+            return false;
+        }
+        return node.asText("").trim().toLowerCase().contains("yes");
+    }
 
     private void validateHivResultRules(
             Long patientId,
             String patientIdentifier,
             JsonNode incomingObservation,
             LocalDate incomingDateOfVisit,
-            Long excludeEncounterId) {
+            Long excludeEncounterId,
+            Boolean pmtctHts) {
 
         boolean incomingPositive = isPositiveObservation(incomingObservation);
         boolean incomingNegative = isNegativeObservation(incomingObservation);
@@ -429,7 +548,7 @@ public class HtsEncounterService {
                 .filter(e -> excludeEncounterId == null || !e.getId().equals(excludeEncounterId))
                 .collect(Collectors.toList());
 
-        if (incomingPositive) {
+        if (incomingPositive && !isPmtctKnownPositiveException(incomingObservation, pmtctHts)) {
             HtsEncounter existingPositive = otherActiveEncounters.stream()
                     .filter(e -> isPositiveObservation(e.getObservation()))
                     .findFirst()
@@ -453,6 +572,13 @@ public class HtsEncounterService {
         }
 
         if (incomingNegative && incomingDateOfVisit != null) {
+            // PMTCT records get a shorter re-testing window (30 days) than everyone else (90).
+            // Determined purely by the INCOMING record's own pmtctHts - not the source of
+            // whichever existing negative encounter it's being compared against.
+            long minDaysBetweenNegatives = Boolean.TRUE.equals(pmtctHts)
+                    ? MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT
+                    : MIN_DAYS_BETWEEN_NEGATIVE_RESULTS;
+
             HtsEncounter closestNegative = null;
             long closestGapDays = Long.MAX_VALUE;
 
@@ -467,7 +593,7 @@ public class HtsEncounterService {
                 }
             }
 
-            if (closestNegative != null && closestGapDays < MIN_DAYS_BETWEEN_NEGATIVE_RESULTS) {
+            if (closestNegative != null && closestGapDays < minDaysBetweenNegatives) {
                 throw new IllegalTypeException(
                         HtsEncounterRequestDTO.class,
                         "dateOfVisit",
@@ -475,14 +601,15 @@ public class HtsEncounterService {
                                 "Cannot save this HTS encounter as a negative result: patient %s already has a " +
                                         "negative HTS result recorded on %s (encounter ID %d, client code '%s'), which is " +
                                         "only %d day(s) from this encounter's date of visit (%s). Negative HTS results " +
-                                        "must be at least %d days apart.",
+                                        "must be at least %d days apart%s.",
                                 patientIdentifier,
                                 closestNegative.getDateOfVisit(),
                                 closestNegative.getId(),
                                 closestNegative.getClientCode(),
                                 closestGapDays,
                                 incomingDateOfVisit,
-                                MIN_DAYS_BETWEEN_NEGATIVE_RESULTS));
+                                minDaysBetweenNegatives,
+                                Boolean.TRUE.equals(pmtctHts) ? " for PMTCT records" : ""));
             }
         }
     }

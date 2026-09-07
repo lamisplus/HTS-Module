@@ -5,7 +5,7 @@
 // loop, regardless of what api.js's axios instance is configured to do.
 import { token, url } from "../../api";
 
-const TIMEOUT_MS = 5000;
+const TIMEOUT_MS = 500000;
 
 export async function checkActiveHivTransferIn(personId, personUuid) {
   if (!personId && !personUuid) return false;
