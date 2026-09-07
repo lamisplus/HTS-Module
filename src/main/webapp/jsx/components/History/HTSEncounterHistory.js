@@ -396,6 +396,14 @@ const HTSEncounterHistory = (props) => {
           },
 
           {
+            title: "Date of Previously Known",
+            field: "dateOfPreviouslyKnown",
+            filtering: false,
+            // render: (rowData) => formatSetting(rowData.dateOfPreviouslyKnown),
+
+          },
+
+          {
             title: "Setting",
             field: "setting",
             filtering: false,
@@ -442,6 +450,12 @@ const HTSEncounterHistory = (props) => {
             field: "pmtctHts",
             filtering: false,
             render: (rowData) => formatPmtct(rowData),
+          },
+          {
+            title: "PMTCT Transfer-In Record",
+            field: "pmtctTransferInPatient",
+            filtering: false,
+            render: (rowData) => formatSetting(rowData?.pmtctTransferInPatient),
           },
           {
             title: "Suspected Acute Infection",
@@ -496,6 +510,7 @@ const HTSEncounterHistory = (props) => {
         data={encounters.map?.((record) => ({
           dateOfVisit: record.dateOfVisit ?? "",
           previouslyKnownHivPositive: record?.observation?.previouslyKnownHivPositive ?? (record?.previouslyKnownHivPositive || ""),
+          dateOfPreviouslyKnown: record?.observation?.dateOfPreviouslyKnown || record?.dateOfPreviouslyKnown || "",
           clientCode: record.clientCode ?? "",
           setting: record.setting ?? "",
           initialHivTest: record.observation?.initialHivTest ?? "",
@@ -506,6 +521,7 @@ const HTSEncounterHistory = (props) => {
           suspectedAcuteInfection: record.observation?.suspectedAcuteInfection ?? "",
           hivEarlyDetectResult: record.observation?.hivEarlyDetectResult ?? "",
           typeOfHivTestDone: record.observation?.typeOfHivTestDone ?? "",
+          pmtctTransferInPatient: record.observation?.pmtctTransferInPatient ?? "",
           pmtctHts: record?.pmtctHts ?? "",
           _raw: record,
         }))}

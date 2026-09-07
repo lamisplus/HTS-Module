@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -39,12 +40,7 @@ public class HtsEncounterController {
 
     @PostMapping
     @PreAuthorize("hasAnyAuthority('hts_create', 'hts_encounter_create')")
-    public ResponseEntity<Object> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
-        if (repository.existsActiveHivTransferInForPerson(request.getPatientId(), null)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap(
-                    "message", "This patient has a documented HIV Transfer-In record and cannot have a new HTS record created. Use the ICT form instead."
-            ));
-        }
+    public ResponseEntity<HtsEncounterResponse> create(@Valid @RequestBody HtsEncounterRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request));
     }
 
@@ -141,6 +137,19 @@ public class HtsEncounterController {
             @PageableDefault(size = 20) Pageable pageable) {
         Page<HtsPatientSummaryDto> page = service.getHtsPatientSummaries(search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
+    }
+
+    // IllegalTypeException is thrown by HtsEncounterService for every HIV-result-related
+    // business rule: the duplicate-positive block, the negative-result spacing rule
+    // (90 days, or 30 for PMTCT), and the HIV Transfer-In block. One handler covers all
+    // three (and anything added to validateHivResultRules/save/update later) uniformly.
+    // Without this, the exception falls through to Spring's default error handler and comes
+    // back as an opaque 500 with no message - this surfaces the real message instead, as a
+    // clean 409, scoped to just this controller.
+    @ExceptionHandler(IllegalTypeException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalTypeException(IllegalTypeException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap("message", ex.getMessage()));
     }
 
 }

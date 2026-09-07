@@ -116,6 +116,7 @@ public class HtsEncounterRequestDTO {
     // string (matched case-insensitively), not one of this app's internal codeset codes,
     // since PMTCT is an external producer.
     private String previouslyKnownHivPositive;
+    private String dateOfPreviouslyKnown;
 
     // ---- PMTCT-only fields below (from PMTCT_vs_HTS_field_comparison.xlsx audit) ----
     // All optional/nullable, no validation - HTS itself never sends any of these, only

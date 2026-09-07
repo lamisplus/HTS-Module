@@ -58,7 +58,33 @@ public class HtsEncounterService {
                     .orElseThrow(() -> new IllegalStateException("Person creation failed"));
         }
 
+        // HIV Transfer-In block - checked first, before anything else. Blocks a new HTS
+        // record for any patient with an active (archived = 0) Transfer-In record, UNLESS
+        // this is a PMTCT record (pmtctHts = true), in which case it's allowed through and
+        // permanently flagged via pmtctTransferInPatient below. Regular HTS-module creates
+        // remain blocked exactly as before - only pmtctHts = true bypasses this.
+        // Matches on both id and uuid now that person is already resolved, widening the
+        // match slightly versus the old controller-level check (which only had patientId).
+        boolean hasActiveTransferIn = repository.existsActiveHivTransferInForPerson(person.getId(), person.getUuid());
+        boolean isPmtctRecord = Boolean.TRUE.equals(request.getPmtctHts());
+
+        if (hasActiveTransferIn && !isPmtctRecord) {
+            throw new IllegalTypeException(
+                    HtsEncounterRequestDTO.class,
+                    "patientId",
+                    "This patient has a documented HIV Transfer-In record and cannot have a new HTS record " +
+                            "created. Use the ICT form instead.");
+        }
+
         ObjectNode observation = buildObservation(request);
+
+        if (hasActiveTransferIn && isPmtctRecord) {
+            // Permanent audit marker: this PMTCT record was allowed through despite the
+            // patient having an active Transfer-In record. Set once, here, at creation only -
+            // update() explicitly carries this key forward untouched on every edit and never
+            // lets it be set, changed, or removed by any update request.
+            observation.put("pmtctTransferInPatient", true);
+        }
 
         validateHivResultRules(
                 person.getId(),
@@ -108,6 +134,18 @@ public class HtsEncounterService {
             existing.setLatitude(request.getLatitude());
 
         ObjectNode observation = buildObservation(request);
+
+        // pmtctTransferInPatient is permanent once set at creation and must never change on
+        // an update, in either direction - buildObservation() only builds from the incoming
+        // request (which has no field for this key at all, so it could never set it anyway),
+        // so without this it would simply be dropped by the wholesale observation replace
+        // below. Carry it forward from the existing record exactly as-is, ignoring the
+        // incoming request entirely for this one key.
+        JsonNode existingObservation = existing.getObservation();
+        if (existingObservation != null && existingObservation.has("pmtctTransferInPatient")) {
+            observation.set("pmtctTransferInPatient", existingObservation.get("pmtctTransferInPatient"));
+        }
+
         LocalDate incomingDateOfVisit = request.getDateOfVisit() != null
                 ? request.getDateOfVisit()
                 : existing.getDateOfVisit();
@@ -376,6 +414,7 @@ public class HtsEncounterService {
         putStr(obs, "completedBy", r.getCompletedBy());
         putStr(obs, "designation", r.getDesignation());
         putStr(obs, "previouslyKnownHivPositive", r.getPreviouslyKnownHivPositive());
+        putStr(obs, "dateOfPreviouslyKnown", r.getDateOfPreviouslyKnown());
 
         // ---- PMTCT-only fields below - all optional, HTS itself never sends these ----
         putStr(obs, "pmtctCycleUuid", r.getPmtctCycleUuid());
@@ -463,6 +502,7 @@ public class HtsEncounterService {
     private static final String NEGATIVE_MARKER = "NEGATIVE";
     private static final String ACUTE_INFECTION_RESULT = "Positive";
     private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 90;
+    private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT = 30;
 
     // Exception to the "one active positive result" rule (Rule 1 only - the 90-day
     // negative-result spacing rule is unaffected): PMTCT sends HTS records for clients
@@ -532,6 +572,13 @@ public class HtsEncounterService {
         }
 
         if (incomingNegative && incomingDateOfVisit != null) {
+            // PMTCT records get a shorter re-testing window (30 days) than everyone else (90).
+            // Determined purely by the INCOMING record's own pmtctHts - not the source of
+            // whichever existing negative encounter it's being compared against.
+            long minDaysBetweenNegatives = Boolean.TRUE.equals(pmtctHts)
+                    ? MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT
+                    : MIN_DAYS_BETWEEN_NEGATIVE_RESULTS;
+
             HtsEncounter closestNegative = null;
             long closestGapDays = Long.MAX_VALUE;
 
@@ -546,7 +593,7 @@ public class HtsEncounterService {
                 }
             }
 
-            if (closestNegative != null && closestGapDays < MIN_DAYS_BETWEEN_NEGATIVE_RESULTS) {
+            if (closestNegative != null && closestGapDays < minDaysBetweenNegatives) {
                 throw new IllegalTypeException(
                         HtsEncounterRequestDTO.class,
                         "dateOfVisit",
@@ -554,14 +601,15 @@ public class HtsEncounterService {
                                 "Cannot save this HTS encounter as a negative result: patient %s already has a " +
                                         "negative HTS result recorded on %s (encounter ID %d, client code '%s'), which is " +
                                         "only %d day(s) from this encounter's date of visit (%s). Negative HTS results " +
-                                        "must be at least %d days apart.",
+                                        "must be at least %d days apart%s.",
                                 patientIdentifier,
                                 closestNegative.getDateOfVisit(),
                                 closestNegative.getId(),
                                 closestNegative.getClientCode(),
                                 closestGapDays,
                                 incomingDateOfVisit,
-                                MIN_DAYS_BETWEEN_NEGATIVE_RESULTS));
+                                minDaysBetweenNegatives,
+                                Boolean.TRUE.equals(pmtctHts) ? " for PMTCT records" : ""));
             }
         }
     }
