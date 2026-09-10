@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -78,13 +79,11 @@ public class HtsEncounterService {
 
         ObjectNode observation = buildObservation(request);
 
-        if (hasActiveTransferIn && isPmtctRecord) {
-            // Permanent audit marker: this PMTCT record was allowed through despite the
-            // patient having an active Transfer-In record. Set once, here, at creation only -
-            // update() explicitly carries this key forward untouched on every edit and never
-            // lets it be set, changed, or removed by any update request.
-            observation.put("pmtctTransferInPatient", true);
-        }
+        // Permanent audit marker: this PMTCT record was allowed through despite the
+        // patient having an active Transfer-In record. Set once, here, at creation only -
+        // update() explicitly carries this key forward untouched on every edit and never
+        // lets it be set, changed, or removed by any update request.
+        observation.put("pmtctTransferInPatient", hasActiveTransferIn && isPmtctRecord);
 
         validateHivResultRules(
                 person.getId(),
@@ -93,6 +92,13 @@ public class HtsEncounterService {
                 request.getDateOfVisit(),
                 null,
                 request.getPmtctHts());
+
+        validateCrossSourceDateOrdering(
+                person.getId(),
+                patientIdentifier(request.getClientCode(), person.getId()),
+                request.getDateOfVisit(),
+                request.getPmtctHts(),
+                null);
 
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
@@ -160,6 +166,13 @@ public class HtsEncounterService {
                 incomingDateOfVisit,
                 id,
                 existing.getPmtctHts());
+
+        validateCrossSourceDateOrdering(
+                existing.getPerson().getId(),
+                patientIdentifier(clientCode, existing.getPerson().getId()),
+                incomingDateOfVisit,
+                existing.getPmtctHts(),
+                id);
 
         existing.setObservation(observation);
 
@@ -611,6 +624,68 @@ public class HtsEncounterService {
                                 minDaysBetweenNegatives,
                                 Boolean.TRUE.equals(pmtctHts) ? " for PMTCT records" : ""));
             }
+        }
+    }
+
+    // Rule 3 (absolute, cross-facility, cross-source): a new or edited encounter cannot be
+    // dated earlier than the EARLIEST active positive result recorded by the OPPOSITE source
+    // (HTS-module vs PMTCT) for the same patient. Fires regardless of the incoming record's
+    // own result - positive, negative, or undetermined - since the concern is the backdating
+    // itself, contradicting an already-established positive diagnosis from the other module.
+    //
+    // Deliberately does NOT compare same-source records against each other (an HTS record
+    // backdated before another HTS positive, or a PMTCT record before another PMTCT positive)
+    // - that overlaps with Rule 1's territory and was explicitly out of scope for this rule.
+    //
+    // Deliberately kept separate from validateHivResultRules() and NOT called from
+    // updateFinalHivTestResult(): that endpoint never changes dateOfVisit, and running this
+    // there would risk an already-saved, previously-valid record suddenly failing later
+    // (e.g. a viral-load-triggered result update) purely because an unrelated backdated
+    // record was created afterward in the other module - an inappropriate side effect for an
+    // endpoint that isn't touching the date at all.
+    private void validateCrossSourceDateOrdering(
+            Long patientId,
+            String patientIdentifier,
+            LocalDate incomingDateOfVisit,
+            Boolean pmtctHts,
+            Long excludeEncounterId) {
+
+        if (incomingDateOfVisit == null) {
+            return;
+        }
+
+        boolean incomingIsPmtct = Boolean.TRUE.equals(pmtctHts);
+
+        HtsEncounter earliestOppositePositive = repository
+                .findByPerson_IdAndArchivedOrderByDateOfVisitDesc(patientId, false)
+                .stream()
+                .filter(e -> excludeEncounterId == null || !e.getId().equals(excludeEncounterId))
+                // Only the OPPOSITE source counts here - same-source is Rule 1's territory.
+                .filter(e -> Boolean.TRUE.equals(e.getPmtctHts()) != incomingIsPmtct)
+                .filter(e -> e.getDateOfVisit() != null)
+                .filter(e -> isPositiveObservation(e.getObservation()))
+                .min(Comparator.comparing(HtsEncounter::getDateOfVisit))
+                .orElse(null);
+
+        if (earliestOppositePositive != null && incomingDateOfVisit.isBefore(earliestOppositePositive.getDateOfVisit())) {
+            String thisSourceLabel = incomingIsPmtct ? "PMTCT" : "HTS module";
+            String oppositeSourceLabel = incomingIsPmtct ? "HTS module" : "PMTCT module";
+
+            throw new IllegalTypeException(
+                    HtsEncounterRequestDTO.class,
+                    "dateOfVisit",
+                    String.format(
+                            "Cannot save this %s encounter with a date of visit of %s: patient %s already has a " +
+                                    "positive HIV result documented in the %s on %s (encounter ID %d, client code " +
+                                    "'%s'). A new or edited encounter cannot be dated earlier than an " +
+                                    "already-documented positive result from the other module.",
+                            thisSourceLabel,
+                            incomingDateOfVisit,
+                            patientIdentifier,
+                            oppositeSourceLabel,
+                            earliestOppositePositive.getDateOfVisit(),
+                            earliestOppositePositive.getId(),
+                            earliestOppositePositive.getClientCode()));
         }
     }
 

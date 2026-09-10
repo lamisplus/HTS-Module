@@ -296,8 +296,9 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       toast.success("Encounter updated successfully");
       backButtonAction();
     } catch (error) {
-      console.error("Failed to update encounter:", error.response?.data || error.message);
-      toast.error("Failed to update encounter");
+      console.error("Failed to update encounter:", error?.response?.data || error?.message);
+      const apiMessage = error?.response?.data?.message || error?.response?.data || error?.response;
+      toast.error(apiMessage || "Failed to update encounter", { autoClose: 10000 });
       setIsLoading(false);
     }
   };
