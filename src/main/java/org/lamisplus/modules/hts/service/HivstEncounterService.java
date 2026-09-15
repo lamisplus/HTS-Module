@@ -40,6 +40,25 @@ public class HivstEncounterService {
     private final CurrentUserOrganizationService currentUserOrganizationService;
 
     public HivstEncounterResponseDTO save(HivstEncounterRequestDTO request) {
+        return save(request, null, null);
+    }
+
+    /**
+     * Creates a HIVST encounter derived from an HTS encounter that recorded HIVST kit
+     * distribution (hivTestKitsProvided = YES). The resulting record is a fully independent
+     * HIVST encounter - editable and deletable from the HIVST grid like any other, and NOT
+     * kept in sync with the HTS record it came from. The three marker fields stamped into
+     * its observation exist purely for traceability/reporting, not as a parent-child link.
+     */
+    public HivstEncounterResponseDTO saveDerivedFromHts(HivstEncounterRequestDTO request,
+                                                        Long htsEncounterId,
+                                                        String htsEncounterUuid) {
+        return save(request, htsEncounterId, htsEncounterUuid);
+    }
+
+    private HivstEncounterResponseDTO save(HivstEncounterRequestDTO request,
+                                           Long htsEncounterId,
+                                           String htsEncounterUuid) {
         Person person = personRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new EntityNotFoundException(Person.class, "id", request.getPatientId().toString()));
 
@@ -53,7 +72,20 @@ public class HivstEncounterService {
         encounter.setSource("Web");
         encounter.setLongitude(request.getLongitude());
         encounter.setLatitude(request.getLatitude());
-        encounter.setObservation(buildObservation(request));
+
+        ObjectNode observation = buildObservation(request);
+        if (htsEncounterId != null || htsEncounterUuid != null) {
+            // Traceability markers - only present on records extracted from an HTS encounter.
+            // A HIVST record created directly on the HIVST form never carries these.
+            observation.put("sourcedFromHts", true);
+            if (htsEncounterId != null) {
+                observation.put("htsEncounterId", htsEncounterId);
+            }
+            if (htsEncounterUuid != null) {
+                observation.put("htsEncounterUuid", htsEncounterUuid);
+            }
+        }
+        encounter.setObservation(observation);
 
         encounter = encounterRepository.save(encounter);
         return toResponse(encounter);
@@ -173,7 +205,7 @@ public class HivstEncounterService {
     }
 
     // Helper methods
-    private JsonNode buildObservation(HivstEncounterRequestDTO request) {
+    private ObjectNode buildObservation(HivstEncounterRequestDTO request) {
         ObjectNode obs = objectMapper.createObjectNode();
 
         // Note: "setting" intentionally lives only as its own column

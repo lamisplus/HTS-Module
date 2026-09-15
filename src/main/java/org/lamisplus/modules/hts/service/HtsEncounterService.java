@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
+import org.lamisplus.modules.hts.domain.dto.HivstEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
@@ -41,6 +42,10 @@ public class HtsEncounterService {
     private final PersonService personService;
     private final ObjectMapper objectMapper;
     private final CurrentUserOrganizationService currentUserOrganizationService;
+    // Used to create a companion HIVST encounter when an HTS record documents HIVST kit
+    // distribution - see maybeCreateDerivedHivstEncounter(). HivstEncounterService does not
+    // depend on this service, so there's no circular dependency.
+    private final HivstEncounterService hivstEncounterService;
 
     public HtsEncounterResponse save(HtsEncounterRequestDTO request) {
         Person person;
@@ -79,11 +84,13 @@ public class HtsEncounterService {
 
         ObjectNode observation = buildObservation(request);
 
-        // Permanent audit marker: this PMTCT record was allowed through despite the
-        // patient having an active Transfer-In record. Set once, here, at creation only -
-        // update() explicitly carries this key forward untouched on every edit and never
-        // lets it be set, changed, or removed by any update request.
-        observation.put("pmtctTransferInPatient", hasActiveTransferIn && isPmtctRecord);
+        if (hasActiveTransferIn && isPmtctRecord) {
+            // Permanent audit marker: this PMTCT record was allowed through despite the
+            // patient having an active Transfer-In record. Set once, here, at creation only -
+            // update() explicitly carries this key forward untouched on every edit and never
+            // lets it be set, changed, or removed by any update request.
+            observation.put("pmtctTransferInPatient", true);
+        }
 
         validateHivResultRules(
                 person.getId(),
@@ -114,7 +121,80 @@ public class HtsEncounterService {
         encounter.setObservation(observation);
 
         encounter = repository.save(encounter);
+
+        maybeCreateDerivedHivstEncounter(request, encounter);
+
         return toResponse(encounter);
+    }
+
+    // When an HTS encounter documents that HIVST kits were provided, extract the HIVST-relevant
+    // subset of the record and create a companion HIVST encounter, so the same event appears on
+    // both grids and a HIVST result can be entered against it (HivstResultService reads
+    // numberOfHivstKitDistributed off the HIVST encounter's observation).
+    //
+    // Deliberately NOT called from update(): a derived HIVST record is independent once created -
+    // later edits to the originating HTS record don't touch it, and it can be edited or deleted
+    // from the HIVST grid like any other HIVST record.
+    //
+    // Failure here never rolls back the HTS save - the HTS record is the primary clinical
+    // artifact and must not be lost because of a secondary write. Logged and swallowed.
+    private void maybeCreateDerivedHivstEncounter(HtsEncounterRequestDTO request, HtsEncounter savedEncounter) {
+        if (!"YES_NO_YES".equalsIgnoreCase(trimToNull(request.getHivTestKitsProvided()))) {
+            return;
+        }
+
+        try {
+            HivstEncounterRequestDTO hivstRequest = new HivstEncounterRequestDTO();
+
+            hivstRequest.setPatientId(savedEncounter.getPerson().getId());
+            hivstRequest.setDateOfVisit(savedEncounter.getDateOfVisit());
+            // Same client code as the HTS record it came from - intentionally not regenerated.
+            hivstRequest.setClientCode(savedEncounter.getClientCode());
+            // Use the SAVED encounter's facilityId, not the request's - it may have been
+            // server-derived by resolveFacilityId() rather than taken from the payload.
+            hivstRequest.setFacilityId(savedEncounter.getFacilityId());
+            hivstRequest.setSetting(savedEncounter.getSetting());
+
+            hivstRequest.setFacilitySetting(request.getFacilitySetting());
+            hivstRequest.setCommunityEntryPoint(request.getCommunityEntryPoint());
+            hivstRequest.setTypeOfSession(request.getTypeOfSession());
+            hivstRequest.setHtsPopulationType(request.getHtsPopulationType());
+            hivstRequest.setIndexTesting(request.getIndexTesting());
+            hivstRequest.setIndexRelationship(request.getIndexRelationship());
+            hivstRequest.setIndexClientCode(request.getIndexClientCode());
+
+            hivstRequest.setNumberOfWives(request.getNumberOfWives());
+            hivstRequest.setNumberOfCoWives(request.getNumberOfCoWives());
+            hivstRequest.setNumberOfBiologicalChildren(request.getNumberOfBiologicalChildren());
+            hivstRequest.setPregnancyStatus(request.getPregnancyStatus());
+            hivstRequest.setBreastfeedingDuration(request.getBreastfeedingDuration());
+
+            // The three HIVST-tracking fields that triggered this extraction
+            hivstRequest.setHivTestKitsProvided(request.getHivTestKitsProvided());
+            hivstRequest.setCategoryOfClients(request.getCategoryOfClients());
+            hivstRequest.setNumberOfHivstKitDistributed(request.getNumberOfHivstKitDistributed());
+
+            hivstRequest.setCompletedBy(request.getCompletedBy());
+            hivstRequest.setDesignation(request.getDesignation());
+            hivstRequest.setLongitude(savedEncounter.getLongitude());
+            hivstRequest.setLatitude(savedEncounter.getLatitude());
+
+            hivstEncounterService.saveDerivedFromHts(
+                    hivstRequest, savedEncounter.getId(), savedEncounter.getUuid());
+
+        } catch (Exception e) {
+//            log.error("Failed to create derived HIVST encounter for HTS encounter id {} (client code '{}'). " +
+//                            "The HTS record was saved successfully and is unaffected.",
+//                    savedEncounter.getId(), savedEncounter.getClientCode(), e);
+        }
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     public HtsEncounterResponse update(Long id, HtsEncounterRequestDTO request) {
