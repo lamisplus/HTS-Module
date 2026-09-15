@@ -673,10 +673,13 @@ export const buildValidationSchema = (isNewPatient) => {
       "Number of Kits Distributed is required",
       function (value) {
         if (this.parent.hivTestKitsProvided !== "YES_NO_YES") return true;
-        if (!value) {
+        if (!value || value === "") {
           return this.createError({
             message: "Number of Kits Distributed is required when HIV self test kit provided to client is yes",
           });
+        }
+        if (this.parent.hivTestKitsProvided !== "YES_NO_YES" && Number(value) < 1) {
+          return this.createError({ message: "Number of kits must be at least 1 since HIV self tests kit provided to client is 'yes'" });
         }
         return true;
       }

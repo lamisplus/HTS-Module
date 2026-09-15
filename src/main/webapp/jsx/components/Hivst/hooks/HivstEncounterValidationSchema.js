@@ -96,7 +96,7 @@ export const buildHIVSTValidationSchema = () => {
         if (!value || value === "") {
           return this.createError({
             message: "Number of Kits Distributed is required when HIV self test kit provided to client is yes",
-          });
+          }); 
         }
         if (Number(value) < 1) {
           return this.createError({ message: "Number of kits must be at least 1" });
