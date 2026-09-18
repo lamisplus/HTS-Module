@@ -51,6 +51,23 @@ public class IctEncounterService {
         return hts;
     }
 
+    // Person.getUuid() returns Object (legacy data can hold either a UUID or a String) -
+    // this mirrors the exact instanceof handling already used inline in save() below, as a
+    // reusable helper for the Transfer-In check, which needs a String.
+    private String personUuidAsString(Person person) {
+        if (person == null) {
+            return null;
+        }
+        Object uuid = person.getUuid();
+        if (uuid instanceof UUID) {
+            return uuid.toString();
+        }
+        if (uuid instanceof String) {
+            return (String) uuid;
+        }
+        return uuid != null ? uuid.toString() : null;
+    }
+
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPatientId());
 
@@ -67,12 +84,35 @@ public class IctEncounterService {
         encounter.setFacilityId(request.getFacilityId());
         mapRequestToEncounter(request, encounter);
 
+        boolean createdViaTransferIn = false;
+
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
             encounter.setHtsEncounter(hts);
             if (hts.getUuid() != null) {
                 encounter.setHtsEncounterUuid(hts.getUuid().toString());
             }
+        } else {
+            // No HTS link provided - the only other path to ICT eligibility is a documented,
+            // active HIV Transfer-In record (a transfer-in patient is, by definition, already
+            // confirmed positive at their originating facility - the transfer-in table itself
+            // has no separate HIV-status field, so presence in it IS the proof). This closes
+            // the previous gap where omitting htsEncounterId skipped validation entirely.
+            boolean activeTransferIn = htsEncounterRepository.existsActiveHivTransferInForPerson(
+                    person.getId(), personUuidAsString(person));
+
+            if (!activeTransferIn) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "ICT encounter can only be created for a client with a confirmed positive HTS result, " +
+                                "or a patient with a documented, active HIV Transfer-In record.");
+            }
+            createdViaTransferIn = true;
+        }
+
+        if (createdViaTransferIn) {
+            // Audit marker - only set when the Transfer-In exception is the actual reason
+            // this record was allowed through, not when a valid HTS link was also provided.
+            ((ObjectNode) encounter.getData()).put("createdViaTransferInException", true);
         }
 
         IctEncounter savedEncounter = ictEncounterRepository.save(encounter);
@@ -124,7 +164,19 @@ public class IctEncounterService {
 
     public IctEncounterResponse update(Long id, IctEncounterRequest request) {
         IctEncounter encounter = findActiveOrThrow(id);
+
+        // Capture BEFORE mapRequestToEncounter() rebuilds `data` from scratch, wholesale -
+        // the exact same issue found on the HTS side (observation replaced entirely on every
+        // update, not merged). Needed to grandfather an already-legitimate Transfer-In-sourced
+        // record when this particular edit doesn't (re)provide an HTS link.
+        JsonNode existingData = encounter.getData();
+        boolean previouslyCreatedViaTransferIn = existingData != null
+                && existingData.has("createdViaTransferInException")
+                && existingData.get("createdViaTransferInException").asBoolean(false);
+
         mapRequestToEncounter(request, encounter);
+
+        boolean createdViaTransferIn = false;
 
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
@@ -134,9 +186,33 @@ public class IctEncounterService {
             } else {
                 encounter.setHtsEncounterUuid(null);
             }
+            // A valid HTS link is now the record's justification - the marker is recomputed
+            // fresh each save based on THIS save's actual justification, not carried forward
+            // permanently once set.
         } else {
+            // No HTS link (kept or newly provided) - eligibility must come from Transfer-In,
+            // either grandfathered from how this record was originally created (so a patient
+            // whose Transfer-In status is later closed out doesn't have an already-legitimate
+            // record become permanently un-editable), or currently active.
+            Person person = encounter.getPerson();
+            boolean currentlyActiveTransferIn = htsEncounterRepository.existsActiveHivTransferInForPerson(
+                    person != null ? person.getId() : null, personUuidAsString(person));
+
+            if (!previouslyCreatedViaTransferIn && !currentlyActiveTransferIn) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "This ICT encounter has no confirmed-positive HTS record linked, and the patient does " +
+                                "not have an active HIV Transfer-In record. An ICT encounter must be linked to a " +
+                                "confirmed positive HTS result or belong to a patient with a documented Transfer-In " +
+                                "record.");
+            }
+
             encounter.setHtsEncounter(null);
             encounter.setHtsEncounterUuid(null);
+            createdViaTransferIn = true;
+        }
+
+        if (createdViaTransferIn) {
+            ((ObjectNode) encounter.getData()).put("createdViaTransferInException", true);
         }
 
         encounter.getContacts().clear();

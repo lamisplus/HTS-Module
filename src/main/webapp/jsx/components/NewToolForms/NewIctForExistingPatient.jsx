@@ -2,7 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button } from "semantic-ui-react";
+import axios from "axios";
+import { url, token } from "../../../api";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
+import { checkActiveHivTransferIn } from "../../services/checkHivTransferIn.service";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
 
@@ -122,6 +125,72 @@ const mapHtsRecordToIctValues = (htsRecord) => {
     return { ...ictSectionAKeys, ...buildInitialValuesKeys };
 };
 
+// Transfer-In patient path: there is no HTS encounter to read from at all (HTS creation is
+// deliberately blocked for them - that's the entire premise of this feature), so demographics
+// come straight from GET /api/v1/patient/{patientId} instead. setting/facilitySetting/
+// communityEntryPoint/htsEncounterId/htsDateOfVisit intentionally stay blank - there is no
+// HTS visit context to prefill from. indexClientId also stays blank (no HTS client code
+// exists) - IctSectionA.jsx makes this field editable specifically when htsEncounterId is
+// empty, so the user can enter one manually.
+const mapPatientDetailsToIctValues = (patientDetails) => {
+    if (!patientDetails) return {};
+
+    const p = patientDetails;
+    const personPhone = p.contactPoint?.contactPoint?.[0]?.value ?? "";
+    const personAddressObj = p.address?.address?.[0];
+    const personAddress = personAddressObj
+        ? personAddressObj.city
+        : "";
+
+    let sexCode = "";
+    if (p.gender?.display) {
+        sexCode = sexMap[p.gender.display.toLowerCase()] || "";
+    }
+
+    const ictSectionAKeys = {
+        indexClientId: "",
+        indexFirstName: p.firstName ?? "",
+        indexMiddleName: p.otherName ?? "",
+        indexSurname: p.surname ?? "",
+        indexSex: sexCode,
+        indexDob: p.dateOfBirth ?? "",
+        indexAge: p.dateOfBirth != null ? String(getAge(p.dateOfBirth)) : "",
+        indexPhone: personPhone,
+        indexAltPhone: "",
+        indexAddress: personAddress,
+        artUniqueId: "",
+        isOnArt: false,
+        patientId: p.id != null ? String(p.id) : "",
+        facilityId: p.facilityId != null ? String(p.facilityId) : "",
+        currentOrganisationUnitId: p.facilityId != null ? String(p.facilityId) : "",
+        htsEncounterId: "",
+        setting: "",
+        facilitySetting: "",
+        communityEntryPoint: "",
+        indexDateOfRegistration: p.dateOfRegistration,
+        htsDateOfVisit: "",
+        facilityName: "",
+        state: personAddressObj?.stateId != null ? String(personAddressObj.stateId) : "",
+        lga: personAddressObj?.district != null ? String(personAddressObj.district) : "",
+    };
+
+    const buildInitialValuesKeys = {
+        clientCode: "",
+        firstName: p.firstName ?? "",
+        middleName: p.otherName ?? "",
+        surname: p.surname ?? "",
+        sex: sexCode,
+        dateOfBirth: p.dateOfBirth ?? "",
+        age: p.dateOfBirth != null ? String(getAge(p.dateOfBirth)) : "",
+        phoneNumber: personPhone,
+        address: personAddress,
+        clientState: personAddressObj?.stateId != null ? String(personAddressObj.stateId) : "",
+        clientLga: personAddressObj?.district != null ? String(personAddressObj.district) : "",
+    };
+
+    return { ...ictSectionAKeys, ...buildInitialValuesKeys };
+};
+
 // const mapHtsRecordToIctValues = (htsRecord) => {
 //     if (!htsRecord) return {};
 
@@ -213,14 +282,30 @@ const NewIctForExistingPatient = ({ patientId, onDone, isOnArt = false }) => {
                     (enc) => enc?.observation?.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive" || enc?.observation?.finalHivTestResult?.toLowerCase() === "positive"
                 );
 
-                if (!positiveRecord) {
-                    setError("No positive HIV test result found for this patient. ICT form cannot be created.");
-                } else {
+                if (positiveRecord) {
                     setPositiveHtsRecord(positiveRecord);
                     const mapped = mapHtsRecordToIctValues(positiveRecord);
-                  
                     setIctInitialValues(mapped);
+                    return;
                 }
+
+                // No positive HTS record - check the other valid path to ICT eligibility:
+                // a documented, active HIV Transfer-In record. Such a patient is already
+                // confirmed positive at their originating facility, but HTS creation is
+                // blocked for them by design, so there's no HTS record to prefill from -
+                // fetch the patient record directly instead.
+                const hasActiveTransferIn = await checkActiveHivTransferIn(patientId, undefined);
+
+                if (!hasActiveTransferIn) {
+                    setError("No positive HIV test result found for this patient. ICT form cannot be created.");
+                    return;
+                }
+
+                const response = await axios.get(`${url}patient/${patientId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setPositiveHtsRecord(null);
+                setIctInitialValues(mapPatientDetailsToIctValues(response.data));
             } catch (err) {
                 console.error("Failed to fetch HTS encounters:", err);
                 setError("Unable to load patient HIV testing history. Please try again.");

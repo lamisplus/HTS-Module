@@ -12,13 +12,15 @@ import java.util.List;
  *
  * Uses {@link EntityManager} with a native SQL query directly - no Spring Data
  * repository interface is needed because there is no JPA entity backing this
- * query (it spans three tables).
+ * query (it spans four tables).
  *
- * Four locations are checked in a single UNION ALL query:
+ * Six locations are checked in a single UNION ALL query:
  * 1. hts_encounter.client_code
  * 2. hts_encounter.observation->>'indexClientCode' (JSONB)
- * 3. hts_ict_encounter.data->>'indexClientId' (JSONB)
- * 4. hts_ict_contact.contact_code
+ * 3. hivst_encounter.client_code
+ * 4. hivst_encounter.observation->>'indexClientCode' (JSONB)
+ * 5. hts_ict_encounter.data->>'indexClientId' (JSONB)
+ * 6. hts_ict_contact.contact_code
  */
 @Service
 @Slf4j
@@ -41,19 +43,31 @@ public class ClientCodeUniquenessService {
                     "WHERE archived = false AND observation IS NOT NULL " +
                     "AND observation->>'indexClientCode' ILIKE :code " +
                     "UNION ALL " +
-                    // 3. ICT data->>'indexClientId'
+                    // 3. HIVST client_code - same structure/columns as HTS, previously missing
+                    // from this check entirely. This matters now that HIVST encounters can be
+                    // derived from an HTS record and reuse its client_code verbatim, and it
+                    // also covers HIVST records filled directly on the standalone HIVST form.
+                    "SELECT 1 FROM hivst_encounter " +
+                    "WHERE archived = false AND client_code ILIKE :code " +
+                    "UNION ALL " +
+                    // 4. HIVST observation->>'indexClientCode' - mirrors check #2
+                    "SELECT 1 FROM hivst_encounter " +
+                    "WHERE archived = false AND observation IS NOT NULL " +
+                    "AND observation->>'indexClientCode' ILIKE :code " +
+                    "UNION ALL " +
+                    // 5. ICT data->>'indexClientId'
                     "SELECT 1 FROM hts_ict_encounter " +
                     "WHERE archived = false AND data IS NOT NULL " +
                     "AND data->>'indexClientId' ILIKE :code " +
                     "UNION ALL " +
-                    // 4. ICT contact_code
+                    // 6. ICT contact_code
                     "SELECT 1 FROM hts_ict_contact " +
                     "WHERE archived = false AND contact_code ILIKE :code " +
                     "LIMIT 1";
 
     /**
      * Returns {@code true} when the supplied {@code clientCode} already exists
-     * in any of the four locations searched. The check is case-insensitive.
+     * in any of the six locations searched. The check is case-insensitive.
      * Blank / null inputs always return {@code false}.
      *
      * @param clientCode the raw code string typed by the user

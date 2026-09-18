@@ -273,8 +273,9 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
       toast.success("New HTS encounter created successfully");
       onSubmitSuccess ? onSubmitSuccess(response, values) : backButtonAction?.();
     } catch (error) {
-      console.error("Failed to create encounter:", error.response?.data || error.message);
-      toast.error("Failed to create HTS encounter");
+      console.error("Failed to create encounter:", error?.response?.data || error?.message);
+      const apiMessage = error?.response?.data?.message || error?.response?.data || error?.response;
+      toast.error(apiMessage || "Failed to create HTS encounter", { autoClose: 10000 });
     } finally {
       setIsLoading(false);
     }

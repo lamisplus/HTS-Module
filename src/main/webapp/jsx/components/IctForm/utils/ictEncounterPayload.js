@@ -23,7 +23,11 @@ export const buildIctEncounterPayload = (values) => {
   return {
     patientId: values.patientId != null ? Number(values.patientId) : null,
     facilityId: values.facilityId != null ? Number(values.facilityId) : null,
-    htsEncounterId: values.htsEncounterId != null ? Number(values.htsEncounterId) : null,
+    // Truthy check, not != null: an empty string here (a Transfer-In-sourced ICT record
+    // with no HTS link) must become null, not 0 - Number('') is 0, which the backend would
+    // treat as "a real HTS encounter link was provided" and try (and fail) to look up,
+    // instead of correctly falling through to the Transfer-In eligibility check.
+    htsEncounterId: values.htsEncounterId ? Number(values.htsEncounterId) : null,
 
     dateOfService: values.dateOfService || null,
     setting: values.setting || null,

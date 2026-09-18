@@ -266,7 +266,13 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
       <SectionSubheading>Index Client Details</SectionSubheading>
       <div className="row">
-        <div className="col-md-4"><ReadOnlyField label="Index Client ID (HTS Code)" value={values.indexClientId} /></div>
+        {values.htsEncounterId ? (
+          <div className="col-md-4"><ReadOnlyField label="Index Client ID (HTS Code)" value={values.indexClientId} /></div>
+        ) : (
+          <div className="col-md-4">
+            <FormTextField label="Index Client ID (HTS Code)" {...fp("indexClientId")} />
+          </div>
+        )}
         {values.artUniqueId && <div className="col-md-4"><ReadOnlyField label="ART Unique ID" value={values.artUniqueId} /></div>}
         <div className="col-md-4"><ReadOnlyField label="First Name" value={values.indexFirstName} /></div>
         <div className="col-md-4"><ReadOnlyField label="Middle Name" value={values.indexMiddleName} /></div>

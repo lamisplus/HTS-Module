@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lamisplus.modules.base.controller.apierror.EntityNotFoundException;
 import org.lamisplus.modules.base.controller.apierror.IllegalTypeException;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterRequestDTO;
+import org.lamisplus.modules.hts.domain.dto.HivstEncounterRequestDTO;
 import org.lamisplus.modules.hts.domain.dto.HtsEncounterResponse;
 import org.lamisplus.modules.hts.domain.dto.HtsPatientSummaryDto;
 import org.lamisplus.modules.hts.domain.dto.PatientHtsSummaryDto;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -40,6 +42,10 @@ public class HtsEncounterService {
     private final PersonService personService;
     private final ObjectMapper objectMapper;
     private final CurrentUserOrganizationService currentUserOrganizationService;
+    // Used to create a companion HIVST encounter when an HTS record documents HIVST kit
+    // distribution - see maybeCreateDerivedHivstEncounter(). HivstEncounterService does not
+    // depend on this service, so there's no circular dependency.
+    private final HivstEncounterService hivstEncounterService;
 
     public HtsEncounterResponse save(HtsEncounterRequestDTO request) {
         Person person;
@@ -94,6 +100,13 @@ public class HtsEncounterService {
                 null,
                 request.getPmtctHts());
 
+        validateCrossSourceDateOrdering(
+                person.getId(),
+                patientIdentifier(request.getClientCode(), person.getId()),
+                request.getDateOfVisit(),
+                request.getPmtctHts(),
+                null);
+
         HtsEncounter encounter = new HtsEncounter();
         encounter.setPerson(person);
         encounter.setPatientUuid(resolveUuid(person.getUuid()));
@@ -108,7 +121,80 @@ public class HtsEncounterService {
         encounter.setObservation(observation);
 
         encounter = repository.save(encounter);
+
+        maybeCreateDerivedHivstEncounter(request, encounter);
+
         return toResponse(encounter);
+    }
+
+    // When an HTS encounter documents that HIVST kits were provided, extract the HIVST-relevant
+    // subset of the record and create a companion HIVST encounter, so the same event appears on
+    // both grids and a HIVST result can be entered against it (HivstResultService reads
+    // numberOfHivstKitDistributed off the HIVST encounter's observation).
+    //
+    // Deliberately NOT called from update(): a derived HIVST record is independent once created -
+    // later edits to the originating HTS record don't touch it, and it can be edited or deleted
+    // from the HIVST grid like any other HIVST record.
+    //
+    // Failure here never rolls back the HTS save - the HTS record is the primary clinical
+    // artifact and must not be lost because of a secondary write. Logged and swallowed.
+    private void maybeCreateDerivedHivstEncounter(HtsEncounterRequestDTO request, HtsEncounter savedEncounter) {
+        if (!"YES_NO_YES".equalsIgnoreCase(trimToNull(request.getHivTestKitsProvided()))) {
+            return;
+        }
+
+        try {
+            HivstEncounterRequestDTO hivstRequest = new HivstEncounterRequestDTO();
+
+            hivstRequest.setPatientId(savedEncounter.getPerson().getId());
+            hivstRequest.setDateOfVisit(savedEncounter.getDateOfVisit());
+            // Same client code as the HTS record it came from - intentionally not regenerated.
+            hivstRequest.setClientCode(savedEncounter.getClientCode());
+            // Use the SAVED encounter's facilityId, not the request's - it may have been
+            // server-derived by resolveFacilityId() rather than taken from the payload.
+            hivstRequest.setFacilityId(savedEncounter.getFacilityId());
+            hivstRequest.setSetting(savedEncounter.getSetting());
+
+            hivstRequest.setFacilitySetting(request.getFacilitySetting());
+            hivstRequest.setCommunityEntryPoint(request.getCommunityEntryPoint());
+            hivstRequest.setTypeOfSession(request.getTypeOfSession());
+            hivstRequest.setHtsPopulationType(request.getHtsPopulationType());
+            hivstRequest.setIndexTesting(request.getIndexTesting());
+            hivstRequest.setIndexRelationship(request.getIndexRelationship());
+            hivstRequest.setIndexClientCode(request.getIndexClientCode());
+
+            hivstRequest.setNumberOfWives(request.getNumberOfWives());
+            hivstRequest.setNumberOfCoWives(request.getNumberOfCoWives());
+            hivstRequest.setNumberOfBiologicalChildren(request.getNumberOfBiologicalChildren());
+            hivstRequest.setPregnancyStatus(request.getPregnancyStatus());
+            hivstRequest.setBreastfeedingDuration(request.getBreastfeedingDuration());
+
+            // The three HIVST-tracking fields that triggered this extraction
+            hivstRequest.setHivTestKitsProvided(request.getHivTestKitsProvided());
+            hivstRequest.setCategoryOfClients(request.getCategoryOfClients());
+            hivstRequest.setNumberOfHivstKitDistributed(request.getNumberOfHivstKitDistributed());
+
+            hivstRequest.setCompletedBy(request.getCompletedBy());
+            hivstRequest.setDesignation(request.getDesignation());
+            hivstRequest.setLongitude(savedEncounter.getLongitude());
+            hivstRequest.setLatitude(savedEncounter.getLatitude());
+
+            hivstEncounterService.saveDerivedFromHts(
+                    hivstRequest, savedEncounter.getId(), savedEncounter.getUuid());
+
+        } catch (Exception e) {
+//            log.error("Failed to create derived HIVST encounter for HTS encounter id {} (client code '{}'). " +
+//                            "The HTS record was saved successfully and is unaffected.",
+//                    savedEncounter.getId(), savedEncounter.getClientCode(), e);
+        }
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     public HtsEncounterResponse update(Long id, HtsEncounterRequestDTO request) {
@@ -160,6 +246,13 @@ public class HtsEncounterService {
                 incomingDateOfVisit,
                 id,
                 existing.getPmtctHts());
+
+        validateCrossSourceDateOrdering(
+                existing.getPerson().getId(),
+                patientIdentifier(clientCode, existing.getPerson().getId()),
+                incomingDateOfVisit,
+                existing.getPmtctHts(),
+                id);
 
         existing.setObservation(observation);
 
@@ -611,6 +704,68 @@ public class HtsEncounterService {
                                 minDaysBetweenNegatives,
                                 Boolean.TRUE.equals(pmtctHts) ? " for PMTCT records" : ""));
             }
+        }
+    }
+
+    // Rule 3 (absolute, cross-facility, cross-source): a new or edited encounter cannot be
+    // dated earlier than the EARLIEST active positive result recorded by the OPPOSITE source
+    // (HTS-module vs PMTCT) for the same patient. Fires regardless of the incoming record's
+    // own result - positive, negative, or undetermined - since the concern is the backdating
+    // itself, contradicting an already-established positive diagnosis from the other module.
+    //
+    // Deliberately does NOT compare same-source records against each other (an HTS record
+    // backdated before another HTS positive, or a PMTCT record before another PMTCT positive)
+    // - that overlaps with Rule 1's territory and was explicitly out of scope for this rule.
+    //
+    // Deliberately kept separate from validateHivResultRules() and NOT called from
+    // updateFinalHivTestResult(): that endpoint never changes dateOfVisit, and running this
+    // there would risk an already-saved, previously-valid record suddenly failing later
+    // (e.g. a viral-load-triggered result update) purely because an unrelated backdated
+    // record was created afterward in the other module - an inappropriate side effect for an
+    // endpoint that isn't touching the date at all.
+    private void validateCrossSourceDateOrdering(
+            Long patientId,
+            String patientIdentifier,
+            LocalDate incomingDateOfVisit,
+            Boolean pmtctHts,
+            Long excludeEncounterId) {
+
+        if (incomingDateOfVisit == null) {
+            return;
+        }
+
+        boolean incomingIsPmtct = Boolean.TRUE.equals(pmtctHts);
+
+        HtsEncounter earliestOppositePositive = repository
+                .findByPerson_IdAndArchivedOrderByDateOfVisitDesc(patientId, false)
+                .stream()
+                .filter(e -> excludeEncounterId == null || !e.getId().equals(excludeEncounterId))
+                // Only the OPPOSITE source counts here - same-source is Rule 1's territory.
+                .filter(e -> Boolean.TRUE.equals(e.getPmtctHts()) != incomingIsPmtct)
+                .filter(e -> e.getDateOfVisit() != null)
+                .filter(e -> isPositiveObservation(e.getObservation()))
+                .min(Comparator.comparing(HtsEncounter::getDateOfVisit))
+                .orElse(null);
+
+        if (earliestOppositePositive != null && incomingDateOfVisit.isBefore(earliestOppositePositive.getDateOfVisit())) {
+            String thisSourceLabel = incomingIsPmtct ? "PMTCT" : "HTS module";
+            String oppositeSourceLabel = incomingIsPmtct ? "HTS module" : "PMTCT module";
+
+            throw new IllegalTypeException(
+                    HtsEncounterRequestDTO.class,
+                    "dateOfVisit",
+                    String.format(
+                            "Cannot save this %s encounter with a date of visit of %s: patient %s already has a " +
+                                    "positive HIV result documented in the %s on %s (encounter ID %d, client code " +
+                                    "'%s'). A new or edited encounter cannot be dated earlier than an " +
+                                    "already-documented positive result from the other module.",
+                            thisSourceLabel,
+                            incomingDateOfVisit,
+                            patientIdentifier,
+                            oppositeSourceLabel,
+                            earliestOppositePositive.getDateOfVisit(),
+                            earliestOppositePositive.getId(),
+                            earliestOppositePositive.getClientCode()));
         }
     }
 

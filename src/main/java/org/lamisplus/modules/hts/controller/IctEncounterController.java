@@ -14,9 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/ict-encounter")
@@ -71,5 +74,16 @@ public class IctEncounterController {
             @PageableDefault(sort = "dateOfService", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<IctEncounterResponse> page = service.search(facilityId, search, pageable);
         return ResponseEntity.ok(PaginationUtil.generatePagination(page, page.getContent()));
+    }
+
+    // ResponseStatusException is thrown by IctEncounterService for the confirmed-positive
+    // HTS link check and the HIV Transfer-In eligibility check. Without this handler it
+    // falls through to Spring's default error handler and comes back with no message - this
+    // surfaces the real message instead, mirroring HtsEncounterController's identical
+    // handler for IllegalTypeException.
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(Collections.singletonMap("message", ex.getReason()));
     }
 }
