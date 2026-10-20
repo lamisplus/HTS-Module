@@ -1,0 +1,115 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="ensure_hts_encounter_last_modified_date_10202026" author="Emmanuel Nnajiofor">
+        <comment>
+            Self-heals databases where hts_encounter.last_modified_date is missing.
+
+            Background: the column was originally added in updates.xml (Updates installer, @Order 3),
+            guarded by a tableExists(hts_encounter) precondition with onFail=MARK_RAN. hts_encounter is
+            only created later by HtsEncounterSchemaInstaller (@Order 20), so on fresh installs and on
+            upgrades from the legacy hts_client-era module that changeset was marked as run without
+            ever adding the column, and was never retried. The HtsEncounter entity maps the column, so
+            every query on hts_encounter then failed with
+            "column last_modified_date does not exist".
+
+            This installer runs after hts_encounter is guaranteed to exist (@Order 27) and is fully
+            idempotent. It deliberately has NO MARK_RAN precondition: if the table is somehow missing
+            it fails loudly instead of being silently recorded as done.
+        </comment>
+
+        <sql splitStatements="true" endDelimiter=";">
+            ALTER TABLE hts_encounter
+                ADD COLUMN IF NOT EXISTS last_modified_date TIMESTAMP WITHOUT TIME ZONE;
+
+            UPDATE hts_encounter
+            SET last_modified_date = COALESCE(date_modified, date_created)
+            WHERE last_modified_date IS NULL;
+
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_last_modified_date
+                ON hts_encounter (last_modified_date);
+        </sql>
+    </changeSet>
+
+    <!--
+        Re-applies two changesets from updates.xml that were silently skipped (MARK_RAN / failOnError=false)
+        on databases where the Updates installer (@Order 3) ran before hts_encounter and hts_ict_encounter
+        existed. Both are idempotent, so they are a no-op on databases that already have them.
+        Order matters: the pregnancy-status fix writes last_modified_date, created above.
+    -->
+    <changeSet id="ensure_hts_encounter_perf_indexes_10202026" author="Emmanuel Nnajiofor" failOnError="false">
+        <comment>
+            Mirrors 06-07-2026-hts-patient-grid-perf-indexes and the hts_encounter indexes of
+            06-07-2026-hts-patients-tab-perf-indexes (updates.xml). Index failures must not block startup.
+        </comment>
+        <sql splitStatements="true" endDelimiter=";">
+            -- hts_encounter: DISTINCT ON latest + window COUNT driver.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_latest
+                ON hts_encounter (facility_id, archived, patient_uuid, id DESC);
+
+            -- hts_encounter: EXISTS semi-join in the lean count query.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_grid_count
+                ON hts_encounter (patient_uuid, facility_id, archived);
+
+            -- hts_encounter: NOT EXISTS on client_code = patient_person.hospital_number.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_client_code
+                ON hts_encounter (facility_id, archived, client_code);
+
+            -- hts_encounter: NOT EXISTS on CAST(patient_uuid AS text) = patient_person.uuid.
+            CREATE INDEX IF NOT EXISTS idx_hts_encounter_facility_arch_uuid_text
+                ON hts_encounter (facility_id, archived, (CAST(patient_uuid AS text)));
+
+            -- hts_ict_encounter: grouped ict_count CTE (same skipped changeset, same root cause).
+            CREATE INDEX IF NOT EXISTS idx_hts_ict_encounter_grid_count
+                ON hts_ict_encounter (facility_id, archived, patient_uuid);
+        </sql>
+    </changeSet>
+
+    <changeSet id="ensure_hts_encounter_pregnancy_status_fix_10202026" author="Emmanuel Nnajiofor">
+        <comment>
+            Mirrors 18-08-2026-fix-pregnancy-status-breastfeeding-concat (updates.xml), which was skipped
+            on databases where hts_encounter did not exist when the Updates installer ran. Rows are only
+            touched when pregnancyStatus still contains ' BREASTFEEDING_' or is a bare numeric codeset id
+            and differs from the corrected value, so it is a no-op where the fix was already applied.
+        </comment>
+        <sql splitStatements="false">
+            UPDATE hts_encounter e
+            SET observation        = jsonb_set(e.observation, '{pregnancyStatus}', to_jsonb(v.new_value), false),
+                date_modified      = now(),
+                last_modified_date = now()
+            FROM (
+                SELECT c.id,
+                       CASE
+                           WHEN c.prefix ~ '^[0-9]+$'
+                               THEN coalesce(
+                                        (SELECT k.code
+                                         FROM base_application_codeset k
+                                         WHERE k.id::text = c.prefix
+                                           AND k.code LIKE 'PREGANACY!_STATUS!_%' ESCAPE '!'),
+                                        c.prefix)
+                           WHEN c.prefix != '' THEN c.prefix
+                           WHEN c.breastfeeding = 'YES' AND c.is_female THEN 'PREGANACY_STATUS_BREASTFEEDING'
+                           ELSE ''
+                       END AS new_value
+                FROM (
+                    SELECT e2.id,
+                           btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 1)) AS prefix,
+                           upper(btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 2))) AS breastfeeding,
+                           (upper(btrim(coalesce(p.sex, ''))) LIKE '%FEMALE%'
+                            OR upper(btrim(coalesce(p.sex, ''))) = 'F') AS is_female
+                    FROM hts_encounter e2
+                    LEFT JOIN patient_person p ON p.id = e2.patient_id
+                    WHERE e2.observation IS NOT NULL
+                      AND jsonb_typeof(e2.observation-&gt;'pregnancyStatus') = 'string'
+                      AND (strpos(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_') != 0
+                           OR btrim(e2.observation-&gt;&gt;'pregnancyStatus') ~ '^[0-9]+$')
+                ) c
+            ) v
+            WHERE e.id = v.id
+              AND coalesce(e.observation-&gt;&gt;'pregnancyStatus', '') IS DISTINCT FROM v.new_value;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
