@@ -31,6 +31,12 @@
             CREATE INDEX IF NOT EXISTS idx_hts_encounter_last_modified_date
                 ON hts_encounter (last_modified_date);
         </sql>
+        <rollback>
+            <comment>
+                Intentionally not reversed: the column may have pre-existed this changeset
+                (added by the Updates installer), so dropping it here could remove live data.
+            </comment>
+        </rollback>
     </changeSet>
 
     <!--
@@ -65,6 +71,7 @@
             CREATE INDEX IF NOT EXISTS idx_hts_ict_encounter_grid_count
                 ON hts_ict_encounter (facility_id, archived, patient_uuid);
         </sql>
+        <rollback/>
     </changeSet>
 
     <changeSet id="ensure_hts_encounter_pregnancy_status_fix_10202026" author="Emmanuel Nnajiofor">
@@ -95,21 +102,27 @@
                        END AS new_value
                 FROM (
                     SELECT e2.id,
-                           btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 1)) AS prefix,
-                           upper(btrim(split_part(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_', 2))) AS breastfeeding,
+                           btrim(split_part(e2.observation->>'pregnancyStatus', ' BREASTFEEDING_', 1)) AS prefix,
+                           upper(btrim(split_part(e2.observation->>'pregnancyStatus', ' BREASTFEEDING_', 2))) AS breastfeeding,
                            (upper(btrim(coalesce(p.sex, ''))) LIKE '%FEMALE%'
                             OR upper(btrim(coalesce(p.sex, ''))) = 'F') AS is_female
                     FROM hts_encounter e2
                     LEFT JOIN patient_person p ON p.id = e2.patient_id
                     WHERE e2.observation IS NOT NULL
-                      AND jsonb_typeof(e2.observation-&gt;'pregnancyStatus') = 'string'
-                      AND (strpos(e2.observation-&gt;&gt;'pregnancyStatus', ' BREASTFEEDING_') != 0
-                           OR btrim(e2.observation-&gt;&gt;'pregnancyStatus') ~ '^[0-9]+$')
+                      AND jsonb_typeof(e2.observation->'pregnancyStatus') = 'string'
+                      AND (strpos(e2.observation->>'pregnancyStatus', ' BREASTFEEDING_') != 0
+                           OR btrim(e2.observation->>'pregnancyStatus') ~ '^[0-9]+$')
                 ) c
             ) v
             WHERE e.id = v.id
-              AND coalesce(e.observation-&gt;&gt;'pregnancyStatus', '') IS DISTINCT FROM v.new_value;
+              AND coalesce(e.observation->>'pregnancyStatus', '') IS DISTINCT FROM v.new_value;
         </sql>
+        <rollback>
+            <comment>
+                Not reversible: the prior pregnancyStatus values are not preserved anywhere.
+                Snapshot the affected rows first if reversibility is needed in production.
+            </comment>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>
