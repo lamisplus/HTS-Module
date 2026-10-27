@@ -1,3 +1,5 @@
+import { LEGACY_HIV_RESULT_CODE_MAP } from "../constants";
+
 const SETTING_PREFIX_MAP = {
   "HTS_ENTRY_POINT_FACILITY": "FC",
   "HTS_ENTRY_POINT_COMMUNITY": "CM",
@@ -355,4 +357,18 @@ export const buildHtsEncounterPayload = (formValues, isNewPatient) => {
   }
 
   return payload;
+};
+
+// Maps legacy STI_HIV_RESULT codes on a saved record to the codes the form uses now.
+// See LEGACY_HIV_RESULT_CODE_MAP in ../constants.
+export const normalizeLegacyHivResultCodes = (values) => {
+  if (!values) return values;
+  const normalized = { ...values };
+  Object.keys(LEGACY_HIV_RESULT_CODE_MAP).forEach((field) => {
+    const raw = normalized[field];
+    if (typeof raw !== "string") return;
+    const replacement = LEGACY_HIV_RESULT_CODE_MAP[field][raw.trim().toUpperCase()];
+    if (replacement) normalized[field] = replacement;
+  });
+  return normalized;
 };

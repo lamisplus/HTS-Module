@@ -37,6 +37,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class HtsEncounterService {
 
+    private static final String LEGACY_HIV_RESULT_PREFIX = "STI_HIV_RESULT_";
+    private static final String INITIAL_HIV_TEST_PREFIX = "HIV_TEST_RESULT_";
+    private static final String CONFIRMATORY_HIV_TEST_PREFIX = "HIV_CONFIRMATORY_TEST_RESULT_";
+
     private final HtsEncounterRepository repository;
     private final PersonRepository personRepository;
     private final PersonService personService;
@@ -482,9 +486,9 @@ public class HtsEncounterService {
         // Diagnostic Testing
         putStr(obs, "typeOfHivTestDone", r.getTypeOfHivTestDone());
         putStr(obs, "hivEarlyDetectResult", r.getHivEarlyDetectResult());
-        putStr(obs, "initialHivTest", r.getInitialHivTest());
+        putStr(obs, "initialHivTest", normalizeLegacyHivResult(r.getInitialHivTest(), INITIAL_HIV_TEST_PREFIX));
         putStr(obs, "suspectedAcuteInfection", r.getSuspectedAcuteInfection());
-        putStr(obs, "confirmatoryHivTest", r.getConfirmatoryHivTest());
+        putStr(obs, "confirmatoryHivTest", normalizeLegacyHivResult(r.getConfirmatoryHivTest(), CONFIRMATORY_HIV_TEST_PREFIX));
         putStr(obs, "finalHivTestResult", r.getFinalHivTestResult());
         putStr(obs, "dateOfFinalHivTestDone", r.getDateOfFinalHivTestDone());
         putStr(obs, "syphilisTestResult", r.getSyphilisTestResult());
@@ -558,6 +562,19 @@ public class HtsEncounterService {
     private void putStr(ObjectNode node, String key, String value) {
         if (value != null)
             node.put(key, value);
+    }
+
+    // initialHivTest uses the HIV_TEST_RESULT codeset and confirmatoryHivTest uses
+    // HIV_CONFIRMATORY_TEST_RESULT. Older form builds saved STI_HIV_RESULT codes in both, and a
+    // browser still running a cached old bundle could keep doing so, so those two codes are
+    // mapped to the same result in the correct codeset. Any other value is stored unchanged.
+    private static String normalizeLegacyHivResult(String value, String targetPrefix) {
+        if (value == null) return null;
+        String code = value.trim().toUpperCase(Locale.ROOT);
+        if (code.equals(LEGACY_HIV_RESULT_PREFIX + "POSITIVE") || code.equals(LEGACY_HIV_RESULT_PREFIX + "NEGATIVE")) {
+            return targetPrefix + code.substring(LEGACY_HIV_RESULT_PREFIX.length());
+        }
+        return value;
     }
 
     // Mirrors putStr's null-skip behavior for the three PMTCT nested objects (syphilisInfo,

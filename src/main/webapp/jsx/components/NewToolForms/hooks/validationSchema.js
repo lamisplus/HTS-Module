@@ -1,5 +1,6 @@
 // src/NewToolForms/hooks/validationSchema.js
 import * as yup from "yup";
+import { INITIAL_HIV_TEST_POSITIVE } from "../constants";
 
 const nonBlankMin2 = (label) =>
   yup
@@ -587,7 +588,7 @@ export const buildValidationSchema = (isNewPatient) => {
       function (value) {
         const { initialHivTest, hivEarlyDetectResult } = this.parent;
         const needsConfirmatory =
-          initialHivTest === "STI_HIV_RESULT_POSITIVE" ||
+          initialHivTest === INITIAL_HIV_TEST_POSITIVE ||
           hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE";
         if (!needsConfirmatory) return true;
         return !!value || this.createError({ message: "Confirmatory HIV test is required" });
@@ -606,7 +607,7 @@ export const buildValidationSchema = (isNewPatient) => {
         // Mirrors DiagnosticTestingSection's `showRecency` flag:
         // the field is only rendered - and therefore only required -
         // when the initial HIV test result is Positive.
-        if (this.parent.initialHivTest !== "STI_HIV_RESULT_POSITIVE") return true;
+        if (this.parent.initialHivTest !== INITIAL_HIV_TEST_POSITIVE) return true;
         return !!value || this.createError({ message: "Recency test result is required" });
       }
     ),

@@ -1,0 +1,211 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <!--
+        Background: the HTS Diagnostic Testing section loaded the STI_HIV_RESULT codeset for
+        "Initial HIV Test" (observation.initialHivTest) instead of HIV_TEST_RESULT. Form builds from
+        May 2026 also used STI_HIV_RESULT for "Confirmatory HIV Test" (observation.confirmatoryHivTest),
+        which now uses HIV_CONFIRMATORY_TEST_RESULT. The form, the backend and this changelog now
+        use the correct codesets; these changesets move saved records onto them.
+
+        Only the exact codes STI_HIV_RESULT_POSITIVE and STI_HIV_RESULT_NEGATIVE (any case, surrounding
+        spaces ignored) stored as JSON strings are changed. Display values such as "Positive", values
+        written by PMTCT, and every other observation key are left alone. Codes are matched, never
+        codeset ids, because ids differ between facility databases.
+
+        Every changed value is first copied to hts_encounter_sti_hiv_result_backup, so the rollback
+        blocks can restore it. Each correction is a single statement, so the backup and the update
+        succeed or fail together. All changesets are idempotent: a second run changes nothing.
+        There is deliberately no MARK_RAN precondition; this installer runs after hts_encounter
+        exists (@Order 31), so a missing table fails loudly instead of being recorded as done.
+    -->
+
+    <changeSet id="create_hts_encounter_sti_hiv_result_backup_10272026" author="Emmanuel Nnajiofor">
+        <comment>
+            Creates the table that keeps the original value of every observation key changed by the
+            changesets below. key_existed records whether the key was present, so a rollback can
+            remove a key it added instead of leaving an empty one behind.
+        </comment>
+        <sql splitStatements="false">
+            CREATE TABLE IF NOT EXISTS hts_encounter_sti_hiv_result_backup (
+                hts_encounter_id       BIGINT       NOT NULL,
+                field_name             VARCHAR(50)  NOT NULL,
+                hts_encounter_uuid     VARCHAR(255),
+                key_existed            BOOLEAN      NOT NULL,
+                old_value              TEXT,
+                new_value              TEXT,
+                old_date_modified      TIMESTAMP WITHOUT TIME ZONE,
+                old_last_modified_date TIMESTAMP WITHOUT TIME ZONE,
+                backed_up_at           TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT now(),
+                CONSTRAINT pk_hts_encounter_sti_hiv_result_backup PRIMARY KEY (hts_encounter_id, field_name)
+            );
+        </sql>
+        <rollback>
+            <sql>DROP TABLE IF EXISTS hts_encounter_sti_hiv_result_backup;</sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="correct_legacy_sti_initial_hiv_test_10272026" author="Emmanuel Nnajiofor">
+        <comment>
+            initialHivTest: STI_HIV_RESULT_POSITIVE -> HIV_TEST_RESULT_POSITIVE,
+            STI_HIV_RESULT_NEGATIVE -> HIV_TEST_RESULT_NEGATIVE. Archived rows are included so a
+            record that is later restored is already correct. last_modified_date is bumped so the
+            corrected rows are picked up by sync.
+        </comment>
+        <sql splitStatements="false">
+            WITH legacy AS (
+                SELECT e.id, e.uuid, e.date_modified, e.last_modified_date,
+                       e.observation->>'initialHivTest' AS old_value,
+                       'HIV_TEST_RESULT_' || substr(upper(btrim(e.observation->>'initialHivTest')), 16) AS new_value
+                FROM hts_encounter e
+                WHERE jsonb_typeof(e.observation->'initialHivTest') = 'string'
+                  AND upper(btrim(e.observation->>'initialHivTest')) IN ('STI_HIV_RESULT_POSITIVE', 'STI_HIV_RESULT_NEGATIVE')
+            ), backup AS (
+                INSERT INTO hts_encounter_sti_hiv_result_backup
+                    (hts_encounter_id, field_name, hts_encounter_uuid, key_existed, old_value, new_value,
+                     old_date_modified, old_last_modified_date)
+                SELECT l.id, 'initialHivTest', l.uuid, true, l.old_value, l.new_value, l.date_modified, l.last_modified_date
+                FROM legacy l
+                ON CONFLICT (hts_encounter_id, field_name) DO NOTHING
+            )
+            UPDATE hts_encounter e
+            SET observation        = jsonb_set(e.observation, '{initialHivTest}', to_jsonb(l.new_value), false),
+                date_modified      = now(),
+                last_modified_date = now()
+            FROM legacy l
+            WHERE l.id = e.id;
+        </sql>
+        <rollback>
+            <sql splitStatements="false">
+                UPDATE hts_encounter e
+                SET observation        = jsonb_set(e.observation, '{initialHivTest}', to_jsonb(b.old_value), false),
+                    date_modified      = b.old_date_modified,
+                    last_modified_date = now()
+                FROM hts_encounter_sti_hiv_result_backup b
+                WHERE b.hts_encounter_id = e.id
+                  AND b.field_name = 'initialHivTest'
+                  AND e.observation->>'initialHivTest' = b.new_value;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="correct_legacy_sti_confirmatory_hiv_test_10272026" author="Emmanuel Nnajiofor">
+        <comment>
+            confirmatoryHivTest: STI_HIV_RESULT_POSITIVE -> HIV_CONFIRMATORY_TEST_RESULT_POSITIVE,
+            STI_HIV_RESULT_NEGATIVE -> HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE. Without this, the HTS
+            eligibility, duplicate-positive, ICT and index-testing checks do not see these results.
+        </comment>
+        <sql splitStatements="false">
+            WITH legacy AS (
+                SELECT e.id, e.uuid, e.date_modified, e.last_modified_date,
+                       e.observation->>'confirmatoryHivTest' AS old_value,
+                       'HIV_CONFIRMATORY_TEST_RESULT_' || substr(upper(btrim(e.observation->>'confirmatoryHivTest')), 16) AS new_value
+                FROM hts_encounter e
+                WHERE jsonb_typeof(e.observation->'confirmatoryHivTest') = 'string'
+                  AND upper(btrim(e.observation->>'confirmatoryHivTest')) IN ('STI_HIV_RESULT_POSITIVE', 'STI_HIV_RESULT_NEGATIVE')
+            ), backup AS (
+                INSERT INTO hts_encounter_sti_hiv_result_backup
+                    (hts_encounter_id, field_name, hts_encounter_uuid, key_existed, old_value, new_value,
+                     old_date_modified, old_last_modified_date)
+                SELECT l.id, 'confirmatoryHivTest', l.uuid, true, l.old_value, l.new_value, l.date_modified, l.last_modified_date
+                FROM legacy l
+                ON CONFLICT (hts_encounter_id, field_name) DO NOTHING
+            )
+            UPDATE hts_encounter e
+            SET observation        = jsonb_set(e.observation, '{confirmatoryHivTest}', to_jsonb(l.new_value), false),
+                date_modified      = now(),
+                last_modified_date = now()
+            FROM legacy l
+            WHERE l.id = e.id;
+        </sql>
+        <rollback>
+            <sql splitStatements="false">
+                UPDATE hts_encounter e
+                SET observation        = jsonb_set(e.observation, '{confirmatoryHivTest}', to_jsonb(b.old_value), false),
+                    date_modified      = b.old_date_modified,
+                    last_modified_date = now()
+                FROM hts_encounter_sti_hiv_result_backup b
+                WHERE b.hts_encounter_id = e.id
+                  AND b.field_name = 'confirmatoryHivTest'
+                  AND e.observation->>'confirmatoryHivTest' = b.new_value;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="fill_final_hiv_test_result_for_corrected_records_10272026" author="Emmanuel Nnajiofor">
+        <comment>
+            The July backfill (backfill_final_hiv_test_result) could not derive finalHivTestResult for
+            records whose confirmatoryHivTest held an STI_HIV_RESULT code. For records corrected above
+            only, and only where finalHivTestResult is missing or empty, this derives it with the same
+            rules as DiagnosticTestingSection.jsx. A blank typeOfHivTestDone is treated as Rapid
+            Antibody, the only path that existed before Early Detect. Existing results are never
+            overwritten, and nothing is written when no rule applies.
+        </comment>
+        <sql splitStatements="false">
+            WITH derived AS (
+                SELECT e.id,
+                       e.uuid,
+                       jsonb_exists(e.observation, 'finalHivTestResult') AS key_existed,
+                       e.observation->>'finalHivTestResult' AS old_value,
+                       e.date_modified,
+                       e.last_modified_date,
+                       CASE
+                           WHEN coalesce(e.observation->>'typeOfHivTestDone', '') IN ('', 'TYPE_OF_HIV_TEST_RAPID_ANTIBODY') THEN
+                               CASE
+                                   WHEN e.observation->>'initialHivTest' = 'HIV_TEST_RESULT_NEGATIVE' THEN 'Negative'
+                                   WHEN e.observation->>'initialHivTest' = 'HIV_TEST_RESULT_POSITIVE' THEN
+                                       CASE
+                                           WHEN e.observation->>'confirmatoryHivTest' = 'HIV_CONFIRMATORY_TEST_RESULT_POSITIVE' THEN 'Positive'
+                                           WHEN e.observation->>'confirmatoryHivTest' = 'HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE' THEN 'Negative'
+                                       END
+                               END
+                           WHEN e.observation->>'typeOfHivTestDone' = 'TYPE_OF_HIV_TEST_HIV_EARLY_DETECT'
+                                AND e.observation->>'hivEarlyDetectResult' = 'HIV_EARLY_DETECT_RESULT_ANTIBODY_REACTIVE' THEN
+                               CASE
+                                   WHEN e.observation->>'confirmatoryHivTest' = 'HIV_CONFIRMATORY_TEST_RESULT_POSITIVE' THEN 'Positive'
+                                   WHEN e.observation->>'confirmatoryHivTest' = 'HIV_CONFIRMATORY_TEST_RESULT_NEGATIVE' THEN 'Negative'
+                               END
+                       END AS new_value
+                FROM hts_encounter e
+                WHERE e.id IN (SELECT b.hts_encounter_id
+                               FROM hts_encounter_sti_hiv_result_backup b
+                               WHERE b.field_name IN ('initialHivTest', 'confirmatoryHivTest'))
+                  AND coalesce(btrim(e.observation->>'finalHivTestResult'), '') = ''
+            ), backup AS (
+                INSERT INTO hts_encounter_sti_hiv_result_backup
+                    (hts_encounter_id, field_name, hts_encounter_uuid, key_existed, old_value, new_value,
+                     old_date_modified, old_last_modified_date)
+                SELECT d.id, 'finalHivTestResult', d.uuid, d.key_existed, d.old_value, d.new_value,
+                       d.date_modified, d.last_modified_date
+                FROM derived d
+                WHERE d.new_value IS NOT NULL
+                ON CONFLICT (hts_encounter_id, field_name) DO NOTHING
+            )
+            UPDATE hts_encounter e
+            SET observation        = jsonb_set(e.observation, '{finalHivTestResult}', to_jsonb(d.new_value), true),
+                date_modified      = now(),
+                last_modified_date = now()
+            FROM derived d
+            WHERE d.id = e.id
+              AND d.new_value IS NOT NULL;
+        </sql>
+        <rollback>
+            <sql splitStatements="false">
+                UPDATE hts_encounter e
+                SET observation        = CASE
+                                             WHEN b.key_existed THEN jsonb_set(e.observation, '{finalHivTestResult}', to_jsonb(coalesce(b.old_value, '')), false)
+                                             ELSE e.observation - 'finalHivTestResult'
+                                         END,
+                    date_modified      = b.old_date_modified,
+                    last_modified_date = now()
+                FROM hts_encounter_sti_hiv_result_backup b
+                WHERE b.hts_encounter_id = e.id
+                  AND b.field_name = 'finalHivTestResult'
+                  AND e.observation->>'finalHivTestResult' = b.new_value;
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
