@@ -9,8 +9,8 @@ import BasicInformationSection from "./sections/BasicInformationSection";
 import PreTestCounsellingSection from "./sections/PreTestCounsellingSection";
 import DiagnosticTestingSection from "./sections/DiagnosticTestingSection";
 import PostTestCounsellingSection from "./sections/PostTestCounsellingSection";
-import { COLORS } from "./constants";
-import { buildHtsEncounterPayload } from "./utils/htsEncounterPayload";
+import { COLORS, INITIAL_HIV_TEST_CODESET } from "./constants";
+import { buildHtsEncounterPayload, normalizeLegacyHivResultCodes } from "./utils/htsEncounterPayload";
 import { updateHtsEncounter } from "../../services/updateHtsEncounter";
 import { toast } from "react-toastify";
 import { getHtsEcounter } from "../../services/getHtsEncounter";
@@ -92,7 +92,7 @@ const FIELD_CODESET_MAP = {
   breastfeedingDuration: "DURATION_OF_BREASTFEEDING",
   previouslyTestedNegative: "YES_NO",
   timeOfLastNegativeTest: "RECENT_HIV_TEST",
-  initialHivTest: "STI_HIV_RESULT",
+  initialHivTest: INITIAL_HIV_TEST_CODESET,
   confirmatoryHivTest: "HIV_CONFIRMATORY_TEST_RESULT",
   recencyTest: "RECENCY_TESTING",
   syphilisTestResult: "SYPHILIS_RESULT",
@@ -159,7 +159,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
 
 
   }
-  const [formInitialValues, setFormInitialValues] = useState(formInitialValuecontruct);
+  const [formInitialValues, setFormInitialValues] = useState(normalizeLegacyHivResultCodes(formInitialValuecontruct));
   const [isRefreshingEncounter, setIsRefreshingEncounter] = useState(false);
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
@@ -179,7 +179,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
       "PREGNANCY_STATUS",
       "DURATION_OF_BREASTFEEDING",
       "RECENT_HIV_TEST",
-      "STI_HIV_RESULT",
+      INITIAL_HIV_TEST_CODESET,
       "HIV_CONFIRMATORY_TEST_RESULT",
       "RECENCY_TESTING",
       "SYPHILIS_RESULT",
@@ -231,11 +231,11 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
             codesetLookup[field] = codesets[codesetName];
           }
         });
-        const converted = convertFieldsToCodes(formInitialValuecontruct, codesetLookup);
+        const converted = convertFieldsToCodes(normalizeLegacyHivResultCodes(formInitialValuecontruct), codesetLookup);
 
         setFormInitialValues(converted);
       } else {
-        setFormInitialValues(formInitialValuecontruct);
+        setFormInitialValues(normalizeLegacyHivResultCodes(formInitialValuecontruct));
       }
     } catch (err) {
       console.error("Failed to refresh encounter", err);

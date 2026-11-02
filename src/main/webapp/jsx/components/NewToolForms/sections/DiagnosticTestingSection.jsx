@@ -3,6 +3,11 @@ import React, { useState, useEffect } from "react";
 import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
+import {
+  INITIAL_HIV_TEST_CODESET,
+  INITIAL_HIV_TEST_NEGATIVE,
+  INITIAL_HIV_TEST_POSITIVE,
+} from "../constants";
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -37,7 +42,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   useGetCodesets({
     codesetsKeys: [
       "YES_NO",
-      "STI_HIV_RESULT",
+      INITIAL_HIV_TEST_CODESET,
       "SYPHILIS_RESULT",
       "HIV_EARLY_DETECT_RESULT",
       "HIV_CONFIRMATORY_TEST_RESULT",
@@ -51,7 +56,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   // ── Path flags ────────────────────────────────────────────────────────────
   const earlyDetectDone = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT";
   const earlyDetectNo = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_RAPID_ANTIBODY";
-  const showRecency = values.initialHivTest === "STI_HIV_RESULT_POSITIVE";
+  const showRecency = values.initialHivTest === INITIAL_HIV_TEST_POSITIVE;
 
   const isAcutePath =
     values.hivEarlyDetectResult === "HIV_EARLY_DETECT_RESULT_ANTIGEN_REACTIVE" ||
@@ -68,7 +73,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   //   Path B - Initial HIV Test is Positive
   const showConfirmatory =
     isAntibodyReactivePath ||
-    (earlyDetectNo && values.initialHivTest === "STI_HIV_RESULT_POSITIVE");
+    (earlyDetectNo && values.initialHivTest === INITIAL_HIV_TEST_POSITIVE);
 
   // ── Derived Final HIV Test Result ─────────────────────────────────────────
   const getFinalResult = () => {
@@ -83,8 +88,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
       return null;
     }
     if (earlyDetectNo) {
-      if (values.initialHivTest === "STI_HIV_RESULT_NEGATIVE") return "Negative";
-      if (values.initialHivTest === "STI_HIV_RESULT_POSITIVE") {
+      if (values.initialHivTest === INITIAL_HIV_TEST_NEGATIVE) return "Negative";
+      if (values.initialHivTest === INITIAL_HIV_TEST_POSITIVE) {
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_positive") return "Positive";
         if (values.confirmatoryHivTest?.toLowerCase() === "hiv_confirmatory_test_result_negative") return "Negative";
       }
@@ -96,7 +101,8 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
   useEffect(() => {
     setFieldValue("finalHivTestResult", finalResult || "");
-    if (finalResult !== '') {
+    // getFinalResult() returns null for an incomplete result, so test for a value, not for ''
+    if (finalResult) {
       setFieldValue("dateOfFinalHivTestDone", formik?.values?.dateOfVisit);
     }
     else {
@@ -137,7 +143,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const handleInitialTestChange = (e) => {
     const val = e.target.value;
     setFieldValue("initialHivTest", val);
-    if (val !== "STI_HIV_RESULT_POSITIVE") {
+    if (val !== INITIAL_HIV_TEST_POSITIVE) {
       setFieldValue("confirmatoryHivTest", "");
     }
   };
@@ -239,7 +245,7 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           <div className="col-md-6">
             <FormSelect
               label="Initial HIV Test"
-              {...sp("initialHivTest", transformOptions(codesets?.["STI_HIV_RESULT"]))}
+              {...sp("initialHivTest", transformOptions(codesets?.[INITIAL_HIV_TEST_CODESET]))}
               onChange={readOnly ? undefined : handleInitialTestChange}
               required
             />
