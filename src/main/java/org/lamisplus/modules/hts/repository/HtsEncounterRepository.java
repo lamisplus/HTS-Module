@@ -44,6 +44,26 @@ public interface HtsEncounterRepository extends JpaRepository<HtsEncounter, Long
             @Param("personId") Long personId,
             @Param("personUuid") String personUuid);
 
+    // hiv_enrollment lives in the HIV module; there is no shared entity/repository for it
+    // here, so this is a direct native query against the table. Only rows with archived = 0
+    // (active) count. Enrollment is keyed by person_uuid (-> patient_person.uuid), so a
+    // personId-only call resolves via the patient_person join; a personUuid call matches
+    // directly. Both params are explicitly CAST so a null param can't be inferred as bytea.
+    @Query(value =
+            "SELECT EXISTS (" +
+                    "    SELECT 1 FROM hiv_enrollment e " +
+                    "    JOIN patient_person p ON p.uuid = e.person_uuid " +
+                    "    WHERE e.archived = 0 " +
+                    "      AND (" +
+                    "           (:personId IS NOT NULL AND p.id = CAST(:personId AS bigint)) " +
+                    "        OR (:personUuid IS NOT NULL AND CAST(e.person_uuid AS varchar) = CAST(:personUuid AS varchar))" +
+                    "      )" +
+                    ")",
+            nativeQuery = true)
+    boolean existsActiveHivEnrollmentForPerson(
+            @Param("personId") Long personId,
+            @Param("personUuid") String personUuid);
+
     @Query("SELECT e FROM HtsEncounter e " +
             "JOIN e.person p " +
             "WHERE e.archived = false " +

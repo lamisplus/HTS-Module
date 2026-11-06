@@ -35,6 +35,8 @@ public class IctEncounterService {
     private final PersonRepository personRepository;
     private final ObjectMapper objectMapper;
 
+    private static final String ART_ENROLLMENT_EXCEPTION_MARKER = "createdViaArtEnrollmentException";
+
     private HtsEncounter validateAndFetchConfirmedPositiveHts(Long htsEncounterId) {
         HtsEncounter hts = findHtsOrThrow(htsEncounterId);
         JsonNode obs = hts.getObservation();
@@ -68,6 +70,16 @@ public class IctEncounterService {
         return uuid != null ? uuid.toString() : null;
     }
 
+    // Wrapped so a lookup failure (e.g. HIV module/table absent) degrades to "not enrolled"
+    // instead of failing the ICT save for clients who qualify via an HTS result or Transfer-In.
+    private boolean hasActiveHivEnrollment(Long personId, String personUuid) {
+        try {
+            return htsEncounterRepository.existsActiveHivEnrollmentForPerson(personId, personUuid);
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
     public IctEncounterResponse save(IctEncounterRequest request) {
         Person person = findPersonOrThrow(request.getPatientId());
 
@@ -85,6 +97,7 @@ public class IctEncounterService {
         mapRequestToEncounter(request, encounter);
 
         boolean createdViaTransferIn = false;
+        boolean createdViaArtEnrollment = false;
 
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
@@ -93,26 +106,33 @@ public class IctEncounterService {
                 encounter.setHtsEncounterUuid(hts.getUuid().toString());
             }
         } else {
-            // No HTS link provided - the only other path to ICT eligibility is a documented,
-            // active HIV Transfer-In record (a transfer-in patient is, by definition, already
-            // confirmed positive at their originating facility - the transfer-in table itself
-            // has no separate HIV-status field, so presence in it IS the proof). This closes
-            // the previous gap where omitting htsEncounterId skipped validation entirely.
+            // No HTS link provided - eligibility can still come from a documented active HIV
+            // Transfer-In record OR an active HIV enrollment (an ART client in the HIV module).
+            // Either one means the patient is already a confirmed-positive PLHIV, so the ICT
+            // form applies even though there is no HTS encounter to link.
             boolean activeTransferIn = htsEncounterRepository.existsActiveHivTransferInForPerson(
                     person.getId(), personUuidAsString(person));
+            boolean activeHivEnrollment = hasActiveHivEnrollment(
+                    person.getId(), personUuidAsString(person));
 
-            if (!activeTransferIn) {
+            if (!activeTransferIn && !activeHivEnrollment) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "ICT encounter can only be created for a client with a confirmed positive HTS result, " +
-                                "or a patient with a documented, active HIV Transfer-In record.");
+                                "a documented active HIV Transfer-In record, or an active HIV enrollment (ART client).");
             }
-            createdViaTransferIn = true;
+            createdViaTransferIn = activeTransferIn;
+            createdViaArtEnrollment = activeHivEnrollment && !activeTransferIn;
         }
 
         if (createdViaTransferIn) {
             // Audit marker - only set when the Transfer-In exception is the actual reason
             // this record was allowed through, not when a valid HTS link was also provided.
             ((ObjectNode) encounter.getData()).put("createdViaTransferInException", true);
+        }
+        if (createdViaArtEnrollment) {
+            // Audit marker - the HIV-enrollment (ART client) exception is why this record was
+            // allowed through without an HTS link or Transfer-In.
+            ((ObjectNode) encounter.getData()).put(ART_ENROLLMENT_EXCEPTION_MARKER, true);
         }
 
         IctEncounter savedEncounter = ictEncounterRepository.save(encounter);
@@ -173,10 +193,14 @@ public class IctEncounterService {
         boolean previouslyCreatedViaTransferIn = existingData != null
                 && existingData.has("createdViaTransferInException")
                 && existingData.get("createdViaTransferInException").asBoolean(false);
+        boolean previouslyCreatedViaArtEnrollment = existingData != null
+                && existingData.has(ART_ENROLLMENT_EXCEPTION_MARKER)
+                && existingData.get(ART_ENROLLMENT_EXCEPTION_MARKER).asBoolean(false);
 
         mapRequestToEncounter(request, encounter);
 
         boolean createdViaTransferIn = false;
+        boolean createdViaArtEnrollment = false;
 
         if (request.getHtsEncounterId() != null) {
             HtsEncounter hts = validateAndFetchConfirmedPositiveHts(request.getHtsEncounterId());
@@ -190,29 +214,38 @@ public class IctEncounterService {
             // fresh each save based on THIS save's actual justification, not carried forward
             // permanently once set.
         } else {
-            // No HTS link (kept or newly provided) - eligibility must come from Transfer-In,
-            // either grandfathered from how this record was originally created (so a patient
-            // whose Transfer-In status is later closed out doesn't have an already-legitimate
-            // record become permanently un-editable), or currently active.
+            // No HTS link (kept or newly provided) - eligibility must come from a Transfer-In
+            // or an HIV enrollment (ART client), either grandfathered from how this record was
+            // originally created (so a patient whose status is later closed out doesn't have an
+            // already-legitimate record become permanently un-editable), or currently active.
             Person person = encounter.getPerson();
             boolean currentlyActiveTransferIn = htsEncounterRepository.existsActiveHivTransferInForPerson(
                     person != null ? person.getId() : null, personUuidAsString(person));
+            boolean currentlyActiveHivEnrollment = hasActiveHivEnrollment(
+                    person != null ? person.getId() : null, personUuidAsString(person));
 
-            if (!previouslyCreatedViaTransferIn && !currentlyActiveTransferIn) {
+            boolean transferInOk = previouslyCreatedViaTransferIn || currentlyActiveTransferIn;
+            boolean enrollmentOk = previouslyCreatedViaArtEnrollment || currentlyActiveHivEnrollment;
+
+            if (!transferInOk && !enrollmentOk) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "This ICT encounter has no confirmed-positive HTS record linked, and the patient does " +
-                                "not have an active HIV Transfer-In record. An ICT encounter must be linked to a " +
-                                "confirmed positive HTS result or belong to a patient with a documented Transfer-In " +
-                                "record.");
+                                "not have an active HIV Transfer-In record or HIV enrollment. An ICT encounter must " +
+                                "be linked to a confirmed positive HTS result, or belong to a patient with a documented " +
+                                "Transfer-In record or active HIV enrollment (ART client).");
             }
 
             encounter.setHtsEncounter(null);
             encounter.setHtsEncounterUuid(null);
-            createdViaTransferIn = true;
+            createdViaTransferIn = transferInOk;
+            createdViaArtEnrollment = enrollmentOk && !transferInOk;
         }
 
         if (createdViaTransferIn) {
             ((ObjectNode) encounter.getData()).put("createdViaTransferInException", true);
+        }
+        if (createdViaArtEnrollment) {
+            ((ObjectNode) encounter.getData()).put(ART_ENROLLMENT_EXCEPTION_MARKER, true);
         }
 
         encounter.getContacts().clear();

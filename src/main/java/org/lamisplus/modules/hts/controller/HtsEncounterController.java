@@ -54,6 +54,17 @@ public class HtsEncounterController {
         return ResponseEntity.ok(repository.existsActiveHivTransferInForPerson(personId, personUuid));
     }
 
+    // Frontend ICT eligibility check - returns whether this patient has an active
+    // (archived = 0) HIV enrollment (an ART client in the HIV module), matched on either
+    // personId or personUuid. Lets ART clients without any HTS record access the ICT form.
+    @GetMapping("/hiv-enrollment-check")
+    @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view', 'hts_create', 'hts_encounter_create')")
+    public ResponseEntity<Boolean> checkActiveHivEnrollment(
+            @RequestParam(required = false) Long personId,
+            @RequestParam(required = false) String personUuid) {
+        return ResponseEntity.ok(repository.existsActiveHivEnrollmentForPerson(personId, personUuid));
+    }
+
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('hts_view', 'hts_encounter_view')")

@@ -6,6 +6,7 @@ import axios from "axios";
 import { url, token } from "../../../api";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { checkActiveHivTransferIn } from "../../services/checkHivTransferIn.service";
+import { checkActiveHivEnrollment } from "../../services/checkHivEnrollment.service";
 import IctForm from "../IctForm/IctForm";
 import { COLORS } from "../NewToolForms/constants";
 
@@ -289,15 +290,18 @@ const NewIctForExistingPatient = ({ patientId, onDone, isOnArt = false }) => {
                     return;
                 }
 
-                // No positive HTS record - check the other valid path to ICT eligibility:
-                // a documented, active HIV Transfer-In record. Such a patient is already
-                // confirmed positive at their originating facility, but HTS creation is
-                // blocked for them by design, so there's no HTS record to prefill from -
-                // fetch the patient record directly instead.
+                // No positive HTS record - check the other valid paths to ICT eligibility:
+                // a documented active HIV Transfer-In record, OR an active HIV enrollment
+                // (an ART client in the HIV module). Either one means the patient is already a
+                // confirmed positive PLHIV, but there's no HTS record to prefill from - fetch
+                // the patient record directly instead.
                 const hasActiveTransferIn = await checkActiveHivTransferIn(patientId, undefined);
+                const hasActiveHivEnrollment = hasActiveTransferIn
+                    ? false
+                    : await checkActiveHivEnrollment(patientId, undefined);
 
-                if (!hasActiveTransferIn) {
-                    setError("No positive HIV test result found for this patient. ICT form cannot be created.");
+                if (!hasActiveTransferIn && !hasActiveHivEnrollment) {
+                    setError("No positive HIV test result, HIV Transfer-In, or HIV enrollment found for this patient. ICT form cannot be created.");
                     return;
                 }
 
