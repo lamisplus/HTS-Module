@@ -201,7 +201,6 @@ const IctSectionA = ({ formik, readOnly = false }) => {
 
   const showFacilitySetting = values.setting === "HTS_ENTRY_POINT_FACILITY";
   const showCommunityEntry = values.setting === "HTS_ENTRY_POINT_COMMUNITY";
-  const showArtClinic = !!values.isOnArt;
   const showCategoryOther = values.clientCategory === "INDEX_CLIENT_CATEGORY_OTHERS";
   const showAcceptedPns = values.offeredPns === "YES_NO_YES";
 
@@ -254,14 +253,12 @@ const IctSectionA = ({ formik, readOnly = false }) => {
             />
           </div>
         )}
-        {showArtClinic && (
-          <div className="col-md-4">
-            <FormSelect
-              label="ART Clinic"
-              {...sp("artClinic", transformOptions(codesets?.["YES_NO"]))}
-            />
-          </div>
-        )}
+        <div className="col-md-4">
+          <FormSelect
+            label="ART Clinic"
+            {...sp("artClinic", transformOptions(codesets?.["YES_NO"]))}
+          />
+        </div>
       </div>
 
       <SectionSubheading>Index Client Details</SectionSubheading>

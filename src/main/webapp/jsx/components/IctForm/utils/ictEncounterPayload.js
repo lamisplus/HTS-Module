@@ -36,8 +36,7 @@ export const buildIctEncounterPayload = (values) => {
     facilitySetting: isFacility ? values.facilitySetting || null : null,
     communityEntryPoint: isCommunity ? values.communityEntryPoint || null : null,
 
-    // artClinic only when the index client is on ART
-    artClinic: values.isOnArt ? values.artClinic || null : null,
+    artClinic: values.artClinic || null,
 
     // Facility context - send numeric IDs for state/LGA, not display names
     facilityName: values.facilityName || null,
