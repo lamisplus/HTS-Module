@@ -120,9 +120,7 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
     "informedConsentGiven", "everHadSexualIntercourse", "moreThanOneSexPartner",
     "unprotectedVaginalSex", "unprotectedAnalSex", "bloodTransfusionLast3Months",
     "sexUnderInfluence", "historyOfSTI", "currentCough", "weightLoss", "fever",
-    "nightSweats", "complaintsVaginalDischarge", "complaintsLowerAbdominalPain",
-    "complaintsUrethralDischarge", "complaintsScroralSwelling",
-    "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+    "nightSweats",
     "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
     "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup"
   ];
@@ -130,6 +128,8 @@ const NewPatientHtsForm = ({ onValuesChange, onSubmitSuccess, onBack } = {}) => 
   const diagnosticFields = [
     "typeOfHivTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
+    "complaintsVaginalDischarge", "complaintsLowerAbdominalPain", "complaintsUrethralDischarge",
+    "complaintsScroralSwelling", "complaintsGenitalSores", "complaintsSwollenLymphNodes",
   ];
 
   const postTestFields = [

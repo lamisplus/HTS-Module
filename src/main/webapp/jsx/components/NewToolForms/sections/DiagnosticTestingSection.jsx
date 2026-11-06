@@ -1,6 +1,6 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState, useEffect } from "react";
-import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField } from "./FormFields";
+import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField, ScoreDisplay } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 import {
@@ -52,6 +52,19 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     patientId: "diagnosticTesting",
     onSuccess: loadCodesets,
   });
+
+  const calcScore = (fields) =>
+    fields.reduce((sum, f) => sum + (values[f] === "YES_NO_YES" ? 1 : 0), 0);
+
+  const isFemale = values.sex === "SEX_FEMALE";
+  const isMale = values.sex === "SEX_MALE";
+  const stiFields = [
+    ...(isFemale ? ["complaintsVaginalDischarge", "complaintsLowerAbdominalPain"] : []),
+    ...(isMale ? ["complaintsUrethralDischarge", "complaintsScroralSwelling"] : []),
+    "complaintsGenitalSores",
+    "complaintsSwollenLymphNodes",
+  ];
+  const stiScore = calcScore(stiFields);
 
   // ── Path flags ────────────────────────────────────────────────────────────
   const earlyDetectDone = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT";
@@ -320,6 +333,55 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
           />
         </div>
       </div>
+
+      <SectionSubheading>STI Screening</SectionSubheading>
+      <div className="row">
+        {isFemale && (
+          <>
+            <div className="col-md-6">
+              <FormSelect
+                label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
+                {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+            <div className="col-md-6">
+              <FormSelect
+                label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
+                {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+          </>
+        )}
+        {isMale && (
+          <>
+            <div className="col-md-6">
+              <FormSelect
+                label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
+                {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+            <div className="col-md-6">
+              <FormSelect
+                label="Male: Complaints of Scrotal Swelling or Pain?"
+                {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+          </>
+        )}
+        <div className="col-md-6">
+          <FormSelect
+            label="Complaints of Genital Sore(s)"
+            {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
+          />
+        </div>
+        <div className="col-md-6">
+          <FormSelect
+            label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
+            {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
+          />
+        </div>
+      </div>
+      <ScoreDisplay label="STI Screening Score:" score={stiScore} />
     </div>
   );
 };
