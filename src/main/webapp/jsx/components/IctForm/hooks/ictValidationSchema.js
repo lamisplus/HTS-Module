@@ -72,7 +72,8 @@ const buildContactSchema = (htsDateOfVisit) => yup.object({
             "art-not-before-tested",
             "Date enrolled on ART cannot be earlier than date contact was tested",
             function (value) {
-              const { dateTestedHiv } = this.parent;
+              const { dateTestedHiv, knownHivPositive } = this.parent;
+              if (knownHivPositive === "YES_NO_YES") return true;
               if (!value || !dateTestedHiv) return true;
               return toLocalDateString(value) >= toLocalDateString(dateTestedHiv);
             }
