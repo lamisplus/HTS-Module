@@ -141,7 +141,7 @@ public class HtsEncounterController {
 
     // IllegalTypeException is thrown by HtsEncounterService for every HIV-result-related
     // business rule: the duplicate-positive block, the negative-result spacing rule
-    // (90 days, or 30 for PMTCT), and the HIV Transfer-In block. One handler covers all
+    // (30 days), and the HIV Transfer-In block. One handler covers all
     // three (and anything added to validateHivResultRules/save/update later) uniformly.
     // Without this, the exception falls through to Spring's default error handler and comes
     // back as an opaque 500 with no message - this surfaces the real message instead, as a

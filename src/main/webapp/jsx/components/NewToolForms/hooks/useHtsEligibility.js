@@ -57,14 +57,12 @@ export function checkHtsEligibility(encounters, hasActiveHivTransferIn) {
   if (confirmatoryResult === "hiv_confirmatory_test_result_negative") {
     const visitDate = new Date(latest.dateOfVisit);
     const today = new Date();
-    const monthsDiff =
-      (today.getFullYear() - visitDate.getFullYear()) * 12 +
-      (today.getMonth() - visitDate.getMonth());
+    const daysDiff = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));
 
-    if (monthsDiff < 3) {
+    if (daysDiff < 30) {
       return {
         isEligible: false,
-        reason: `Client tested Negative on ${latest.dateOfVisit}, which is within the last 3 months.`,
+        reason: `Client tested Negative on ${latest.dateOfVisit}, which is within the last 30 days.`,
         confirmatoryResult,
         finalHivTestResult,
         suspectedAcuteInfection
@@ -73,7 +71,7 @@ export function checkHtsEligibility(encounters, hasActiveHivTransferIn) {
 
     return {
       isEligible: true,
-      reason: `Client's last Negative result (${latest.dateOfVisit}) is older than 3 months.`,
+      reason: `Client's last Negative result (${latest.dateOfVisit}) is older than 30 days.`,
       confirmatoryResult,
       finalHivTestResult,
       suspectedAcuteInfection

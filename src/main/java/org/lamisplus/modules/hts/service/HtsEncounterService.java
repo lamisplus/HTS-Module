@@ -598,7 +598,7 @@ public class HtsEncounterService {
     //
     // Rule 2 (absolute, cross-facility): if the incoming encounter's result
     // is negative and the patient already has another active negative
-    // encounter, the two dateOfVisit values must be at least 90 days apart.
+    // encounter, the two dateOfVisit values must be at least 30 days apart.
     // The closest existing negative encounter (by day gap) is used for the
     // check and for the error message, since it is always the tightest
     // constraint.
@@ -611,10 +611,10 @@ public class HtsEncounterService {
     private static final String POSITIVE_MARKER = "POSITIVE";
     private static final String NEGATIVE_MARKER = "NEGATIVE";
     private static final String ACUTE_INFECTION_RESULT = "Positive";
-    private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 90;
+    private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS = 30;
     private static final long MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT = 30;
 
-    // Exception to the "one active positive result" rule (Rule 1 only - the 90-day
+    // Exception to the "one active positive result" rule (Rule 1 only - the 30-day
     // negative-result spacing rule is unaffected): PMTCT sends HTS records for clients
     // whose positive status was already known before this encounter, and needs to be
     // able to record that even when the patient already has another active positive HTS
@@ -682,8 +682,8 @@ public class HtsEncounterService {
         }
 
         if (incomingNegative && incomingDateOfVisit != null) {
-            // PMTCT records get a shorter re-testing window (30 days) than everyone else (90).
-            // Determined purely by the INCOMING record's own pmtctHts - not the source of
+            // The negative re-testing window is 30 days. PMTCT keeps its own constant (also
+            // 30), determined purely by the INCOMING record's own pmtctHts - not the source of
             // whichever existing negative encounter it's being compared against.
             long minDaysBetweenNegatives = Boolean.TRUE.equals(pmtctHts)
                     ? MIN_DAYS_BETWEEN_NEGATIVE_RESULTS_PMTCT
