@@ -600,6 +600,43 @@ export const buildValidationSchema = (isNewPatient) => {
 
     syphilisTestResult: yup.string().required("Syphilis Test Result is required"),
 
+    stiTestDone: yup.mixed().test(
+      "sti-test-done-required",
+      "Select whether an STI test was done",
+      function (value) {
+        if (this.parent.id) return true;
+        return !!value || this.createError({ message: "Select whether an STI test was done" });
+      }
+    ),
+    swabCollected: yup.string().nullable(),
+    stiTestResult: yup.mixed().test(
+      "sti-test-result-required",
+      "STI test result is required",
+      function (value) {
+        if (this.parent.stiTestDone !== "YES_NO_YES") return true;
+        return !!value || this.createError({ message: "STI test result is required" });
+      }
+    ),
+    aetiology: yup.mixed().test(
+      "aetiology-required",
+      "Select at least one aetiology",
+      function (value) {
+        if (this.parent.stiTestDone !== "YES_NO_YES") return true;
+        if (this.parent.stiTestResult !== "Reactive") return true;
+        return (Array.isArray(value) && value.length > 0) ||
+          this.createError({ message: "Select at least one aetiology" });
+      }
+    ),
+    outcomeOfVisit: yup.mixed().test(
+      "outcome-of-visit-required",
+      "Outcome of visit is required",
+      function (value) {
+        if (this.parent.stiTestDone !== "YES_NO_YES") return true;
+        if (this.parent.stiTestResult !== "Reactive") return true;
+        return !!value || this.createError({ message: "Outcome of visit is required" });
+      }
+    ),
+
     recencyTest: yup.mixed().test(
       "recencyTest-conditional",
       "Recency test result is required",

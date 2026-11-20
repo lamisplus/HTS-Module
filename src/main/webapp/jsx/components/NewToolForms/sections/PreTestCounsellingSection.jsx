@@ -145,6 +145,9 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
         "unprotectedVaginalSex", "unprotectedAnalSex",
         "bloodTransfusionLast3Months", "sexUnderInfluence", "historyOfSTI",
         "currentCough", "weightLoss", "fever", "nightSweats",
+        "complaintsVaginalDischarge", "complaintsLowerAbdominalPain",
+        "complaintsUrethralDischarge", "complaintsScroralSwelling",
+        "complaintsGenitalSores", "complaintsSwollenLymphNodes",
         "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
         "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment",
         "hadSexWithHivPositivePartnerInRiskGroup"
@@ -309,7 +312,7 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
       )}
 
       {/* (C) TB */}
-      <SectionSubheading>(C) TB Screening</SectionSubheading>
+      <SectionSubheading>(C) TB and Syndromic STI Screening</SectionSubheading>
       {skipSection ? (
         <div style={skippedNoticeStyle}>
           {getSkipMessage()}
@@ -332,6 +335,55 @@ const PreTestCounsellingSection = ({ formik, readOnly }) => {
             </div>
           </div>
           <ScoreDisplay label="TB Screening Score:" score={tbScore} />
+
+          <p style={subsectionLabelStyle}>Syndromic STI Screening</p>
+          <div className="row">
+            {isFemale && (
+              <>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
+                    {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
+                    {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
+                  />
+                </div>
+              </>
+            )}
+            {isMale && (
+              <>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
+                    {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <FormSelect
+                    label="Male: Complaints of Scrotal Swelling or Pain?"
+                    {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
+                  />
+                </div>
+              </>
+            )}
+            <div className="col-md-6">
+              <FormSelect
+                label="Complaints of Genital Sore(s)"
+                {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+            <div className="col-md-6">
+              <FormSelect
+                label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
+                {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
+              />
+            </div>
+          </div>
+          <ScoreDisplay label="STI Screening Score:" score={stiScore} />
 
           <SectionSubheading>Sex Partner Risk Assessment (Last 3 months)</SectionSubheading>
           {values.everHadSexualIntercourse === "YES_NO_NO" ? (

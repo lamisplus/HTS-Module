@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -83,6 +84,11 @@ public class HtsEncounterRequestDTO {
     private String finalHivTestResult;
     private String dateOfFinalHivTestDone;
     private String syphilisTestResult;
+    private String stiTestDone;
+    private String swabCollected;
+    private String stiTestResult;
+    private List<String> aetiology;
+    private String outcomeOfVisit;
     private String recencyTest;
     private String hivEarlyDetectResult;
     private String previouslyTestedThisYear;

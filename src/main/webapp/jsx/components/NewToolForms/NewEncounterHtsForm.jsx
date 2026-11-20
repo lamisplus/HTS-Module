@@ -129,6 +129,7 @@ const blankClinicalValues = {
   partnerNotRegularlyOnDrugs: "", partnerRecentlyReturnedToTreatment: "",
   hadSexWithHivPositivePartnerInRiskGroup: "", typeOfHivTestDone: "", hivEarlyDetectResult: "",
   initialHivTest: "", suspectedAcuteInfection: "", confirmatoryHivTest: "", syphilisTestResult: "",
+  stiTestDone: "", swabCollected: "", stiTestResult: "", aetiology: [], outcomeOfVisit: "",
   recencyTest: "", previouslyTestedThisYear: "", clientReceivedTestResult: "",
   hivTestKitsProvided: "", categoryOfClients: "", numberOfHivstKitDistributed: "", acceptedIndexTesting: "", providedFpInfo: "",
   clientPartnerUseFpMethods: "", clientPartnerUseCondoms: "", correctCondomUseDemonstrated: "",
@@ -311,15 +312,17 @@ const NewEncounterHtsForm = ({ person, backButtonAction, onValuesChange, onSubmi
     "clientInformedRiskFactors", "clientInformedPreventionMethods", "clientInformedPossibleResults",
     "informedConsentGiven", "everHadSexualIntercourse", "moreThanOneSexPartner", "unprotectedVaginalSex",
     "unprotectedAnalSex", "bloodTransfusionLast3Months", "sexUnderInfluence", "historyOfSTI",
-    "currentCough", "weightLoss", "fever", "nightSweats", "partnerNewlyDiagnosed",
+    "currentCough", "weightLoss", "fever", "nightSweats",
+    "complaintsVaginalDischarge", "complaintsLowerAbdominalPain", "complaintsUrethralDischarge",
+    "complaintsScroralSwelling", "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+    "partnerNewlyDiagnosed",
     "partnerPregnantOnArv", "adolescentHivPositive", "partnerNotRegularlyOnDrugs",
     "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup",
   ];
   const diagnosticFields = [
     "typeOfHivTestDone", "hivEarlyDetectResult", "initialHivTest",
     "suspectedAcuteInfection", "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
-    "complaintsVaginalDischarge", "complaintsLowerAbdominalPain", "complaintsUrethralDischarge",
-    "complaintsScroralSwelling", "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+    "stiTestDone", "swabCollected", "stiTestResult", "aetiology", "outcomeOfVisit",
   ];
   const postTestFields = [
     "previouslyTestedThisYear", "clientReceivedTestResult", "hivTestKitsProvided",

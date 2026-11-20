@@ -54,7 +54,14 @@ export function checkHtsEligibility(encounters, hasActiveHivTransferIn) {
     };
   }
 
-  if (confirmatoryResult === "hiv_confirmatory_test_result_negative") {
+  const initialResult = latest?.observation?.initialHivTest?.trim().toLowerCase();
+
+  const isLatestNegative =
+    confirmatoryResult === "hiv_confirmatory_test_result_negative" ||
+    finalHivTestResult === "negative" ||
+    initialResult === "hiv_test_result_negative";
+
+  if (isLatestNegative) {
     const visitDate = new Date(latest.dateOfVisit);
     const today = new Date();
     const daysDiff = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));

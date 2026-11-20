@@ -1,6 +1,6 @@
 // src/NewToolForms/sections/DiagnosticTestingSection.jsx
 import React, { useState, useEffect } from "react";
-import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField, ScoreDisplay } from "./FormFields";
+import { FormSelect, SectionSubheading, ReadOnlyField, FormTextField, FormCheckboxGroup } from "./FormFields";
 import { useGetCodesets } from "../../../hooks/useGetCodesets.hook";
 import { capitalizeFirstLetter } from "../../utils";
 import {
@@ -8,6 +8,24 @@ import {
   INITIAL_HIV_TEST_NEGATIVE,
   INITIAL_HIV_TEST_POSITIVE,
 } from "../constants";
+
+const STI_TEST_RESULT_OPTIONS = [
+  { label: "Reactive", value: "Reactive" },
+  { label: "Non-reactive", value: "Non-reactive" },
+];
+
+const AETIOLOGY_OPTIONS = [
+  { label: "Syphilis", value: "Syphilis" },
+  { label: "Chlamydia", value: "Chlamydia" },
+  { label: "Gonorrhoea", value: "Gonorrhoea" },
+  { label: "Trichomoniasis", value: "Trichomoniasis" },
+];
+
+const OUTCOME_OF_VISIT_OPTIONS = [
+  { label: "Treated", value: "Treated" },
+  { label: "Not treated", value: "Not treated" },
+  { label: "Referred out", value: "Referred out" },
+];
 
 const DiagnosticTestingSection = ({ formik, readOnly }) => {
   const { values, errors, touched, handleChange, handleBlur, setFieldValue } = formik;
@@ -53,18 +71,24 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
     onSuccess: loadCodesets,
   });
 
-  const calcScore = (fields) =>
-    fields.reduce((sum, f) => sum + (values[f] === "YES_NO_YES" ? 1 : 0), 0);
+  const stiTestDoneYes = values.stiTestDone === "YES_NO_YES";
+  const stiReactive = values.stiTestResult === "Reactive";
 
-  const isFemale = values.sex === "SEX_FEMALE";
-  const isMale = values.sex === "SEX_MALE";
-  const stiFields = [
-    ...(isFemale ? ["complaintsVaginalDischarge", "complaintsLowerAbdominalPain"] : []),
-    ...(isMale ? ["complaintsUrethralDischarge", "complaintsScroralSwelling"] : []),
-    "complaintsGenitalSores",
-    "complaintsSwollenLymphNodes",
-  ];
-  const stiScore = calcScore(stiFields);
+  useEffect(() => {
+    if (values.stiTestDone !== "YES_NO_YES") {
+      if (values.swabCollected) setFieldValue("swabCollected", "");
+      if (values.stiTestResult) setFieldValue("stiTestResult", "");
+      if (Array.isArray(values.aetiology) && values.aetiology.length) setFieldValue("aetiology", []);
+      if (values.outcomeOfVisit) setFieldValue("outcomeOfVisit", "");
+    }
+  }, [values.stiTestDone]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (values.stiTestResult !== "Reactive") {
+      if (Array.isArray(values.aetiology) && values.aetiology.length) setFieldValue("aetiology", []);
+      if (values.outcomeOfVisit) setFieldValue("outcomeOfVisit", "");
+    }
+  }, [values.stiTestResult]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Path flags ────────────────────────────────────────────────────────────
   const earlyDetectDone = values.typeOfHivTestDone === "TYPE_OF_HIV_TEST_HIV_EARLY_DETECT";
@@ -336,52 +360,57 @@ const DiagnosticTestingSection = ({ formik, readOnly }) => {
 
       <SectionSubheading>STI Screening</SectionSubheading>
       <div className="row">
-        {isFemale && (
+        <div className="col-md-6">
+          <FormSelect
+            label="STI Test Done"
+            {...sp("stiTestDone", transformOptions(codesets?.["YES_NO"]))}
+            required
+          />
+        </div>
+
+        {stiTestDoneYes && (
           <>
             <div className="col-md-6">
               <FormSelect
-                label="Female: Complaints of Vaginal Discharge or Burning When Urinating?"
-                {...sp("complaintsVaginalDischarge", transformOptions(codesets?.["YES_NO"]))}
+                label="Swab Collected"
+                {...sp("swabCollected", transformOptions(codesets?.["YES_NO"]))}
               />
             </div>
             <div className="col-md-6">
               <FormSelect
-                label="Female: Complaints of Lower Abdominal Pains with or without Vaginal Discharge?"
-                {...sp("complaintsLowerAbdominalPain", transformOptions(codesets?.["YES_NO"]))}
+                label="STI Test Result"
+                {...sp("stiTestResult", STI_TEST_RESULT_OPTIONS)}
+                required
               />
             </div>
           </>
         )}
-        {isMale && (
+
+        {stiTestDoneYes && stiReactive && (
           <>
-            <div className="col-md-6">
-              <FormSelect
-                label="Male: Complaints of Urethral Discharge or Burning When Urinating?"
-                {...sp("complaintsUrethralDischarge", transformOptions(codesets?.["YES_NO"]))}
+            <div className="col-md-12">
+              <FormCheckboxGroup
+                label="Aetiology"
+                name="aetiology"
+                value={values.aetiology}
+                onChange={setFieldValue}
+                options={AETIOLOGY_OPTIONS}
+                error={touched.aetiology && !!errors.aetiology}
+                helperText={touched.aetiology && errors.aetiology}
+                disabled={readOnly}
+                required
               />
             </div>
             <div className="col-md-6">
               <FormSelect
-                label="Male: Complaints of Scrotal Swelling or Pain?"
-                {...sp("complaintsScroralSwelling", transformOptions(codesets?.["YES_NO"]))}
+                label="Outcome of Visit"
+                {...sp("outcomeOfVisit", OUTCOME_OF_VISIT_OPTIONS)}
+                required
               />
             </div>
           </>
         )}
-        <div className="col-md-6">
-          <FormSelect
-            label="Complaints of Genital Sore(s)"
-            {...sp("complaintsGenitalSores", transformOptions(codesets?.["YES_NO"]))}
-          />
-        </div>
-        <div className="col-md-6">
-          <FormSelect
-            label="Complaints of Swollen Inguinal Lymph Nodes with or without Pains?"
-            {...sp("complaintsSwollenLymphNodes", transformOptions(codesets?.["YES_NO"]))}
-          />
-        </div>
       </div>
-      <ScoreDisplay label="STI Screening Score:" score={stiScore} />
     </div>
   );
 };

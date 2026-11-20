@@ -131,6 +131,64 @@ export const FormTextField = ({
   </FormGroup>
 );
 
+export const FormCheckboxGroup = ({
+  label,
+  name,
+  value = [],
+  onChange,
+  options = [],
+  error,
+  helperText,
+  disabled,
+  required,
+}) => {
+  const selected = Array.isArray(value) ? value : [];
+  const toggle = (optValue) => {
+    if (disabled) return;
+    const next = selected.includes(optValue)
+      ? selected.filter((v) => v !== optValue)
+      : [...selected, optValue];
+    onChange(name, next);
+  };
+  return (
+    <FormGroup style={{ marginBottom: "16px" }}>
+      <Label style={labelStyle}>
+        {label}
+        {required && <span style={{ color: "red" }}> *</span>}
+      </Label>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", paddingTop: "4px" }}>
+        {options.map((opt) => (
+          <label
+            key={opt.value}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              fontSize: "14px",
+              color: "#24292f",
+              fontWeight: 400,
+              margin: 0,
+              cursor: disabled ? "default" : "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(opt.value)}
+              onChange={() => toggle(opt.value)}
+              disabled={disabled}
+              style={{ width: "16px", height: "16px" }}
+            />
+            {opt.label}
+          </label>
+        ))}
+      </div>
+      {(error || helperText) && (
+        <span style={errorStyle}>{helperText || error}</span>
+      )}
+    </FormGroup>
+  );
+};
+
 export const ReadOnlyField = ({ label, value }) => (
   <FormGroup style={{ marginBottom: "16px" }}>
     <Label style={labelStyle}>{label}</Label>

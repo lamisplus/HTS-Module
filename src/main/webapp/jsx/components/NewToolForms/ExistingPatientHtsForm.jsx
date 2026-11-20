@@ -332,6 +332,8 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
     "unprotectedVaginalSex", "unprotectedAnalSex", "bloodTransfusionLast3Months",
     "sexUnderInfluence", "historyOfSTI", "currentCough", "weightLoss", "fever",
     "nightSweats",
+    "complaintsVaginalDischarge", "complaintsLowerAbdominalPain", "complaintsUrethralDischarge",
+    "complaintsScroralSwelling", "complaintsGenitalSores", "complaintsSwollenLymphNodes",
     "partnerNewlyDiagnosed", "partnerPregnantOnArv", "adolescentHivPositive",
     "partnerNotRegularlyOnDrugs", "partnerRecentlyReturnedToTreatment", "hadSexWithHivPositivePartnerInRiskGroup"
   ];
@@ -339,8 +341,7 @@ const ExistingPatientHtsForm = ({ fullRecord, initialValues, readOnly = false, b
   const diagnosticFields = [
     "typeOfHivTestDone", "initialHivTest", "suspectedAcuteInfection",
     "confirmatoryHivTest", "syphilisTestResult", "recencyTest",
-    "complaintsVaginalDischarge", "complaintsLowerAbdominalPain", "complaintsUrethralDischarge",
-    "complaintsScroralSwelling", "complaintsGenitalSores", "complaintsSwollenLymphNodes",
+    "stiTestDone", "swabCollected", "stiTestResult", "aetiology", "outcomeOfVisit",
   ];
 
   const postTestFields = [

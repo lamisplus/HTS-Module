@@ -492,6 +492,11 @@ public class HtsEncounterService {
         putStr(obs, "finalHivTestResult", r.getFinalHivTestResult());
         putStr(obs, "dateOfFinalHivTestDone", r.getDateOfFinalHivTestDone());
         putStr(obs, "syphilisTestResult", r.getSyphilisTestResult());
+        putStr(obs, "stiTestDone", r.getStiTestDone());
+        putStr(obs, "swabCollected", r.getSwabCollected());
+        putStr(obs, "stiTestResult", r.getStiTestResult());
+        putObject(obs, "aetiology", r.getAetiology());
+        putStr(obs, "outcomeOfVisit", r.getOutcomeOfVisit());
         putStr(obs, "recencyTest", r.getRecencyTest());
 
         // Post-Test Counselling
@@ -794,7 +799,8 @@ public class HtsEncounterService {
 
     private boolean isNegativeObservation(JsonNode observation) {
         return containsMarker(observation, "finalHivTestResult", NEGATIVE_MARKER)
-                || containsMarker(observation, "confirmatoryHivTest", NEGATIVE_MARKER);
+                || containsMarker(observation, "confirmatoryHivTest", NEGATIVE_MARKER)
+                || containsMarker(observation, "initialHivTest", NEGATIVE_MARKER);
     }
 
     private boolean containsMarker(JsonNode observation, String field, String marker) {
