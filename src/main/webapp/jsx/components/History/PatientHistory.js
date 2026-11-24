@@ -12,7 +12,7 @@ import { useRoles } from "../../../hooks/useRoles";
 import { getHtsEcounterForAPatient } from "../../services/getHtsEcounterForAPatient";
 import { toast } from "react-toastify";
 import IctForm from "../IctForm/IctForm";
-import { useLocation } from "react-router-dom";
+import { useHtsEligibility } from "../NewToolForms/hooks/useHtsEligibility";
 
 
 const NewEncounterHtsIctOrchestrator = lazy(() =>
@@ -62,8 +62,48 @@ const Home = (props) => {
   const { hasPermission, hasAnyPermission } = usePermissions();
 
   const patientId = props.patientObj?.personId ?? props.patientObj?.id ?? "";
-  const location = useLocation();
-  const skipEligibility = location?.state?.skipEligibility ?? false;
+  const personUuid = props.patientObj?.personUuid;
+  const hasParentEligibility = props?.clientEligibility != null;
+  const [eligEncounters, setEligEncounters] = useState([]);
+  const [isLoadingEligEncounters, setIsLoadingEligEncounters] = useState(!hasParentEligibility);
+
+  useEffect(() => {
+    if (hasParentEligibility || !patientId) {
+      setIsLoadingEligEncounters(false);
+      return undefined;
+    }
+    let mounted = true;
+
+    const loadEligibilityEncounters = async () => {
+      setIsLoadingEligEncounters(true);
+      try {
+        const data = await getHtsEcounterForAPatient(patientId);
+        if (mounted) setEligEncounters(Array.isArray(data) ? data : []);
+      } catch {
+        if (mounted) setEligEncounters([]);
+      } finally {
+        if (mounted) setIsLoadingEligEncounters(false);
+      }
+    };
+
+    loadEligibilityEncounters();
+
+    return () => {
+      mounted = false;
+    };
+  }, [patientId, hasParentEligibility, refreshKey]);
+
+  const localEligibility = useHtsEligibility(
+    eligEncounters,
+    isLoadingEligEncounters,
+    refreshKey,
+    hasParentEligibility ? undefined : patientId,
+    hasParentEligibility ? undefined : personUuid
+  );
+
+  const canCreateHts = hasParentEligibility
+    ? props?.clientEligibility?.isPatientEligibleForHts
+    : localEligibility.isPatientEligibleForHts;
 
 
   const [key, setKey] = useState(
@@ -206,7 +246,7 @@ const Home = (props) => {
                   className="mb-3"
                 >
 
-                  {(skipEligibility || props?.clientEligibility?.isPatientEligibleForHts) && (
+                  {canCreateHts && (
                     <Tab eventKey="new" title="NEW HTS">
 
                       <Suspense fallback={<LoadingSpinner />}>

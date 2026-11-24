@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { checkActiveHivTransferIn } from "../../../services/checkHivTransferIn.service";
+import { checkActiveHivEnrollment } from "../../../services/checkHivEnrollment.service";
 
 export const POSITIVE_HIV_RESULT_CODES = new Set([
   "hiv_confirmatory_test_result_positive",
@@ -19,13 +20,23 @@ function isPositiveEncounter(encounter) {
   );
 }
 
-export function checkHtsEligibility(encounters, hasActiveHivTransferIn) {
+export function checkHtsEligibility(encounters, hasActiveHivTransferIn, hasActiveHivEnrollment) {
   if (hasActiveHivTransferIn) {
     return {
       isEligible: false,
       reason: "Client has a documented HIV Transfer-In record and cannot have a new HTS record created. The ICT form remains available.",
       confirmatoryResult: "N/A - blocked by Transfer-In record",
       finalHivTestResult: "N/A - blocked by Transfer-In record",
+      suspectedAcuteInfection: "N/A"
+    };
+  }
+
+  if (hasActiveHivEnrollment) {
+    return {
+      isEligible: false,
+      reason: "Client is enrolled in ART (HIV care) and cannot have a new HTS record created. The ICT form remains available.",
+      confirmatoryResult: "N/A - blocked by ART enrollment",
+      finalHivTestResult: "N/A - blocked by ART enrollment",
       suspectedAcuteInfection: "N/A"
     };
   }
@@ -97,7 +108,8 @@ export function checkHtsEligibility(encounters, hasActiveHivTransferIn) {
 
 export function useHtsEligibility(encounters, isLoadingEncounters, refreshKey, personId, personUuid) {
   const [hasActiveHivTransferIn, setHasActiveHivTransferIn] = useState(false);
-  const [isCheckingTransferIn, setIsCheckingTransferIn] = useState(false);
+  const [hasActiveHivEnrollment, setHasActiveHivEnrollment] = useState(false);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
   const lastCheckedKeyRef = useRef(null);
 
   const derivedPersonId = encounters?.[0]?.patientId ?? encounters?.[0]?.person?.id ?? personId;
@@ -114,22 +126,33 @@ export function useHtsEligibility(encounters, isLoadingEncounters, refreshKey, p
 
     if (!derivedPersonId && !derivedPersonUuid) {
       setHasActiveHivTransferIn(false);
+      setHasActiveHivEnrollment(false);
       return undefined;
     }
 
-    setIsCheckingTransferIn(true);
+    const checkEligibilityBlockers = async () => {
+      setIsCheckingEligibility(true);
+      try {
+        const [transferIn, enrollment] = await Promise.all([
+          checkActiveHivTransferIn(derivedPersonId, derivedPersonUuid),
+          checkActiveHivEnrollment(derivedPersonId, derivedPersonUuid),
+        ]);
+        if (isMounted) {
+          setHasActiveHivTransferIn(!!transferIn);
+          setHasActiveHivEnrollment(!!enrollment);
+        }
+      } catch (error) {
+        console.error("Failed to check HTS eligibility blockers:", error);
+        if (isMounted) {
+          setHasActiveHivTransferIn(false);
+          setHasActiveHivEnrollment(false);
+        }
+      } finally {
+        if (isMounted) setIsCheckingEligibility(false);
+      }
+    };
 
-    checkActiveHivTransferIn(derivedPersonId, derivedPersonUuid)
-      .then((result) => {
-        if (isMounted) setHasActiveHivTransferIn(!!result);
-      })
-      .catch((error) => {
-        console.error("Failed to check HIV Transfer-In status:", error);
-        if (isMounted) setHasActiveHivTransferIn(false);
-      })
-      .finally(() => {
-        if (isMounted) setIsCheckingTransferIn(false);
-      });
+    checkEligibilityBlockers();
 
     return () => {
       isMounted = false;
@@ -137,14 +160,14 @@ export function useHtsEligibility(encounters, isLoadingEncounters, refreshKey, p
   }, [derivedPersonId, derivedPersonUuid, refreshKey]);
 
   const { isEligible, reason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection } = useMemo(() => {
-    if (isCheckingTransferIn) {
-      return { isEligible: false, reason: "Checking HIV Transfer-In records...", confirmatoryResult: "checking...", finalHivTestResult: "checking...", suspectedAcuteInfection: "checking..." };
+    if (isCheckingEligibility) {
+      return { isEligible: false, reason: "Checking HIV care records...", confirmatoryResult: "checking...", finalHivTestResult: "checking...", suspectedAcuteInfection: "checking..." };
     }
     if (isLoadingEncounters) {
       return { isEligible: false, reason: "Loading encounter history...", confirmatoryResult: "checking...", finalHivTestResult: "checking...", suspectedAcuteInfection: "checking..." };
     }
-    return checkHtsEligibility(encounters, hasActiveHivTransferIn);
-  }, [encounters, isLoadingEncounters, refreshKey, hasActiveHivTransferIn, isCheckingTransferIn]);
+    return checkHtsEligibility(encounters, hasActiveHivTransferIn, hasActiveHivEnrollment);
+  }, [encounters, isLoadingEncounters, refreshKey, hasActiveHivTransferIn, hasActiveHivEnrollment, isCheckingEligibility]);
 
   return { isPatientEligibleForHts: isEligible, eligibilityReason: reason, confirmatoryResult, finalHivTestResult, suspectedAcuteInfection };
 }

@@ -86,6 +86,15 @@ public class HtsEncounterService {
                             "created. Use the ICT form instead.");
         }
 
+        boolean activeHivEnrollment = hasActiveHivEnrollment(person.getId(), person.getUuid());
+        if (activeHivEnrollment && !isPmtctRecord) {
+            throw new IllegalTypeException(
+                    HtsEncounterRequestDTO.class,
+                    "patientId",
+                    "This patient is enrolled in ART (HIV care) and cannot have a new HTS record " +
+                            "created. Use the ICT form instead.");
+        }
+
         ObjectNode observation = buildObservation(request);
 
         if (hasActiveTransferIn && isPmtctRecord) {
@@ -562,6 +571,14 @@ public class HtsEncounterService {
 //                    clientProvidedFacilityId, e.getMessage());
         }
         return clientProvidedFacilityId;
+    }
+
+    private boolean hasActiveHivEnrollment(Long personId, String personUuid) {
+        try {
+            return repository.existsActiveHivEnrollmentForPerson(personId, personUuid);
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     private void putStr(ObjectNode node, String key, String value) {
